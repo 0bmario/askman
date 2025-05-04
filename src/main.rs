@@ -3,9 +3,11 @@ use serde::Deserialize;
 use std::process;
 
 #[derive(Parser)]
-#[command(author, version, about = "askman: Ask terminal commands natively", long_about = None)]
+#[command(
+    version,
+    about = "Ask natural language questions about Unix/Linux commands and get clear, example-based answers in your terminal."
+)]
 struct Args {
-    /// Question as arguments, we need to collect it
     #[arg(required = true)]
     question: Vec<String>,
 }
