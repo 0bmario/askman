@@ -1,0 +1,161 @@
+[
+    {
+        "keywords": [
+            "move",
+            "mv",
+            "file",
+            "files",
+            ".pdf",
+            "docs",
+            "/docs"
+        ],
+        "answer": "Use mv to move files:\n\nmv *.pdf /docs"
+    },
+    {
+        "keywords": [
+            "copy",
+            "cp",
+            "file",
+            "files",
+            ".pdf",
+            "docs",
+            "/docs"
+        ],
+        "answer": "Use cp to copy files:\n\ncp *.pdf /docs"
+    },
+    {
+        "keywords": [
+            "rename",
+            "file",
+            "files",
+            ".txt",
+            ".md"
+        ],
+        "answer": "Use a loop to rename files:\n\nfor f in *.txt; do mv \"$f\" \"${f%.txt}.md\"; done"
+    },
+    {
+        "keywords": [
+            "list",
+            "show",
+            "hidden",
+            "files",
+            "ls"
+        ],
+        "answer": "Use ls -a to show hidden files:\n\nls -a"
+    },
+    {
+        "keywords": [
+            "find",
+            "search",
+            "large",
+            "big",
+            "files",
+            "size"
+        ],
+        "answer": "Use find to locate large files:\n\nfind . -type f -size +100M"
+    },
+    {
+        "keywords": [
+            "search",
+            "inside",
+            "content",
+            "files",
+            "grep",
+            "pattern"
+        ],
+        "answer": "Use grep to search for a pattern inside files:\n\ngrep 'pattern' *.txt"
+    },
+    {
+        "keywords": [
+            "extract",
+            "unpack",
+            "tar",
+            "gz",
+            ".tar.gz",
+            "archive"
+        ],
+        "answer": "Use tar to extract gzip archives:\n\ntar -xzvf archive.tar.gz"
+    },
+    {
+        "keywords": [
+            "delete",
+            "remove",
+            "rm",
+            "folder",
+            "directory"
+        ],
+        "answer": "Use rm -r to delete a folder and its contents:\n\nrm -r folder_name"
+    },
+    {
+        "keywords": [
+            "create",
+            "make",
+            "directory",
+            "folder",
+            "mkdir"
+        ],
+        "answer": "Use mkdir to create a new directory:\n\nmkdir new_folder"
+    },
+    {
+        "keywords": [
+            "create",
+            "make",
+            "file",
+            "touch"
+        ],
+        "answer": "Use touch to create an empty file:\n\ntouch newfile.txt"
+    },
+    {
+        "keywords": [
+            "view",
+            "see",
+            "show",
+            "file",
+            "cat",
+            "less",
+            "more",
+            "content"
+        ],
+        "answer": "Use cat, less, or more to view file contents:\n\ncat file.txt\nless file.txt\nmore file.txt"
+    },
+    {
+        "keywords": [
+            "current",
+            "directory",
+            "where",
+            "pwd",
+            "location"
+        ],
+        "answer": "Use pwd to print the current directory:\n\npwd"
+    },
+    {
+        "keywords": [
+            "change",
+            "directory",
+            "cd",
+            "go to",
+            "move to",
+            "folder"
+        ],
+        "answer": "Use cd to change directories:\n\ncd /path/to/folder"
+    },
+    {
+        "keywords": [
+            "remove",
+            "delete",
+            "file",
+            "rm"
+        ],
+        "answer": "Use rm to delete a file:\n\nrm filename.txt"
+    },
+    {
+        "keywords": [
+            "copy",
+            "directory",
+            "folder",
+            "cp",
+            "recursive"
+        ],
+        "answer": "Use cp -r to copy a directory:\n\ncp -r source_folder destination_folder"
+    }
+]

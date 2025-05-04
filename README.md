@@ -26,7 +26,10 @@ cp *.pdf /docs
 
 ---
 
-## Features
+## MVP:
+- uses a basic dataset of examples
+
+## Features (to be implemented)
 
 - Works completely offline
 - Understands natural language questions
