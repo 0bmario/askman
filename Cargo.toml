@@ -7,6 +7,22 @@ license = "MIT"
 repository = "https://github.com/cito-lito/askman"
 
 [dependencies]
+anyhow = "1.0.98"
+bincode = "2.0.1"
+bytemuck = "1.23.0"
 clap = { version = "4.5.37", features = ["derive"] }
+colored = "3.0.0"
+fastembed = "4.8.0"
+rusqlite = { version = "0.35.0", features = ["bundled"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
+sqlite-vec = "0.1.6"
+
+
+[[bin]]
+name = "askman"
+path = "src/main.rs"
+
+[[bin]]
+name = "import_tldr"
+path = "src/import_tldr.rs"

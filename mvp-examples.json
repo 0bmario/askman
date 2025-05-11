@@ -157,5 +157,288 @@
             "recursive"
         ],
         "answer": "Use cp -r to copy a directory:\n\ncp -r source_folder destination_folder"
+    },
+    {
+        "keywords": [
+            "list",
+            "files",
+            "directory",
+            "folder",
+            "show",
+            "contents",
+            "ls",
+            "see",
+            "what",
+            "inside"
+        ],
+        "answer": "# ls - List directory contents\n\nShow files and folders in a directory.\n\n## Examples:\n\n1. List files in current directory:\n   ```\n   ls\n   ```\n\n2. List all files (including hidden ones):\n   ```\n   ls -a\n   ```\n\n3. List with details (permissions, size, date):\n   ```\n   ls -l\n   ```\n\n4. List all files with details:\n   ```\n   ls -la\n   ```\n\n5. List specific directory:\n   ```\n   ls /path/to/directory\n   ```"
+    },
+    {
+        "keywords": [
+            "copy",
+            "files",
+            "cp",
+            "duplicate",
+            "replicate",
+            "cpoy",
+            "cpy",
+            "copying"
+        ],
+        "answer": "# cp - Copy files and directories\n\nCopy files from one location to another.\n\n## Examples:\n\n1. Copy a file:\n   ```\n   cp file.txt destination/\n   ```\n\n2. Copy a file with a new name:\n   ```\n   cp file.txt newname.txt\n   ```\n\n3. Copy multiple files to a directory:\n   ```\n   cp file1.txt file2.txt destination/\n   ```\n\n4. Copy a directory recursively (with all contents):\n   ```\n   cp -r source_dir/ destination/\n   ```\n\n5. Copy only specific file types (e.g., .txt files):\n   ```\n   cp *.txt destination/\n   ```"
+    },
+    {
+        "keywords": [
+            "move",
+            "files",
+            "mv",
+            "rename",
+            "relocate",
+            "transfer",
+            "mve",
+            "moving"
+        ],
+        "answer": "# mv - Move or rename files and directories\n\nMove files from one location to another or rename them.\n\n## Examples:\n\n1. Rename a file:\n   ```\n   mv oldname.txt newname.txt\n   ```\n\n2. Move a file to another directory:\n   ```\n   mv file.txt destination/\n   ```\n\n3. Move multiple files to a directory:\n   ```\n   mv file1.txt file2.txt destination/\n   ```\n\n4. Move specific file types (e.g., .jpg files):\n   ```\n   mv *.jpg images/\n   ```\n\n5. Move files from one directory to another:\n   ```\n   mv source_dir/* destination_dir/\n   ```\n\n6. Move specific file types between directories:\n   ```\n   find src/ -name '*.xyz' -exec mv {} dest/ \\;\n   ```"
+    },
+    {
+        "keywords": [
+            "remove",
+            "delete",
+            "rm",
+            "erase",
+            "destroy",
+            "get rid",
+            "rmove",
+            "removal"
+        ],
+        "answer": "# rm - Remove files or directories\n\nDelete files and directories (use with caution!).\n\n## Examples:\n\n1. Remove a file:\n   ```\n   rm file.txt\n   ```\n\n2. Remove multiple files:\n   ```\n   rm file1.txt file2.txt\n   ```\n\n3. Remove an empty directory:\n   ```\n   rmdir directory/\n   ```\n\n4. Remove a directory and all its contents (dangerous!):\n   ```\n   rm -r directory/\n   ```\n\n5. Force remove without confirmation:\n   ```\n   rm -f important_file.txt\n   ```\n\n6. Remove with confirmation (safer):\n   ```\n   rm -i file.txt\n   ```"
+    },
+    {
+        "keywords": [
+            "find",
+            "search",
+            "locate",
+            "look for",
+            "file",
+            "directory",
+            "finding"
+        ],
+        "answer": "# find - Search for files in a directory hierarchy\n\nFind files and directories based on various criteria.\n\n## Examples:\n\n1. Find a file by name (anywhere in system):\n   ```\n   find / -name \"filename.txt\"\n   ```\n\n2. Find a file by name (in current directory and subdirectories):\n   ```\n   find . -name \"filename.txt\"\n   ```\n\n3. Find files by partial name (using wildcards):\n   ```\n   find . -name \"*.pdf\"\n   ```\n\n4. Find files modified in the last 7 days:\n   ```\n   find . -type f -mtime -7\n   ```\n\n5. Find large files (greater than 100MB):\n   ```\n   find . -type f -size +100M\n   ```\n\n6. Find and execute a command on each file:\n   ```\n   find . -name \"*.txt\" -exec cat {} \\;\n   ```"
+    },
+    {
+        "keywords": [
+            "grep",
+            "search",
+            "text",
+            "find text",
+            "pattern",
+            "match",
+            "content",
+            "inside files",
+            "string",
+            "phrase"
+        ],
+        "answer": "# grep - Search for patterns in files\n\nFind text patterns within files.\n\n## Examples:\n\n1. Search for a word in a file:\n   ```\n   grep \"search_term\" filename.txt\n   ```\n\n2. Search recursively in all files in a directory:\n   ```\n   grep -r \"search_term\" /path/to/directory/\n   ```\n\n3. Search showing line numbers:\n   ```\n   grep -n \"search_term\" filename.txt\n   ```\n\n4. Search case-insensitively:\n   ```\n   grep -i \"search_term\" filename.txt\n   ```\n\n5. Search for whole words only (not part of larger words):\n   ```\n   grep -w \"word\" filename.txt\n   ```\n\n6. Show only filenames that contain the pattern:\n   ```\n   grep -l \"search_term\" *.txt\n   ```"
+    },
+    {
+        "keywords": [
+            "change",
+            "directory",
+            "cd",
+            "navigate",
+            "go to",
+            "folder",
+            "move to",
+            "switch",
+            "chdir"
+        ],
+        "answer": "# cd - Change directory\n\nNavigate between directories in the filesystem.\n\n## Examples:\n\n1. Go to your home directory:\n   ```\n   cd\n   ```\n   or\n   ```\n   cd ~\n   ```\n\n2. Go to a specific directory (absolute path):\n   ```\n   cd /path/to/directory\n   ```\n\n3. Go to a subdirectory (relative path):\n   ```\n   cd subdirectory\n   ```\n\n4. Go up one directory level:\n   ```\n   cd ..\n   ```\n\n5. Go up multiple directory levels:\n   ```\n   cd ../../\n   ```\n\n6. Go to the previous directory:\n   ```\n   cd -\n   ```"
+    },
+    {
+        "keywords": [
+            "make",
+            "directory",
+            "folder",
+            "create",
+            "mkdir",
+            "new"
+        ],
+        "answer": "# mkdir - Make directories\n\nCreate new directories (folders).\n\n## Examples:\n\n1. Create a directory:\n   ```\n   mkdir new_directory\n   ```\n\n2. Create multiple directories:\n   ```\n   mkdir dir1 dir2 dir3\n   ```\n\n3. Create nested directories (create parent directories if they don't exist):\n   ```\n   mkdir -p parent/child/grandchild\n   ```\n\n4. Create a directory with specific permissions:\n   ```\n   mkdir -m 755 my_directory\n   ```\n\n5. Create a directory and show what's being done:\n   ```\n   mkdir -v new_directory\n   ```"
+    },
+    {
+        "keywords": [
+            "view",
+            "file",
+            "show",
+            "contents",
+            "display",
+            "cat",
+            "read",
+            "print"
+        ],
+        "answer": "# cat - Concatenate and display files\n\nDisplay the content of files.\n\n## Examples:\n\n1. View a file's contents:\n   ```\n   cat filename.txt\n   ```\n\n2. View multiple files:\n   ```\n   cat file1.txt file2.txt\n   ```\n\n3. View a file with line numbers:\n   ```\n   cat -n filename.txt\n   ```\n\n4. View a file showing non-printing characters:\n   ```\n   cat -A filename.txt\n   ```\n\n5. View a file and append it to another:\n   ```\n   cat file1.txt >> file2.txt\n   ```\n\n6. Create a new file and type content (press Ctrl+D to end):\n   ```\n   cat > newfile.txt\n   ```"
+    },
+    {
+        "keywords": [
+            "download",
+            "file",
+            "wget",
+            "fetch",
+            "get",
+            "url",
+            "internet",
+            "web"
+        ],
+        "answer": "# wget - Download files from the web\n\nRetrieve files from the internet.\n\n## Examples:\n\n1. Download a file:\n   ```\n   wget https://example.com/file.zip\n   ```\n\n2. Download a file to a specific directory:\n   ```\n   wget -P /path/to/directory https://example.com/file.zip\n   ```\n\n3. Download a file with a different name:\n   ```\n   wget -O new_name.zip https://example.com/file.zip\n   ```\n\n4. Resume a previously interrupted download:\n   ```\n   wget -c https://example.com/large_file.zip\n   ```\n\n5. Download quietly (no output):\n   ```\n   wget -q https://example.com/file.zip\n   ```\n\n6. Download with a specific user agent:\n   ```\n   wget --user-agent=\"Mozilla/5.0\" https://example.com/file.zip\n   ```"
+    },
+    {
+        "keywords": [
+            "permissions",
+            "chmod",
+            "access",
+            "rights",
+            "file",
+            "change",
+            "mode",
+            "security"
+        ],
+        "answer": "# chmod - Change file permissions\n\nModify file and directory permissions.\n\n## Examples:\n\n1. Make a file executable for the owner:\n   ```\n   chmod +x filename.sh\n   ```\n\n2. Set specific permissions (read/write/execute for owner, read for group and others):\n   ```\n   chmod 744 filename.sh\n   ```\n\n3. Give read and write permissions to owner and group:\n   ```\n   chmod ug+rw filename.txt\n   ```\n\n4. Remove write permission for group and others:\n   ```\n   chmod go-w filename.txt\n   ```\n\n5. Change permissions recursively for a directory and all its contents:\n   ```\n   chmod -R 755 directory/\n   ```\n\n6. Set the same permissions as another file:\n   ```\n   chmod --reference=ref_file.txt target_file.txt\n   ```"
+    },
+    {
+        "keywords": [
+            "compress",
+            "archive",
+            "zip",
+            "tar",
+            "pack",
+            "bundle",
+            "extract",
+            "uncompress",
+            "unzip"
+        ],
+        "answer": "# tar - Tape archive utility\n\nCreate and extract archive files (.tar, .tar.gz, .tar.bz2, etc.).\n\n## Examples:\n\n1. Create a tar archive:\n   ```\n   tar -cf archive.tar file1 file2 directory/\n   ```\n\n2. Create a compressed tar archive (gzip):\n   ```\n   tar -czf archive.tar.gz file1 file2 directory/\n   ```\n\n3. Create a compressed tar archive (bzip2, better compression):\n   ```\n   tar -cjf archive.tar.bz2 file1 file2 directory/\n   ```\n\n4. Extract a tar archive:\n   ```\n   tar -xf archive.tar\n   ```\n\n5. Extract a compressed tar archive (gzip or bzip2):\n   ```\n   tar -xf archive.tar.gz\n   ```\n   or\n   ```\n   tar -xf archive.tar.bz2\n   ```\n\n6. List the contents of a tar archive without extracting:\n   ```\n   tar -tf archive.tar.gz\n   ```"
+    },
+    {
+        "keywords": [
+            "process",
+            "running",
+            "ps",
+            "top",
+            "show",
+            "list",
+            "applications",
+            "running programs",
+            "task"
+        ],
+        "answer": "# ps - Process status\n\nShow information about active processes.\n\n## Examples:\n\n1. Show your processes:\n   ```\n   ps\n   ```\n\n2. Show all running processes:\n   ```\n   ps aux\n   ```\n\n3. Show process tree (hierarchical view):\n   ```\n   ps auxf\n   ```\n\n4. Show processes for a specific user:\n   ```\n   ps -u username\n   ```\n\n5. Show processes by resource usage (CPU, memory):\n   ```\n   ps aux --sort=-%cpu\n   ```\n   or\n   ```\n   ps aux --sort=-%mem\n   ```\n\n6. Find a specific process by name:\n   ```\n   ps aux | grep \"process_name\"\n   ```"
+    },
+    {
+        "keywords": [
+            "kill",
+            "terminate",
+            "stop",
+            "end",
+            "process",
+            "program",
+            "application",
+            "force quit"
+        ],
+        "answer": "# kill - Terminate processes\n\nSend signals to processes, usually to terminate them.\n\n## Examples:\n\n1. Terminate a process by process ID (PID):\n   ```\n   kill 1234\n   ```\n\n2. Force terminate a process (SIGKILL):\n   ```\n   kill -9 1234\n   ```\n   or\n   ```\n   kill -KILL 1234\n   ```\n\n3. Gracefully terminate a process (SIGTERM):\n   ```\n   kill -15 1234\n   ```\n   or\n   ```\n   kill -TERM 1234\n   ```\n\n4. Terminate all processes with a specific name:\n   ```\n   pkill process_name\n   ```\n\n5. Interactive kill (choose processes to kill):\n   ```\n   top\n   ```\n   Then press 'k' and enter the PID\n\n6. Find and kill a process in one command:\n   ```\n   pgrep process_name | xargs kill\n   ```"
+    },
+    {
+        "keywords": [
+            "disk",
+            "space",
+            "storage",
+            "usage",
+            "free",
+            "df",
+            "du",
+            "available",
+            "full",
+            "size"
+        ],
+        "answer": "# df/du - Check disk space usage\n\nView disk space usage information.\n\n## Examples:\n\n1. Show free disk space for all mounted filesystems:\n   ```\n   df -h\n   ```\n\n2. Show free disk space for a specific directory/filesystem:\n   ```\n   df -h /path/to/directory\n   ```\n\n3. Show disk usage for current directory:\n   ```\n   du -h\n   ```\n\n4. Show disk usage for a specific directory:\n   ```\n   du -h /path/to/directory\n   ```\n\n5. Show total disk usage summary:\n   ```\n   du -sh /path/to/directory\n   ```\n\n6. Show the sizes of subdirectories, sorted from largest to smallest:\n   ```\n   du -h --max-depth=1 | sort -hr\n   ```"
+    },
+    {
+        "keywords": [
+            "remote",
+            "login",
+            "ssh",
+            "connect",
+            "server",
+            "secure shell",
+            "access"
+        ],
+        "answer": "# ssh - Secure Shell remote login\n\nConnect to remote machines securely.\n\n## Examples:\n\n1. Connect to a remote server:\n   ```\n   ssh username@hostname\n   ```\n\n2. Connect to a remote server with a specific port:\n   ```\n   ssh -p 2222 username@hostname\n   ```\n\n3. Connect with a specific identity file (private key):\n   ```\n   ssh -i ~/.ssh/id_rsa username@hostname\n   ```\n\n4. Execute a command on a remote server without logging in:\n   ```\n   ssh username@hostname command\n   ```\n\n5. Enable X11 forwarding (for GUI applications):\n   ```\n   ssh -X username@hostname\n   ```\n\n6. Use compression for slow connections:\n   ```\n   ssh -C username@hostname\n   ```"
+    },
+    {
+        "keywords": [
+            "transfer",
+            "files",
+            "remote",
+            "scp",
+            "copy",
+            "secure copy",
+            "upload",
+            "download",
+            "server"
+        ],
+        "answer": "# scp - Secure Copy\n\nCopy files between hosts on a network securely.\n\n## Examples:\n\n1. Copy a local file to a remote server:\n   ```\n   scp localfile.txt username@hostname:/path/to/destination/\n   ```\n\n2. Copy a remote file to local machine:\n   ```\n   scp username@hostname:/path/to/remotefile.txt /local/path/\n   ```\n\n3. Copy a directory recursively to a remote server:\n   ```\n   scp -r local_directory/ username@hostname:/path/to/destination/\n   ```\n\n4. Use a specific port:\n   ```\n   scp -P 2222 localfile.txt username@hostname:/path/to/destination/\n   ```\n\n5. Copy a file between two remote servers:\n   ```\n   scp username1@hostname1:/path/file.txt username2@hostname2:/path/\n   ```\n\n6. Copy with compression for slow connections:\n   ```\n   scp -C localfile.txt username@hostname:/path/to/destination/\n   ```"
+    },
+    {
+        "keywords": [
+            "current",
+            "directory",
+            "where",
+            "am",
+            "i",
+            "pwd",
+            "path",
+            "location",
+            "present",
+            "working"
+        ],
+        "answer": "# pwd - Print Working Directory\n\nShow the full path of the current working directory.\n\n## Examples:\n\n1. Display the current directory path:\n   ```\n   pwd\n   ```\n\n2. Display the physical directory path (resolve all symbolic links):\n   ```\n   pwd -P\n   ```\n\n3. Print the current directory and store it in a variable (bash):\n   ```\n   current_dir=$(pwd)\n   ```\n\n4. Use in a command:\n   ```\n   find $(pwd) -name \"*.txt\"\n   ```\n\n5. Show the logical directory path (follow symbolic links):\n   ```\n   pwd -L\n   ```"
+    },
+    {
+        "keywords": [
+            "help",
+            "manual",
+            "man",
+            "documentation",
+            "how",
+            "to",
+            "use",
+            "command",
+            "info",
+            "usage"
+        ],
+        "answer": "# man - Manual pages\n\nDisplay system reference manuals and documentation.\n\n## Examples:\n\n1. Show the manual for a command:\n   ```\n   man ls\n   ```\n\n2. Show a specific section of the manual:\n   ```\n   man 5 passwd\n   ```\n\n3. Search for manuals containing a keyword:\n   ```\n   man -k search_term\n   ```\n\n4. Show the location of a command's manual page:\n   ```\n   man -w ls\n   ```\n\n5. View all manual pages for a command (if there are multiple):\n   ```\n   man -a printf\n   ```\n\n6. Open the HTML version of a manual page in a browser:\n   ```\n   man -H ls\n   ```"
+    },
+    {
+        "keywords": [
+            "beginning",
+            "file",
+            "head",
+            "top",
+            "first",
+            "lines",
+            "preview",
+            "start"
+        ],
+        "answer": "# head - Show beginning of files\n\nDisplay the first part of files.\n\n## Examples:\n\n1. Show first 10 lines of a file (default):\n   ```\n   head filename.txt\n   ```\n\n2. Show first n lines of a file:\n   ```\n   head -n 20 filename.txt\n   ```\n\n3. Show first n bytes of a file:\n   ```\n   head -c 100 filename.txt\n   ```\n\n4. Show the beginning of multiple files:\n   ```\n   head file1.txt file2.txt\n   ```\n\n5. Show the beginning of all text files in the current directory:\n   ```\n   head *.txt\n   ```\n\n6. Show the first 5 lines and output to another file:\n   ```\n   head -n 5 input.txt > output.txt\n   ```"
+    },
+    {
+        "keywords": [
+            "tail",
+            "end",
+            "file",
+            "last",
+            "lines",
+            "recent",
+            "finish",
+            "bottom"
+        ],
+        "answer": "# tail - Show end of files\n\nDisplay the last part of files.\n\n## Examples:\n\n1. Show last 10 lines of a file (default):\n   ```\n   tail filename.txt\n   ```\n\n2. Show last n lines of a file:\n   ```\n   tail -n 20 filename.txt\n   ```\n\n3. Show last n bytes of a file:\n   ```\n   tail -c 100 filename.txt\n   ```\n\n4. Follow a file in real-time (useful for log files):\n   ```\n   tail -f logfile.txt\n   ```\n\n5. Show the end of multiple files:\n   ```\n   tail file1.txt file2.txt\n   ```\n\n6. Show last 5 lines and output to another file:\n   ```\n   tail -n 5 input.txt > output.txt\n   ```"
     }
 ]
