@@ -1,11 +1,13 @@
 use anyhow::{Context, Result};
-use bytemuck;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 use rusqlite::ffi::sqlite3_auto_extension;
 use rusqlite::{Connection, params};
 use sqlite_vec::sqlite3_vec_init;
 use std::fs;
 use std::path::Path;
+use zerocopy::IntoBytes;
+use rayon::prelude::*;
+use std::sync::Mutex;
 
 fn main() -> Result<()> {
     unsafe {
@@ -36,48 +38,70 @@ fn main() -> Result<()> {
         [],
     )?;
 
-    // process single test file
-    let test_file = "common/uv.md";
-    println!("processing file: {}", test_file);
+    // process all files in common folder
+    let common_dir = "common";
+    let entries: Vec<_> = fs::read_dir(common_dir)
+        .with_context(|| format!("Failed to read directory: {}", common_dir))?
+        .filter_map(|e| e.ok())
+        .collect();
 
-    let content = fs::read_to_string(test_file)
-        .with_context(|| format!("Failed to read file: {}", test_file))?;
+    println!("Found {} files to process", entries.len());
 
-    // parse tldr page
-    let (command, description, examples) = parse_tldr(&content, Path::new(test_file));
+    // Create a thread-safe connection
+    let conn = Mutex::new(conn);
 
-    println!("Parsed command: {}", command);
+    // Process files in parallel
+    entries.par_iter().for_each(|entry| {
+        let path = entry.path();
+        if path.extension().and_then(|s| s.to_str()) == Some("md") {
+            println!("Processing file: {}", path.display());
+            
+            if let Ok(content) = fs::read_to_string(&path) {
+                // parse tldr page
+                let (command, description, examples) = parse_tldr(&content, &path);
 
-    for example in examples.split("\n\n") {
-        let lines: Vec<&str> = example.lines().collect();
-        if lines.len() >= 2 {
-            let example_desc = lines[0];
-            let example_cmd = lines[1];
+                println!("Parsed command: {}", command);
 
-            // generate embedding for this specific example
-            let embedding_text = format!(
-                "command: {}. description: {}. example: {} {}",
-                command, description, example_desc, example_cmd
-            );
-            let embeddings = model.embed(vec![embedding_text], None)?;
-            let embedding_vec = &embeddings[0];
-            println!("embedding_vec: {:?}", embedding_vec);
-            let embedding_blob = bytemuck::cast_slice(embedding_vec).to_vec();
-            println!("embedding_blob: {:?}", embedding_blob);
-            // insert using the vec0 table
-            conn.execute(
-                "INSERT INTO pages_vec(command, description, example_desc, example_cmd, embedding)
-                 VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![
-                    command,
-                    description,
-                    example_desc,
-                    example_cmd,
-                    embedding_blob
-                ],
-            )?;
+                for example in examples.split("\n\n") {
+                    let lines: Vec<&str> = example.lines().collect();
+                    if lines.len() >= 2 {
+                        let example_desc = lines[0];
+                        let example_cmd = lines[1];
+
+                        // generate embedding for this specific example
+                        let embedding_text = format!(
+                            "Task: {}. Command: {}. Description: {}. Example: {} {}",
+                            example_desc, command, description, example_desc, example_cmd
+                        );
+                        if let Ok(embeddings) = model.embed(vec![embedding_text], None) {
+                            let embedding_vec = &embeddings[0];
+                            let embedding_blob = embedding_vec.as_bytes();
+
+                            // insert using the vec0 table
+                            if let Ok(conn) = conn.lock() {
+                                let _ = conn.execute(
+                                    "INSERT INTO pages_vec(command, description, example_desc, example_cmd, embedding)
+                                     VALUES (?1, ?2, ?3, ?4, ?5)",
+                                    params![
+                                        command,
+                                        description,
+                                        example_desc,
+                                        example_cmd,
+                                        embedding_blob
+                                    ],
+                                );
+                            }
+                        }
+                    }
+                }
+            }
         }
-    }
+    });
+
+    // Print summary
+    let count: i64 = conn.lock().unwrap().query_row("SELECT COUNT(*) FROM pages_vec", [], |r| r.get(0))?;
+    println!("\nImported {} examples from tldr pages", count);
+
     Ok(())
 }
 
@@ -189,7 +213,7 @@ mod tests {
             );
             let embeddings = model.embed(vec![embedding_text], None)?;
             let embedding_vec = &embeddings[0];
-            let embedding_blob = bytemuck::cast_slice(embedding_vec).to_vec();
+            let embedding_blob = embedding_vec.as_bytes();
 
             conn.execute(
                 "INSERT INTO pages_vec(command, description, example_desc, example_cmd, embedding)
