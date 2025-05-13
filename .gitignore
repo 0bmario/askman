@@ -1,5 +1,5 @@
 /target
 *.fastembed*
 *.gguf
-*.db
+# *.db
 /common

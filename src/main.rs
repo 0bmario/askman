@@ -40,8 +40,7 @@ fn main() -> Result<()> {
 fn try_semantic_search(conn: &Connection, query: &str) -> Result<()> {
     let embedder = TextEmbedding::try_new(InitOptions::new(EmbeddingModel::AllMiniLML6V2))?;
 
-    let formatted_query = format!("command: . description: . example: {}", query);
-    let q_vec = embedder.embed(vec![formatted_query], None)?[0].clone();
+    let q_vec = embedder.embed(vec![query], None)?[0].clone();
     let q_blob = q_vec.as_bytes();
 
     // find best matching using vector similarity
@@ -63,34 +62,52 @@ fn try_semantic_search(conn: &Connection, query: &str) -> Result<()> {
         ))
     })?;
 
-    let mut found_good_match = false;
-    let mut current_cmd = String::new();
-    // let mut current_desc = String::new();
-
+    // Group examples by command
+    let mut command_map: std::collections::HashMap<String, (String, Vec<(String, String)>)> =
+        std::collections::HashMap::new();
+    
     for result in results {
         let (cmd, desc, ex_desc, ex_cmd, score) = result?;
-        println!("score: {}", score);
-        if score > 0.9 {  // score closer to 1.0 is better
-            if cmd != current_cmd {
-                if !current_cmd.is_empty() {
-                    println!();  // spacing between commands
-                }
-                println!("{}", cmd.bold().green());
-                println!("{}", desc);
-                current_cmd = cmd;
-                // current_desc = desc;
-            }
-
-            print!("\n{} ", "Example".green());
-            print!("{}", ex_desc);
-            println!("\n  {}", ex_cmd.cyan());
-            found_good_match = true;
+        
+        if score < 0.7 {
+            continue;
+        }
+        
+        if command_map.contains_key(&cmd) {
+            // cmd exists, add the example
+            let examples = &mut command_map.get_mut(&cmd).unwrap().1;
+            examples.push((ex_desc, ex_cmd));
+        } else {
+            // new cmd, create entry with description and first example
+            command_map.insert(cmd, (desc, vec![(ex_desc, ex_cmd)]));
         }
     }
-
-    if !found_good_match {
+    
+    // display results
+    for (cmd, (desc, examples)) in &command_map {
+        println!("{}", cmd.bold().green());
+        println!("{}", desc);
+        
+        if !examples.is_empty() {
+            println!("\n{}", "Examples:".underline());
+            
+            for (i, (ex_desc, ex_cmd)) in examples.iter().enumerate() {
+                println!("  {}", ex_desc);
+                println!("   {}", ex_cmd.cyan());
+                
+                if i < examples.len() - 1 {
+                    println!();
+                }
+            }
+        }
+        
+        println!();
+    }
+    
+    if command_map.is_empty() {
         println!("No good matches found.");
     }
 
     Ok(())
 }
+
