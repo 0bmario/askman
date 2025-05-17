@@ -2,11 +2,14 @@ use anyhow::Result;
 use clap::Parser;
 use colored::*;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
+use rusqlite::Connection;
 use rusqlite::ffi::sqlite3_auto_extension;
-use rusqlite::{Connection, params};
+use rusqlite::params;
 use sqlite_vec::sqlite3_vec_init;
-use zerocopy::IntoBytes;
+use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::path::PathBuf;
+use zerocopy::IntoBytes;
 
 /// askman – offline CLI helper
 #[derive(Parser, Debug)]
@@ -19,6 +22,9 @@ struct Args {
     question: Vec<String>,
 }
 
+type CmdData = (String, Vec<(String, String)>, f64);
+type CmdMap = HashMap<String, CmdData>;
+
 fn get_db_path() -> PathBuf {
     if let Ok(exe_path) = std::env::current_exe() {
         if let Some(dir) = exe_path.parent() {
@@ -28,28 +34,21 @@ fn get_db_path() -> PathBuf {
             }
         }
     }
-    // default to current directory
     PathBuf::from("commands.db")
 }
 
 fn main() -> Result<()> {
-    // init sqlite vector extension
     unsafe {
         sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
     }
 
-    // parse args and prepare query
     let args = Args::parse();
     let query = args.question.join(" ");
 
-    // init db connection
     let db_path = get_db_path();
     let conn = Connection::open(db_path)?;
 
-    // perform semantic search
-    try_semantic_search(&conn, &query)?;
-
-    Ok(())
+    try_semantic_search(&conn, &query)
 }
 
 fn try_semantic_search(conn: &Connection, query: &str) -> Result<()> {
@@ -58,71 +57,81 @@ fn try_semantic_search(conn: &Connection, query: &str) -> Result<()> {
     let q_vec = embedder.embed(vec![query], None)?[0].clone();
     let q_blob = q_vec.as_bytes();
 
-    // find best matching using vector similarity
     let mut stmt = conn.prepare(
         "SELECT command, description, example_desc, example_cmd, distance
          FROM pages_vec
          WHERE embedding MATCH ?1
          ORDER BY distance
-         LIMIT 5;",
+         LIMIT 7;",
     )?;
 
     let results = stmt.query_map(params![q_blob], |row| {
         Ok((
-            row.get::<_, String>(0)?, // command
-            row.get::<_, String>(1)?, // description
-            row.get::<_, String>(2)?, // example_desc
-            row.get::<_, String>(3)?, // example_cmd
-            row.get::<_, f64>(4)?,    // distance (score)
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+            row.get::<_, String>(3)?,
+            row.get::<_, f64>(4)?,
         ))
     })?;
 
-    // Group examples by command
-    let mut command_map: std::collections::HashMap<String, (String, Vec<(String, String)>)> =
-        std::collections::HashMap::new();
-    
+    let mut command_map: CmdMap = HashMap::new();
+    let official_sites = [
+        "gnu.",
+        "kernel.",
+        "man7.",
+        "manned.",
+        "linux.",
+        "man.openbsd",
+        "man.freebsd",
+        "greenwoodsoftware.",
+    ];
+
     for result in results {
         let (cmd, desc, ex_desc, ex_cmd, score) = result?;
-        
         if score < 0.7 {
             continue;
         }
-        
-        if command_map.contains_key(&cmd) {
-            // cmd exists, add the example
-            let examples = &mut command_map.get_mut(&cmd).unwrap().1;
-            examples.push((ex_desc, ex_cmd));
-        } else {
-            // new cmd, create entry with description and first example
-            command_map.insert(cmd, (desc, vec![(ex_desc, ex_cmd)]));
-        }
-    }
-    
-    // display results
-    for (cmd, (desc, examples)) in &command_map {
-        println!("{}", cmd.bold().green());
-        println!("{}", desc);
-        
-        if !examples.is_empty() {
-            println!("\n{}", "Examples:".underline());
-            
-            for (i, (ex_desc, ex_cmd)) in examples.iter().enumerate() {
-                println!("  {}", ex_desc);
-                println!("   {}", ex_cmd.cyan());
-                
-                if i < examples.len() - 1 {
-                    println!();
-                }
+
+        let is_official = official_sites.iter().any(|&site| desc.contains(site));
+        let adjusted_score = if is_official { score * 1.2 } else { score };
+
+        match command_map.entry(cmd.clone()) {
+            Entry::Vacant(e) => {
+                e.insert((desc, vec![(ex_desc, ex_cmd)], adjusted_score));
+            }
+            Entry::Occupied(mut o) => {
+                o.get_mut().1.push((ex_desc, ex_cmd));
             }
         }
-        
+    }
+
+    let mut sorted: Vec<(&String, &CmdData)> = command_map.iter().collect();
+    sorted.sort_by(|a, b| {
+        b.1.2
+            .partial_cmp(&a.1.2)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    for (i, (cmd, (desc, examples, _))) in sorted.iter().enumerate().take(3) {
+        println!("{}", cmd.bold().green());
+        println!("{}", desc);
+
+        if !examples.is_empty() {
+            println!("\n{}", "Examples:".underline());
+            let show_count = if i < 2 { examples.len() } else { 1 };
+            for (ex_desc, ex_cmd) in examples.iter().take(show_count) {
+                println!("  {}", ex_desc);
+                println!("   {}", ex_cmd.cyan());
+                println!();
+            }
+        }
         println!();
     }
-    
-    if command_map.is_empty() {
+
+    if sorted.is_empty() {
         println!("No good matches found.");
     }
 
     Ok(())
 }
-

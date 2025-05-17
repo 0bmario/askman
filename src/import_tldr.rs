@@ -46,16 +46,16 @@ fn main() -> Result<()> {
     for entry in entries {
         let entry = entry?;
         let path = entry.path();
-        
+
         if path.extension().and_then(|s| s.to_str()) != Some("md") {
             continue;
         }
-        
+
         println!("Processing file: {}", path.display());
-        
+
         let content = fs::read_to_string(&path)
             .with_context(|| format!("Failed to read file: {}", path.display()))?;
-        
+
         // parse tldr page
         let (command, description, examples) = parse_tldr(&content, &path);
         println!("Parsed command: {}", command);
@@ -65,7 +65,7 @@ fn main() -> Result<()> {
             if lines.len() < 2 {
                 continue;
             }
-            
+
             let example_desc = lines[0];
             let example_cmd = lines[1];
 
@@ -74,10 +74,11 @@ fn main() -> Result<()> {
                 "Task: {}. Command: {}. Description: {}. Example: {} {}",
                 example_desc, command, description, example_desc, example_cmd
             );
-            
-            let embeddings = model.embed(vec![embedding_text], None)
+
+            let embeddings = model
+                .embed(vec![embedding_text], None)
                 .with_context(|| format!("Failed to create embedding for command: {}", command))?;
-            
+
             let embedding_vec = &embeddings[0];
             let embedding_blob = embedding_vec.as_bytes();
 
@@ -93,7 +94,7 @@ fn main() -> Result<()> {
                     embedding_blob
                 ],
             )?;
-            
+
             count += 1;
         }
     }
