@@ -42,6 +42,8 @@ Examples:
 - Uses dataset commands created from [tldr-pages common](https://github.com/tldr-pages/tldr/tree/main/pages/common) folder 
 - Provides semantic search for command examples
 
+- Big thanks to [tldr-pages](https://github.com/tldr-pages/tldr) for the curated data!!
+
 ---
 
 ## 📦 Installation
@@ -51,12 +53,7 @@ Make sure you have [Rust and Cargo installed](https://www.rust-lang.org/tools/in
 Then run:
 
 ```bash
-cargo install --git https://github.com/cito-lito/askman
-```
-
-Download the `commands.db` file to the same directory as the executable (`~/.cargo/bin/commands.db`):
-```bash
-curl -L -o "$(dirname $(which askman))/commands.db" https://raw.githubusercontent.com/cito-lito/askman/main/commands.db
+cargo install --git https://github.com/cito-lito/askman && curl -L -o "$(dirname $(which askman))/commands.db" https://raw.githubusercontent.com/cito-lito/askman/main/commands.db
 ```
 
 This will install `askman` with a pre-built database.The first time you run `askman`, it will download the required model files.

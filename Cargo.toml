@@ -26,3 +26,6 @@ path = "src/main.rs"
 name = "import_tldr"
 path = "src/import_tldr.rs"
 required-features = ["dev"]
+
+[features]
+dev = []
