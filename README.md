@@ -4,19 +4,19 @@
 
 ---
 
-## 🤔 Why?
+## Why?
 
 I didn't want to leave the terminal to search for the right command, and man pages aren't always "easy" to read.
 
 ---
 
-## 🤖 What is askman?
+## What is askman?
 
 `askman` lets you ask natural language questions about Unix/Linux commands and get helpful, example-driven answers.
 
 ---
 
-## 💡 Example Usage
+## Example Usage
 
 ```bash
 askman how to move all files to /docs  
@@ -53,7 +53,7 @@ Make sure you have [Rust and Cargo installed](https://www.rust-lang.org/tools/in
 Then run:
 
 ```bash
-cargo install --git https://github.com/cito-lito/askman && curl -L -o "$(dirname $(which askman))/commands.db" https://raw.githubusercontent.com/cito-lito/askman/main/commands.db
+cargo install --git https://github.com/0bmario/askman && curl -L -o "$(dirname $(which askman))/commands.db" https://raw.githubusercontent.com/0bmario/askman/main/commands.db
 ```
 
 This will install `askman` with a pre-built database.The first time you run `askman`, it will download the required model files.
