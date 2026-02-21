@@ -79,12 +79,13 @@ This will create a new `commands.db` file with your custom command set.
 
 ## Uninstall
 
-remove the db file first
+To remove the downloaded model and the database:
+
 ```bash
-rm ~/.cargo/bin/commands.db // or the directory where the executable is
+askman --clean
 ```
 
-remove the executable
+Then, you can safely remove the executable:
 ```bash
 cargo uninstall askman
 ```

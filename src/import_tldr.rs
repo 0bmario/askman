@@ -7,18 +7,30 @@ use std::fs;
 use std::path::Path;
 use zerocopy::IntoBytes;
 
+fn get_app_dir() -> std::path::PathBuf {
+    let mut path = dirs::data_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+    path.push("askman");
+    if !path.exists() {
+        std::fs::create_dir_all(&path).unwrap_or_default();
+    }
+    path
+}
+
 fn main() -> Result<()> {
     unsafe {
         sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
     }
 
+    let app_dir = get_app_dir();
+
     println!("Initializing embedding model...");
-    let model = TextEmbedding::try_new(
-        InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(true),
-    )?;
+    let embed_options = InitOptions::new(EmbeddingModel::AllMiniLML6V2)
+        .with_show_download_progress(true)
+        .with_cache_dir(app_dir.join("models"));
+    let model = TextEmbedding::try_new(embed_options)?;
 
     // init db
-    let db_path = "commands.db";
+    let db_path = app_dir.join("commands.db");
     let conn = Connection::open(db_path).context("Failed to open database")?;
 
     // drop existing tables if they exist

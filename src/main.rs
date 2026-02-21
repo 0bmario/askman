@@ -18,14 +18,28 @@ use zerocopy::IntoBytes;
     about = "Ask natural language questions about Unix/Linux commands."
 )]
 struct Args {
-    #[arg(required = true)]
+    #[arg(required_unless_present = "clean")]
     question: Vec<String>,
+
+    /// Remove the global settings, database, and model cache to uninstall
+    #[arg(long, short = 'c')]
+    clean: bool,
 }
 
 type CmdData = (String, Vec<(String, String)>, f64);
 type CmdMap = HashMap<String, CmdData>;
 
-fn get_db_path() -> PathBuf {
+fn get_app_dir() -> PathBuf {
+    let mut path = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
+    path.push("askman");
+    if !path.exists() {
+        std::fs::create_dir_all(&path).unwrap_or_default();
+    }
+    path
+}
+
+fn get_db_path(app_dir: &std::path::Path) -> PathBuf {
+    // First, check if db is right next to the executable, for backward compatibility or local installs
     if let Ok(exe_path) = std::env::current_exe() {
         if let Some(dir) = exe_path.parent() {
             let db_path = dir.join("commands.db");
@@ -34,7 +48,7 @@ fn get_db_path() -> PathBuf {
             }
         }
     }
-    PathBuf::from("commands.db")
+    app_dir.join("commands.db")
 }
 
 fn main() -> Result<()> {
@@ -43,16 +57,39 @@ fn main() -> Result<()> {
     }
 
     let args = Args::parse();
-    let query = args.question.join(" ");
+    let app_dir = get_app_dir();
 
-    let db_path = get_db_path();
+    if args.clean {
+        println!("Cleaning up askman application data...");
+        if app_dir.exists() {
+            if let Err(e) = std::fs::remove_dir_all(&app_dir) {
+                eprintln!(
+                    "Failed to remove data directory: {}. Please delete it manually at {:?}",
+                    e, app_dir
+                );
+            } else {
+                println!(
+                    "Successfully removed configuration, database, and models from {:?}",
+                    app_dir
+                );
+            }
+        } else {
+            println!("No data directory found at {:?}", app_dir);
+        }
+        return Ok(());
+    }
+
+    let query = args.question.join(" ");
+    let db_path = get_db_path(&app_dir);
     let conn = Connection::open(db_path)?;
 
-    try_semantic_search(&conn, &query)
+    try_semantic_search(&conn, &query, &app_dir)
 }
 
-fn try_semantic_search(conn: &Connection, query: &str) -> Result<()> {
-    let embedder = TextEmbedding::try_new(InitOptions::new(EmbeddingModel::AllMiniLML6V2))?;
+fn try_semantic_search(conn: &Connection, query: &str, app_dir: &std::path::Path) -> Result<()> {
+    let embed_options =
+        InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_cache_dir(app_dir.join("models"));
+    let embedder = TextEmbedding::try_new(embed_options)?;
 
     let q_vec = embedder.embed(vec![query], None)?[0].clone();
     let q_blob = q_vec.as_bytes();

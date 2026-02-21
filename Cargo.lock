@@ -118,6 +118,7 @@ dependencies = [
  "anyhow",
  "clap",
  "colored",
+ "dirs",
  "fastembed",
  "rusqlite",
  "serde",
