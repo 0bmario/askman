@@ -1,6 +1,27 @@
-# askman 
+# askman
+A simple, offline CLI tool that finds terminal commands from natural language descriptions. Just describe what you want to do.
 
-A simple, offline CLI tool for developers who want to look up Linux, macOS, and Windows terminal commands using natural language, without leaving the terminal or digging through the man pages. Just ask what you want to do, and get the command you need.
+<p align="center">
+  <img src="./askman-demo.gif" alt="askman demo" width="700">
+</p>
+
+## Installation
+
+### macOS / Linux
+
+```bash
+curl -sSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
+```
+
+### Windows / from source
+
+Requires [Rust](https://rust-lang.org/tools/install/):
+
+```bash
+cargo install --git https://github.com/0bmario/askman
+```
+
+On first run, `askman` downloads a small search model and command database. Everything runs offline after that.
 
 ## Usage
 

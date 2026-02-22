@@ -233,6 +233,107 @@ mod tests {
     use rusqlite::Connection;
     use std::fs;
 
+    // --- parse_tldr ---
+
+    #[test]
+    fn test_parse_standard_tldr_page() {
+        let md = r#"# ls
+
+> List directory contents.
+> More information: <https://www.gnu.org/software/coreutils/ls>.
+
+- List files one per line:
+
+`ls -1`
+
+- List all files, including hidden files:
+
+`ls -a`
+"#;
+        let path = Path::new("ls.md");
+        let (name, desc, examples) = parse_tldr(md, path);
+
+        assert_eq!(name, "ls");
+        assert!(desc.contains("List directory contents."));
+        assert!(examples.contains("ls -1"));
+        assert!(examples.contains("ls -a"));
+    }
+
+    #[test]
+    fn test_parse_multi_line_description() {
+        let md = r#"# tar
+
+> Archiving utility.
+> Often combined with a compression method, such as gzip or bzip2.
+> More information: <https://www.gnu.org/software/tar>.
+
+- Create an archive:
+
+`tar cf {{target.tar}} {{file1}} {{file2}}`
+"#;
+        let path = Path::new("tar.md");
+        let (name, desc, _examples) = parse_tldr(md, path);
+
+        assert_eq!(name, "tar");
+        assert!(desc.contains("Archiving utility."));
+        assert!(desc.contains("Often combined"));
+    }
+
+    #[test]
+    fn test_parse_preserves_variables() {
+        let md = r#"# cp
+
+> Copy files and directories.
+
+- Copy a file to another location:
+
+`cp {{path/to/source}} {{path/to/destination}}`
+"#;
+        let path = Path::new("cp.md");
+        let (_, _, examples) = parse_tldr(md, path);
+
+        assert!(examples.contains("{{path/to/source}}"));
+        assert!(examples.contains("{{path/to/destination}}"));
+    }
+
+    #[test]
+    fn test_parse_multiple_examples() {
+        let md = r#"# chmod
+
+> Change permissions.
+
+- Give execute permission:
+
+`chmod +x {{file}}`
+
+- Set permissions to 755:
+
+`chmod 755 {{file}}`
+
+- Remove write permission:
+
+`chmod -w {{file}}`
+"#;
+        let path = Path::new("chmod.md");
+        let (_, _, examples) = parse_tldr(md, path);
+
+        let example_blocks: Vec<&str> = examples.split("\n\n").filter(|s| !s.is_empty()).collect();
+        assert_eq!(example_blocks.len(), 3);
+    }
+
+    #[test]
+    fn test_parse_empty_content() {
+        let md = "# empty\n";
+        let path = Path::new("empty.md");
+        let (name, desc, examples) = parse_tldr(md, path);
+
+        assert_eq!(name, "empty");
+        assert!(desc.is_empty());
+        assert!(examples.is_empty());
+    }
+
+    // --- database creation (existing test) ---
+
     #[test]
     fn test_database_creation() -> Result<()> {
         unsafe {
