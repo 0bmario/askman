@@ -8,14 +8,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use zerocopy::IntoBytes;
 
-fn get_app_dir() -> std::path::PathBuf {
-    let mut path = dirs::data_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
-    path.push("askman");
-    if !path.exists() {
-        std::fs::create_dir_all(&path).unwrap_or_default();
-    }
-    path
-}
+#[path = "db.rs"]
+mod db;
 
 /// Downloads and extracts the tldr-pages repo zip into a temp directory.
 /// Returns the path to the extracted `pages/` folder (e.g. /tmp/askman_tldr/tldr-main/pages).
@@ -57,7 +51,7 @@ fn main() -> Result<()> {
         sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
     }
 
-    let app_dir = get_app_dir();
+    let app_dir = db::get_app_dir()?;
 
     // Auto-download tldr repo, extract to temp dir
     let pages_dir = download_tldr_pages()?;

@@ -20,7 +20,9 @@ const OFFICIAL_SITES: &[&str] = &[
     "greenwoodsoftware.",
 ];
 
-/// Distance threshold: prevents completely unrelated matches
+/// Cosine distance threshold (0 = identical, 2 = opposite): filters out unrelated matches.
+/// sqlite-vec's vec0 table returns cosine distance by default via the `distance` column.
+/// See: https://alexgarcia.xyz/sqlite-vec/api-reference.html#vec_distance_cosine
 const MAX_DISTANCE: f64 = 1.10;
 
 pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> &'static str {
@@ -115,8 +117,8 @@ pub fn perform_search(
 
     let mut sorted: Vec<(String, CmdData)> = command_map.into_iter().collect();
     sorted.sort_by(|a, b| {
-        b.1.2
-            .partial_cmp(&a.1.2)
+        a.1.2
+            .partial_cmp(&b.1.2)
             .unwrap_or(std::cmp::Ordering::Equal)
     });
 

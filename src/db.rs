@@ -4,10 +4,18 @@ use rusqlite::Connection;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-/// Global data directory: ~/.local/share/askman (linux) or ~/Library/Application Support/askman (mac)
-pub fn get_app_dir() -> Result<PathBuf> {
+/// Returns the app data directory path WITHOUT creating it.
+/// Use this when you only need the path (e.g. --clean).
+pub fn get_app_dir_path() -> PathBuf {
     let mut path = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
     path.push("askman");
+    path
+}
+
+/// Global data directory: ~/.local/share/askman (linux) or ~/Library/Application Support/askman (mac)
+/// Creates the directory if it doesn't exist.
+pub fn get_app_dir() -> Result<PathBuf> {
+    let path = get_app_dir_path();
     if !path.exists() {
         std::fs::create_dir_all(&path)?;
     }
@@ -48,22 +56,36 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
             .unwrap()
             .progress_chars("#>-"));
 
-        let mut file = std::fs::File::create(&global_db_path)?;
-        let mut downloaded: u64 = 0;
-        let mut buffer = [0; 8192];
+        let tmp_db_path = global_db_path.with_extension("db.tmp");
+        let result: Result<(), anyhow::Error> = {
+            use std::io::Read;
 
-        use std::io::Read;
-        loop {
-            let bytes_read = response.read(&mut buffer)?;
-            if bytes_read == 0 {
-                break;
-            }
-            file.write_all(&buffer[..bytes_read])?;
-            downloaded += bytes_read as u64;
-            pb.set_position(downloaded);
+            // Scoped so file handle is always dropped before rename/remove.
+            let mut file = std::fs::File::create(&tmp_db_path)?;
+            let mut downloaded: u64 = 0;
+            let mut buffer = [0; 8192];
+
+            (|| {
+                loop {
+                    let bytes_read = response.read(&mut buffer)?;
+                    if bytes_read == 0 {
+                        break;
+                    }
+                    file.write_all(&buffer[..bytes_read])?;
+                    downloaded += bytes_read as u64;
+                    pb.set_position(downloaded);
+                }
+                Ok(())
+            })()
+        }; // file handle is dropped here, before rename or remove_file
+
+        if result.is_ok() {
+            std::fs::rename(&tmp_db_path, &global_db_path)?;
+            pb.finish_with_message("Download complete.");
+        } else {
+            let _ = std::fs::remove_file(&tmp_db_path);
+            result?;
         }
-
-        pb.finish_with_message("Download complete.");
     }
 
     Ok(global_db_path)
