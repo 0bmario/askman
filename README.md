@@ -7,6 +7,14 @@ A simple, offline CLI tool that finds terminal commands from natural language de
 
 ## Installation
 
+### macOS / Linux
+
+```bash
+curl -sSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
+```
+
+### Windows / from source
+
 Requires [Rust](https://rust-lang.org/tools/install/):
 
 ```bash

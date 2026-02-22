@@ -8,6 +8,21 @@ use zerocopy::IntoBytes;
 pub type CmdData = (String, Vec<(String, String)>, f64);
 pub type CmdMap = HashMap<String, CmdData>;
 
+/// Domains that indicate an "official" man page source
+const OFFICIAL_SITES: &[&str] = &[
+    "gnu.",
+    "kernel.",
+    "man7.",
+    "manned.",
+    "linux.",
+    "man.openbsd",
+    "man.freebsd",
+    "greenwoodsoftware.",
+];
+
+/// Distance threshold: prevents completely unrelated matches
+const MAX_DISTANCE: f64 = 1.10;
+
 pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> &'static str {
     if linux {
         "linux"
@@ -19,9 +34,38 @@ pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> &'static str {
         match std::env::consts::OS {
             "macos" => "osx",
             "windows" => "windows",
-            _ => "linux", // Defaults freebsd/openbsd/linux to linux
+            _ => "linux",
         }
     }
+}
+
+/// Pure scoring function: adjusts raw distance based on command name and description heuristics.
+/// Returns `None` if the result should be filtered out (score above threshold).
+pub fn adjust_score(cmd: &str, desc: &str, raw_distance: f64) -> Option<f64> {
+    if raw_distance > MAX_DISTANCE {
+        return None;
+    }
+
+    let is_official = OFFICIAL_SITES.iter().any(|&site| desc.contains(site));
+    let mut score = if is_official {
+        raw_distance * 1.2
+    } else {
+        raw_distance
+    };
+
+    // Heuristic to prefer basic unix commands over niche variants
+    if cmd == "grep" || (cmd.len() <= 3 && !cmd.starts_with('q') && !cmd.starts_with('z')) {
+        score *= 1.50; // Boost core commands like 'mv', 'cp', 'rm', 'grep'
+    } else if cmd.contains('-')
+        || cmd.starts_with('q')
+        || cmd.starts_with('z')
+        || (cmd.ends_with("grep") && cmd != "grep")
+        || cmd.ends_with("all")
+    {
+        score *= 0.75; // Penalize niche variants
+    }
+
+    Some(score)
 }
 
 pub fn perform_search(
@@ -51,40 +95,13 @@ pub fn perform_search(
 
     let mut command_map: CmdMap = HashMap::new();
 
-    // Descriptions linking to these domains get a slight relevance boost
-    let official_sites = [
-        "gnu.",
-        "kernel.",
-        "man7.",
-        "manned.",
-        "linux.",
-        "man.openbsd",
-        "man.freebsd",
-        "greenwoodsoftware.",
-    ];
-
     for result in results {
         let (cmd, desc, ex_desc, ex_cmd, score) = result?;
 
-        // Distance threshold: prevents completely unrelated matches
-        if score > 1.10 {
-            continue;
-        }
-
-        let is_official = official_sites.iter().any(|&site| desc.contains(site));
-        let mut adjusted_score = if is_official { score * 1.2 } else { score };
-
-        // Heuristic to prefer basic unix commands over niche variants
-        if cmd == "grep" || (cmd.len() <= 3 && !cmd.starts_with('q') && !cmd.starts_with('z')) {
-            adjusted_score *= 1.50; // Boost core commands like 'mv', 'cp', 'rm', 'grep'
-        } else if cmd.contains('-')
-            || cmd.starts_with('q')
-            || cmd.starts_with('z')
-            || (cmd.ends_with("grep") && cmd != "grep")
-            || cmd.ends_with("all")
-        {
-            adjusted_score *= 0.75; // Penalize niche variants
-        }
+        let adjusted_score = match adjust_score(&cmd, &desc, score) {
+            Some(s) => s,
+            None => continue,
+        };
 
         match command_map.entry(cmd.clone()) {
             Entry::Vacant(e) => {
@@ -104,4 +121,84 @@ pub fn perform_search(
     });
 
     Ok(sorted)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // --- get_target_os ---
+
+    #[test]
+    fn test_explicit_linux_flag() {
+        assert_eq!(get_target_os(true, false, false), "linux");
+    }
+
+    #[test]
+    fn test_explicit_osx_flag() {
+        assert_eq!(get_target_os(false, true, false), "osx");
+    }
+
+    #[test]
+    fn test_explicit_windows_flag() {
+        assert_eq!(get_target_os(false, false, true), "windows");
+    }
+
+    #[test]
+    fn test_linux_takes_priority_over_osx() {
+        assert_eq!(get_target_os(true, true, false), "linux");
+    }
+
+    // --- adjust_score ---
+
+    #[test]
+    fn test_filters_out_high_distance() {
+        assert!(adjust_score("ls", "list files", 1.50).is_none());
+        assert!(adjust_score("ls", "list files", 1.11).is_none());
+    }
+
+    #[test]
+    fn test_accepts_low_distance() {
+        assert!(adjust_score("ls", "list files", 0.5).is_some());
+    }
+
+    #[test]
+    fn test_core_command_boosted() {
+        let ls_score = adjust_score("ls", "list files", 0.5).unwrap();
+        // 'ls' is <= 3 chars, not q/z prefix -> boosted by 1.5x
+        assert!((ls_score - 0.75).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_grep_boosted() {
+        let grep_score = adjust_score("grep", "search patterns", 0.5).unwrap();
+        assert!((grep_score - 0.75).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_niche_variant_penalized() {
+        let zgrep_score = adjust_score("zgrep", "search compressed", 0.5).unwrap();
+        // starts with 'z' AND ends with "grep" -> penalized by 0.75x
+        assert!((zgrep_score - 0.375).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_hyphenated_command_penalized() {
+        let score = adjust_score("docker-cp", "copy files", 0.5).unwrap();
+        assert!((score - 0.375).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_official_site_boosts_score() {
+        let plain = adjust_score("find", "find files", 0.5).unwrap();
+        let official = adjust_score("find", "find files. More information: gnu.org", 0.5).unwrap();
+        assert!(official > plain);
+    }
+
+    #[test]
+    fn test_normal_command_no_modifier() {
+        // 'curl' is 4 chars, no special prefix/suffix -> no boost or penalty
+        let score = adjust_score("curl", "transfer data", 0.5).unwrap();
+        assert!((score - 0.5).abs() < 0.001);
+    }
 }
