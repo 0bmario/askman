@@ -1,112 +1,56 @@
-# 📚 askman
+# askman 
 
-**A simple, offline CLI tool for developers who want to use Unix/Linux terminal commands without googling/AI-ing every time or checking the [man pages](https://en.wikipedia.org/wiki/Man_page).**
+A simple, offline CLI tool for developers who want to look up Linux, macOS, and Windows terminal commands using natural language, without leaving the terminal or digging through the man pages. Just ask what you want to do, and get the command you need.
 
----
-
-## Why?
-
-I didn't want to leave the terminal to search for the right command, and man pages aren't always "easy" to read.
-
----
-
-## What is askman?
-
-`askman` lets you ask natural language questions about Unix/Linux commands and get helpful, example-driven answers.
-
----
-
-## Example Usage
+## Usage
 
 ```bash
-askman how to move all files to /docs  
+askman how to move all files to /docs
 ```
 
-**Output:**
-```bash
+```
 mv
-Move or rename files and directories. More information: <https://www.gnu.org/software/coreutils/manual/html_node/mv-invocation.html>.
+Move or rename files and directories.
 
 Examples:
   Move a file or directory into an existing directory:
-   mv {{path/to/source}} {{path/to/existing_directory}}
+   mv path/to/source path/to/existing_directory
 
   Move multiple files into an existing directory, keeping the filenames unchanged:
-   mv {{path/to/source1 path/to/source2 ...}} {{path/to/existing_directory}}
+   mv path/to/source1 path/to/source2 ... path/to/existing_directory
 ```
 
----
-
-## 🏗️ MVP
-
-- Uses dataset commands created from [tldr-pages common](https://github.com/tldr-pages/tldr/tree/main/pages/common) folder 
-- Provides semantic search for command examples
-
-- Big thanks to [tldr-pages](https://github.com/tldr-pages/tldr) for the curated data!!
-
----
-
-## 📦 Installation
-
-Make sure you have [Rust and Cargo installed](https://www.rust-lang.org/tools/install).
-
-Then run:
-
+By default, results are filtered to your host OS. If you need a command for a different system, override it with flags:
 ```bash
-cargo install --git https://github.com/0bmario/askman && curl -L -o "$(dirname $(which askman))/commands.db" https://raw.githubusercontent.com/0bmario/askman/main/commands.db
+askman --linux how to restart systemd
+askman --osx how to flush dns
+askman --windows how to clear dns cache
 ```
 
-This will install `askman` with a pre-built database.The first time you run `askman`, it will download the required model files.
+## Installation
 
----
-
-## 🔧 Building Your Own Database
-
-If you want to customize the command database:
-
-1. Clone the repository:
-
-2. Place your tldr-pages into the `common/` directory:
-   Make sure the files follow the format of the [tldr-pages](https://github.com/tldr-pages/tldr/blob/main/CONTRIBUTING.md#markdown-format).
-
-3. Build and run the import tool:
-
+Ensure you have [Rust](https://rust-lang.org/tools/install/) installed, then run:
 ```bash
-cargo run --bin import_tldr
+cargo install --git https://github.com/0bmario/askman
 ```
 
-This will create a new `commands.db` file with your custom command set.
+On your first query, `askman` will automatically download and cache a fast semantic search model and a curated database of commands. Everything runs locally on your machine after that!
 
 ## Uninstall
 
-To remove the downloaded model and the database:
-
+To cleanly remove the cached models, database, and the CLI executable:
 ```bash
-askman --clean
+askman --clean && cargo uninstall askman
 ```
 
-Then, you can safely remove the executable:
+## Rebuilding the Database
+
+Want to refresh the database with the absolute latest commands?
 ```bash
-cargo uninstall askman
+cargo run --bin import_tldr --features="dev"
 ```
+This automatically fetches the newest data from the tldr repository, extracts it, and generates a fresh database for your system.
 
+## Acknowledgments
 
-
-## Features (planned)
-
-- Understands natural language questions
-- Provides example-driven answers
-- Fast, offline
-
----
-
-## 📄 License
-
-This project is licensed under the terms of the [MIT License](LICENSE).
-
----
-
-**Contributions and feedback are welcome!**
-
-
-
+A huge thank to the [tldr-pages](https://github.com/tldr-pages/tldr) project! `askman`'s command data is entirely sourced from their dope, community-driven collection of simplified examples :raised_hands:

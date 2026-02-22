@@ -4,7 +4,8 @@ use rusqlite::ffi::sqlite3_auto_extension;
 use rusqlite::{Connection, params};
 use sqlite_vec::sqlite3_vec_init;
 use std::fs;
-use std::path::Path;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 use zerocopy::IntoBytes;
 
 fn get_app_dir() -> std::path::PathBuf {
@@ -16,6 +17,41 @@ fn get_app_dir() -> std::path::PathBuf {
     path
 }
 
+/// Downloads and extracts the tldr-pages repo zip into a temp directory.
+/// Returns the path to the extracted `pages/` folder (e.g. /tmp/askman_tldr/tldr-main/pages).
+fn download_tldr_pages() -> Result<PathBuf> {
+    let tmp_dir = std::env::temp_dir().join("askman_tldr");
+    if tmp_dir.exists() {
+        fs::remove_dir_all(&tmp_dir)?;
+    }
+    fs::create_dir_all(&tmp_dir)?;
+
+    println!("Downloading tldr-pages from GitHub...");
+    let zip_url = "https://github.com/tldr-pages/tldr/archive/refs/heads/main.zip";
+    let response = reqwest::blocking::get(zip_url)?;
+    let bytes = response.bytes()?;
+
+    // Write zip to disk, then extract (zip crate needs a seekable reader)
+    let zip_path = tmp_dir.join("tldr.zip");
+    let mut file = fs::File::create(&zip_path)?;
+    file.write_all(&bytes)?;
+
+    println!("Extracting...");
+    let file = fs::File::open(&zip_path)?;
+    let mut archive = zip::ZipArchive::new(file)?;
+    archive.extract(&tmp_dir)?;
+
+    // The zip extracts to `tldr-main/pages/`
+    let pages_dir = tmp_dir.join("tldr-main").join("pages");
+    if !pages_dir.exists() {
+        return Err(anyhow::anyhow!(
+            "Expected pages/ directory not found in zip"
+        ));
+    }
+
+    Ok(pages_dir)
+}
+
 fn main() -> Result<()> {
     unsafe {
         sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
@@ -23,23 +59,25 @@ fn main() -> Result<()> {
 
     let app_dir = get_app_dir();
 
+    // Auto-download tldr repo, extract to temp dir
+    let pages_dir = download_tldr_pages()?;
+
     println!("Initializing embedding model...");
     let embed_options = InitOptions::new(EmbeddingModel::AllMiniLML6V2)
         .with_show_download_progress(true)
         .with_cache_dir(app_dir.join("models"));
     let model = TextEmbedding::try_new(embed_options)?;
 
-    // init db
     let db_path = app_dir.join("commands.db");
-    let conn = Connection::open(db_path).context("Failed to open database")?;
+    let conn = Connection::open(&db_path).context("Failed to open database")?;
 
-    // drop existing tables if they exist
     conn.execute("DROP TABLE IF EXISTS pages_vec", [])?;
 
-    // create table
+    // os column tags each command by platform for filtered queries
     conn.execute(
         "CREATE VIRTUAL TABLE pages_vec USING vec0(
             command TEXT,
+            os TEXT,
             description TEXT,
             example_desc TEXT,
             example_cmd TEXT,
@@ -48,10 +86,35 @@ fn main() -> Result<()> {
         [],
     )?;
 
-    // process all files in common folder
-    let common_dir = "common";
-    let entries = fs::read_dir(common_dir)
-        .with_context(|| format!("Failed to read directory: {}", common_dir))?;
+    let mut count = 0;
+    for os_type in ["common", "linux", "osx", "windows"] {
+        let dir = pages_dir.join(os_type);
+        if dir.exists() {
+            println!("Processing directory: {}", os_type);
+            count += process_directory(&dir, os_type, &conn, &model)?;
+        } else {
+            println!("Directory {} not found. Skipping...", os_type);
+        }
+    }
+
+    // Clean up temp directory
+    let tmp_dir = std::env::temp_dir().join("askman_tldr");
+    fs::remove_dir_all(&tmp_dir).ok();
+
+    println!("\nImported {} examples from tldr pages", count);
+    println!("Database saved to: {}", db_path.display());
+    Ok(())
+}
+
+/// Reads all .md files in a tldr directory, embeds each example, and inserts into SQLite.
+fn process_directory(
+    dir_path: &Path,
+    os_tag: &str,
+    conn: &Connection,
+    model: &TextEmbedding,
+) -> Result<usize> {
+    let entries = fs::read_dir(dir_path)
+        .with_context(|| format!("Failed to read directory: {}", dir_path.display()))?;
 
     let mut count = 0;
 
@@ -63,14 +126,11 @@ fn main() -> Result<()> {
             continue;
         }
 
-        println!("Processing file: {}", path.display());
-
         let content = fs::read_to_string(&path)
             .with_context(|| format!("Failed to read file: {}", path.display()))?;
 
         // parse tldr page
         let (command, description, examples) = parse_tldr(&content, &path);
-        println!("Parsed command: {}", command);
 
         for example in examples.split("\n\n") {
             let lines: Vec<&str> = example.lines().collect();
@@ -96,10 +156,11 @@ fn main() -> Result<()> {
 
             // insert using the vec0 table
             conn.execute(
-                "INSERT INTO pages_vec(command, description, example_desc, example_cmd, embedding)
-                 VALUES (?1, ?2, ?3, ?4, ?5)",
+                "INSERT INTO pages_vec(command, os, description, example_desc, example_cmd, embedding)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
                 params![
                     command,
+                    os_tag,
                     description,
                     example_desc,
                     example_cmd,
@@ -111,8 +172,7 @@ fn main() -> Result<()> {
         }
     }
 
-    println!("\nImported {} examples from tldr pages", count);
-    Ok(())
+    Ok(count)
 }
 
 /// Parse a tldr page into a command, description, and examples
@@ -188,6 +248,7 @@ mod tests {
         conn.execute(
             "CREATE VIRTUAL TABLE pages_vec USING vec0(
                 command TEXT,
+                os TEXT,
                 description TEXT,
                 example_desc TEXT,
                 example_cmd TEXT,
@@ -226,9 +287,9 @@ mod tests {
             let embedding_blob = embedding_vec.as_bytes();
 
             conn.execute(
-                "INSERT INTO pages_vec(command, description, example_desc, example_cmd, embedding)
-                 VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![cmd, desc, ex_desc, ex_cmd, embedding_blob],
+                "INSERT INTO pages_vec(command, os, description, example_desc, example_cmd, embedding)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![cmd, "common", desc, ex_desc, ex_cmd, embedding_blob],
             )?;
         }
 
