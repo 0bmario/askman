@@ -48,21 +48,21 @@ pub fn adjust_score(cmd: &str, desc: &str, raw_distance: f64) -> Option<f64> {
 
     let is_official = OFFICIAL_SITES.iter().any(|&site| desc.contains(site));
     let mut score = if is_official {
-        raw_distance * 1.2
+        raw_distance * 0.8
     } else {
         raw_distance
     };
 
     // Heuristic to prefer basic unix commands over niche variants
     if cmd == "grep" || (cmd.len() <= 3 && !cmd.starts_with('q') && !cmd.starts_with('z')) {
-        score *= 1.50; // Boost core commands like 'mv', 'cp', 'rm', 'grep'
+        score *= 0.67; // Boost core commands like 'mv', 'cp', 'rm', 'grep'
     } else if cmd.contains('-')
         || cmd.starts_with('q')
         || cmd.starts_with('z')
         || (cmd.ends_with("grep") && cmd != "grep")
         || cmd.ends_with("all")
     {
-        score *= 0.75; // Penalize niche variants
+        score *= 1.33; // Penalize niche variants
     }
 
     Some(score)
@@ -165,34 +165,34 @@ mod tests {
     #[test]
     fn test_core_command_boosted() {
         let ls_score = adjust_score("ls", "list files", 0.5).unwrap();
-        // 'ls' is <= 3 chars, not q/z prefix -> boosted by 1.5x
-        assert!((ls_score - 0.75).abs() < 0.001);
+        // 'ls' is <= 3 chars, not q/z prefix -> boosted by 0.67x (lower distance)
+        assert!((ls_score - 0.335).abs() < 0.001);
     }
 
     #[test]
     fn test_grep_boosted() {
         let grep_score = adjust_score("grep", "search patterns", 0.5).unwrap();
-        assert!((grep_score - 0.75).abs() < 0.001);
+        assert!((grep_score - 0.335).abs() < 0.001);
     }
 
     #[test]
     fn test_niche_variant_penalized() {
         let zgrep_score = adjust_score("zgrep", "search compressed", 0.5).unwrap();
-        // starts with 'z' AND ends with "grep" -> penalized by 0.75x
-        assert!((zgrep_score - 0.375).abs() < 0.001);
+        // starts with 'z' AND ends with "grep" -> penalized by 1.33x
+        assert!((zgrep_score - 0.665).abs() < 0.001);
     }
 
     #[test]
     fn test_hyphenated_command_penalized() {
         let score = adjust_score("docker-cp", "copy files", 0.5).unwrap();
-        assert!((score - 0.375).abs() < 0.001);
+        assert!((score - 0.665).abs() < 0.001);
     }
 
     #[test]
     fn test_official_site_boosts_score() {
         let plain = adjust_score("find", "find files", 0.5).unwrap();
         let official = adjust_score("find", "find files. More information: gnu.org", 0.5).unwrap();
-        assert!(official > plain);
+        assert!(official < plain); // lower distance is better
     }
 
     #[test]

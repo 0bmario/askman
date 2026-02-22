@@ -5,13 +5,13 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 /// Global data directory: ~/.local/share/askman (linux) or ~/Library/Application Support/askman (mac)
-pub fn get_app_dir() -> PathBuf {
+pub fn get_app_dir() -> Result<PathBuf> {
     let mut path = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
     path.push("askman");
     if !path.exists() {
-        std::fs::create_dir_all(&path).unwrap_or_default();
+        std::fs::create_dir_all(&path)?;
     }
-    path
+    Ok(path)
 }
 
 /// Resolves commands.db path. Falls back to downloading from GitHub on first run.
@@ -30,40 +30,40 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
 
     if !global_db_path.exists() {
         println!("Downloading initial commands database (this only happens once)...");
-        let mut response = reqwest::blocking::get(
-            "https://raw.githubusercontent.com/cito-lito/askman/main/commands.db",
-        )?;
 
-        if response.status().is_success() {
-            let total_size = response.content_length().unwrap_or(0);
+        let client = reqwest::blocking::Client::builder()
+            .timeout(std::time::Duration::from_secs(30))
+            .build()?;
 
-            let pb = ProgressBar::new(total_size);
-            pb.set_style(ProgressStyle::default_bar()
-                .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-                .unwrap()
-                .progress_chars("#>-"));
+        let mut response = client
+            .get("https://raw.githubusercontent.com/0bmario/askman/main/commands.db")
+            .send()?
+            .error_for_status()?;
 
-            let mut file = std::fs::File::create(&global_db_path)?;
-            let mut downloaded: u64 = 0;
-            let mut buffer = [0; 8192];
+        let total_size = response.content_length().unwrap_or(0);
 
-            use std::io::Read;
-            while let Ok(usize) = response.read(&mut buffer) {
-                if usize == 0 {
-                    break;
-                }
-                file.write_all(&buffer[..usize])?;
-                downloaded += usize as u64;
-                pb.set_position(downloaded);
+        let pb = ProgressBar::new(total_size);
+        pb.set_style(ProgressStyle::default_bar()
+            .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
+            .unwrap()
+            .progress_chars("#>-"));
+
+        let mut file = std::fs::File::create(&global_db_path)?;
+        let mut downloaded: u64 = 0;
+        let mut buffer = [0; 8192];
+
+        use std::io::Read;
+        loop {
+            let bytes_read = response.read(&mut buffer)?;
+            if bytes_read == 0 {
+                break;
             }
-
-            pb.finish_with_message("Download complete.");
-        } else {
-            return Err(anyhow::anyhow!(
-                "Failed to download database: HTTP {}",
-                response.status()
-            ));
+            file.write_all(&buffer[..bytes_read])?;
+            downloaded += bytes_read as u64;
+            pb.set_position(downloaded);
         }
+
+        pb.finish_with_message("Download complete.");
     }
 
     Ok(global_db_path)

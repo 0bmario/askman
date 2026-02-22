@@ -17,7 +17,7 @@ fn main() -> Result<()> {
     }
 
     let args = cli::Args::parse();
-    let app_dir = db::get_app_dir();
+    let app_dir = db::get_app_dir()?;
 
     if args.clean {
         println!("Cleaning up askman application data...");
