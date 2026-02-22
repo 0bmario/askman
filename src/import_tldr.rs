@@ -81,7 +81,7 @@ fn main() -> Result<()> {
     )?;
 
     let mut count = 0;
-    for os_type in ["common", "linux", "osx", "windows"] {
+    for os_type in ["common", "linux", "osx"] {
         let dir = pages_dir.join(os_type);
         if dir.exists() {
             println!("Processing directory: {}", os_type);
