@@ -5,8 +5,9 @@ pub fn colorize_shell_word(word: &str, is_first: bool) -> String {
         word.green().bold().to_string()
     } else if word.starts_with('-') {
         word.cyan().to_string()
-    } else if word.starts_with('[') || word.starts_with(']') || word.contains('|') {
-        word.bright_black().to_string() // visually mute bash syntax like [-f|--force]
+    } else if word.starts_with('[') || word.contains('|') {
+        // visually mute bash syntax like [-f|--force], no need to check ']' because parts are split around spaces
+        word.bright_black().to_string()
     } else {
         // Normal text (paths, strings not in variables)
         word.to_string()
@@ -100,7 +101,13 @@ mod tests {
     fn test_highlight_command() {
         let cmd = "chmod +x {{file}} && ls -la";
         let highlighted = highlight_command(cmd);
-        // We just ensure it doesn't crash and produces some string since terminal coloring codes are hard to exact-match sometimes.
+
         assert!(!highlighted.is_empty());
+        // Verify ANSI escape sequences are present (\x1b[...m)
+        assert!(highlighted.contains("\x1b["));
+        // Check for specific formatted tokens (e.g. at least one reset code \x1b[0m)
+        assert!(highlighted.contains("\x1b[0m"));
+        // Check that variable is highlighted (yellow is usually 33)
+        assert!(highlighted.contains("33mfile\x1b[0m"));
     }
 }
