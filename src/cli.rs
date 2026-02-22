@@ -15,14 +15,14 @@ pub struct Args {
     pub clean: bool,
 
     /// Force search for Linux commands
-    #[arg(long)]
+    #[arg(long, conflicts_with_all = ["osx", "windows"])]
     pub linux: bool,
 
     /// Force search for macOS commands
-    #[arg(long)]
+    #[arg(long, conflicts_with_all = ["linux", "windows"])]
     pub osx: bool,
 
     /// Force search for Windows commands
-    #[arg(long)]
+    #[arg(long, conflicts_with_all = ["linux", "osx"])]
     pub windows: bool,
 }

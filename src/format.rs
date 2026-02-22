@@ -17,6 +17,7 @@ pub fn colorize_shell_word(word: &str, is_first: bool) -> String {
 pub fn highlight_command(ex_cmd: &str) -> String {
     let mut highlighted_cmd = String::new();
     let mut in_variable = false;
+    let mut is_first_word = true;
 
     // Simple tokenizer that respects the {{var}} syntax from tldr before stripping it
     let mut current_word = String::new();
@@ -27,10 +28,8 @@ pub fn highlight_command(ex_cmd: &str) -> String {
         // Check for variable start {{
         if i + 1 < chars.len() && chars[i] == '{' && chars[i + 1] == '{' {
             if !current_word.is_empty() {
-                highlighted_cmd.push_str(&colorize_shell_word(
-                    &current_word,
-                    highlighted_cmd.is_empty(),
-                ));
+                highlighted_cmd.push_str(&colorize_shell_word(&current_word, is_first_word));
+                is_first_word = false;
                 current_word.clear();
             }
             in_variable = true;
@@ -52,10 +51,8 @@ pub fn highlight_command(ex_cmd: &str) -> String {
 
         if chars[i].is_whitespace() && !in_variable {
             if !current_word.is_empty() {
-                highlighted_cmd.push_str(&colorize_shell_word(
-                    &current_word,
-                    highlighted_cmd.is_empty(),
-                ));
+                highlighted_cmd.push_str(&colorize_shell_word(&current_word, is_first_word));
+                is_first_word = false;
                 current_word.clear();
             }
             highlighted_cmd.push(chars[i]);
@@ -70,10 +67,7 @@ pub fn highlight_command(ex_cmd: &str) -> String {
         if in_variable {
             highlighted_cmd.push_str(&current_word.yellow().to_string());
         } else {
-            highlighted_cmd.push_str(&colorize_shell_word(
-                &current_word,
-                highlighted_cmd.is_empty(),
-            ));
+            highlighted_cmd.push_str(&colorize_shell_word(&current_word, is_first_word));
         }
     }
 

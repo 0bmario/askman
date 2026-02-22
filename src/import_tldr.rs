@@ -22,7 +22,7 @@ fn download_tldr_pages() -> Result<PathBuf> {
 
     println!("Downloading tldr-pages from GitHub...");
     let zip_url = "https://github.com/tldr-pages/tldr/archive/refs/heads/main.zip";
-    let response = reqwest::blocking::get(zip_url)?;
+    let response = reqwest::blocking::get(zip_url)?.error_for_status()?;
     let bytes = response.bytes()?;
 
     // Write zip to disk, then extract (zip crate needs a seekable reader)
@@ -194,12 +194,7 @@ fn parse_tldr(md: &str, file: &Path) -> (String, String, String) {
 
         match line.chars().next() {
             Some('>') => {
-                // collect description lines
                 let desc_line = line[1..].trim();
-                // // skip urls
-                // if !desc_line.starts_with('<') {
-                //     desc_lines.push(desc_line);
-                // }
                 desc_lines.push(desc_line);
             }
             Some('-') => {
