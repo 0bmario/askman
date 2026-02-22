@@ -1,112 +1,50 @@
-# 📚 askman
+# askman
+A simple, offline CLI tool that finds terminal commands from natural language descriptions. Just describe what you want to do.
 
-**A simple, offline CLI tool for developers who want to use Unix/Linux terminal commands without googling/AI-ing every time or checking the [man pages](https://en.wikipedia.org/wiki/Man_page).**
+<p align="center">
+  <img src="./askman-demo.gif" alt="askman demo" width="700">
+</p>
 
----
+## Installation
 
-## Why?
-
-I didn't want to leave the terminal to search for the right command, and man pages aren't always "easy" to read.
-
----
-
-## What is askman?
-
-`askman` lets you ask natural language questions about Unix/Linux commands and get helpful, example-driven answers.
-
----
-
-## Example Usage
+Requires [Rust](https://rust-lang.org/tools/install/):
 
 ```bash
-askman how to move all files to /docs  
+cargo install --git https://github.com/0bmario/askman
 ```
 
-**Output:**
-```bash
-mv
-Move or rename files and directories. More information: <https://www.gnu.org/software/coreutils/manual/html_node/mv-invocation.html>.
+On first run, `askman` downloads a small search model and command database. Everything runs offline after that.
 
-Examples:
-  Move a file or directory into an existing directory:
-   mv {{path/to/source}} {{path/to/existing_directory}}
-
-  Move multiple files into an existing directory, keeping the filenames unchanged:
-   mv {{path/to/source1 path/to/source2 ...}} {{path/to/existing_directory}}
-```
-
----
-
-## 🏗️ MVP
-
-- Uses dataset commands created from [tldr-pages common](https://github.com/tldr-pages/tldr/tree/main/pages/common) folder 
-- Provides semantic search for command examples
-
-- Big thanks to [tldr-pages](https://github.com/tldr-pages/tldr) for the curated data!!
-
----
-
-## 📦 Installation
-
-Make sure you have [Rust and Cargo installed](https://www.rust-lang.org/tools/install).
-
-Then run:
+## Usage
 
 ```bash
-cargo install --git https://github.com/0bmario/askman && curl -L -o "$(dirname $(which askman))/commands.db" https://raw.githubusercontent.com/0bmario/askman/main/commands.db
+askman <description of the needed command>
 ```
 
-This will install `askman` with a pre-built database.The first time you run `askman`, it will download the required model files.
-
----
-
-## 🔧 Building Your Own Database
-
-If you want to customize the command database:
-
-1. Clone the repository:
-
-2. Place your tldr-pages into the `common/` directory:
-   Make sure the files follow the format of the [tldr-pages](https://github.com/tldr-pages/tldr/blob/main/CONTRIBUTING.md#markdown-format).
-
-3. Build and run the import tool:
+Results are filtered to your OS by default. Override with flags:
 
 ```bash
-cargo run --bin import_tldr
+askman --linux how to restart systemd
+askman --osx how to flush dns
+askman --windows how to clear dns cache
 ```
 
-This will create a new `commands.db` file with your custom command set.
+## How it works
+
+- `askman` embeds your query into a vector and matches it against pre-embedded command examples.
+- All command data comes from [tldr-pages](https://github.com/tldr-pages/tldr), embeddings are generated with [AllMiniLM-L6-V2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), and vector DB created with [sqlite-vec](https://github.com/asg017/sqlite-vec).
+- Everything runs locally after setup.
 
 ## Uninstall
 
-To remove the downloaded model and the database:
-
 ```bash
-askman --clean
+askman --clean && cargo uninstall askman
 ```
 
-Then, you can safely remove the executable:
-```bash
-cargo uninstall askman
-```
+## Acknowledgments
 
+Command data sourced from the [tldr-pages](https://github.com/tldr-pages/tldr) project. Semantic search powered by [AllMiniLM-L6-V2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) and [sqlite-vec](https://github.com/asg017/sqlite-vec).
 
+## License
 
-## Features (planned)
-
-- Understands natural language questions
-- Provides example-driven answers
-- Fast, offline
-
----
-
-## 📄 License
-
-This project is licensed under the terms of the [MIT License](LICENSE).
-
----
-
-**Contributions and feedback are welcome!**
-
-
-
+MIT

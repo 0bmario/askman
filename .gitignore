@@ -3,3 +3,4 @@
 *.gguf
 # *.db
 /common
+*askman-demo.mov

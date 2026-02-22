@@ -2,9 +2,9 @@
 name = "askman"
 version = "0.1.0"
 edition = "2024"
-description = "A simple, offline CLI tool to help you use Unix/Linux terminal commands more easily."
+description = "A simple, offline CLI tool to help you use Unix, Linux, macOS, and Windows commands more easily."
 license = "MIT"
-repository = "https://github.com/cito-lito/askman"
+repository = "https://github.com/0bmario/askman"
 
 [dependencies]
 anyhow = "1.0.98"
@@ -12,12 +12,17 @@ clap = { version = "4.5.37", features = ["derive"] }
 colored = "3.0.0"
 fastembed = "4.8.0"
 dirs = "5.0.1"
+reqwest = { version = "0.12", features = ["blocking"] }
 rusqlite = { version = "0.35.0", features = ["bundled"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 sqlite-vec = "0.1.6"
 zerocopy = "0.8.25"
 
+# Temporary workaround for Apple Silicon compilation failures on Rust 1.85+
+# fastembed -> tokenizers -> image -> zune-jpeg
+# See: https://github.com/rust-lang/rust/issues/136894
+zune-jpeg = "=0.4.13"
 
 [[bin]]
 name = "askman"
@@ -29,4 +34,10 @@ path = "src/import_tldr.rs"
 required-features = ["dev"]
 
 [features]
-dev = []
+dev = ["zip"]
+
+[dependencies.zip]
+version = "=2.4.0"
+optional = true
+default-features = false
+features = ["deflate"]
