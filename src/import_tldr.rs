@@ -8,14 +8,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use zerocopy::IntoBytes;
 
-fn get_app_dir() -> std::path::PathBuf {
-    let mut path = dirs::data_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
-    path.push("askman");
-    if !path.exists() {
-        std::fs::create_dir_all(&path).unwrap_or_default();
-    }
-    path
-}
+#[path = "db.rs"]
+mod db;
 
 /// Downloads and extracts the tldr-pages repo zip into a temp directory.
 /// Returns the path to the extracted `pages/` folder (e.g. /tmp/askman_tldr/tldr-main/pages).
@@ -28,7 +22,7 @@ fn download_tldr_pages() -> Result<PathBuf> {
 
     println!("Downloading tldr-pages from GitHub...");
     let zip_url = "https://github.com/tldr-pages/tldr/archive/refs/heads/main.zip";
-    let response = reqwest::blocking::get(zip_url)?;
+    let response = reqwest::blocking::get(zip_url)?.error_for_status()?;
     let bytes = response.bytes()?;
 
     // Write zip to disk, then extract (zip crate needs a seekable reader)
@@ -57,7 +51,7 @@ fn main() -> Result<()> {
         sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
     }
 
-    let app_dir = get_app_dir();
+    let app_dir = db::get_app_dir()?;
 
     // Auto-download tldr repo, extract to temp dir
     let pages_dir = download_tldr_pages()?;
@@ -200,16 +194,11 @@ fn parse_tldr(md: &str, file: &Path) -> (String, String, String) {
 
         match line.chars().next() {
             Some('>') => {
-                // collect description lines
                 let desc_line = line[1..].trim();
-                // // skip urls
-                // if !desc_line.starts_with('<') {
-                //     desc_lines.push(desc_line);
-                // }
                 desc_lines.push(desc_line);
             }
             Some('-') => {
-                examples.push_str(&line[1..].trim());
+                examples.push_str(line[1..].trim());
                 examples.push('\n');
                 want_code = true;
             }
@@ -232,6 +221,107 @@ mod tests {
     use super::*;
     use rusqlite::Connection;
     use std::fs;
+
+    // --- parse_tldr ---
+
+    #[test]
+    fn test_parse_standard_tldr_page() {
+        let md = r#"# ls
+
+> List directory contents.
+> More information: <https://www.gnu.org/software/coreutils/ls>.
+
+- List files one per line:
+
+`ls -1`
+
+- List all files, including hidden files:
+
+`ls -a`
+"#;
+        let path = Path::new("ls.md");
+        let (name, desc, examples) = parse_tldr(md, path);
+
+        assert_eq!(name, "ls");
+        assert!(desc.contains("List directory contents."));
+        assert!(examples.contains("ls -1"));
+        assert!(examples.contains("ls -a"));
+    }
+
+    #[test]
+    fn test_parse_multi_line_description() {
+        let md = r#"# tar
+
+> Archiving utility.
+> Often combined with a compression method, such as gzip or bzip2.
+> More information: <https://www.gnu.org/software/tar>.
+
+- Create an archive:
+
+`tar cf {{target.tar}} {{file1}} {{file2}}`
+"#;
+        let path = Path::new("tar.md");
+        let (name, desc, _examples) = parse_tldr(md, path);
+
+        assert_eq!(name, "tar");
+        assert!(desc.contains("Archiving utility."));
+        assert!(desc.contains("Often combined"));
+    }
+
+    #[test]
+    fn test_parse_preserves_variables() {
+        let md = r#"# cp
+
+> Copy files and directories.
+
+- Copy a file to another location:
+
+`cp {{path/to/source}} {{path/to/destination}}`
+"#;
+        let path = Path::new("cp.md");
+        let (_, _, examples) = parse_tldr(md, path);
+
+        assert!(examples.contains("{{path/to/source}}"));
+        assert!(examples.contains("{{path/to/destination}}"));
+    }
+
+    #[test]
+    fn test_parse_multiple_examples() {
+        let md = r#"# chmod
+
+> Change permissions.
+
+- Give execute permission:
+
+`chmod +x {{file}}`
+
+- Set permissions to 755:
+
+`chmod 755 {{file}}`
+
+- Remove write permission:
+
+`chmod -w {{file}}`
+"#;
+        let path = Path::new("chmod.md");
+        let (_, _, examples) = parse_tldr(md, path);
+
+        let example_blocks: Vec<&str> = examples.split("\n\n").filter(|s| !s.is_empty()).collect();
+        assert_eq!(example_blocks.len(), 3);
+    }
+
+    #[test]
+    fn test_parse_empty_content() {
+        let md = "# empty\n";
+        let path = Path::new("empty.md");
+        let (name, desc, examples) = parse_tldr(md, path);
+
+        assert_eq!(name, "empty");
+        assert!(desc.is_empty());
+        assert!(examples.is_empty());
+    }
+
+    // --- database creation (existing test) ---
 
     #[test]
     fn test_database_creation() -> Result<()> {
