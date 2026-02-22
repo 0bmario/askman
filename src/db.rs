@@ -40,11 +40,11 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
         println!("Downloading initial commands database (this only happens once)...");
 
         let client = reqwest::blocking::Client::builder()
-            .timeout(std::time::Duration::from_secs(30))
+            .timeout(std::time::Duration::from_secs(120))
             .build()?;
 
         let mut response = client
-            .get("https://raw.githubusercontent.com/0bmario/askman/main/commands.db")
+            .get("https://github.com/0bmario/askman/releases/latest/download/commands.db")
             .send()?
             .error_for_status()?;
 
