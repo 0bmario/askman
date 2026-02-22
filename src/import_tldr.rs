@@ -209,7 +209,7 @@ fn parse_tldr(md: &str, file: &Path) -> (String, String, String) {
                 desc_lines.push(desc_line);
             }
             Some('-') => {
-                examples.push_str(&line[1..].trim());
+                examples.push_str(line[1..].trim());
                 examples.push('\n');
                 want_code = true;
             }
