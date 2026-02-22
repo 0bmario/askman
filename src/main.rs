@@ -17,9 +17,9 @@ fn main() -> Result<()> {
     }
 
     let args = cli::Args::parse();
-    let app_dir = db::get_app_dir()?;
 
     if args.clean {
+        let app_dir = db::get_app_dir_path();
         println!("Cleaning up askman application data...");
         if app_dir.exists() {
             if let Err(e) = std::fs::remove_dir_all(&app_dir) {
@@ -39,6 +39,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    let app_dir = db::get_app_dir()?;
     let query = args.question.join(" ");
     let db_path = db::get_db_path(&app_dir)?;
     let conn = db::get_connection(&db_path)?;
@@ -69,7 +70,7 @@ fn try_semantic_search(
             let top_score = sorted[0].1.2;
             let current_score = sorted[i].1.2;
             // if it's very close, we can show one example for it
-            if top_score - current_score < 0.05 {
+            if current_score - top_score < 0.05 {
                 show_count = 1;
             } else {
                 continue; // Skip printing this command entirely if it's too irrelevant compared to the top hit
