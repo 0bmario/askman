@@ -21,7 +21,7 @@ Requires [Rust](https://rust-lang.org/tools/install/):
 cargo install --git https://github.com/0bmario/askman
 ```
 
-On first run, `askman` downloads a small embedding model and command database. Everything runs offline after that.
+On first run, `askman` downloads a small embedding model and command database.
 
 ## Usage
 

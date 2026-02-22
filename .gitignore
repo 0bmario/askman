@@ -1,7 +1,6 @@
 /target
 *.fastembed*
 *.gguf
-# *.db
 /common
 *askman-demo.mov
 commands.db
