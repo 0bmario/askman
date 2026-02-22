@@ -23,6 +23,7 @@ zerocopy = "0.8.25"
 # fastembed -> tokenizers -> image -> zune-jpeg
 # See: https://github.com/rust-lang/rust/issues/136894
 zune-jpeg = "=0.4.13"
+indicatif = "0.18.4"
 
 [[bin]]
 name = "askman"
