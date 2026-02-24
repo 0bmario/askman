@@ -9,8 +9,8 @@ pub fn init_model(app_dir: &Path) -> Result<TextEmbedding> {
         .with_cache_dir(cache_dir.clone());
     TextEmbedding::try_new(embed_options).with_context(|| {
         format!(
-            "failed to initialize embedding model AllMiniLML6V2 with cache_dir {:?}",
-            cache_dir
+            "failed to initialize embedding model AllMiniLML6V2 with cache_dir {}",
+            cache_dir.display()
         )
     })
 }

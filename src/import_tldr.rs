@@ -8,8 +8,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use zerocopy::IntoBytes;
 
-#[path = "db.rs"]
-mod db;
+use askman::db;
 
 /// Downloads and extracts the tldr-pages repo zip into a temp directory.
 /// Returns the path to the extracted `pages/` folder (e.g. /tmp/askman_tldr/tldr-main/pages).
@@ -81,7 +80,7 @@ fn main() -> Result<()> {
     )?;
 
     let mut count = 0;
-    for os_type in ["common", "linux", "osx"] {
+    for os_type in ["common", "linux", "osx", "windows"] {
         let dir = pages_dir.join(os_type);
         if dir.exists() {
             println!("Processing directory: {}", os_type);
