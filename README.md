@@ -21,7 +21,7 @@ Requires [Rust](https://rust-lang.org/tools/install/):
 cargo install --git https://github.com/0bmario/askman
 ```
 
-On first run, `askman` downloads a small embedding model and command database.
+On first run, `askman` downloads a small embedding model and commands database.
 
 ## Usage
 
@@ -66,8 +66,7 @@ Kudos to the [tldr-pages](https://github.com/tldr-pages/tldr) project. The used 
 
 ## Rebuilding the Database
 
-Want to refresh the database with the absolute latest commands?
 ```bash
 cargo run --bin import_tldr --features="dev"
 ```
-This automatically fetches the newest data from the tldr repository, extracts it, and generates a fresh database for your system.
+This automatically fetches the newest data from the tldr repository, extracts it, and generates a fresh commands database.

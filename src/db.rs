@@ -36,6 +36,10 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
 
     let global_db_path = app_dir.join("commands.db");
 
+    if global_db_path.exists() {
+        ensure_valid_schema(&global_db_path)?;
+    }
+
     if !global_db_path.exists() {
         println!("Downloading initial commands database (this only happens once)...");
 
@@ -93,4 +97,36 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
 
 pub fn get_connection(db_path: &Path) -> Result<Connection> {
     Ok(Connection::open(db_path)?)
+}
+
+/// Checks if the database has the required schema (must have the `os` metadata column).
+/// If it's an old v1 schema (missing `os`), it actively removes it so it can be rebuilt.
+pub fn ensure_valid_schema(db_path: &Path) -> Result<()> {
+    if !db_path.exists() {
+        return Ok(());
+    }
+
+    let has_os_column = {
+        let conn = get_connection(db_path)?;
+        let mut stmt = conn.prepare("PRAGMA table_info(pages_vec)")?;
+        let mut rows = stmt.query([])?;
+        let mut found = false;
+        while let Some(row) = rows.next()? {
+            let name: String = row.get(1)?;
+            if name == "os" {
+                found = true;
+                break;
+            }
+        }
+        found
+    };
+
+    if !has_os_column {
+        println!(
+            "Detected legacy database schema (v1, missing OS flags). Removing to allow upgrade..."
+        );
+        std::fs::remove_file(db_path)?;
+    }
+
+    Ok(())
 }
