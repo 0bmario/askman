@@ -126,6 +126,8 @@ dependencies = [
  "indicatif 0.18.4",
  "reqwest",
  "rusqlite",
+ "serde",
+ "serde_json",
  "sqlite-vec",
  "zerocopy",
  "zip",
