@@ -44,10 +44,110 @@ const OFFICIAL_SITES: &[&str] = &[
     "greenwoodsoftware.",
 ];
 
+/// Whitelist of core canonical UNIX utilities that should always be prioritized
+pub const CORE_COMMANDS: &[&str] = &[
+    "tar",
+    "grep",
+    "find",
+    "sed",
+    "awk",
+    "curl",
+    "wget",
+    "cat",
+    "ls",
+    "rm",
+    "cp",
+    "mv",
+    "echo",
+    "kill",
+    "chmod",
+    "chown",
+    "ssh",
+    "scp",
+    "rsync",
+    "df",
+    "du",
+    "head",
+    "tail",
+    "ps",
+    "top",
+    "htop",
+    "less",
+    "more",
+    "nano",
+    "vim",
+    "vi",
+    "emacs",
+    "mkdir",
+    "rmdir",
+    "touch",
+    "ln",
+    "pwd",
+    "cd",
+    "bash",
+    "sh",
+    "zsh",
+    "ping",
+    "netstat",
+    "ip",
+    "ifconfig",
+    "dig",
+    "nslookup",
+    "git",
+    "docker",
+    "kubectl",
+    "systemctl",
+    "journalctl",
+    "uname",
+    "whoami",
+    "history",
+    "clear",
+    "exit",
+    "date",
+    "cal",
+    "uptime",
+    "w",
+    "who",
+    "su",
+    "sudo",
+    "passwd",
+    "adduser",
+    "usermod",
+    "userdel",
+    "groupadd",
+    "groupmod",
+    "groupdel",
+    "gzip",
+    "gunzip",
+    "zip",
+    "unzip",
+    "bzip2",
+    "bunzip2",
+    "xz",
+    "unxz",
+    "7z",
+    "ffmpeg",
+    "convert",
+    "jq",
+    "yq",
+    "cut",
+    "sort",
+    "uniq",
+    "tr",
+    "wc",
+    "tee",
+    "xargs",
+    "fd",
+    "rg",
+    "ag",
+    "tmux",
+    "screen",
+];
+
 /// Cosine distance threshold (0 = identical, 2 = opposite): filters out unrelated matches.
 /// sqlite-vec's vec0 table returns cosine distance by default via the `distance` column.
 /// See: https://alexgarcia.xyz/sqlite-vec/api-reference.html#vec_distance_cosine
-const MAX_DISTANCE: f64 = 1.10;
+pub const MAX_DISTANCE: f64 = 1.10;
 
 pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> TargetOs {
     match (linux, osx, windows) {
@@ -64,7 +164,12 @@ pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> TargetOs {
 
 /// Pure scoring function: adjusts raw distance based on command name and description heuristics.
 /// Returns `None` if the result should be filtered out (score above threshold).
-pub fn adjust_score(cmd: &str, desc: &str, raw_distance: f64) -> Option<(f64, Vec<String>)> {
+pub fn adjust_score(
+    query: &str,
+    cmd: &str,
+    desc: &str,
+    raw_distance: f64,
+) -> Option<(f64, Vec<String>)> {
     if raw_distance > MAX_DISTANCE {
         return None;
     }
@@ -78,10 +183,16 @@ pub fn adjust_score(cmd: &str, desc: &str, raw_distance: f64) -> Option<(f64, Ve
         raw_distance
     };
 
-    // Heuristic to prefer basic unix commands over niche variants
-    if cmd == "grep" || (cmd.len() <= 3 && !cmd.starts_with('q') && !cmd.starts_with('z')) {
+    // Explicit Intent Multiplier: If the user explicitly typed the command in the query
+    let query_words: Vec<&str> = query.split_whitespace().collect();
+    if query_words.contains(&cmd) {
+        applied_heuristics.push("exact_match (0.5x)".to_string());
+        score *= 0.5; // Massive boost for explicit intent
+    }
+
+    if CORE_COMMANDS.contains(&cmd) {
         applied_heuristics.push("core_command (0.67x)".to_string());
-        score *= 0.67; // Boost core commands like 'mv', 'cp', 'rm', 'grep'
+        score *= 0.67; // Boost canonical core tools
     } else if cmd.contains('-')
         || cmd.starts_with('q')
         || cmd.starts_with('z')
@@ -97,6 +208,7 @@ pub fn adjust_score(cmd: &str, desc: &str, raw_distance: f64) -> Option<(f64, Ve
 
 pub fn perform_search(
     conn: &Connection,
+    query: &str,
     q_vec: &[f32],
     target_os: TargetOs,
 ) -> anyhow::Result<Vec<(String, CmdData)>> {
@@ -107,7 +219,7 @@ pub fn perform_search(
          FROM pages_vec
          WHERE (os = 'common' OR os = ?2) AND embedding MATCH ?1
          ORDER BY distance
-         LIMIT 7;",
+         LIMIT 23;",
     )?;
 
     let results = stmt.query_map(params![q_blob, target_os.as_str()], |row| {
@@ -125,7 +237,7 @@ pub fn perform_search(
     for result in results {
         let (cmd, desc, ex_desc, ex_cmd, raw_distance) = result?;
 
-        let (adjusted_score, heuristics) = match adjust_score(&cmd, &desc, raw_distance) {
+        let (adjusted_score, heuristics) = match adjust_score(query, &cmd, &desc, raw_distance) {
             Some(s) => s,
             None => {
                 continue;
@@ -188,53 +300,67 @@ mod tests {
 
     #[test]
     fn test_filters_out_high_distance() {
-        assert!(adjust_score("ls", "list files", 1.50).is_none());
-        assert!(adjust_score("ls", "list files", 1.11).is_none());
+        assert!(adjust_score("dummy query", "ls", "list files", 1.50).is_none());
+        assert!(adjust_score("dummy query", "ls", "list files", 1.11).is_none());
     }
 
     #[test]
     fn test_accepts_low_distance() {
-        assert!(adjust_score("ls", "list files", 0.5).is_some());
+        assert!(adjust_score("dummy query", "ls", "list files", 0.5).is_some());
     }
 
     #[test]
     fn test_core_command_boosted() {
-        let (ls_score, _) = adjust_score("ls", "list files", 0.5).unwrap();
-        // 'ls' is <= 3 chars, not q/z prefix -> boosted by 0.67x (lower distance)
+        let (ls_score, _) = adjust_score("dummy query", "ls", "list files", 0.5).unwrap();
+        // 'ls' is in CORE_COMMANDS -> boosted by 0.67x (lower distance)
         assert!((ls_score - 0.335).abs() < 0.001);
     }
 
     #[test]
     fn test_grep_boosted() {
-        let (grep_score, _) = adjust_score("grep", "search patterns", 0.5).unwrap();
+        let (grep_score, _) = adjust_score("dummy query", "grep", "search patterns", 0.5).unwrap();
+        // 'grep' is in CORE_COMMANDS -> boosted by 0.67x
         assert!((grep_score - 0.335).abs() < 0.001);
     }
 
     #[test]
     fn test_niche_variant_penalized() {
-        let (zgrep_score, _) = adjust_score("zgrep", "search compressed", 0.5).unwrap();
-        // starts with 'z' AND ends with "grep" -> penalized by 1.33x
+        let (zgrep_score, _) =
+            adjust_score("dummy query", "zgrep", "search compressed", 0.5).unwrap();
+        // starts with 'z' AND ends with "grep" AND not "grep" -> penalized by 1.33x
         assert!((zgrep_score - 0.665).abs() < 0.001);
     }
 
     #[test]
     fn test_hyphenated_command_penalized() {
-        let (score, _) = adjust_score("docker-cp", "copy files", 0.5).unwrap();
+        let (score, _) = adjust_score("dummy query", "docker-cp", "copy files", 0.5).unwrap();
         assert!((score - 0.665).abs() < 0.001);
     }
 
     #[test]
     fn test_official_site_boosts_score() {
-        let (plain, _) = adjust_score("find", "find files", 0.5).unwrap();
-        let (official, _) =
-            adjust_score("find", "find files. More information: gnu.org", 0.5).unwrap();
+        let (plain, _) = adjust_score("dummy query", "find", "find files", 0.5).unwrap();
+        let (official, _) = adjust_score(
+            "dummy query",
+            "find",
+            "find files. More information: gnu.org",
+            0.5,
+        )
+        .unwrap();
         assert!(official < plain); // lower distance is better
     }
 
     #[test]
     fn test_normal_command_no_modifier() {
-        // 'curl' is 4 chars, no special prefix/suffix -> no boost or penalty
-        let (score, _) = adjust_score("curl", "transfer data", 0.5).unwrap();
+        // 'randomtool' is not in CORE_COMMANDS, no special prefix/suffix -> no boost/penalty
+        let (score, _) = adjust_score("dummy query", "randomtool", "transfer data", 0.5).unwrap();
         assert!((score - 0.5).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_exact_match_query() {
+        // if user types "tar file", 'tar' gets a 0.5x exact match boost AND 0.67x core boost
+        let (score, _) = adjust_score("tar file", "tar", "archive utility", 0.5).unwrap();
+        assert!((score - (0.5 * 0.5 * 0.67)).abs() < 0.001);
     }
 }
