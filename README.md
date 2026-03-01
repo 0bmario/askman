@@ -82,7 +82,7 @@ askman --json "extract a tar.gz archive"
 ```
 
 ### Agent Integration (Skill)
-Add the [`.agents/skills/askman.md`](./.agents/skills/askman.md) file to your agent's skill directory.
+Add the [`.agents/skills/syntax-retriever/SKILL.md`](./.agents/skills/syntax-retriever/SKILL.md) file to your agent's skill directory.
 
 
 ## How it works
