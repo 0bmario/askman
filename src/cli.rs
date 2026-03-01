@@ -18,6 +18,10 @@ pub struct Args {
     #[arg(long, short = 'v')]
     pub verbose: bool,
 
+    /// Output results in JSON format
+    #[arg(long, short = 'j')]
+    pub json: bool,
+
     /// Force search for Linux commands
     #[arg(long, conflicts_with_all = ["osx", "windows"])]
     pub linux: bool,

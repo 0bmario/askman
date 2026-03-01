@@ -1,5 +1,7 @@
 # askman
-A simple, offline CLI tool that finds terminal commands from natural language descriptions. Just describe what you want to do.
+**The offline, semantic search engine for the terminal.**
+
+`askman` translates natural language descriptions into exact terminal commands. Built as a dual-purpose tool, it serves as a CLI lookup for human devs, and as a context provider for AI Agents / RAG pipelines.
 
 <p align="center">
   <img src="./askman-demo.gif" alt="askman demo" width="700">
@@ -35,6 +37,53 @@ askman --linux restart systemd
 askman --osx flush dns
 askman --windows clear dns cache
 ```
+
+### For AI / LLM Agents (JSON Output)
+
+Use `askman` as an offline context provider for AI Agents. The `--json` flag returns a strict, token-efficient schema containing community-verified syntax: [tldr-pages](https://github.com/tldr-pages/tldr) and a calibrated `confidence` score (0.0 to 1.0):
+
+```bash
+askman --json "extract a tar.gz archive"
+```
+
+**Output:**
+```json
+{
+  "query": "extract a tar.gz archive",
+  "results": [
+    {
+      "command": "tar",
+      "confidence": 1.00,
+      "description": "Archiving utility. Often combined with a compression method, such as `gzip` or `bzip2`.",
+      "examples": [
+        {
+          "description": "Extract a (compressed) archive file into the current directory verbosely:",
+          "syntax": "tar xvf {{path/to/source.tar[.gz|.bz2|.xz]}}"
+        },
+        {
+          "description": "Extract a (compressed) archive file into the target directory:",
+          "syntax": "tar xf {{path/to/source.tar[.gz|.bz2|.xz]}} {{[-C|--directory]}} {{path/to/directory}}"
+        }
+      ]
+    },
+    {
+      "command": "unzip",
+      "confidence": 1.00,
+      "description": "Extract files/directories from Zip archives.",
+      "examples": [
+        {
+          "description": "Extract all files/directories from specific archives into the current directory:",
+          "syntax": "unzip {{path/to/archive1.zip path/to/archive2.zip ...}}"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Agent Integration (Skill)
+Add the [`.agents/skills/askman.md`](./.agents/skills/askman.md) file to your agent's skill directory.
+
 
 ## How it works
 
