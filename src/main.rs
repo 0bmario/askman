@@ -58,7 +58,7 @@ fn try_semantic_search(
 ) -> Result<()> {
     let embedder = embed::init_model(app_dir)?;
     let q_vec = embed::embed_query(&embedder, query)?;
-    let sorted = search::perform_search(conn, query, &q_vec, target_os)?;
+    let sorted = search::perform_search(conn, query, &q_vec, target_os, output_json)?;
 
     if output_json {
         let mut results_json = Vec::new();
@@ -99,6 +99,7 @@ fn try_semantic_search(
 
             let mut result_obj = serde_json::json!({
                 "command": cmd,
+                "platform": data.platform,
                 "description": clean_desc.trim_end_matches([' ', '\n']).replace("[", "").replace("]", ""),
                 "confidence": (confidence * 10000.0).round() / 10000.0,
                 "examples": data.examples.iter().map(|(desc, ex_cmd)| {
@@ -130,6 +131,7 @@ fn try_semantic_search(
 
         let output = serde_json::json!({
             "query": query,
+            "os": target_os.as_str(),
             "results": results_json
         });
 

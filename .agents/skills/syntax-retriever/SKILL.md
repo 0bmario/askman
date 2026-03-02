@@ -1,7 +1,7 @@
 ---
 name: syntax-retriever
 description: >-
-  MUST USE before running any multi-flag or unfamiliar terminal command.
+  MUST USE before running any multi-flag or unfamiliar terminal command that can lead to unrecoverable states.
   Retrieves verified community-sourced syntax from a local database.
 ---
 
@@ -10,16 +10,23 @@ description: >-
 **Rule:** Before executing any complex, multi-flag, or unfamiliar terminal
 command, you MUST query `askman` to retrieve verified syntax. Do NOT guess flags.
 
-### When to use
-BEFORE running a terminal command where you are unsure of exact flags or argument ordering.
+## Strategy (Crucial)
 
-### How to use
+**Mental Model:** The search engine does not "understand" instructions or build pipelines; it performs semantic similarity matching against community-curated `tldr` pages. You must query to match *how commands are described* in documentation.
+
+- **Query for what it does, not the exact constraints:** For example, instead of querying `"find files larger than 50MB and delete them"` (which is too specific), query `"find files by size"`. Find the size flag (`-size`), then run a second query for `"find and delete files"` to find the delete flag (`-delete`), and compose them yourself.
+- **Break down complex pipelines:** `askman` is a syntax verifier, not an intent interpreter. If you need `lsof | xargs kill`, query for `lsof` and `kill` independently to verify their flags.
+- **Do not invent flags:** Use your AI reasoning to apply the syntax to your specific scenario (paths, wildcards, regex patterns), but **never guess or hallucinate the flags themselves.**
+- **The "Missing Flag" Fallback:** `askman` searches `tldr` pages, which sometimes omit highly advanced or niche flags (like `tar --wildcards`). If `askman` returns nothing or irrelevant results, **do not hallucinate the flag**. Instead, run `man <command>` or `<command> --help` to safely read the official documentation.
+
+## How to use
 
 ```bash
 askman --json "extract a tar.gz archive"
 ```
 
 If you already know the command name, include it in the query for better results:
+
 ```bash
 askman --json "wget download entire website"
 ```
@@ -27,12 +34,15 @@ askman --json "wget download entire website"
 ### Parsing the output
 
 Example response:
+
 ```json
 {
   "query": "extract a tar.gz archive",
+  "os": "osx",
   "results": [
     {
       "command": "tar",
+      "platform": "common",
       "confidence": 0.99,
       "description": "Archiving utility.",
       "examples": [
@@ -47,13 +57,5 @@ Example response:
 ```
 
 Select the result whose `command` best matches the user's intent.
+If you need commands for a remote machine, prefer results where `platform` matches that machine.
 Replace `{{placeholders}}` with actual paths from the workspace, then execute.
-Do not invent flags beyond what `askman` returns.
-
-### Multi-step pipelines
-If the task requires chaining multiple commands (e.g., `find | xargs kill`),
-query `askman` for each command separately, then compose the pipeline yourself.
-
-### Fallback
-If `askman` returns an empty `results` array or the binary is not found,
-tell the user and ask for guidance. Do NOT guess the syntax.

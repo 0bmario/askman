@@ -24,6 +24,7 @@ impl TargetOs {
 #[derive(Debug)]
 pub struct CmdData {
     pub description: String,
+    pub platform: String,
     pub examples: Vec<(String, String)>,
     pub adjusted_score: f64,
     pub raw_distance: f64,
@@ -211,32 +212,59 @@ pub fn perform_search(
     query: &str,
     q_vec: &[f32],
     target_os: TargetOs,
+    cross_platform: bool,
 ) -> anyhow::Result<Vec<(String, CmdData)>> {
     let q_blob = q_vec.as_bytes();
 
-    let mut stmt = conn.prepare(
-        "SELECT command, description, example_desc, example_cmd, distance
-         FROM pages_vec
-         WHERE (os = 'common' OR os = ?2) AND embedding MATCH ?1
-         ORDER BY distance
-         LIMIT 23;",
-    )?;
+    let mut results_vec = Vec::new();
 
-    let results = stmt.query_map(params![q_blob, target_os.as_str()], |row| {
-        Ok((
-            row.get::<_, String>(0)?,
-            row.get::<_, String>(1)?,
-            row.get::<_, String>(2)?,
-            row.get::<_, String>(3)?,
-            row.get::<_, f64>(4)?,
-        ))
-    })?;
+    if cross_platform {
+        let mut stmt = conn.prepare(
+            "SELECT command, os, description, example_desc, example_cmd, distance
+             FROM pages_vec
+             WHERE embedding MATCH ?1
+             ORDER BY distance
+             LIMIT 23;",
+        )?;
+        let mapped = stmt.query_map(params![q_blob], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, String>(4)?,
+                row.get::<_, f64>(5)?,
+            ))
+        })?;
+        for r in mapped {
+            results_vec.push(r?);
+        }
+    } else {
+        let mut stmt = conn.prepare(
+            "SELECT command, description, example_desc, example_cmd, distance
+             FROM pages_vec
+             WHERE (os = 'common' OR os = ?2) AND embedding MATCH ?1
+             ORDER BY distance
+             LIMIT 23;",
+        )?;
+        let mapped = stmt.query_map(params![q_blob, target_os.as_str()], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                target_os.as_str().to_string(), // os_tag
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, f64>(4)?,
+            ))
+        })?;
+        for r in mapped {
+            results_vec.push(r?);
+        }
+    }
 
     let mut command_map: CmdMap = HashMap::new();
 
-    for result in results {
-        let (cmd, desc, ex_desc, ex_cmd, raw_distance) = result?;
-
+    for (cmd, os_tag, desc, ex_desc, ex_cmd, raw_distance) in results_vec {
         let (adjusted_score, heuristics) = match adjust_score(query, &cmd, &desc, raw_distance) {
             Some(s) => s,
             None => {
@@ -248,6 +276,7 @@ pub fn perform_search(
             Entry::Vacant(e) => {
                 e.insert(CmdData {
                     description: desc,
+                    platform: os_tag,
                     examples: vec![(ex_desc, ex_cmd)],
                     adjusted_score,
                     raw_distance,
