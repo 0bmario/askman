@@ -58,11 +58,26 @@ fn try_semantic_search(
 ) -> Result<()> {
     let embedder = embed::init_model(app_dir)?;
     let q_vec = embed::embed_query(&embedder, query)?;
-    let sorted = search::perform_search(conn, query, &q_vec, target_os, output_json)?;
+    let mut sorted = search::perform_search(conn, query, &q_vec, target_os, output_json)?;
 
     if output_json {
+        // JSON policy blocks thin complex results; hydrate the top hit with more examples
+        // so strong single-intent queries are less likely to be rejected as under-specified.
+        let _ = search::hydrate_top_result_examples(
+            conn,
+            &mut sorted,
+            query,
+            target_os,
+            true,
+            search::HYDRATE_MIN_EXAMPLES,
+            search::HYDRATE_MAX_EXAMPLES,
+        )?;
+
         let mut results_json = Vec::new();
         for (i, (cmd, data)) in sorted.iter().enumerate().take(2) {
+            // Expose partial-intent mismatches directly to agents (`pass`/`warn` + missing terms).
+            let intent = search::evaluate_intent_coverage(query, cmd, data);
+
             // Clean up description (strip "More information" and "See also" links)
             let mut clean_desc = data.description.as_str();
             if let Some(idx) = clean_desc.find(" More information:") {
@@ -102,6 +117,11 @@ fn try_semantic_search(
                 "platform": data.platform,
                 "description": clean_desc.trim_end_matches([' ', '\n']).replace("[", "").replace("]", ""),
                 "confidence": (confidence * 10000.0).round() / 10000.0,
+                "intent": {
+                    "coverage": (intent.score * 10000.0).round() / 10000.0,
+                    "status": if intent.strong { "pass" } else { "warn" },
+                    "missing_terms": intent.missing_terms
+                },
                 "examples": data.examples.iter().map(|(desc, ex_cmd)| {
                     serde_json::json!({
                         "description": desc.replace("[", "").replace("]", ""),
@@ -123,6 +143,10 @@ fn try_semantic_search(
                     obj.insert(
                         "heuristics_applied".to_string(),
                         serde_json::json!(data.heuristics),
+                    );
+                    obj.insert(
+                        "intent_matched_terms".to_string(),
+                        serde_json::json!(intent.matched_terms),
                     );
                 }
             }
