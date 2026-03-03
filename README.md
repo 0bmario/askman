@@ -1,99 +1,46 @@
 # askman
-**The offline, semantic search engine for the terminal.**
 
-`askman` translates natural language descriptions into exact terminal commands. Built as a dual-purpose tool, it serves as a CLI lookup for human devs, and as a context provider for AI Agents / RAG pipelines.
+**An offline terminal command syntax engine for AI Agents.**
 
-<p align="center">
-  <img src="./askman-demo.gif" alt="askman demo" width="700">
-</p>
+`askman` constrains agents to community-verified syntax (sourced from [tldr-pages](https://github.com/tldr-pages/tldr)). It translates natural language goals into strict, executable JSON payloads.
+
+Built-in guardrails (semantic confidence scores and an engine that checks if the intent matches the documentation) explicitly tell the agent when to abort a guess and fallback to reading `man` pages or `tool --help`.
+
+## How it Works
+
+1. Feed `askman` a natural language goal: `askman --json "kubectl force delete namespace"`
+2. It runs offline semantic vector search against an embedded SQLite database.
+3. It returns perfectly formatted syntax, with a `confidence` score and `intent.status`.
+4. If `status: warn` or `confidence < 0.8`, the agent knows to abort and fallback to manual docs.
+
+### Target Agents
+
+`askman` is designed for **autonomous, terminal-operating AI Agents** that need a reliable, way to retrieve complex command syntax without risking system destruction or hallucinated flags.
+
+#### Agent Integration
+
+Give your agent access to the `askman` binary and add [`.agents/skills/syntax-retriever/SKILL.md`](./.agents/skills/syntax-retriever/SKILL.md) to its context.
+
+---
 
 ## Installation
 
-### macOS / Linux (recommended)
+### macOS / Linux
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
 ```
 
-### From source
-
-Requires [Rust](https://rust-lang.org/tools/install/):
+### Cargo
 
 ```bash
 cargo install --git https://github.com/0bmario/askman
 ```
 
-On first run, `askman` downloads a small embedding model and commands database.
-
-## Usage
-
-```bash
-askman move files to docs
-```
-
-By default, results are filtered to your host OS. If you need a command for a different system, override it with flags:
-```bash
-askman --linux restart systemd
-askman --osx flush dns
-askman --windows clear dns cache
-```
-
-### For AI / LLM Agents (JSON Output)
-
-Use `askman` as an offline context provider for AI Agents. The `--json` flag returns a strict, token-efficient schema containing community-verified syntax: [tldr-pages](https://github.com/tldr-pages/tldr) and a calibrated `confidence` score (0.0 to 1.0):
-
-```bash
-askman --json "extract a tar.gz archive"
-```
-
-**Output:**
-```json
-{
-  "query": "extract a tar.gz archive",
-  "results": [
-    {
-      "command": "tar",
-      "confidence": 1.00,
-      "description": "Archiving utility. Often combined with a compression method, such as `gzip` or `bzip2`.",
-      "examples": [
-        {
-          "description": "Extract a (compressed) archive file into the current directory verbosely:",
-          "syntax": "tar xvf {{path/to/source.tar[.gz|.bz2|.xz]}}"
-        },
-        {
-          "description": "Extract a (compressed) archive file into the target directory:",
-          "syntax": "tar xf {{path/to/source.tar[.gz|.bz2|.xz]}} {{[-C|--directory]}} {{path/to/directory}}"
-        }
-      ]
-    },
-    {
-      "command": "unzip",
-      "confidence": 1.00,
-      "description": "Extract files/directories from Zip archives.",
-      "examples": [
-        {
-          "description": "Extract all files/directories from specific archives into the current directory:",
-          "syntax": "unzip {{path/to/archive1.zip path/to/archive2.zip ...}}"
-        }
-      ]
-    }
-  ]
-}
-```
-
-### Agent Integration (Skill)
-Add the [`.agents/skills/syntax-retriever/SKILL.md`](./.agents/skills/syntax-retriever/SKILL.md) file to your agent's skill directory.
-
-
-## How it works
-
-- `askman` uses semantic search to match your query to real command examples from [tldr-pages](https://github.com/tldr-pages/tldr).
-- Input is embedded into a vector using a local [AllMiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) model, then matched against a pre-built SQLite database via [sqlite-vec](https://github.com/asg017/sqlite-vec) cosine distance.
-- Everything runs on your machine after the initial setup.
-
 ## Uninstall
 
-First, remove cached data (models and database):
+First, remove cached data (embedding model and database):
+
 ```bash
 askman --clean
 ```
@@ -101,10 +48,13 @@ askman --clean
 Then remove the binary itself:
 
 - **If installed via `install.sh`:**
+
   ```bash
   rm ~/.local/bin/askman
   ```
+
 - **If installed via `cargo`:**
+
   ```bash
   cargo uninstall askman
   ```
@@ -118,4 +68,11 @@ Kudos to the [tldr-pages](https://github.com/tldr-pages/tldr) project. The used 
 ```bash
 cargo run --bin import_tldr --features="dev"
 ```
+
 This automatically fetches the newest data from the tldr repository, extracts it, and generates a fresh commands database.
+
+*(askman can also be used as a CLI lookup tool by human devs by omitting the `--json` flag.)*
+
+<p align="center">
+  <img src="./askman-demo.gif" alt="askman demo" width="700">
+</p>

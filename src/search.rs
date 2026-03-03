@@ -318,7 +318,8 @@ pub fn perform_search(
     Ok(sorted)
 }
 
-/// If the top result is thin, fetch more examples for that command directly from DB.
+/// Raises example depth for thin top hits so the JSON output meets the policy guard.
+/// After exercises, consider tightening platform filtering or emitting per-example OS annotations.
 pub fn hydrate_top_result_examples(
     conn: &Connection,
     sorted: &mut [(String, CmdData)],
@@ -376,13 +377,14 @@ fn is_simple_intent_query(query: &str) -> bool {
 
 pub fn evaluate_intent_coverage(query: &str, command: &str, data: &CmdData) -> IntentCoverage {
     // Lightweight lexical coverage check used as an execution guard for partial semantic matches.
+    // Improvement idea after running the new tests: tune term filtering so short or stopword-heavy queries still give useful warnings.
     let query_terms = extract_intent_terms(query);
     if query_terms.is_empty() {
         return IntentCoverage {
-            score: 1.0,
+            score: 0.0,
             matched_terms: vec![],
             missing_terms: vec![],
-            strong: true,
+            strong: false,
         };
     }
 
@@ -453,7 +455,7 @@ fn extract_intent_terms(text: &str) -> Vec<String> {
 }
 
 fn push_intent_term(token: &str, terms: &mut Vec<String>, seen: &mut HashSet<String>) {
-    if token.len() < 3 {
+    if token.len() < 2 {
         return;
     }
     if INTENT_STOPWORDS.contains(&token) {
@@ -824,6 +826,28 @@ mod tests {
 
         assert_eq!(added, 0);
         assert_eq!(sorted[0].1.examples.len(), 1);
+    }
+
+    #[test]
+    fn intent_terms_keep_two_char_tokens() {
+        let terms = extract_intent_terms("ls -la /tmp");
+        assert!(terms.contains(&"ls".to_string()));
+    }
+
+    #[test]
+    fn empty_intent_marks_as_weak() {
+        let data = CmdData {
+            description: "desc".to_string(),
+            platform: "common".to_string(),
+            examples: vec![],
+            adjusted_score: 0.1,
+            raw_distance: 0.1,
+            heuristics: vec![],
+        };
+
+        let coverage = evaluate_intent_coverage("and the with", "cmd", &data);
+        assert_eq!(coverage.score, 0.0);
+        assert!(!coverage.strong);
     }
 
     #[test]

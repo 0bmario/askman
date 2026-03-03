@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Askman installer script
-# Use: curl -sSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
+# Use: curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
 
 REPO="0bmario/askman"
 
@@ -27,10 +27,10 @@ ASSET_NAME="askman-${PLATFORM}-${ARCH_SUFFIX}.tar.gz"
 
 echo "Detecting latest release for askman..."
 if command -v jq >/dev/null 2>&1; then
-    LATEST_TAG=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" | jq -r '.tag_name')
+    LATEST_TAG=$(curl -fs "https://api.github.com/repos/${REPO}/releases/latest" | jq -r '.tag_name')
 else
     echo "Warning: jq not found. Falling back to grep/sed parsing which is brittle."
-    LATEST_TAG=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    LATEST_TAG=$(curl -fs "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 fi
 
 if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then

@@ -63,6 +63,7 @@ fn try_semantic_search(
     if output_json {
         // JSON policy blocks thin complex results; hydrate the top hit with more examples
         // so strong single-intent queries are less likely to be rejected as under-specified.
+        // Follow-up after exercising this: ensure hydration respects the requested OS or tags each example with its platform.
         let _ = search::hydrate_top_result_examples(
             conn,
             &mut sorted,
