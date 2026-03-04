@@ -1,27 +1,10 @@
 # askman
 
-**An offline terminal command syntax engine for AI Agents.**
+**Offline command-syntax retrieval and decision signals for terminal agents.**
 
-`askman` constrains agents to community-verified syntax (sourced from [tldr-pages](https://github.com/tldr-pages/tldr)). It translates natural language goals into strict, executable JSON payloads.
-
-Built-in guardrails (semantic confidence scores and an engine that checks if the intent matches the documentation) explicitly tell the agent when to abort a guess and fallback to reading `man` pages or `tool --help`.
-
-## How it Works
-
-1. Feed `askman` a natural language goal: `askman --json "kubectl force delete namespace"`
-2. It runs offline semantic vector search against an embedded SQLite database.
-3. It returns perfectly formatted syntax, with a `confidence` score and `intent.status`.
-4. If `status: warn` or `confidence < 0.8`, the agent knows to abort and fallback to manual docs.
-
-### Target Agents
-
-`askman` is designed for **autonomous, terminal-operating AI Agents** that need a reliable, way to retrieve complex command syntax without risking system destruction or hallucinated flags.
-
-#### Agent Integration
-
-Give your agent access to the `askman` binary and add [`.agents/skills/syntax-retriever/SKILL.md`](./.agents/skills/syntax-retriever/SKILL.md) to its context.
-
----
+- `askman` returns ranked terminal command matches from [tldr-pages](https://github.com/tldr-pages/tldr).
+- In `--json` mode it returns execution-gating signals (`command`, `confidence`, `intent.status`, `intent.missing_terms`) so agents can execute or fall back safely.
+- **`askman` goal is to enforce deterministic, verified behavior on AI agents when they execute shell commands.**
 
 ## Installation
 
@@ -36,6 +19,33 @@ curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | ba
 ```bash
 cargo install --git https://github.com/0bmario/askman
 ```
+
+## Quick Try
+
+```bash
+askman --json "remove files older than 7 days"
+```
+
+## Agent Integration
+
+Add the [`.agents/skills/syntax-retriever/SKILL.md`](./.agents/skills/syntax-retriever/SKILL.md) file to your agent's skill directory.
+
+### Agent Policy (TL;DR)
+
+- Decompose multi-step tasks into separate `askman` queries.
+- Execute only if the top result matches the intended command family, `confidence >= 0.8`, and `intent.status == "pass"`.
+- Fall back to `man <tool>` or `<tool> --help` when evidence is weak (do not guess flags).
+
+<details>
+<summary>How it works</summary>
+
+- `askman` uses semantic retrieval over command examples sourced from [tldr-pages](https://github.com/tldr-pages/tldr).
+- On first run it downloads an embedding model (AllMiniLM-L6-v2) and a prebuilt SQLite command database; later lookups are offline.
+- The query is embedded locally and matched against the SQLite database with [sqlite-vec](https://github.com/asg017/sqlite-vec) cosine distance.
+
+</details>
+
+---
 
 ## Uninstall
 
@@ -61,7 +71,7 @@ Then remove the binary itself:
 
 ## Acknowledgments
 
-Kudos to the [tldr-pages](https://github.com/tldr-pages/tldr) project. The used command data is sourced from their collection of simplified examples :raised_hands:
+Thanks to [tldr-pages](https://github.com/tldr-pages/tldr) for the curated command examples.
 
 ## Rebuilding the Database
 
