@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use askman::{cli, db, embed, format, search};
+use askman::{cli, db, embed, format, search, update};
 use clap::Parser;
 use colored::*;
 use rusqlite::ffi::sqlite3_auto_extension;
@@ -14,6 +14,16 @@ fn main() -> Result<()> {
     }
 
     let args = cli::Args::parse();
+
+    if let Some(command) = &args.command {
+        match command {
+            cli::Command::Update => return update::run_update(),
+        }
+    }
+
+    if args.update {
+        return update::run_update();
+    }
 
     if args.clean {
         let app_dir = db::get_app_dir_path();
