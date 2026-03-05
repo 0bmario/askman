@@ -3,14 +3,14 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
-    name: Build and Release
+  build-binaries:
+    name: Build Binary (${{ matrix.artifact_name }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -24,7 +24,6 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             artifact_name: askman-macos-aarch64
-          # (Temporarily disabled windows build as requested)
 
     steps:
       - name: Checkout repository
@@ -38,14 +37,109 @@ jobs:
       - name: Build release binary
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Package binary (Unix)
-        if: matrix.os != 'windows-latest'
+      - name: Package release archive
         run: |
           tar -czvf ${{ matrix.artifact_name }}.tar.gz -C target/${{ matrix.target }}/release askman
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}.tar.gz
+          if-no-files-found: error
+
+  build-db:
+    name: Build commands.db
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build commands database
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/xdg-data
+        run: cargo run --bin import_tldr --features dev
+
+      - name: Collect commands.db artifact
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/xdg-data
+        run: |
+          DB_PATH="${XDG_DATA_HOME}/askman/commands.db"
+          test -f "${DB_PATH}"
+          cp "${DB_PATH}" commands.db
+
+      - name: Upload commands.db artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: commands-db
+          path: commands.db
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish Release
+    needs: [build-binaries, build-db]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate tag matches Cargo.toml version
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          import tomllib
+
+          with open("Cargo.toml", "rb") as f:
+              cargo_version = tomllib.load(f)["package"]["version"]
+
+          expected_tag = f"v{cargo_version}"
+          actual_tag = os.environ["GITHUB_REF_NAME"]
+
+          if actual_tag != expected_tag:
+              print(
+                  f"Tag/version mismatch: pushed tag {actual_tag}, expected {expected_tag} from Cargo.toml",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          print(f"Tag/version check passed: {actual_tag}")
+          PY
+
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: askman-*
+          merge-multiple: true
+          path: release-assets
+
+      - name: Download commands.db artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: commands-db
+          path: release-assets
+
+      - name: Generate checksum files
+        run: |
+          cd release-assets
+          for file in askman-*.tar.gz commands.db; do
+            sha256sum "${file}" > "${file}.sha256"
+          done
+          cd ..
+          sha256sum install.sh > release-assets/install.sh.sha256
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
           files: |
-            ${{ matrix.artifact_name }}.tar.gz
+            release-assets/askman-*.tar.gz
+            release-assets/askman-*.tar.gz.sha256
+            release-assets/commands.db
+            release-assets/commands.db.sha256
+            release-assets/install.sh.sha256
