@@ -23,7 +23,6 @@ pub fn get_app_dir() -> Result<PathBuf> {
 }
 
 /// Resolves commands.db path. Falls back to downloading from GitHub on first run.
-// #[allow(dead_code)]
 pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
     // Check next to executable first (backward compat for local dev installs)
     if let Ok(exe_path) = std::env::current_exe() {
@@ -45,7 +44,6 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
         println!("Downloading initial commands database (this only happens once)...");
 
         let client = reqwest::blocking::Client::builder()
-            .timeout(std::time::Duration::from_secs(120))
             .timeout(std::time::Duration::from_secs(120))
             .build()?;
 
@@ -100,6 +98,40 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
 #[allow(dead_code)]
 pub fn get_connection(db_path: &Path) -> Result<Connection> {
     Ok(Connection::open(db_path)?)
+}
+
+/// Checks if the database has the required schema (must include the `os` column).
+/// If an older database is found, remove it so the matching release asset can be downloaded.
+fn ensure_valid_schema(db_path: &Path) -> Result<()> {
+    if !db_path.exists() {
+        return Ok(());
+    }
+
+    let has_os_column = {
+        let conn = get_connection(db_path)?;
+        let mut stmt = conn.prepare("PRAGMA table_info(pages_vec)")?;
+        let mut rows = stmt.query([])?;
+        let mut found = false;
+
+        while let Some(row) = rows.next()? {
+            let name: String = row.get(1)?;
+            if name == "os" {
+                found = true;
+                break;
+            }
+        }
+
+        found
+    };
+
+    if !has_os_column {
+        println!(
+            "Detected legacy database schema (missing OS metadata). Removing cached database..."
+        );
+        std::fs::remove_file(db_path)?;
+    }
+
+    Ok(())
 }
 
 #[allow(dead_code)]

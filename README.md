@@ -14,12 +14,6 @@ An offline CLI that finds terminal commands from natural language descriptions. 
 curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
 ```
 
-Install a specific release:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash -s -- --version v0.3.2
-```
-
 ### Cargo
 
 ```bash
