@@ -3,14 +3,14 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
-    name: Build and Release
+  build-binaries:
+    name: Build Binary (${{ matrix.artifact_name }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -24,7 +24,6 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             artifact_name: askman-macos-aarch64
-          # (Temporarily disabled windows build as requested)
 
     steps:
       - name: Checkout repository
@@ -38,14 +37,70 @@ jobs:
       - name: Build release binary
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Package binary (Unix)
-        if: matrix.os != 'windows-latest'
+      - name: Package release archive
         run: |
           tar -czvf ${{ matrix.artifact_name }}.tar.gz -C target/${{ matrix.target }}/release askman
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}.tar.gz
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish Release
+    needs: [build-binaries]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate tag matches Cargo.toml version
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          import tomllib
+
+          with open("Cargo.toml", "rb") as f:
+              cargo_version = tomllib.load(f)["package"]["version"]
+
+          expected_tag = f"v{cargo_version}"
+          actual_tag = os.environ["GITHUB_REF_NAME"]
+
+          if actual_tag != expected_tag:
+              print(
+                  f"Tag/version mismatch: pushed tag {actual_tag}, expected {expected_tag} from Cargo.toml",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          print(f"Tag/version check passed: {actual_tag}")
+          PY
+
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: askman-*
+          merge-multiple: true
+          path: release-assets
+
+      - name: Generate checksum files
+        run: |
+          cd release-assets
+          for file in askman-*.tar.gz; do
+            sha256sum "${file}" > "${file}.sha256"
+          done
+          cd ..
+          sha256sum install.sh > release-assets/install.sh.sha256
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
           files: |
-            ${{ matrix.artifact_name }}.tar.gz
+            release-assets/askman-*.tar.gz
+            release-assets/askman-*.tar.gz.sha256
+            release-assets/install.sh.sha256
