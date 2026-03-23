@@ -11,7 +11,8 @@ An offline CLI that finds terminal commands from natural language descriptions. 
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.3.3/install.sh | bash
+
 ```
 
 ### Cargo
@@ -20,7 +21,7 @@ curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | ba
 cargo install --git https://github.com/0bmario/askman
 ```
 
-On first run, `askman` downloads a small embedding model. After that, lookups run offline.
+On first run, `askman` downloads a small embedding model and the `commands.db` asset. After that, lookups run offline.
 
 ## Usage
 
