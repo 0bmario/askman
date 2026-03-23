@@ -20,7 +20,7 @@ curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | ba
 cargo install --git https://github.com/0bmario/askman
 ```
 
-On first run, `askman` downloads a small embedding model and the `commands.db` asset that matches the binary release version. After that, lookups run offline.
+On first run, `askman` downloads a small embedding model. After that, lookups run offline.
 
 ## Usage
 
