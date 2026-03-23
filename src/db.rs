@@ -23,6 +23,7 @@ pub fn get_app_dir() -> Result<PathBuf> {
 }
 
 /// Resolves commands.db path. Falls back to downloading from GitHub on first run.
+// #[allow(dead_code)]
 pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
     // Check next to executable first (backward compat for local dev installs)
     if let Ok(exe_path) = std::env::current_exe() {
@@ -45,10 +46,11 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
 
         let client = reqwest::blocking::Client::builder()
             .timeout(std::time::Duration::from_secs(120))
+            .timeout(std::time::Duration::from_secs(120))
             .build()?;
 
         let mut response = client
-            .get("https://github.com/0bmario/askman/releases/latest/download/commands.db")
+            .get(commands_db_download_url())
             .send()?
             .error_for_status()?;
 
@@ -95,38 +97,29 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
     Ok(global_db_path)
 }
 
+#[allow(dead_code)]
 pub fn get_connection(db_path: &Path) -> Result<Connection> {
     Ok(Connection::open(db_path)?)
 }
 
-/// Checks if the database has the required schema (must have the `os` metadata column).
-/// If it's an old v1 schema (missing `os`), it actively removes it so it can be rebuilt.
-pub fn ensure_valid_schema(db_path: &Path) -> Result<()> {
-    if !db_path.exists() {
-        return Ok(());
-    }
+#[allow(dead_code)]
+fn commands_db_download_url() -> String {
+    const RELEASE_REPO: &str = "0bmario/askman";
+    const RELEASE_TAG: &str = concat!("v", env!("CARGO_PKG_VERSION"));
 
-    let has_os_column = {
-        let conn = get_connection(db_path)?;
-        let mut stmt = conn.prepare("PRAGMA table_info(pages_vec)")?;
-        let mut rows = stmt.query([])?;
-        let mut found = false;
-        while let Some(row) = rows.next()? {
-            let name: String = row.get(1)?;
-            if name == "os" {
-                found = true;
-                break;
-            }
-        }
-        found
-    };
+    format!("https://github.com/{RELEASE_REPO}/releases/download/{RELEASE_TAG}/commands.db")
+}
 
-    if !has_os_column {
-        println!(
-            "Detected legacy database schema (v1, missing OS flags). Removing to allow upgrade..."
+#[cfg(test)]
+mod tests {
+    use super::commands_db_download_url;
+
+    #[test]
+    fn commands_db_uses_versioned_release_asset() {
+        let version = env!("CARGO_PKG_VERSION");
+        assert_eq!(
+            commands_db_download_url(),
+            format!("https://github.com/0bmario/askman/releases/download/v{version}/commands.db")
         );
-        std::fs::remove_file(db_path)?;
     }
-
-    Ok(())
 }

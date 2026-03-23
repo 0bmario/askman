@@ -77,9 +77,19 @@ pub fn highlight_command(ex_cmd: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use colored::control;
+    use std::sync::{Mutex, OnceLock};
+
+    fn color_test_lock() -> &'static Mutex<()> {
+        static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+        LOCK.get_or_init(|| Mutex::new(()))
+    }
 
     #[test]
     fn test_colorize_shell_word() {
+        let _guard = color_test_lock().lock().unwrap();
+        control::set_override(true);
+
         assert_eq!(
             colorize_shell_word("ls", true),
             "ls".green().bold().to_string()
@@ -89,10 +99,15 @@ mod tests {
             colorize_shell_word("file.txt", false),
             "file.txt".to_string()
         );
+
+        control::unset_override();
     }
 
     #[test]
     fn test_highlight_command() {
+        let _guard = color_test_lock().lock().unwrap();
+        control::set_override(true);
+
         let cmd = "chmod +x {{file}} && ls -la";
         let highlighted = highlight_command(cmd);
 
@@ -103,5 +118,7 @@ mod tests {
         assert!(highlighted.contains("\x1b[0m"));
         // Check that variable is highlighted (yellow is usually 33)
         assert!(highlighted.contains("33mfile\x1b[0m"));
+
+        control::unset_override();
     }
 }

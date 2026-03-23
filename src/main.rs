@@ -9,6 +9,7 @@ use sqlite_vec::sqlite3_vec_init;
 fn main() -> Result<()> {
     // Required: register sqlite-vec extension before opening any connection
     #[allow(clippy::missing_transmute_annotations)]
+    #[allow(clippy::missing_transmute_annotations)]
     unsafe {
         sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
     }
@@ -30,18 +31,12 @@ fn main() -> Result<()> {
         println!("Cleaning up askman application data...");
         if app_dir.exists() {
             if let Err(e) = std::fs::remove_dir_all(&app_dir) {
-                eprintln!(
-                    "Failed to remove data directory: {}. Please delete it manually at {:?}",
-                    e, app_dir
-                );
+                eprintln!("Failed to remove data directory: {e}. Please delete it manually at {app_dir:?}");
             } else {
-                println!(
-                    "Successfully removed configuration, database, and models from {:?}",
-                    app_dir
-                );
+                println!("Successfully removed configuration, database, and models from {app_dir:?}");
             }
         } else {
-            println!("No data directory found at {:?}", app_dir);
+            println!("No data directory found at {app_dir:?}");
         }
         return Ok(());
     }
@@ -190,6 +185,14 @@ fn try_semantic_search(
         }
 
         println!("{}", cmd.bold().green());
+
+        // Clean up description (strip "More information" links)
+        let clean_desc = if let Some(idx) = desc.find(" More information:") {
+            &desc[..idx]
+        } else {
+            desc
+        };
+        println!("{clean_desc}");
         if verbose {
             let rules = if data.heuristics.is_empty() {
                 "none".to_string()
@@ -218,8 +221,8 @@ fn try_semantic_search(
 
         if show_count > 0 && !data.examples.is_empty() {
             println!("\n{}", "Examples:".underline());
-            for (ex_desc, ex_cmd) in data.examples.iter().take(show_count) {
-                println!("  {}", ex_desc);
+            for (ex_desc, ex_cmd) in examples.iter().take(show_count) {
+                println!("  {ex_desc}");
                 println!("   {}", format::highlight_command(ex_cmd));
                 println!();
             }
