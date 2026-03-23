@@ -1,10 +1,10 @@
 # askman
 
-**Offline command-syntax retrieval and decision signals for terminal agents.**
+An offline CLI that finds terminal commands from natural language descriptions. Describe what you want to do and `askman` returns the closest matching command with examples.
 
-- `askman` returns ranked terminal command matches from [tldr-pages](https://github.com/tldr-pages/tldr).
-- In `--json` mode it returns execution-gating signals (`command`, `confidence`, `intent.status`, `intent.missing_terms`) so agents can execute or fall back safely.
-- **`askman` goal is to enforce deterministic, verified behavior on AI agents when they execute shell commands.**
+<p align="center">
+  <img src="./askman-demo.gif" alt="askman demo" width="700">
+</p>
 
 ## Installation
 
@@ -14,59 +14,58 @@
 curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash
 ```
 
+Install a specific release:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/0bmario/askman/main/install.sh | bash -s -- --version v0.3.2
+```
+
 ### Cargo
 
 ```bash
 cargo install --git https://github.com/0bmario/askman
 ```
 
-## Quick Try
+On first run, `askman` downloads a small embedding model and the `commands.db` asset that matches the binary release version. After that, lookups run offline.
+
+## Usage
 
 ```bash
-askman --json "remove files older than ..."
+askman move files to docs
 ```
 
-## Agent Integration
+By default, results are filtered to your host OS. Override that when you need a command for a different system:
 
-Add the [`.agents/skills/syntax-retriever/SKILL.md`](./.agents/skills/syntax-retriever/SKILL.md) file to your agent's skill directory.
+```bash
+askman --linux restart systemd
+askman --osx flush dns
+askman --windows clear dns cache
+```
 
-### Agent Policy
+## How it works
 
-- Decompose multi-step tasks into separate `askman` queries.
-- Execute only if the top result matches the intended command family, `confidence >= 0.8`, and `intent.status == "pass"`.
-- Fall back to `man <tool>` or `<tool> --help` when evidence is weak (do not guess flags).
-
-<details>
-<summary>How it works</summary>
-
-- `askman` uses semantic retrieval over command examples sourced from [tldr-pages](https://github.com/tldr-pages/tldr).
-- On first run it downloads an embedding model (AllMiniLM-L6-v2) and a prebuilt SQLite command database; later lookups are offline.
-- The query is embedded locally and matched against the SQLite database with [sqlite-vec](https://github.com/asg017/sqlite-vec) cosine distance.
-
-</details>
-
----
+- `askman` uses semantic search to match your query to real command examples from [tldr-pages](https://github.com/tldr-pages/tldr).
+- Your query is embedded locally with [AllMiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), then matched against a SQLite database through [sqlite-vec](https://github.com/asg017/sqlite-vec).
+- After the initial model and database download, everything runs on your machine.
 
 ## Uninstall
 
-First, remove cached data (embedding model and database): `askman --clean`
+First, remove cached data:
+
+```bash
+askman --clean
+```
 
 Then remove the binary itself: `rm ~/.local/bin/askman` or if installed via cargo `cargo uninstall askman`.
 
 ## Acknowledgments
 
-Thanks to [tldr-pages](https://github.com/tldr-pages/tldr) for the curated command examples.
+Thanks to the [tldr-pages](https://github.com/tldr-pages/tldr) project. The command data used by `askman` comes from their collection of simplified examples.
 
 ## Rebuilding the Database
 
 ```bash
-cargo run --bin import_tldr --features="dev"
+cargo run --bin import_tldr --features dev
 ```
 
-This automatically fetches the newest data from the tldr repository, extracts it, and generates a fresh commands database.
-
-*(askman can also be used as a CLI lookup tool by human devs by omitting the `--json` flag.)*
-
-<p align="center">
-  <img src="./askman-demo.gif" alt="askman demo" width="700">
-</p>
+This fetches the latest tldr pages, extracts them, and builds a fresh `commands.db` for your system.
