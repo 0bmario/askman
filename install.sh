@@ -52,9 +52,6 @@ TAG="${VERSION:-$(
 if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
   echo "Error: Could not fetch release tag."
   exit 1
-if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
-  echo "Error: Could not fetch release tag."
-  exit 1
 fi
 
 echo "Installing askman ${TAG}..."
