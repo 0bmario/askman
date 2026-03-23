@@ -48,7 +48,7 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
             .build()?;
 
         let mut response = client
-            .get(commands_db_download_url())
+            .get("https://github.com/0bmario/askman/releases/latest/download/commands.db")
             .send()?
             .error_for_status()?;
 
@@ -95,14 +95,13 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
     Ok(global_db_path)
 }
 
-#[allow(dead_code)]
 pub fn get_connection(db_path: &Path) -> Result<Connection> {
     Ok(Connection::open(db_path)?)
 }
 
-/// Checks if the database has the required schema (must include the `os` column).
-/// If an older database is found, remove it so the matching release asset can be downloaded.
-fn ensure_valid_schema(db_path: &Path) -> Result<()> {
+/// Checks if the database has the required schema (must have the `os` metadata column).
+/// If it's an old v1 schema (missing `os`), it actively removes it so it can be rebuilt.
+pub fn ensure_valid_schema(db_path: &Path) -> Result<()> {
     if !db_path.exists() {
         return Ok(());
     }
@@ -112,7 +111,6 @@ fn ensure_valid_schema(db_path: &Path) -> Result<()> {
         let mut stmt = conn.prepare("PRAGMA table_info(pages_vec)")?;
         let mut rows = stmt.query([])?;
         let mut found = false;
-
         while let Some(row) = rows.next()? {
             let name: String = row.get(1)?;
             if name == "os" {
@@ -120,38 +118,15 @@ fn ensure_valid_schema(db_path: &Path) -> Result<()> {
                 break;
             }
         }
-
         found
     };
 
     if !has_os_column {
         println!(
-            "Detected legacy database schema (missing OS metadata). Removing cached database..."
+            "Detected legacy database schema (v1, missing OS flags). Removing to allow upgrade..."
         );
         std::fs::remove_file(db_path)?;
     }
 
     Ok(())
-}
-
-#[allow(dead_code)]
-fn commands_db_download_url() -> String {
-    const RELEASE_REPO: &str = "0bmario/askman";
-    const RELEASE_TAG: &str = concat!("v", env!("CARGO_PKG_VERSION"));
-
-    format!("https://github.com/{RELEASE_REPO}/releases/download/{RELEASE_TAG}/commands.db")
-}
-
-#[cfg(test)]
-mod tests {
-    use super::commands_db_download_url;
-
-    #[test]
-    fn commands_db_uses_versioned_release_asset() {
-        let version = env!("CARGO_PKG_VERSION");
-        assert_eq!(
-            commands_db_download_url(),
-            format!("https://github.com/0bmario/askman/releases/download/v{version}/commands.db")
-        );
-    }
 }

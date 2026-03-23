@@ -8,7 +8,6 @@ use sqlite_vec::sqlite3_vec_init;
 
 fn main() -> Result<()> {
     // Required: register sqlite-vec extension before opening any connection
-    #[allow(clippy::missing_transmute_annotations)]
     unsafe {
         sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
     }
@@ -21,15 +20,17 @@ fn main() -> Result<()> {
         if app_dir.exists() {
             if let Err(e) = std::fs::remove_dir_all(&app_dir) {
                 eprintln!(
-                    "Failed to remove data directory: {e}. Please delete it manually at {app_dir:?}"
+                    "Failed to remove data directory: {}. Please delete it manually at {:?}",
+                    e, app_dir
                 );
             } else {
                 println!(
-                    "Successfully removed configuration, database, and models from {app_dir:?}"
+                    "Successfully removed configuration, database, and models from {:?}",
+                    app_dir
                 );
             }
         } else {
-            println!("No data directory found at {app_dir:?}");
+            println!("No data directory found at {:?}", app_dir);
         }
         return Ok(());
     }
@@ -42,7 +43,7 @@ fn main() -> Result<()> {
     // CLI flags override auto-detection; default maps to host OS
     let target_os = search::get_target_os(args.linux, args.osx, args.windows);
 
-    try_semantic_search(&conn, &query, &app_dir, target_os)
+    try_semantic_search(&conn, &query, &app_dir, target_os, args.verbose)
 }
 
 /// Embeds the query, runs KNN against sqlite-vec, ranks results, and prints output.
@@ -51,10 +52,11 @@ fn try_semantic_search(
     query: &str,
     app_dir: &std::path::Path,
     target_os: search::TargetOs,
+    verbose: bool,
 ) -> Result<()> {
     let embedder = embed::init_model(app_dir)?;
     let q_vec = embed::embed_query(&embedder, query)?;
-    let sorted = search::perform_search(conn, query, &q_vec, target_os, false)?;
+    let sorted = search::perform_search(conn, &q_vec, target_os)?;
 
     for (i, (cmd, data)) in sorted.iter().enumerate().take(3) {
         let mut show_count = if i == 0 { data.examples.len() } else { 0 };
@@ -72,15 +74,28 @@ fn try_semantic_search(
         }
 
         println!("{}", cmd.bold().green());
+        if verbose {
+            let rules = if data.heuristics.is_empty() {
+                "none".to_string()
+            } else {
+                data.heuristics.join(", ")
+            };
+            println!(
+                "{}",
+                format!(
+                    "(Distance: {:.4} | Raw: {:.4} | Rules: {})",
+                    data.adjusted_score, data.raw_distance, rules
+                )
+                .bright_black()
+            );
+        }
 
-        // Clean up description (strip "More information" and "See also" links)
-        let mut clean_desc = data.description.as_str();
-        if let Some(idx) = clean_desc.find(" More information:") {
-            clean_desc = &clean_desc[..idx];
-        }
-        if let Some(idx) = clean_desc.find(" See also:") {
-            clean_desc = &clean_desc[..idx];
-        }
+        // Clean up description (strip "More information" links)
+        let clean_desc = if let Some(idx) = data.description.find(" More information:") {
+            &data.description[..idx]
+        } else {
+            &data.description
+        };
         println!("{}", clean_desc);
 
         if show_count > 0 && !data.examples.is_empty() {

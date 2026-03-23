@@ -48,40 +48,9 @@ jobs:
           path: ${{ matrix.artifact_name }}.tar.gz
           if-no-files-found: error
 
-  build-db:
-    name: Build commands.db
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Build commands database
-        env:
-          XDG_DATA_HOME: ${{ runner.temp }}/xdg-data
-        run: cargo run --bin import_tldr --features dev
-
-      - name: Collect commands.db artifact
-        env:
-          XDG_DATA_HOME: ${{ runner.temp }}/xdg-data
-        run: |
-          DB_PATH="${XDG_DATA_HOME}/askman/commands.db"
-          test -f "${DB_PATH}"
-          cp "${DB_PATH}" commands.db
-
-      - name: Upload commands.db artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: commands-db
-          path: commands.db
-          if-no-files-found: error
-
   publish-release:
     name: Publish Release
-    needs: [build-binaries, build-db]
+    needs: [build-binaries]
     runs-on: ubuntu-latest
 
     steps:
@@ -118,16 +87,10 @@ jobs:
           merge-multiple: true
           path: release-assets
 
-      - name: Download commands.db artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: commands-db
-          path: release-assets
-
       - name: Generate checksum files
         run: |
           cd release-assets
-          for file in askman-*.tar.gz commands.db; do
+          for file in askman-*.tar.gz; do
             sha256sum "${file}" > "${file}.sha256"
           done
           cd ..
@@ -140,6 +103,4 @@ jobs:
           files: |
             release-assets/askman-*.tar.gz
             release-assets/askman-*.tar.gz.sha256
-            release-assets/commands.db
-            release-assets/commands.db.sha256
             release-assets/install.sh.sha256

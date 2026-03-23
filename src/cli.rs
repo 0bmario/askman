@@ -4,7 +4,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(
     version,
-    about = "Ask natural language questions about terminal commands."
+    about = "Ask natural language questions about Unix/Linux commands."
 )]
 pub struct Args {
     #[arg(required_unless_present = "clean")]
@@ -13,6 +13,10 @@ pub struct Args {
     /// Remove the global settings, database, and model cache to uninstall
     #[arg(long, short = 'c')]
     pub clean: bool,
+
+    /// Print internal matching scores (adjusted ranking distance, raw cosine distance, and applied heuristics)
+    #[arg(long, short = 'v')]
+    pub verbose: bool,
 
     /// Force search for Linux commands
     #[arg(long, conflicts_with_all = ["osx", "windows"])]
