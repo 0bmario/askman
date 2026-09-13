@@ -14,7 +14,7 @@ pub struct Args {
     #[arg(long, short = 'c')]
     pub clean: bool,
 
-    /// Print internal matching scores (adjusted ranking distance, raw cosine distance, and applied heuristics)
+    /// Print internal matching scores (adjusted ranking distance, raw L2 distance, and applied heuristics)
     #[arg(long, short = 'v')]
     pub verbose: bool,
 

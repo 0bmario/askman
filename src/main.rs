@@ -83,8 +83,11 @@ fn try_semantic_search(
             println!(
                 "{}",
                 format!(
-                    "(Distance: {:.4} | Raw: {:.4} | Rules: {})",
-                    data.adjusted_score, data.raw_distance, rules
+                    "(Distance: {:.4} | Raw {}: {:.4} | Rules: {})",
+                    data.adjusted_score,
+                    search::DISTANCE_METRIC,
+                    data.raw_distance,
+                    rules
                 )
                 .bright_black()
             );

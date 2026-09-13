@@ -44,10 +44,14 @@ const OFFICIAL_SITES: &[&str] = &[
     "greenwoodsoftware.",
 ];
 
-/// Cosine distance threshold (0 = identical, 2 = opposite): filters out unrelated matches.
-/// sqlite-vec's vec0 table returns cosine distance by default via the `distance` column.
-/// See: https://alexgarcia.xyz/sqlite-vec/api-reference.html#vec_distance_cosine
+/// sqlite-vec vec0 uses L2 distance unless the table declares another metric.
+/// The existing table does not declare one, so this threshold and the ranking
+/// behavior are intentionally retained as L2 values.
+/// See: https://alexgarcia.xyz/sqlite-vec/features/knn.html
 const MAX_DISTANCE: f64 = 1.10;
+
+/// Metric returned by the current `pages_vec` schema.
+pub const DISTANCE_METRIC: &str = "L2";
 
 pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> TargetOs {
     match (linux, osx, windows) {

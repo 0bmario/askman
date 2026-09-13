@@ -4,9 +4,20 @@ use rusqlite::Connection;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+/// Optional data-directory override used by isolated development runs.
+///
+/// The normal installation path remains platform-specific. Keeping the
+/// override here lets smoke tests provision a database and model cache without
+/// touching a developer's installed Askman data.
+pub const DATA_DIR_ENV: &str = "ASKMAN_DATA_DIR";
+
 /// Returns the app data directory path WITHOUT creating it.
 /// Use this when you only need the path (e.g. --clean).
 pub fn get_app_dir_path() -> PathBuf {
+    if let Some(path) = std::env::var_os(DATA_DIR_ENV).filter(|path| !path.is_empty()) {
+        return PathBuf::from(path);
+    }
+
     let mut path = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
     path.push("askman");
     path
@@ -24,12 +35,19 @@ pub fn get_app_dir() -> Result<PathBuf> {
 
 /// Resolves commands.db path. Falls back to downloading from GitHub on first run.
 pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
-    // Check next to executable first (backward compat for local dev installs)
-    if let Ok(exe_path) = std::env::current_exe() {
-        if let Some(dir) = exe_path.parent() {
-            let local_db_path = dir.join("commands.db");
-            if local_db_path.exists() {
-                return Ok(local_db_path);
+    // An explicit data directory is used by isolated smoke runs and must not
+    // be bypassed by a database shipped next to the executable.
+    let has_data_dir_override = std::env::var_os(DATA_DIR_ENV)
+        .filter(|path| !path.is_empty())
+        .is_some();
+    if !has_data_dir_override {
+        // Check next to executable first (backward compat for local dev installs)
+        if let Ok(exe_path) = std::env::current_exe() {
+            if let Some(dir) = exe_path.parent() {
+                let local_db_path = dir.join("commands.db");
+                if local_db_path.exists() {
+                    return Ok(local_db_path);
+                }
             }
         }
     }

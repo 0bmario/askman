@@ -1,0 +1,5 @@
+# Known smoke inputs for the current retrieval path. These are regression
+# probes, not held-out evaluation tasks.
+move files to docs	mv
+list files in a directory	ls
+search for a pattern in text	grep
