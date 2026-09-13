@@ -7,12 +7,7 @@ import sys
 
 
 def main() -> int:
-    allow_unreachable = sys.argv[1:] == ["--allow-unreachable"]
     blocked_errors = {errno.EPERM, errno.EACCES}
-    if allow_unreachable:
-        blocked_errors.update(
-            {errno.ENETUNREACH, errno.EHOSTUNREACH, errno.ECONNREFUSED}
-        )
 
     # A loopback connection avoids depending on an external service. The
     # offline runner must deny the connect itself, rather than merely relying
@@ -22,9 +17,7 @@ def main() -> int:
         try:
             sock.connect(("127.0.0.1", 65534))
         except OSError as error:
-            # sandbox-exec rejects connect(2) with EPERM/EACCES. An empty
-            # Linux network namespace has no usable route and reports one of
-            # the unreachable/refused errors instead.
+            # sandbox-exec rejects connect(2) with EPERM/EACCES.
             if error.errno in blocked_errors:
                 print(f"network denied: errno={error.errno}")
                 return 0

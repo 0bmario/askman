@@ -1,5 +1,5 @@
 # Known smoke inputs for the current retrieval path. These are regression
-# probes, not held-out evaluation tasks.
-move files to docs	mv
-list files in a directory	ls
-search for a pattern in text	grep
+# probes, not held-out evaluation tasks. Columns: query, top command, rendered example.
+move files to docs	mv	mv path/to/source path/to/existing_directory
+list files in a directory	ls	ls -1
+search for a pattern in text	grep	grep "search_pattern" path/to/file1 path/to/file2 ...

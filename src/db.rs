@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 /// The normal installation path remains platform-specific. Keeping the
 /// override here lets smoke tests provision a database and model cache without
 /// touching a developer's installed Askman data.
-pub const DATA_DIR_ENV: &str = "ASKMAN_DATA_DIR";
+const DATA_DIR_ENV: &str = "ASKMAN_DATA_DIR";
 
 /// Returns the app data directory path WITHOUT creating it.
 /// Use this when you only need the path (e.g. --clean).

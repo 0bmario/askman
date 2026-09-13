@@ -2,10 +2,10 @@
 set -Eeuo pipefail
 
 # Reproduce the current CLI against fixed public assets. Provisioning is the
-# only networked step; `run` executes the real binary under an OS-level deny
-# policy and uses only the staged data directory.
+# only networked step after Cargo dependencies have been fetched. `run` builds
+# and executes the real binary under an OS-level network deny policy.
 
-readonly SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+readonly SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 readonly DB_URL="https://github.com/0bmario/askman/releases/download/v0.3.3/commands.db"
 readonly DB_SHA256="0218c1fd18dc6eb1c6b405356c92e47379286cec68f9fea1a70be896d5f71495"
@@ -29,7 +29,7 @@ usage() {
     printf '%s\n' \
         "Usage:" \
         "  $0 provision RUN_DIR" \
-        "  $0 run RUN_DIR [ASKMAN_BIN]"
+        "  $0 run RUN_DIR"
 }
 
 sha256_file() {
@@ -81,14 +81,12 @@ provision() {
     mkdir -p "$data_dir" "$data_dir/models"
     download_verified "$DB_URL" "$data_dir/commands.db" "$DB_SHA256"
 
-    if [[ "$(os_name)" == Darwin && "$(uname -m)" == arm64 ]]; then
-        local runtime_dir="$run_dir/onnxruntime"
-        local runtime_archive="$run_dir/$ORT_ARCHIVE_NAME"
-        mkdir -p "$runtime_dir"
-        download_verified "$ORT_URL" "$runtime_archive" "$ORT_ARCHIVE_SHA256"
-        if [[ ! -d "$runtime_dir/$ORT_ROOT_DIRNAME" ]]; then
-            tar -xzf "$runtime_archive" -C "$runtime_dir"
-        fi
+    local runtime_dir="$run_dir/onnxruntime"
+    local runtime_archive="$run_dir/$ORT_ARCHIVE_NAME"
+    mkdir -p "$runtime_dir"
+    download_verified "$ORT_URL" "$runtime_archive" "$ORT_ARCHIVE_SHA256"
+    if [[ ! -d "$runtime_dir/$ORT_ROOT_DIRNAME" ]]; then
+        tar -xzf "$runtime_archive" -C "$runtime_dir"
     fi
 
     # fastembed 4.8.0 asks hf-hub for `refs/main`. Point that reference at a
@@ -135,28 +133,14 @@ offline_run() {
         "ASKMAN_DATA_DIR=$data_dir"
         "HF_HOME=$data_dir/models"
     )
-    if [[ -n "$pinned_runtime_root" ]]; then
-        env_args+=("DYLD_LIBRARY_PATH=$pinned_runtime_root/lib")
-    fi
-
-    case "$(os_name)" in
-        Darwin)
-            /usr/bin/sandbox-exec \
-                -p '(version 1) (allow default) (deny network*)' \
-                env "${env_args[@]}" "$@"
-            ;;
-        Linux)
-            if ! command -v unshare >/dev/null 2>&1; then
-                printf '%s\n' "Linux offline smoke requires unshare." >&2
-                return 1
-            fi
-            unshare --net -- env "${env_args[@]}" "$@"
-            ;;
-        *)
-            printf '%s\n' "No OS-level network deny runner is configured for $(os_name)." >&2
-            return 1
-            ;;
-    esac
+    env_args+=(
+        "DYLD_LIBRARY_PATH=$pinned_runtime_root/lib"
+        "NO_COLOR=1"
+        "CLICOLOR_FORCE=0"
+    )
+    /usr/bin/sandbox-exec \
+        -p '(version 1) (allow default) (deny network*)' \
+        env "${env_args[@]}" "$@"
 }
 
 dependency_version() {
@@ -202,39 +186,16 @@ verify_model_ref() {
 }
 
 runtime_linkage() {
-    local linkage=""
-    case "$(os_name)" in
-        Darwin)
-            linkage="$(otool -L "$1" 2>/dev/null | awk '/onnxruntime/ {print $1; exit}')"
-            ;;
-        Linux)
-            linkage="$(ldd "$1" 2>/dev/null | awk '/onnxruntime/ {print $1; exit}')"
-            ;;
-    esac
-    if [[ -n "$linkage" ]]; then
-        printf '%s' "$linkage"
-    else
-        printf '%s' unavailable
-    fi
-}
-
-runtime_intra_threads() {
-    # fastembed 4.8.0 passes Rust's available_parallelism() to ORT. On the
-    # supported hosts, getconf reports the same online processor count.
-    getconf _NPROCESSORS_ONLN 2>/dev/null || printf '%s' unavailable
+    otool -L "$1" | awk '/onnxruntime/ {print $1; exit}'
 }
 
 runtime_root() {
-    local run_dir="$1"
-    if [[ "$(os_name)" == Darwin && "$(uname -m)" == arm64 ]]; then
-        printf '%s' "$run_dir/onnxruntime/$ORT_ROOT_DIRNAME"
-    fi
+    printf '%s' "$1/onnxruntime/$ORT_ROOT_DIRNAME"
 }
 
 write_manifest() {
     local run_dir="$1"
     local binary="$2"
-    local default_binary="$run_dir/target/release/askman"
     local data_dir="$run_dir/data"
     local db_path="$data_dir/commands.db"
     local model_dir="$data_dir/models/$MODEL_CACHE_DIRNAME/snapshots/$MODEL_REVISION"
@@ -245,11 +206,7 @@ write_manifest() {
 
     {
         printf '%s\n' "code_revision=$revision"
-        if [[ "$binary" == "$default_binary" ]]; then
-            printf '%s\n' "binary_source=isolated cargo build"
-        else
-            printf '%s\n' "binary_source=provided path"
-        fi
+        printf '%s\n' "binary_source=isolated cargo build"
         printf '%s\n' "working_tree=$(git -C "$REPO_ROOT" status --porcelain=v1 | tr '\n' ';')"
         printf '%s\n' "cargo_lock_sha256=$(sha256_file "$REPO_ROOT/Cargo.lock")"
         printf '%s\n' "binary_sha256=$(sha256_file "$binary")"
@@ -271,41 +228,51 @@ write_manifest() {
         printf '%s\n' "ort=$(dependency_version ort)"
         printf '%s\n' "ort_sys=$(dependency_version ort-sys)"
         printf '%s\n' "ort_runtime_linkage=$(runtime_linkage "$binary")"
-        if [[ -n "$pinned_runtime_root" ]]; then
-            printf '%s\n' "ort_runtime_version=$ORT_VERSION"
-            printf '%s\n' "ort_runtime_archive_sha256=$(sha256_file "$run_dir/$ORT_ARCHIVE_NAME")"
-            printf '%s\n' "ort_runtime_dylib_sha256=$(sha256_file "$pinned_runtime_root/lib/libonnxruntime.1.20.0.dylib")"
-        else
-            printf '%s\n' "ort_runtime_version=unmanaged host/build runtime"
-        fi
+        printf '%s\n' "ort_runtime_version=$ORT_VERSION"
+        printf '%s\n' "ort_runtime_archive_sha256=$(sha256_file "$run_dir/$ORT_ARCHIVE_NAME")"
+        printf '%s\n' "ort_runtime_dylib_sha256=$(sha256_file "$pinned_runtime_root/lib/libonnxruntime.1.20.0.dylib")"
         printf '%s\n' "os=$(uname -a)"
-        if [[ "$(os_name)" == "Darwin" ]]; then
-            printf '%s\n' "os_version=$(sw_vers -productVersion)"
-            printf '%s\n' "cpu=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || printf '%s' unavailable)"
-            printf '%s\n' "cpu_count=$(sysctl -n hw.ncpu 2>/dev/null || printf '%s' unavailable)"
-            printf '%s\n' "ram_bytes=$(sysctl -n hw.memsize 2>/dev/null || printf '%s' unavailable)"
-        elif [[ "$(os_name)" == "Linux" ]]; then
-            printf '%s\n' "cpu=$(lscpu 2>/dev/null | awk -F: '/Model name/ {gsub(/^ +/, "", $2); print $2; exit}' || printf '%s' unavailable)"
-            printf '%s\n' "cpu_count=$(getconf _NPROCESSORS_ONLN 2>/dev/null || printf '%s' unavailable)"
-            printf '%s\n' "ram_bytes=$(awk '/MemTotal/ {print $2 * 1024; exit}' /proc/meminfo 2>/dev/null || printf '%s' unavailable)"
-        fi
+        printf '%s\n' "os_version=$(sw_vers -productVersion)"
+        printf '%s\n' "cpu=$(sysctl -n machdep.cpu.brand_string)"
+        printf '%s\n' "cpu_count=$(sysctl -n hw.ncpu)"
+        printf '%s\n' "ram_bytes=$(sysctl -n hw.memsize)"
         printf '%s\n' "execution_provider=fastembed default CPU provider"
         printf '%s\n' "embedding_model=AllMiniLML6V2"
         printf '%s\n' "embedding_dimension=384"
         printf '%s\n' "embedding_max_length=512 (fastembed 4.8.0 default)"
         printf '%s\n' "embedding_output=fastembed normalized vectors"
         printf '%s\n' "sqlite_vec_distance=L2 (vec0 default; schema does not declare another metric)"
-        printf '%s\n' "ort_intra_threads=$(runtime_intra_threads) (Rust available_parallelism at process start)"
-        printf '%s\n' "query_fixture=$SCRIPT_DIR/../tests/fixtures/offline-smoke.tsv"
-        printf '%s\n' "network_policy=macOS sandbox-exec deny network* or Linux unshare --net"
+        printf '%s\n' "ort_intra_threads_policy=Rust available_parallelism at process start (fastembed 4.8.0); effective count not instrumented"
+        printf '%s\n' "query_fixture=$run_dir/offline-smoke.tsv"
+        printf '%s\n' "query_fixture_sha256=$(sha256_file "$run_dir/offline-smoke.tsv")"
+        printf '%s\n' "committed_fixture_sha256=$(git -C "$REPO_ROOT" show HEAD:tests/fixtures/offline-smoke.tsv | shasum -a 256 | awk '{print $1}')"
+        printf '%s\n' "network_policy=macOS sandbox-exec deny network*"
         printf '%s\n' "setup_networked=true; query_networked=false"
     } > "$run_dir/run-manifest.txt"
 }
 
+assert_smoke_result() {
+    local output="$1"
+    local expected="$2"
+    local expected_example="$3"
+    if [[ "$(head -n 1 "$output")" != "$expected" ]]; then
+        printf 'Smoke query did not rank the expected command first: %s\n' "$expected" >&2
+        return 1
+    fi
+    if [[ -z "$expected_example" ]] || ! awk -v example="   $expected_example" '
+        $0 == "Examples:" { in_examples = 1; next }
+        in_examples && $0 ~ /^[^[:space:]]/ { exit }
+        in_examples && $0 == example { found = 1 }
+        END { exit !found }
+    ' "$output"; then
+        printf 'Smoke query did not retrieve the expected example: %s\n' "$expected" >&2
+        return 1
+    fi
+}
+
 run_smoke() {
     local run_dir="$1"
-    local binary="${2:-$run_dir/target/release/askman}"
-    local default_binary="$run_dir/target/release/askman"
+    local binary="$run_dir/target/release/askman"
     local data_dir="$run_dir/data"
     local model_root="$data_dir/models/$MODEL_CACHE_DIRNAME"
     local model_dir="$data_dir/models/$MODEL_CACHE_DIRNAME/snapshots/$MODEL_REVISION"
@@ -319,57 +286,36 @@ run_smoke() {
     verify_asset "$model_dir/special_tokens_map.json" "$MODEL_SPECIAL_TOKENS_SHA256"
     verify_asset "$model_dir/tokenizer_config.json" "$MODEL_TOKENIZER_CONFIG_SHA256"
     verify_asset "$model_dir/tokenizer.json" "$MODEL_TOKENIZER_SHA256"
-    if [[ -n "$pinned_runtime_root" ]]; then
-        verify_asset "$run_dir/$ORT_ARCHIVE_NAME" "$ORT_ARCHIVE_SHA256"
-        verify_asset "$pinned_runtime_root/lib/libonnxruntime.1.20.0.dylib" "$ORT_DYLIB_SHA256"
-    fi
-    local build_required=false
-    if [[ "$binary" == "$default_binary" ]]; then
-        build_required=true
-    elif [[ ! -x "$binary" ]]; then
-        printf 'Provided binary is not executable: %s\n' "$binary" >&2
-        return 1
-    fi
-    if [[ "$build_required" == true ]]; then
-        printf '%s\n' "Building release binary with Cargo offline..."
-        if [[ -n "$pinned_runtime_root" ]]; then
-            LIBONNXRUNTIME_NO_PKG_CONFIG=1 \
-                ORT_LIB_LOCATION="$pinned_runtime_root" \
-                ORT_PREFER_DYNAMIC_LINK=1 \
-                CARGO_TARGET_DIR="$run_dir/target" \
-                cargo build --locked --offline --release --manifest-path "$REPO_ROOT/Cargo.toml"
-        else
-            CARGO_TARGET_DIR="$run_dir/target" \
-                cargo build --locked --offline --release --manifest-path "$REPO_ROOT/Cargo.toml"
-        fi
-    fi
+    verify_asset "$run_dir/$ORT_ARCHIVE_NAME" "$ORT_ARCHIVE_SHA256"
+    verify_asset "$pinned_runtime_root/lib/libonnxruntime.1.20.0.dylib" "$ORT_DYLIB_SHA256"
+    printf '%s\n' "Building release binary with networking denied..."
+    offline_run "$run_dir" env \
+        LIBONNXRUNTIME_NO_PKG_CONFIG=1 \
+        ORT_LIB_LOCATION="$pinned_runtime_root" \
+        ORT_PREFER_DYNAMIC_LINK=1 \
+        CARGO_TARGET_DIR="$run_dir/target" \
+        cargo build --locked --offline --release --manifest-path "$REPO_ROOT/Cargo.toml"
     if [[ ! -x "$binary" ]]; then
         printf 'Binary is not executable: %s\n' "$binary" >&2
         return 1
     fi
 
     mkdir -p "$run_dir/results"
+    cp "$REPO_ROOT/tests/fixtures/offline-smoke.tsv" "$run_dir/offline-smoke.tsv"
     write_manifest "$run_dir" "$binary"
 
     printf '%s\n' "Checking OS-level network denial..."
-    case "$(os_name)" in
-        Darwin)
-            offline_run "$run_dir" python3 "$SCRIPT_DIR/assert_network_blocked.py" \
-                > "$run_dir/network-probe.txt" 2>&1
-            ;;
-        Linux)
-            offline_run "$run_dir" python3 "$SCRIPT_DIR/assert_network_blocked.py" \
-                --allow-unreachable > "$run_dir/network-probe.txt" 2>&1
-            ;;
-    esac
+    offline_run "$run_dir" python3 "$SCRIPT_DIR/assert_network_blocked.py" \
+        > "$run_dir/network-probe.txt" 2>&1
 
     : > "$run_dir/smoke-output.txt"
     local number=0
     local query
     local expected
+    local expected_example
     local output
     local status
-    while IFS=$'\t' read -r query expected; do
+    while IFS=$'\t' read -r query expected expected_example; do
         [[ -z "$query" || "$query" == \#* ]] && continue
         number=$((number + 1))
         output="$run_dir/results/query-${number}.txt"
@@ -381,6 +327,7 @@ run_smoke() {
         {
             printf 'query[%d]=%s\n' "$number" "$query"
             printf 'expected_top_command[%d]=%s\n' "$number" "$expected"
+            printf 'expected_example[%d]=%s\n' "$number" "$expected_example"
             printf 'exit_status[%d]=%s\n' "$number" "$status"
             sed 's/^/  /' "$output"
             printf '\n'
@@ -389,11 +336,12 @@ run_smoke() {
             printf 'Smoke query failed (exit %s): %s\n' "$status" "$query" >&2
             return "$status"
         fi
-        if ! grep -Fxq "$expected" "$output"; then
-            printf 'Smoke query did not retrieve expected command %s: %s\n' "$expected" "$query" >&2
-            return 1
-        fi
-    done < "$REPO_ROOT/tests/fixtures/offline-smoke.tsv"
+        assert_smoke_result "$output" "$expected" "$expected_example"
+    done < "$run_dir/offline-smoke.tsv"
+    if [[ "$number" -eq 0 ]]; then
+        printf '%s\n' "Smoke fixture contains no queries." >&2
+        return 1
+    fi
 
     printf '%s\n' "smoke_queries=$number" >> "$run_dir/run-manifest.txt"
     printf '%s\n' "network_probe=passed" >> "$run_dir/run-manifest.txt"
@@ -402,8 +350,18 @@ run_smoke() {
     printf '%s\n' "Output: $run_dir/smoke-output.txt"
 }
 
-if [[ $# -lt 2 || $# -gt 3 ]]; then
+# Permit the targeted harness checks to call validation functions directly.
+if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
+    return 0
+fi
+
+if [[ $# -ne 2 ]]; then
     usage >&2
+    exit 2
+fi
+
+if [[ "$(os_name)" != Darwin || "$(uname -m)" != arm64 ]]; then
+    printf '%s\n' "This pinned smoke harness currently supports macOS ARM64 only." >&2
     exit 2
 fi
 
@@ -413,7 +371,7 @@ case "$1" in
         provision "$2"
         ;;
     run)
-        run_smoke "$2" "${3:-$2/target/release/askman}"
+        run_smoke "$2"
         ;;
     *)
         usage >&2
