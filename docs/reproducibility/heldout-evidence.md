@@ -102,8 +102,8 @@ observed, so there is no observed failure example to fabricate.
 The report checks and records:
 
 - platform selection is target platform first, then `common`;
-- page/example IDs and source paths/refs/revisions are source-backed and
-  unique;
+- page/example IDs and `(source_path, platform, language)` identity keys are
+  source-backed and unique;
 - reference pages resolve to operational destinations, with no reference
   replacing an example in retrieval output.
 
