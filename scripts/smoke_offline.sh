@@ -29,7 +29,8 @@ usage() {
     printf '%s\n' \
         "Usage:" \
         "  $0 provision RUN_DIR" \
-        "  $0 run RUN_DIR"
+        "  $0 run RUN_DIR" \
+        "  $0 evidence RUN_DIR"
 }
 
 sha256_file() {
@@ -185,6 +186,25 @@ verify_model_ref() {
     fi
 }
 
+verify_pinned_assets() {
+    local run_dir="$1"
+    local data_dir="$run_dir/data"
+    local model_root="$data_dir/models/$MODEL_CACHE_DIRNAME"
+    local model_dir="$model_root/snapshots/$MODEL_REVISION"
+    local pinned_runtime_root
+    pinned_runtime_root="$(runtime_root "$run_dir")"
+
+    verify_model_ref "$model_root/refs/main"
+    verify_asset "$data_dir/commands.db" "$DB_SHA256"
+    verify_asset "$model_dir/model.onnx" "$MODEL_ONNX_SHA256"
+    verify_asset "$model_dir/config.json" "$MODEL_CONFIG_SHA256"
+    verify_asset "$model_dir/special_tokens_map.json" "$MODEL_SPECIAL_TOKENS_SHA256"
+    verify_asset "$model_dir/tokenizer_config.json" "$MODEL_TOKENIZER_CONFIG_SHA256"
+    verify_asset "$model_dir/tokenizer.json" "$MODEL_TOKENIZER_SHA256"
+    verify_asset "$run_dir/$ORT_ARCHIVE_NAME" "$ORT_ARCHIVE_SHA256"
+    verify_asset "$pinned_runtime_root/lib/libonnxruntime.1.20.0.dylib" "$ORT_DYLIB_SHA256"
+}
+
 runtime_linkage() {
     otool -L "$1" | awk '/onnxruntime/ {print $1; exit}'
 }
@@ -273,21 +293,10 @@ assert_smoke_result() {
 run_smoke() {
     local run_dir="$1"
     local binary="$run_dir/target/release/askman"
-    local data_dir="$run_dir/data"
-    local model_root="$data_dir/models/$MODEL_CACHE_DIRNAME"
-    local model_dir="$data_dir/models/$MODEL_CACHE_DIRNAME/snapshots/$MODEL_REVISION"
     local pinned_runtime_root
     pinned_runtime_root="$(runtime_root "$run_dir")"
 
-    verify_model_ref "$model_root/refs/main"
-    verify_asset "$data_dir/commands.db" "$DB_SHA256"
-    verify_asset "$model_dir/model.onnx" "$MODEL_ONNX_SHA256"
-    verify_asset "$model_dir/config.json" "$MODEL_CONFIG_SHA256"
-    verify_asset "$model_dir/special_tokens_map.json" "$MODEL_SPECIAL_TOKENS_SHA256"
-    verify_asset "$model_dir/tokenizer_config.json" "$MODEL_TOKENIZER_CONFIG_SHA256"
-    verify_asset "$model_dir/tokenizer.json" "$MODEL_TOKENIZER_SHA256"
-    verify_asset "$run_dir/$ORT_ARCHIVE_NAME" "$ORT_ARCHIVE_SHA256"
-    verify_asset "$pinned_runtime_root/lib/libonnxruntime.1.20.0.dylib" "$ORT_DYLIB_SHA256"
+    verify_pinned_assets "$run_dir"
     printf '%s\n' "Building release binary with networking denied..."
     offline_run "$run_dir" env \
         LIBONNXRUNTIME_NO_PKG_CONFIG=1 \
@@ -350,6 +359,70 @@ run_smoke() {
     printf '%s\n' "Output: $run_dir/smoke-output.txt"
 }
 
+run_evidence() {
+    local run_dir="$1"
+    local data_dir="$run_dir/data"
+    local pinned_runtime_root
+    pinned_runtime_root="$(runtime_root "$run_dir")"
+
+    verify_pinned_assets "$run_dir"
+
+    local artifact="$run_dir/heldout-lexical.db"
+    local dense_artifact="$run_dir/heldout-dense.db"
+    mkdir -p "$run_dir/results"
+    local cargo_env=(
+        LIBONNXRUNTIME_NO_PKG_CONFIG=1
+        ORT_LIB_LOCATION="$pinned_runtime_root"
+        ORT_PREFER_DYNAMIC_LINK=1
+        CARGO_TARGET_DIR="$run_dir/target"
+    )
+
+    # Asset setup/provisioning is complete before this function. Every build,
+    # evaluation, and helper process below inherits the network deny policy.
+    offline_run "$run_dir" env "${cargo_env[@]}" cargo build --locked --offline \
+        --features dev --bin tldr_subset \
+        --manifest-path "$REPO_ROOT/Cargo.toml" \
+        > "$run_dir/helper-build.txt"
+    local helper="$run_dir/target/debug/tldr_subset"
+    # macOS sandbox-exec removes DYLD_* variables. Embed the run-directory
+    # rpath in this disposable helper so the denied query phase can load the
+    # already provisioned runtime without weakening the sandbox.
+    if ! otool -l "$helper" | awk -v expected="$pinned_runtime_root/lib" \
+        '$1 == "path" && $2 == expected { found = 1 } END { exit !found }'; then
+        install_name_tool -add_rpath "$pinned_runtime_root/lib" "$helper"
+    fi
+    offline_run "$run_dir" "$helper" \
+        build \
+        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest.json" \
+        --snapshot "$REPO_ROOT/tests/fixtures/tldr-full-corpus" \
+        --output "$artifact" \
+        > "$run_dir/lexical-build.txt"
+    offline_run "$run_dir" "$helper" \
+        dense-build \
+        --artifact "$artifact" \
+        --model-cache "$data_dir/models" \
+        --output "$dense_artifact" \
+        --recipe description \
+        > "$run_dir/dense-build.txt"
+    offline_run "$run_dir" python3 "$REPO_ROOT/scripts/assert_network_blocked.py" \
+        > "$run_dir/evidence-network-probe.txt" 2>&1
+    offline_run "$run_dir" env "${cargo_env[@]}" python3 \
+        "$REPO_ROOT/scripts/run_heldout_evidence.py" \
+        --artifact "$dense_artifact" \
+        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest.json" \
+        --dataset "$REPO_ROOT/tests/fixtures/evaluation/frozen-holdout-v1.json" \
+        --hybrid-config "$REPO_ROOT/tests/fixtures/evaluation/hybrid-config-v1.json" \
+        --evidence-config "$REPO_ROOT/tests/fixtures/evaluation/heldout-evidence-config-v1.json" \
+        --dense-helper "$helper" \
+        --model-cache "$data_dir/models" \
+        --build-metadata "$run_dir/lexical-build.txt" \
+        --dense-build-metadata "$run_dir/dense-build.txt" \
+        --network-probe "$run_dir/evidence-network-probe.txt" \
+        --output "$run_dir/heldout-evidence.json"
+
+    printf '%s\n' "Evidence: $run_dir/heldout-evidence.json"
+}
+
 # Permit the targeted harness checks to call validation functions directly.
 if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
     return 0
@@ -372,6 +445,9 @@ case "$1" in
         ;;
     run)
         run_smoke "$2"
+        ;;
+    evidence)
+        run_evidence "$2"
         ;;
     *)
         usage >&2

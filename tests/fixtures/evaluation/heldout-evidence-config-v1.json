@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "evidence_id": "heldout-evidence-v1",
+  "dataset_id": "askman-evaluation-v1",
+  "dataset_sha256": "ddd20209e2426afe6b3122ab43b953822e8a1c2e70b147045930558345bee320",
+  "split": "holdout",
+  "hybrid_config_id": "hybrid-comparison-v1",
+  "quality": {
+    "retrievers": ["keyword", "hybrid"],
+    "runs_per_retriever": 1,
+    "no_holdout_tuning_or_rerun": true
+  },
+  "performance": {
+    "workload": "all holdout task questions in dataset order",
+    "fresh_process_runs": 5,
+    "warmup_queries": 2,
+    "warm_queries": 30,
+    "threading": {
+      "policy": "default process parallelism; do not set a thread override"
+    },
+    "power": {
+      "policy": "record host power state; do not change power settings"
+    }
+  },
+  "execution_provider": "CPU only; no GPU"
+}

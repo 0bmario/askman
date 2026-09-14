@@ -70,3 +70,5 @@ The dense retrieval candidate is documented in the
 [dense retrieval instructions](docs/reproducibility/dense-retrieval.md).
 The hybrid comparison, bounded development tuning, and frozen operating point
 are documented in the [hybrid retrieval instructions](docs/reproducibility/hybrid-retrieval.md).
+The held-out evidence protocol and machine-readable report are documented in
+the [held-out evidence instructions](docs/reproducibility/heldout-evidence.md).
