@@ -64,11 +64,13 @@ python3 scripts/run_heldout_evidence.py \
   --model-cache "$RUN_DIR/data/models" \
   --build-metadata "$RUN_DIR/lexical-build.txt" \
   --dense-build-metadata "$RUN_DIR/dense-build.txt" \
+  --network-probe "$RUN_DIR/evidence-network-probe.txt" \
   --output "$RUN_DIR/heldout-evidence.json"
 ```
 
-This direct form does not install assets or enforce a network policy; use the
-offline smoke entrypoint for the provisioned-query claim.
+This direct form does not install assets or enforce a network policy; it
+consumes a previously recorded probe. Use the offline smoke entrypoint for the
+provisioned-query claim.
 
 ## Recorded result
 

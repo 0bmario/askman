@@ -138,6 +138,17 @@ def parse_key_value_output(path: Path | None) -> dict[str, Any]:
     return result
 
 
+def require_build_metadata(path: Path | None, label: str) -> dict[str, Any]:
+    metadata = parse_key_value_output(path)
+    required_keys = {"build_time_ms", "artifact_size_bytes", "peak_memory_bytes"}
+    missing_keys = sorted(required_keys - metadata.keys())
+    if missing_keys:
+        raise ValueError(
+            f"{label} build metadata is missing: {', '.join(missing_keys)}"
+        )
+    return metadata
+
+
 def run_command(command: list[str]) -> str | None:
     try:
         completed = subprocess.run(
@@ -426,7 +437,6 @@ def deterministic_invariants(artifact: Path) -> dict[str, Any]:
         )
         grouped: dict[str, dict[str, str]] = {}
         page_ids = {row[0] for row in rows}
-        source_paths = [row[2] for row in rows]
         page_identity_errors = 0
         for (
             page_id,
@@ -443,15 +453,23 @@ def deterministic_invariants(artifact: Path) -> dict[str, Any]:
                 "page", [source_revision, source_path, platform, language]
             )
             expected_source_ref = f"tldr-pages@{source_revision}:{source_path}"
-            if (
-                page_id != expected_page_id
-                or source_ref != expected_source_ref
-                or platform not in evaluator.SUPPORTED_PLATFORMS
-                or not language
-            ):
+            has_page_id_mismatch = page_id != expected_page_id
+            has_source_ref_mismatch = source_ref != expected_source_ref
+            has_unsupported_platform = platform not in evaluator.SUPPORTED_PLATFORMS
+            has_missing_language = not language
+            has_page_identity_error = any(
+                (
+                    has_page_id_mismatch,
+                    has_source_ref_mismatch,
+                    has_unsupported_platform,
+                    has_missing_language,
+                )
+            )
+            if has_page_identity_error:
                 page_identity_errors += 1
         duplicate_page_ids = len(rows) - len(page_ids)
-        duplicate_source_paths = len(source_paths) - len(set(source_paths))
+        page_source_keys = {(row[2], row[5], row[6]) for row in rows}
+        duplicate_page_source_keys = len(rows) - len(page_source_keys)
         duplicate_page_variants = len(rows) - len(
             {(row[1], row[5]) for row in rows}
         )
@@ -551,7 +569,7 @@ def deterministic_invariants(artifact: Path) -> dict[str, Any]:
         (
             page_identity_errors,
             duplicate_page_ids,
-            duplicate_source_paths,
+            duplicate_page_source_keys,
             duplicate_page_variants,
             example_identity_errors,
             bad_page_identity,
@@ -587,7 +605,7 @@ def deterministic_invariants(artifact: Path) -> dict[str, Any]:
         "source_identity": {
             "rule": "deterministic page/example IDs and source-backed refs validated by artifact",
             "duplicate_page_ids": duplicate_page_ids,
-            "duplicate_source_paths": duplicate_source_paths,
+            "duplicate_page_source_keys": duplicate_page_source_keys,
             "duplicate_page_variants": duplicate_page_variants,
             "page_identity_errors": page_identity_errors,
             "example_identity_errors": example_identity_errors,
@@ -698,9 +716,9 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--evidence-config", required=True, type=Path)
     result.add_argument("--dense-helper", required=True, type=Path)
     result.add_argument("--model-cache", required=True, type=Path)
-    result.add_argument("--build-metadata", type=Path)
-    result.add_argument("--dense-build-metadata", type=Path)
-    result.add_argument("--network-probe", type=Path)
+    result.add_argument("--build-metadata", required=True, type=Path)
+    result.add_argument("--dense-build-metadata", required=True, type=Path)
+    result.add_argument("--network-probe", required=True, type=Path)
     result.add_argument("--output", required=True, type=Path)
     return result
 
@@ -720,7 +738,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     hybrid = evaluator.load_hybrid_config(args.hybrid_config)
     if hybrid.config_id != config["hybrid_config_id"]:
         raise ValueError("evidence config hybrid ID does not match hybrid config")
-    if not hybrid.frozen or hybrid.selected_candidate_id != "rrf-k60-b8-cutoff-0.50":
+    uses_expected_frozen_candidate = (
+        hybrid.frozen
+        and hybrid.selected_candidate_id == "rrf-k60-b8-cutoff-0.50"
+    )
+    if not uses_expected_frozen_candidate:
         raise ValueError("evidence requires the selected frozen hybrid candidate")
     tasks = query_tasks(dataset)
     quality = {
@@ -728,8 +750,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         for name in config["quality"]["retrievers"]
     }
     build = {
-        "lexical": parse_key_value_output(args.build_metadata),
-        "dense": parse_key_value_output(args.dense_build_metadata),
+        "lexical": require_build_metadata(args.build_metadata, "lexical"),
+        "dense": require_build_metadata(args.dense_build_metadata, "dense"),
         "setup_and_download_separate": True,
         "query_network_policy": "macOS sandbox-exec deny network* (caller enforced)",
     }

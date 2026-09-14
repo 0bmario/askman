@@ -369,7 +369,6 @@ run_evidence() {
 
     local artifact="$run_dir/heldout-lexical.db"
     local dense_artifact="$run_dir/heldout-dense.db"
-    mkdir -p "$run_dir/results"
     local cargo_env=(
         LIBONNXRUNTIME_NO_PKG_CONFIG=1
         ORT_LIB_LOCATION="$pinned_runtime_root"
