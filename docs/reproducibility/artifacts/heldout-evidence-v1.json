@@ -1,0 +1,1761 @@
+{
+  "deterministic_invariants": {
+    "platform_precedence": {
+      "passed": true,
+      "repeated_selection_is_identical": {
+        "common": true,
+        "linux": true,
+        "osx": true,
+        "windows": true
+      },
+      "rule": "target platform page, then common page",
+      "selected_page_ids_by_platform": {
+        "common": {
+          "cp": "page-ed27786af8e7ac29c425e6c1becb5de9b7ac4cec884b4fd704fe06123a33041a",
+          "vi": "page-27d8ad71b0c5dc4dc740310aa0031db33b4fe8a06af74d0bc31013a6bb6e1041",
+          "vim": "page-898556e4b4d84ea56c5868e9a9a65fadd3066fb880c6bba8ec7e4280005e2d34"
+        },
+        "linux": {
+          "cp": "page-ed27786af8e7ac29c425e6c1becb5de9b7ac4cec884b4fd704fe06123a33041a",
+          "grep": "page-9411c34a4eca3e834d8a7b2a61d42efffb1b5c73c2b3bfd38efc443e8b945901",
+          "vi": "page-27d8ad71b0c5dc4dc740310aa0031db33b4fe8a06af74d0bc31013a6bb6e1041",
+          "vim": "page-898556e4b4d84ea56c5868e9a9a65fadd3066fb880c6bba8ec7e4280005e2d34"
+        },
+        "osx": {
+          "cp": "page-ed27786af8e7ac29c425e6c1becb5de9b7ac4cec884b4fd704fe06123a33041a",
+          "pbcopy": "page-ffbf78f76c82567a70e113135e5f2bb9c17f50820dbee55ec5fe371749c6bfb6",
+          "vi": "page-27d8ad71b0c5dc4dc740310aa0031db33b4fe8a06af74d0bc31013a6bb6e1041",
+          "vim": "page-898556e4b4d84ea56c5868e9a9a65fadd3066fb880c6bba8ec7e4280005e2d34"
+        },
+        "windows": {
+          "cp": "page-ed27786af8e7ac29c425e6c1becb5de9b7ac4cec884b4fd704fe06123a33041a",
+          "printf": "page-76f669acc8b932745bdbcae89a982b72de4d6cf5df2bb360e4d57ff6352c86a7",
+          "vi": "page-27d8ad71b0c5dc4dc740310aa0031db33b4fe8a06af74d0bc31013a6bb6e1041",
+          "vim": "page-898556e4b4d84ea56c5868e9a9a65fadd3066fb880c6bba8ec7e4280005e2d34"
+        }
+      }
+    },
+    "reference_behavior": {
+      "indexed_reference_example_count": 0,
+      "invalid_reference_rows": 0,
+      "page_kind_counts": {
+        "operational": 5,
+        "reference": 1
+      },
+      "passed": true,
+      "rule": "reference pages resolve to source-backed operational destinations; references never substitute examples",
+      "selected_destination_errors": 0,
+      "unresolved_destination_rows": 0
+    },
+    "source_identity": {
+      "bad_page_identity_rows": 0,
+      "duplicate_page_ids": 0,
+      "duplicate_page_source_keys": 0,
+      "duplicate_page_variants": 0,
+      "example_identity_errors": 0,
+      "identity_fields": [
+        "page_id",
+        "example_id",
+        "source_path",
+        "source_ref",
+        "source_revision"
+      ],
+      "orphan_example_rows": 0,
+      "orphan_lexical_rows": 0,
+      "page_identity_errors": 0,
+      "passed": true,
+      "rule": "deterministic page/example IDs and source-backed refs validated by artifact"
+    }
+  },
+  "evidence_id": "heldout-evidence-v1",
+  "generated_at_utc": "2026-09-14T20:16:59.422644+00:00",
+  "host": {
+    "cpu": {
+      "logical_count": 10,
+      "model": "Apple M2 Pro"
+    },
+    "os": {
+      "machine": "arm64",
+      "release": "25.6.0",
+      "sw_vers": "26.6.2",
+      "system": "Darwin",
+      "version": "Darwin Kernel Version 25.6.0: Fri Jul 31 19:18:48 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T6020"
+    },
+    "power": {
+      "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=22413411)\t100%; charged; 0:00 remaining present: true",
+      "policy": "record-only; no power settings changed",
+      "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded"
+    },
+    "ram_bytes": 17179869184,
+    "threading": {
+      "available_parallelism": 10,
+      "effective_ort_thread_count": "not instrumented; default available parallelism",
+      "environment_overrides": {},
+      "policy": "default process parallelism; do not set a thread override"
+    }
+  },
+  "limitations": [
+    "The holdout has 10 answerable and 20 unanswerable tasks; rates are reported with counts and denominators and are unstable at this size.",
+    "Fresh-process p95 uses five runs and warm p95 uses one process workload; these are engineering measurements, not capacity guarantees.",
+    "No holdout tuning or rerun was performed after observing results.",
+    "Offline query networking is enforced by the caller's sandbox; setup/download is a separate networked step."
+  ],
+  "milestone_2_remaining_work": [
+    "CLI integration",
+    "automatic matching-asset setup",
+    "explicit updates",
+    "packaging investigation"
+  ],
+  "performance": {
+    "fresh_process": {
+      "initialization_ms": {
+        "count": 5,
+        "p50_ms": 3493.542,
+        "p95_ms": 3620.066,
+        "samples_ms": [
+          3470.9,
+          3524.679,
+          3620.066,
+          3493.542,
+          3473.36
+        ]
+      },
+      "measured_query_count_per_run": 30,
+      "model_load_ms": {
+        "count": 5,
+        "p50_ms": 3485,
+        "p95_ms": 3611,
+        "samples_ms": [
+          3460,
+          3518,
+          3611,
+          3485,
+          3464
+        ]
+      },
+      "peak_memory_bytes": {
+        "max": 345473024,
+        "samples": [
+          345473024,
+          343228416,
+          343392256,
+          343982080,
+          343244800
+        ]
+      },
+      "process_scope": "fresh evidence-runner process and fresh dense helper process",
+      "query": {
+        "count": 150,
+        "p50_ms": 2.879,
+        "p95_ms": 6.625,
+        "samples_ms": [
+          2.037,
+          1.97,
+          3.325,
+          3.555,
+          3.591,
+          2.327,
+          2.734,
+          3.288,
+          2.926,
+          2.613,
+          2.088,
+          3.273,
+          3.585,
+          2.202,
+          2.724,
+          2.002,
+          2.402,
+          2.744,
+          4.257,
+          2.25,
+          2.786,
+          2.409,
+          3.047,
+          3.87,
+          5.365,
+          2.29,
+          2.173,
+          2.256,
+          2.816,
+          2.397,
+          2.175,
+          1.769,
+          4.875,
+          3.036,
+          2.578,
+          2.385,
+          2.785,
+          5.101,
+          4.804,
+          3.448,
+          5.422,
+          2.847,
+          2.466,
+          2.401,
+          4.327,
+          2.153,
+          2.236,
+          2.948,
+          6.428,
+          2.745,
+          3.039,
+          2.423,
+          5.227,
+          3.792,
+          2.215,
+          2.019,
+          2.325,
+          5.522,
+          2.838,
+          2.031,
+          7.523,
+          6.707,
+          5.201,
+          5.475,
+          7.364,
+          6.215,
+          3.954,
+          6.192,
+          5.288,
+          4.984,
+          2.85,
+          6.625,
+          5.004,
+          4.9,
+          5.099,
+          3.414,
+          6.143,
+          5.281,
+          4.907,
+          4.815,
+          5.445,
+          3.238,
+          7.165,
+          8.809,
+          9.562,
+          4.901,
+          5.536,
+          9.545,
+          3.525,
+          5.377,
+          2.847,
+          2.098,
+          5.033,
+          2.837,
+          5.045,
+          2.768,
+          2.671,
+          2.85,
+          3.326,
+          3.911,
+          5.132,
+          3.194,
+          2.824,
+          3.12,
+          4.364,
+          2.358,
+          2.805,
+          4.233,
+          2.946,
+          2.885,
+          5.54,
+          2.75,
+          5.384,
+          2.859,
+          5.648,
+          3.468,
+          6.588,
+          3.149,
+          2.442,
+          2.573,
+          2.879,
+          1.826,
+          2.926,
+          2.43,
+          2.06,
+          2.188,
+          2.118,
+          2.001,
+          2.39,
+          2.025,
+          1.966,
+          1.921,
+          3.705,
+          3.77,
+          2.492,
+          2.118,
+          2.324,
+          2.567,
+          2.726,
+          2.247,
+          3.341,
+          4.128,
+          2.212,
+          2.118,
+          2.126,
+          2.162,
+          2.268,
+          2.282,
+          2.213,
+          2.732
+        ]
+      },
+      "run_count": 5,
+      "runner_process_elapsed_ms": {
+        "count": 5,
+        "p50_ms": 3684.798,
+        "p95_ms": 3894.798,
+        "samples_ms": [
+          3637.493,
+          3709.575,
+          3894.798,
+          3684.798,
+          3634.329
+        ]
+      },
+      "warmup_query_count_per_run": 2
+    },
+    "query_scope": "selected hybrid end-to-end: FTS5, dense helper, RRF, and weak-match cutoff",
+    "warm_in_process": {
+      "initialization_ms": 3504.525,
+      "measured_query_count": 30,
+      "model_load_ms": 3497,
+      "peak_memory_bytes": 345358336,
+      "process_count": 1,
+      "query": {
+        "count": 30,
+        "p50_ms": 2.77,
+        "p95_ms": 5.148,
+        "samples_ms": [
+          2.626,
+          2.383,
+          2.167,
+          5.102,
+          2.77,
+          2.581,
+          2.56,
+          2.315,
+          2.225,
+          4.282,
+          3.231,
+          4.205,
+          2.658,
+          2.438,
+          4.263,
+          2.809,
+          2.379,
+          3.104,
+          2.308,
+          8.568,
+          4.4,
+          4.66,
+          4.895,
+          3.212,
+          2.352,
+          2.749,
+          3.83,
+          5.148,
+          3.042,
+          2.296
+        ]
+      },
+      "warmup_query_count": 2
+    },
+    "workload": "all holdout task questions in dataset order"
+  },
+  "protocol": {
+    "dataset_sha256": "ddd20209e2426afe6b3122ab43b953822e8a1c2e70b147045930558345bee320",
+    "evidence_config_sha256": "67686420b06fe4f24ed88567854847ea497de6f5d39d009bfb6e20a1b3d78ff3",
+    "execution_provider": "CPU only; no GPU",
+    "no_holdout_tuning_or_rerun": true,
+    "quality_runs_per_retriever": 1,
+    "selected_hybrid_candidate": "rrf-k60-b8-cutoff-0.50"
+  },
+  "provenance": {
+    "build": {
+      "dense": {
+        "artifact_size_bytes": 1720320,
+        "build_time_ms": 13,
+        "hardware": "macos aarch64",
+        "model_revision": "5f1b8cd78bc4fb444dd171e59b18f3a3af89a079",
+        "peak_memory_bytes": 346931200
+      },
+      "lexical": {
+        "artifact_size_bytes": 77824,
+        "build_time_ms": 11,
+        "excluded_files": 1,
+        "hardware": "Mac14,9 (macOS aarch64)",
+        "peak_memory_bytes": 14073856,
+        "source_digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822"
+      },
+      "query_network_policy": "macOS sandbox-exec deny network* (caller enforced)",
+      "setup_and_download_separate": true
+    },
+    "code_revision": "13770e3f8fd04dc0362784a088afbcea9b13146a",
+    "database": {
+      "path": "heldout-dense.db",
+      "sha256": "02b43355af77ea0be898050a1504e0624997bfebc8ece2e80fea6d9cfb3b1d99",
+      "size_bytes": 1720320
+    },
+    "dependencies": {
+      "cargo": "cargo 1.88.0 (873a06493 2025-05-10)",
+      "fastembed": "4.8.0",
+      "ort": "2.0.0-rc.9",
+      "ort-sys": "2.0.0-rc.9",
+      "rusqlite": "0.35.0",
+      "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)",
+      "sqlite-vec": "0.1.6"
+    },
+    "input_digests_sha256": {
+      "artifact": "02b43355af77ea0be898050a1504e0624997bfebc8ece2e80fea6d9cfb3b1d99",
+      "cargo_lock": "3f5dd2f6b780dc671c1de5abf3a2726161ded7bf6ec718b7dd77d1130c207f44",
+      "dataset": "ddd20209e2426afe6b3122ab43b953822e8a1c2e70b147045930558345bee320",
+      "evidence_config": "67686420b06fe4f24ed88567854847ea497de6f5d39d009bfb6e20a1b3d78ff3",
+      "hybrid_config": "1059c9bf72e570cf431ccddb2676176bac65238b5c4c8a07b63891e5133a9c7f",
+      "manifest": "68ae06300afdaee1515ef7c6248f35056e871e73d07778f2e1c2f636589c8461"
+    },
+    "model": {
+      "execution_provider": "CPU only; no GPU",
+      "file_sha256": {
+        "config.json": "1b4d8e2a3988377ed8b519a31d8d31025a25f1c5f8606998e8014111438efcd7",
+        "model.onnx": "bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5",
+        "special_tokens_map.json": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a",
+        "tokenizer.json": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0",
+        "tokenizer_config.json": "bd2e06a5b20fd1b13ca988bedc8763d332d242381b4fbc98f8fead4524158f79"
+      },
+      "onnxruntime_version": "1.20.0",
+      "repository": "Qdrant/all-MiniLM-L6-v2-onnx",
+      "revision": "5f1b8cd78bc4fb444dd171e59b18f3a3af89a079"
+    },
+    "network_probe": {
+      "path": "evidence-network-probe.txt",
+      "result": "passed",
+      "sha256": "cffcf4bbec29a4b3dbd2f6cc7ceb9cdf6a2304184802d2d670f234ce7f4ca7ee"
+    },
+    "working_tree": ""
+  },
+  "quality_reports": {
+    "hybrid": {
+      "corpus": {
+        "artifact_kind": "askman.tldr-subset",
+        "parser_version": "tldr-subset-v3",
+        "schema_version": "3",
+        "source_digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+        "source_revision": "fixture-tldr-full-corpus-v1"
+      },
+      "dataset_id": "askman-evaluation-v1",
+      "dataset_schema_version": 1,
+      "historical_policy_smoke": "separate: scripts/smoke_offline.sh",
+      "holdout_access": {
+        "authorized": true,
+        "recorded": true,
+        "utc": "2026-09-14T20:16:59.412875+00:00"
+      },
+      "hybrid": {
+        "candidate": {
+          "candidate_budgets": {
+            "dense": 8,
+            "keyword": 8
+          },
+          "candidate_id": "rrf-k60-b8-cutoff-0.50",
+          "fusion": {
+            "dense_weight": 1.0,
+            "keyword_weight": 1.0,
+            "method": "rrf",
+            "rrf_k": 60
+          },
+          "weak_match_cutoff": 0.5
+        },
+        "config_frozen": true,
+        "config_frozen_at": "2026-09-14",
+        "config_id": "hybrid-comparison-v1",
+        "config_sha256": "1059c9bf72e570cf431ccddb2676176bac65238b5c4c8a07b63891e5133a9c7f",
+        "corpus": {
+          "artifact_kind": "askman.tldr-subset",
+          "corpus_id": "fixture-tldr-full-corpus-v1:d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+          "manifest_sha256": "68ae06300afdaee1515ef7c6248f35056e871e73d07778f2e1c2f636589c8461",
+          "parser_version": "tldr-subset-v3",
+          "schema_version": "3",
+          "source_digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+          "source_revision": "fixture-tldr-full-corpus-v1"
+        },
+        "corpus_policy": "artifact-selected-page-ids-v1",
+        "dataset_id": "askman-evaluation-v1",
+        "dense_recipe": "description",
+        "development_results": {
+          "baselines": {
+            "current-adapter": {
+              "candidate_recall": {
+                "count": 13,
+                "denominator": 13
+              },
+              "coverage": {
+                "count": 13,
+                "denominator": 30
+              },
+              "false_answers_on_unanswerable": {
+                "count": 0,
+                "denominator": 17
+              },
+              "incorrect_answered_tasks": {
+                "count": 0,
+                "denominator": 13
+              },
+              "success_at_1": {
+                "count": 13,
+                "denominator": 13
+              },
+              "success_at_3": {
+                "count": 13,
+                "denominator": 13
+              }
+            },
+            "dense": {
+              "candidate_recall": {
+                "count": 13,
+                "denominator": 13
+              },
+              "coverage": {
+                "count": 30,
+                "denominator": 30
+              },
+              "false_answers_on_unanswerable": {
+                "count": 17,
+                "denominator": 17
+              },
+              "incorrect_answered_tasks": {
+                "count": 0,
+                "denominator": 13
+              },
+              "success_at_1": {
+                "count": 12,
+                "denominator": 13
+              },
+              "success_at_3": {
+                "count": 13,
+                "denominator": 13
+              }
+            },
+            "keyword": {
+              "candidate_recall": {
+                "count": 13,
+                "denominator": 13
+              },
+              "coverage": {
+                "count": 13,
+                "denominator": 30
+              },
+              "false_answers_on_unanswerable": {
+                "count": 0,
+                "denominator": 17
+              },
+              "incorrect_answered_tasks": {
+                "count": 0,
+                "denominator": 13
+              },
+              "success_at_1": {
+                "count": 13,
+                "denominator": 13
+              },
+              "success_at_3": {
+                "count": 13,
+                "denominator": 13
+              }
+            }
+          },
+          "candidates": {
+            "rrf-k20-b12-cutoff-0.50": {
+              "candidate_recall": {
+                "count": 13,
+                "denominator": 13
+              },
+              "coverage": {
+                "count": 13,
+                "denominator": 30
+              },
+              "false_answers_on_unanswerable": {
+                "count": 0,
+                "denominator": 17
+              },
+              "incorrect_answered_tasks": {
+                "count": 0,
+                "denominator": 13
+              },
+              "success_at_1": {
+                "count": 13,
+                "denominator": 13
+              },
+              "success_at_3": {
+                "count": 13,
+                "denominator": 13
+              }
+            },
+            "rrf-k20-b8-cutoff-0.00": {
+              "candidate_recall": {
+                "count": 13,
+                "denominator": 13
+              },
+              "coverage": {
+                "count": 30,
+                "denominator": 30
+              },
+              "false_answers_on_unanswerable": {
+                "count": 17,
+                "denominator": 17
+              },
+              "incorrect_answered_tasks": {
+                "count": 0,
+                "denominator": 13
+              },
+              "success_at_1": {
+                "count": 13,
+                "denominator": 13
+              },
+              "success_at_3": {
+                "count": 13,
+                "denominator": 13
+              }
+            },
+            "rrf-k60-b12-cutoff-0.50": {
+              "candidate_recall": {
+                "count": 13,
+                "denominator": 13
+              },
+              "coverage": {
+                "count": 13,
+                "denominator": 30
+              },
+              "false_answers_on_unanswerable": {
+                "count": 0,
+                "denominator": 17
+              },
+              "incorrect_answered_tasks": {
+                "count": 0,
+                "denominator": 13
+              },
+              "success_at_1": {
+                "count": 13,
+                "denominator": 13
+              },
+              "success_at_3": {
+                "count": 13,
+                "denominator": 13
+              }
+            },
+            "rrf-k60-b8-cutoff-0.00": {
+              "candidate_recall": {
+                "count": 13,
+                "denominator": 13
+              },
+              "coverage": {
+                "count": 30,
+                "denominator": 30
+              },
+              "false_answers_on_unanswerable": {
+                "count": 17,
+                "denominator": 17
+              },
+              "incorrect_answered_tasks": {
+                "count": 0,
+                "denominator": 13
+              },
+              "success_at_1": {
+                "count": 13,
+                "denominator": 13
+              },
+              "success_at_3": {
+                "count": 13,
+                "denominator": 13
+              }
+            },
+            "rrf-k60-b8-cutoff-0.50": {
+              "candidate_recall": {
+                "count": 13,
+                "denominator": 13
+              },
+              "coverage": {
+                "count": 13,
+                "denominator": 30
+              },
+              "false_answers_on_unanswerable": {
+                "count": 0,
+                "denominator": 17
+              },
+              "incorrect_answered_tasks": {
+                "count": 0,
+                "denominator": 13
+              },
+              "success_at_1": {
+                "count": 13,
+                "denominator": 13
+              },
+              "success_at_3": {
+                "count": 13,
+                "denominator": 13
+              }
+            }
+          }
+        },
+        "development_selected_candidate_id": "rrf-k60-b8-cutoff-0.50",
+        "metrics": [
+          "candidate_recall",
+          "success_at_1",
+          "success_at_3",
+          "coverage",
+          "incorrect_answered_tasks",
+          "false_answers_on_unanswerable"
+        ],
+        "reference_policy": "source-backed-pages-only; page references never substitute examples",
+        "retriever_versions": {
+          "dense": "dense-vector-vec0-v1",
+          "keyword": "keyword-fts5-v1"
+        },
+        "selection_rule": {
+          "guardrails": [
+            "do not increase false_answers_on_unanswerable",
+            "retain keyword and dense baselines"
+          ],
+          "primary_metric": "success_at_3",
+          "text": "Maximize Success@3; break ties by candidate recall, coverage, lower total candidate budget, then lower RRF k, subject to the false-answer guardrail.",
+          "tie_breakers": [
+            "candidate_recall",
+            "coverage",
+            "total_candidate_budget",
+            "rrf_k"
+          ]
+        },
+        "split_id": "scenario-family-split-v1"
+      },
+      "resources": {
+        "helper_startup_ms": 3494.257,
+        "keyword": {
+          "repeated_query_count": 30,
+          "repeated_query_p50_ms": 0.098,
+          "repeated_query_p95_ms": 0.261
+        },
+        "model_load_ms": 3487,
+        "peak_memory_bytes": 344506368,
+        "repeated_query_count": 30,
+        "repeated_query_p50_ms": 2.622,
+        "repeated_query_p95_ms": 5.942
+      },
+      "retriever": "hybrid",
+      "retriever_version": "hybrid-rrf-v1",
+      "scorer_version": "task-scorer-v1",
+      "split": "holdout",
+      "split_id": "scenario-family-split-v1",
+      "summary": {
+        "answerable_tasks": 10,
+        "candidate_recall": {
+          "count": 10,
+          "denominator": 10
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 30
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 20
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 10
+        },
+        "success_at_1": {
+          "count": 10,
+          "denominator": 10
+        },
+        "success_at_3": {
+          "count": 10,
+          "denominator": 10
+        },
+        "tasks": 30,
+        "unanswerable_tasks": 20
+      },
+      "tasks": [
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-01"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-02"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-03"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-04"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-05"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-01"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-02"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-03"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-04"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-05"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-01"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-02"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-03"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-04"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-05"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-01"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-02"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-03"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-04"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-05"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-01"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-02"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-03"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-04"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-05"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-01"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-02"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-03"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-04"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-05"
+        }
+      ]
+    },
+    "keyword": {
+      "corpus": {
+        "artifact_kind": "askman.tldr-subset",
+        "parser_version": "tldr-subset-v3",
+        "schema_version": "3",
+        "source_digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+        "source_revision": "fixture-tldr-full-corpus-v1"
+      },
+      "dataset_id": "askman-evaluation-v1",
+      "dataset_schema_version": 1,
+      "historical_policy_smoke": "separate: scripts/smoke_offline.sh",
+      "holdout_access": {
+        "authorized": true,
+        "recorded": true,
+        "utc": "2026-09-14T20:16:55.739382+00:00"
+      },
+      "hybrid": null,
+      "resources": {
+        "helper_startup_ms": null,
+        "model_load_ms": null,
+        "peak_memory_bytes": null,
+        "repeated_query_count": 30,
+        "repeated_query_p50_ms": 0.029,
+        "repeated_query_p95_ms": 0.076
+      },
+      "retriever": "keyword",
+      "retriever_version": "keyword-fts5-v1",
+      "scorer_version": "task-scorer-v1",
+      "split": "holdout",
+      "split_id": "scenario-family-split-v1",
+      "summary": {
+        "answerable_tasks": 10,
+        "candidate_recall": {
+          "count": 10,
+          "denominator": 10
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 30
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 20
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 10
+        },
+        "success_at_1": {
+          "count": 10,
+          "denominator": 10
+        },
+        "success_at_3": {
+          "count": 10,
+          "denominator": 10
+        },
+        "tasks": 30,
+        "unanswerable_tasks": 20
+      },
+      "tasks": [
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-01"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-02"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-03"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-04"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-edit-05"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-01"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-02"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-03"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-04"
+        },
+        {
+          "answered": true,
+          "candidate_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "candidate_recall": true,
+          "displayed_example_ids": [
+            "example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"
+          ],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": true,
+          "success_at_3": true,
+          "task_id": "holdout-windows-05"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-01"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-02"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-03"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-04"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-missing-05"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-01"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-02"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-03"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-04"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-platform-05"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-01"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-02"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-03"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-04"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-reference-05"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-01"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-02"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-03"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-04"
+        },
+        {
+          "answered": false,
+          "candidate_example_ids": [],
+          "candidate_recall": null,
+          "displayed_example_ids": [],
+          "false_answer": false,
+          "incorrect_answer": false,
+          "success_at_1": false,
+          "success_at_3": false,
+          "task_id": "holdout-ambiguity-05"
+        }
+      ]
+    }
+  },
+  "recommendation": {
+    "decision": "insufficient_evidence",
+    "text": "The frozen hybrid and keyword baseline are compared on 30 small fixture tasks; this is insufficient evidence for superiority, adoption, or a product asset change."
+  },
+  "representative_results": {
+    "hybrid": {
+      "correct_abstentions": [
+        {
+          "candidate_example_ids": [
+            "example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d",
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "displayed_example_ids": [],
+          "task_id": "holdout-missing-01"
+        },
+        {
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "displayed_example_ids": [],
+          "task_id": "holdout-missing-02"
+        }
+      ],
+      "failure_observation": "No incorrect or false answers observed.",
+      "failures": [],
+      "false_answers": [],
+      "successes": [
+        {
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "task_id": "holdout-edit-01"
+        },
+        {
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301",
+            "example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"
+          ],
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "task_id": "holdout-edit-02"
+        }
+      ]
+    },
+    "keyword": {
+      "correct_abstentions": [
+        {
+          "candidate_example_ids": [],
+          "displayed_example_ids": [],
+          "task_id": "holdout-missing-01"
+        },
+        {
+          "candidate_example_ids": [],
+          "displayed_example_ids": [],
+          "task_id": "holdout-missing-02"
+        }
+      ],
+      "failure_observation": "No incorrect or false answers observed.",
+      "failures": [],
+      "false_answers": [],
+      "successes": [
+        {
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "task_id": "holdout-edit-01"
+        },
+        {
+          "candidate_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "displayed_example_ids": [
+            "example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"
+          ],
+          "task_id": "holdout-edit-02"
+        }
+      ]
+    }
+  },
+  "schema_version": 1,
+  "status": "complete"
+}
