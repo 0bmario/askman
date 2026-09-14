@@ -17,9 +17,9 @@ The protocol is
 - Hybrid: `rrf-k60-b8-cutoff-0.50` from the committed frozen config; no candidate
   flag or holdout tuning is accepted by this runner.
 - Workload: all 30 holdout questions in dataset order.
-- Performance: five fresh helper processes, two discarded warm-up queries per
-  process, then 30 measured queries per process; one additional process with
-  two warm-up queries and 30 measured in-process queries.
+- Performance: five fresh evidence-runner/helper process pairs, two discarded
+  warm-up queries per pair, then 30 measured queries per pair; one additional
+  process with two warm-up queries and 30 measured in-process queries.
 - Performance query scope: selected hybrid end-to-end, including FTS5, the
   dense helper boundary, RRF fusion, and the weak-match cutoff.
 - Threading: default process parallelism; the report records overrides and

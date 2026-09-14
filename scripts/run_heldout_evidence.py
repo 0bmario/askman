@@ -355,6 +355,51 @@ def run_hybrid_queries(
             client.close()
 
 
+def run_fresh_performance_process(args: argparse.Namespace) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        str(ROOT / "scripts/run_heldout_evidence.py"),
+        "--performance-worker",
+        "--artifact",
+        str(args.artifact),
+        "--manifest",
+        str(args.manifest),
+        "--dataset",
+        str(args.dataset),
+        "--hybrid-config",
+        str(args.hybrid_config),
+        "--evidence-config",
+        str(args.evidence_config),
+        "--dense-helper",
+        str(args.dense_helper),
+        "--model-cache",
+        str(args.model_cache),
+        "--build-metadata",
+        str(args.build_metadata),
+        "--dense-build-metadata",
+        str(args.dense_build_metadata),
+        "--network-probe",
+        str(args.network_probe),
+        "--output",
+        "/dev/null",
+    ]
+    started = time.perf_counter()
+    completed = subprocess.run(command, check=False, capture_output=True, text=True)
+    elapsed_ms = (time.perf_counter() - started) * 1000
+    if completed.returncode != 0:
+        raise RuntimeError(
+            f"fresh performance process failed: {completed.stderr.strip()}"
+        )
+    try:
+        value = json.loads(completed.stdout)
+    except json.JSONDecodeError as error:
+        raise RuntimeError("fresh performance process returned invalid JSON") from error
+    if not isinstance(value, dict):
+        raise RuntimeError("fresh performance process returned a non-object report")
+    value["runner_process_elapsed_ms"] = round(elapsed_ms, 3)
+    return value
+
+
 def performance_report(
     args: argparse.Namespace,
     config: dict[str, Any],
@@ -365,15 +410,7 @@ def performance_report(
     fresh_runs: list[dict[str, Any]] = []
     for _ in range(performance["fresh_process_runs"]):
         fresh_runs.append(
-            run_hybrid_queries(
-                args.dense_helper,
-                args.artifact,
-                args.model_cache,
-                tasks,
-                performance["warmup_queries"],
-                performance["warm_queries"],
-                candidate,
-            )
+            run_fresh_performance_process(args)
         )
     warm = run_hybrid_queries(
         args.dense_helper,
@@ -389,11 +426,15 @@ def performance_report(
         "query_scope": "selected hybrid end-to-end: FTS5, dense helper, RRF, and weak-match cutoff",
         "fresh_process": {
             "run_count": len(fresh_runs),
+            "process_scope": "fresh evidence-runner process and fresh dense helper process",
             "warmup_query_count_per_run": performance["warmup_queries"],
             "measured_query_count_per_run": performance["warm_queries"],
             "initialization_ms": summarize_samples(run["startup"] for run in fresh_runs),
             "model_load_ms": summarize_samples(run["model_load_ms"] for run in fresh_runs if run["model_load_ms"] is not None),
             "query": summarize_samples(value for run in fresh_runs for value in run["query"]["samples_ms"]),
+            "runner_process_elapsed_ms": summarize_samples(
+                run["runner_process_elapsed_ms"] for run in fresh_runs
+            ),
             "peak_memory_bytes": {
                 "max": max((run["peak_memory_bytes"] or 0) for run in fresh_runs),
                 "samples": [run["peak_memory_bytes"] for run in fresh_runs],
@@ -709,6 +750,11 @@ def build_provenance(args: argparse.Namespace, config: dict[str, Any], build: di
 
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
+    result.add_argument(
+        "--performance-worker",
+        action="store_true",
+        help="run one isolated performance sample and emit JSON",
+    )
     result.add_argument("--artifact", required=True, type=Path)
     result.add_argument("--manifest", required=True, type=Path)
     result.add_argument("--dataset", required=True, type=Path)
@@ -723,7 +769,9 @@ def parser() -> argparse.ArgumentParser:
     return result
 
 
-def run(args: argparse.Namespace) -> dict[str, Any]:
+def load_frozen_protocol(
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any], Any, list[dict[str, str]], str, str]:
     config = load_evidence_config(args.evidence_config)
     evidence_config_digest = sha256_file(args.evidence_config)
     if evidence_config_digest != FROZEN_EVIDENCE_CONFIG_SHA256:
@@ -744,7 +792,32 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     )
     if not uses_expected_frozen_candidate:
         raise ValueError("evidence requires the selected frozen hybrid candidate")
-    tasks = query_tasks(dataset)
+    return (
+        config,
+        hybrid,
+        query_tasks(dataset),
+        evidence_config_digest,
+        dataset_digest,
+    )
+
+
+def performance_worker(args: argparse.Namespace) -> dict[str, Any]:
+    config, hybrid, tasks, _, _ = load_frozen_protocol(args)
+    return run_hybrid_queries(
+        args.dense_helper,
+        args.artifact,
+        args.model_cache,
+        tasks,
+        config["performance"]["warmup_queries"],
+        config["performance"]["warm_queries"],
+        hybrid.selected,
+    )
+
+
+def run(args: argparse.Namespace) -> dict[str, Any]:
+    config, hybrid, tasks, evidence_config_digest, dataset_digest = load_frozen_protocol(
+        args
+    )
     quality = {
         name: run_quality(args, name, args.hybrid_config)
         for name in config["quality"]["retrievers"]
@@ -799,6 +872,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
+        if args.performance_worker:
+            print(json.dumps(performance_worker(args), sort_keys=True))
+            return 0
         report = run(args)
     except (OSError, RuntimeError, TypeError, ValueError, KeyError) as error:
         print(f"heldout evidence failed: {error}", file=sys.stderr)
