@@ -1,3 +1,5 @@
+#![cfg(feature = "dev")]
+
 use askman::tldr_subset::{BuildOptions, QueryOptions, build_artifact, parse_page, query_artifact};
 use rusqlite::Connection;
 use std::fs;
@@ -162,6 +164,25 @@ fn refuses_to_publish_over_the_installed_askman_database() {
         manifest: FIXTURE_MANIFEST.into(),
         snapshot: FIXTURE_ROOT.into(),
         output: askman::db::get_app_dir_path().join("commands.db"),
+    })
+    .unwrap_err()
+    .to_string();
+
+    assert!(
+        error.contains("refusing to replace installed Askman database"),
+        "{error}"
+    );
+}
+
+#[test]
+fn refuses_to_publish_over_an_executable_adjacent_database() {
+    let executable = std::env::current_exe().unwrap();
+    let adjacent_database = executable.parent().unwrap().join("commands.db");
+
+    let error = build_artifact(BuildOptions {
+        manifest: FIXTURE_MANIFEST.into(),
+        snapshot: FIXTURE_ROOT.into(),
+        output: adjacent_database,
     })
     .unwrap_err()
     .to_string();

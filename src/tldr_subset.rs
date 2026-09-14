@@ -71,7 +71,6 @@ pub struct Page {
     pub source_ref: String,
     pub platform: String,
     pub language: String,
-    pub page_position: usize,
     pub original_content: String,
     pub examples: Vec<Example>,
 }
@@ -131,8 +130,13 @@ pub fn build_artifact(options: BuildOptions) -> Result<BuildReport> {
     }
 
     let output = absolute_path(&options.output)?;
-    let installed_db = absolute_path(&db::get_app_dir_path().join("commands.db"))?;
-    if output == installed_db {
+    let mut installed_db_paths = vec![absolute_path(&db::get_app_dir_path().join("commands.db"))?];
+    if let Ok(executable) = std::env::current_exe()
+        && let Some(parent) = executable.parent()
+    {
+        installed_db_paths.push(absolute_path(&parent.join("commands.db"))?);
+    }
+    if installed_db_paths.iter().any(|path| path == &output) {
         bail!(
             "refusing to replace installed Askman database: {}",
             options.output.display()
@@ -391,7 +395,6 @@ pub fn parse_page(
         source_ref,
         platform: platform.to_string(),
         language: language.to_string(),
-        page_position: 0,
         original_content: content.to_string(),
         examples,
     })
@@ -425,12 +428,12 @@ fn validate_manifest(manifest: &SubsetManifest) -> Result<()> {
     if manifest.source.name != "tldr-pages" {
         bail!("manifest source must be tldr-pages");
     }
-    if manifest.source.revision.is_empty()
-        || manifest.source.url.is_empty()
-        || manifest.source.attribution.is_empty()
-        || manifest.source.license.name.is_empty()
-        || manifest.source.license.url.is_empty()
-    {
+    let source_metadata_complete = !manifest.source.revision.is_empty()
+        && !manifest.source.url.is_empty()
+        && !manifest.source.attribution.is_empty()
+        && !manifest.source.license.name.is_empty()
+        && !manifest.source.license.url.is_empty();
+    if !source_metadata_complete {
         bail!("manifest source revision, URL, attribution, and license metadata are required");
     }
     if manifest.source.digest_algorithm != "sha256"
@@ -650,10 +653,10 @@ fn write_artifact(
     let stored_pages: i64 = conn.query_row("SELECT COUNT(*) FROM pages", [], |row| row.get(0))?;
     let stored_examples: i64 =
         conn.query_row("SELECT COUNT(*) FROM examples", [], |row| row.get(0))?;
-    if accounted_files as usize != source_files.len()
-        || stored_pages as usize != source_files.len()
-        || stored_examples as usize != example_count
-    {
+    let row_counts_match = accounted_files as usize == source_files.len()
+        && stored_pages as usize == source_files.len()
+        && stored_examples as usize == example_count;
+    if !row_counts_match {
         bail!("artifact row accounting mismatch before publication");
     }
 
