@@ -57,6 +57,10 @@ The run directory contains:
 - `smoke-output.txt` and `results/query-*.txt`: the fixture inputs, expected
   command names, complete CLI output and process exit status.
 
+Keep the run directory as the smoke record. For a later regression check,
+compare `smoke-output.txt` and the per-query files only after confirming that
+the manifest's code, database, model and runtime digests match.
+
 The fixture in `tests/fixtures/offline-smoke.tsv` checks the first result and
 a specific example under that result for `mv`, `ls`, and `grep`, using Linux
 platform filtering on the macOS host. These are regression probes, not
@@ -64,6 +68,40 @@ held-out evaluation tasks; do not reuse them as quality evidence.
 
 Run `bash tests/smoke_offline.sh` for asset-reference and output-validation
 checks without downloading assets or initializing the model.
+
+### Diagnostic host-runtime comparison
+
+The failure comparison below is optional and only applies to the tested host,
+where Homebrew exposes ONNX Runtime `1.22.0` through pkg-config. It builds in
+an isolated target directory against that host runtime, then uses the already
+provisioned database/model assets. The query is network-denied; retain its
+status and output instead of terminating it early:
+
+```sh
+env -u LIBONNXRUNTIME_NO_PKG_CONFIG \
+    -u ORT_LIB_LOCATION \
+    -u ORT_PREFER_DYNAMIC_LINK \
+    -u DYLD_LIBRARY_PATH \
+    CARGO_TARGET_DIR="$RUN_DIR/host-target" \
+    cargo build --locked --offline --release
+
+set +e
+/usr/bin/sandbox-exec \
+    -p '(version 1) (allow default) (deny network*)' \
+    env ASKMAN_DATA_DIR="$RUN_DIR/data" \
+        HF_HOME="$RUN_DIR/data/models" \
+        NO_COLOR=1 CLICOLOR_FORCE=0 \
+        "$RUN_DIR/host-target/release/askman" \
+        --linux "move files to docs" \
+        > "$RUN_DIR/host-query.txt" 2>&1
+status=$?
+set -e
+printf 'exit_status=%s\n' "$status" | tee "$RUN_DIR/host-query-status.txt"
+```
+
+If the host runtime or architecture differs, record that the comparison is
+not applicable rather than treating a clean run as evidence against the
+tested failure.
 
 ## Interpretation
 
@@ -81,8 +119,8 @@ has the same teardown behavior. It also does not measure retrieval quality or
 performance.
 
 Verbose output calls the heuristic-adjusted value `Ranking score`; it calls the
-unadjusted sqlite-vec value `Raw L2 distance`. The historical threshold and
-ordering remain unchanged.
+unadjusted sqlite-vec value `Raw squared L2 distance`. The historical threshold
+and ordering remain unchanged.
 
 ## Teardown finding
 
@@ -94,6 +132,8 @@ duplicate ONNX schema-registration errors, then exited `134` (`SIGABRT`) with
 the nonzero status and stderr were captured, not suppressed.
 
 The same queries using the explicitly provisioned ONNX Runtime `1.20.0` exited
-`0` under the network-denied sandbox and outside it. The evidence establishes
+`0` under the network-denied sandbox and outside it. A standalone native probe
+also aborted when the ORT environment was retained through process teardown;
+explicitly releasing that environment exited cleanly. The evidence establishes
 the tested runtime boundary; it does not by itself prove which native runtime
 destructor or schema-registration path is causal.

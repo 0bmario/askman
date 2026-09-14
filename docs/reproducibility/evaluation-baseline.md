@@ -68,7 +68,7 @@ increment the dataset/corpus IDs before accepting changed source artifacts.
 `keyword` uses the artifact's declared FTS5 query recipe, platform precedence,
 and one result per selected page before displaying three results. The
 `current-adapter` is clearly labeled because the released Askman ranker
-consumes MiniLM L2 distances. It applies the current Rust command/domain
+consumes MiniLM squared L2 distances. It applies the current Rust command/domain
 heuristics to the same deterministic lexical candidate pool and normalized
 surrogate distance. It is a controlled adapter, not a claim to reproduce the
 historical model output.

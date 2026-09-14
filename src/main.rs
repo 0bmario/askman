@@ -132,7 +132,7 @@ mod tests {
 
         assert_eq!(
             line,
-            "(Ranking score: 0.3350 | Raw L2 distance: 0.5000 | Rules: core_command (0.67x))"
+            "(Ranking score: 0.3350 | Raw squared L2 distance: 0.5000 | Rules: core_command (0.67x))"
         );
     }
 }

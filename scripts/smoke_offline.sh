@@ -261,7 +261,7 @@ write_manifest() {
         printf '%s\n' "embedding_dimension=384"
         printf '%s\n' "embedding_max_length=512 (fastembed 4.8.0 default)"
         printf '%s\n' "embedding_output=fastembed normalized vectors"
-        printf '%s\n' "sqlite_vec_distance=L2 (vec0 default; schema does not declare another metric)"
+        printf '%s\n' "sqlite_vec_distance=squared L2 (vec0 default; schema does not declare another metric)"
         printf '%s\n' "ort_intra_threads_policy=Rust available_parallelism at process start (fastembed 4.8.0); effective count not instrumented"
         printf '%s\n' "query_fixture=$run_dir/offline-smoke.tsv"
         printf '%s\n' "query_fixture_sha256=$(sha256_file "$run_dir/offline-smoke.tsv")"
