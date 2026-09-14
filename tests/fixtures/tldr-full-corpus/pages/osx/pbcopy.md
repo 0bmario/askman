@@ -5,4 +5,3 @@
 - Copy text to the clipboard:
 
 `pbcopy < {{file}}`
-

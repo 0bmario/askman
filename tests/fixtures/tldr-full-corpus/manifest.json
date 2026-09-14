@@ -5,7 +5,7 @@
     "name": "tldr-pages",
     "revision": "fixture-tldr-full-corpus-v1",
     "digest_algorithm": "sha256",
-    "digest": "5cefff74aec82018bd54887666fb1de5c185aa213bc5f2800b26b3441250c36a",
+    "digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
     "url": "https://github.com/tldr-pages/tldr",
     "attribution": "Content from the tldr-pages project.",
     "license": {

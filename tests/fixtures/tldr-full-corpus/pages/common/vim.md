@@ -5,4 +5,3 @@
 - Open a file:
 
 `vim {{path/to/file}}`
-

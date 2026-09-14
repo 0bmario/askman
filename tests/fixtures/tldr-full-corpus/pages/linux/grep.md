@@ -5,4 +5,3 @@
 - Search recursively:
 
 `grep -R {{pattern}} {{path}}`
-

@@ -5,4 +5,3 @@
 - Print a formatted value:
 
 `printf "{{text}}"`
-
