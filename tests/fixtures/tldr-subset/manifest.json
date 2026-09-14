@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "parser_version": "tldr-subset-v1",
+  "source": {
+    "name": "tldr-pages",
+    "revision": "fixture-tldr-snapshot-v1",
+    "digest_algorithm": "sha256",
+    "digest": "0b23613237f45a0f7e376ed63b616aa7e2554836c7721044aa1468391a1cae44",
+    "url": "https://github.com/tldr-pages/tldr",
+    "attribution": "Content from the tldr-pages project.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/tldr-pages/tldr/blob/main/LICENSE.md"
+    }
+  },
+  "language": "en",
+  "pages_root": "pages",
+  "files": [
+    "pages/common/cp.md",
+    "pages/common/ls.md",
+    "pages/linux/grep.md"
+  ]
+}

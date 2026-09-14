@@ -3,3 +3,5 @@ pub mod db;
 pub mod embed;
 pub mod format;
 pub mod search;
+#[cfg(feature = "dev")]
+pub mod tldr_subset;
