@@ -48,8 +48,9 @@ stable assertions. This harness always builds the checked-out source.
 The run directory contains:
 
 - `run-manifest.txt`: revision, lockfile and asset digests, runtime/linkage and
-  host information, and inference settings. It records the online processor
-  count passed to ONNX Runtime as its intra-op thread count.
+  host information, and inference settings. It records fastembed's
+  Rust `available_parallelism` thread-selection policy and the observed online
+  processor count; it does not instrument runtime thread creation.
 - `offline-smoke.tsv`: the exact fixture snapshot used, with its SHA256 and
   the committed fixture SHA256 recorded separately in the manifest. A mismatch
   identifies a local fixture change.
@@ -97,6 +98,7 @@ set +e
 query_status=$?
 set -e
 printf 'exit_status=%s\n' "$query_status" | tee "$RUN_DIR/host-query-status.txt"
+exit "$query_status"
 ```
 
 If the host runtime or architecture differs, record that the comparison is

@@ -44,9 +44,10 @@ const OFFICIAL_SITES: &[&str] = &[
     "greenwoodsoftware.",
 ];
 
-/// sqlite-vec vec0's default float distance is L2 unless the table declares
-/// another metric. The existing table does not declare one, so this threshold
-/// and the ranking behavior are intentionally retained as L2 values.
+/// sqlite-vec 0.1.6's default float distance is L2: its
+/// `distance_l2_sqr_float` implementation returns `sqrt(sum(delta * delta))`.
+/// The existing table does not declare another metric, so this threshold and
+/// the ranking behavior are intentionally retained as L2 values.
 /// See: https://alexgarcia.xyz/sqlite-vec/features/knn.html
 const MAX_DISTANCE: f64 = 1.10;
 
