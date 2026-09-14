@@ -1,4 +1,7 @@
 use anyhow::Result;
+use askman::dense::{
+    DenseBuildOptions, DenseRecipe, DenseServerOptions, build_dense_index, run_query_server,
+};
 use askman::tldr_subset::{
     BuildOptions, InspectOptions, QueryOptions, build_artifact, inspect_page,
     query_artifact_for_platform,
@@ -53,6 +56,33 @@ enum Command {
         /// Target operating system. Common is used when no target override exists.
         #[arg(long, alias = "os", default_value = "common")]
         platform: String,
+    },
+    /// Add a pinned MiniLM vector index to a validated lexical artifact.
+    DenseBuild {
+        /// Validated lexical SQLite artifact produced by `build`.
+        #[arg(long)]
+        artifact: PathBuf,
+        /// Offline fastembed cache containing the pinned model snapshot.
+        #[arg(long)]
+        model_cache: PathBuf,
+        /// Replacement dense artifact. The lexical input is left untouched.
+        #[arg(long)]
+        output: PathBuf,
+        /// Development-only embedding text representation.
+        #[arg(long, default_value = "description")]
+        recipe: String,
+        /// Number of source examples passed to MiniLM per inference batch.
+        #[arg(long, default_value_t = askman::dense::DEFAULT_BATCH_SIZE)]
+        batch_size: usize,
+    },
+    /// Serve offline dense vector queries as JSON lines for the evaluator.
+    DenseServer {
+        /// Dense SQLite artifact produced by `dense-build`.
+        #[arg(long)]
+        artifact: PathBuf,
+        /// Offline fastembed cache containing the pinned model snapshot.
+        #[arg(long)]
+        model_cache: PathBuf,
     },
 }
 
@@ -115,6 +145,44 @@ fn main() -> Result<()> {
             })?;
             println!("{}", serde_json::to_string_pretty(&result)?);
         }
+        Command::DenseBuild {
+            artifact,
+            model_cache,
+            output,
+            recipe,
+            batch_size,
+        } => {
+            let report = build_dense_index(DenseBuildOptions {
+                artifact,
+                model_cache,
+                output,
+                recipe: DenseRecipe::parse(&recipe)?,
+                batch_size,
+            })?;
+            println!(
+                "built dense {} index with {} examples into {}",
+                report.recipe,
+                report.indexed_examples,
+                report.output.display()
+            );
+            println!("model_revision={}", report.model_revision);
+            println!("build_time_ms={}", report.build_time_ms);
+            println!(
+                "peak_memory_bytes={}",
+                report
+                    .peak_memory_bytes
+                    .map_or_else(|| "unavailable".to_string(), |bytes| bytes.to_string())
+            );
+            println!("artifact_size_bytes={}", report.artifact_size_bytes);
+            println!("hardware={}", report.hardware);
+        }
+        Command::DenseServer {
+            artifact,
+            model_cache,
+        } => run_query_server(DenseServerOptions {
+            artifact,
+            model_cache,
+        })?,
     }
 
     Ok(())

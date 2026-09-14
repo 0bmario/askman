@@ -13,17 +13,21 @@ import hashlib
 import json
 import re
 import sqlite3
+import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
 
+ROOT = Path(__file__).resolve().parents[1]
 DATASET_SCHEMA_VERSION = 1
 SCORER_VERSION = "task-scorer-v1"
 KEYWORD_RETRIEVER_VERSION = "keyword-fts5-v1"
 CURRENT_ADAPTER_VERSION = "current-askman-ranking-adapter-v1"
+DENSE_RETRIEVER_VERSION = "dense-vector-vec0-v1"
 SUPPORTED_PLATFORMS = {"common", "linux", "osx", "windows"}
 MAX_DISPLAYED_RESULTS = 3
 EXPECTED_FAMILIES_PER_SPLIT = 6
@@ -64,7 +68,136 @@ class Candidate:
     platform: str
     page_position: int
     example_position: int
-    lexical_score: float
+    ranking_score: float
+
+
+def query_resources(query_times_ms: list[float]) -> dict[str, Any]:
+    sorted_times = sorted(query_times_ms)
+
+    def percentile(percent: float) -> float | None:
+        if not sorted_times:
+            return None
+        index = min(
+            len(sorted_times) - 1,
+            int((len(sorted_times) * percent) + 0.999999) - 1,
+        )
+        return round(sorted_times[index], 3)
+
+    return {
+        "repeated_query_count": len(sorted_times),
+        "repeated_query_p50_ms": percentile(0.50),
+        "repeated_query_p95_ms": percentile(0.95),
+    }
+
+
+class DenseClient:
+    def __init__(self, helper: Path, artifact: Path, model_cache: Path) -> None:
+        started = time.perf_counter()
+        try:
+            self.process = subprocess.Popen(
+                [
+                    str(helper),
+                    "dense-server",
+                    "--artifact",
+                    str(artifact),
+                    "--model-cache",
+                    str(model_cache),
+                ],
+                cwd=ROOT,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+            )
+        except OSError as error:
+            raise RuntimeError(f"failed to start dense helper {helper}: {error}") from error
+        self.query_times_ms: list[float] = []
+        ready_line = self.process.stdout.readline() if self.process.stdout else ""
+        if not ready_line:
+            error = self.process.stderr.read() if self.process.stderr else ""
+            self.close(check=False)
+            raise RuntimeError(
+                f"dense helper failed during model/index startup: {error.strip()}"
+            )
+        try:
+            ready = json.loads(ready_line)
+        except json.JSONDecodeError as error:
+            self.close(check=False)
+            raise RuntimeError("dense helper returned invalid startup metadata") from error
+        if not ready.get("ready"):
+            self.close(check=False)
+            raise RuntimeError("dense helper did not become ready")
+        self.model_load_ms = ready.get("model_load_ms")
+        self.peak_memory_bytes = ready.get("peak_memory_bytes")
+        self.startup_ms = (time.perf_counter() - started) * 1000
+
+    def query(self, question: str, platform: str) -> list[Candidate]:
+        if self.process.stdin is None or self.process.stdout is None:
+            raise RuntimeError("dense helper is not connected")
+        request = json.dumps(
+            {"query": question, "platform": platform, "limit": MAX_DISPLAYED_RESULTS}
+        )
+        started = time.perf_counter()
+        try:
+            self.process.stdin.write(request + "\n")
+            self.process.stdin.flush()
+            line = self.process.stdout.readline()
+        except (BrokenPipeError, OSError) as error:
+            raise RuntimeError(f"dense helper query failed: {error}") from error
+        self.query_times_ms.append((time.perf_counter() - started) * 1000)
+        if not line:
+            error = self.process.stderr.read() if self.process.stderr else ""
+            raise RuntimeError(f"dense helper exited during query: {error.strip()}")
+        response = json.loads(line)
+        if not response.get("ok"):
+            raise RuntimeError(response.get("error", "dense helper query failed"))
+        return [Candidate(**candidate) for candidate in response["results"]]
+
+    def resources(self) -> dict[str, Any]:
+        resources = query_resources(self.query_times_ms)
+        resources.update(
+            {
+                "helper_startup_ms": round(self.startup_ms, 3),
+                "model_load_ms": self.model_load_ms,
+                "peak_memory_bytes": self.peak_memory_bytes,
+            }
+        )
+        return resources
+
+    def close(self, check: bool = True) -> None:
+        if self.process.stdin:
+            self.process.stdin.close()
+        try:
+            return_code = self.process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            self.process.terminate()
+            return_code = self.process.wait(timeout=5)
+        if check and return_code != 0:
+            raise RuntimeError(
+                f"dense helper exited with status {return_code}; "
+                "check the pinned ONNX Runtime and model assets"
+            )
+
+
+def validate_retriever_split(retriever: str, split: str) -> None:
+    if retriever == "dense" and split != "dev":
+        raise ValueError(
+            "dense retrieval evaluation is development-only; holdout access belongs "
+            "to later comparison/evidence tickets"
+        )
+
+
+def baseline_resources(query_times_ms: list[float]) -> dict[str, Any]:
+    resources = query_resources(query_times_ms)
+    resources.update(
+        {
+            "helper_startup_ms": None,
+            "model_load_ms": None,
+            "peak_memory_bytes": None,
+        }
+    )
+    return resources
 
 
 def sha256_file(path: Path) -> str:
@@ -157,7 +290,7 @@ def one_per_page(candidates: Iterable[Candidate]) -> list[Candidate]:
     return result
 
 
-def keyword_results(candidates: list[Candidate]) -> list[Candidate]:
+def plain_results(candidates: list[Candidate]) -> list[Candidate]:
     return one_per_page(candidates)[:MAX_DISPLAYED_RESULTS]
 
 
@@ -208,12 +341,12 @@ def is_niche_variant(command: str) -> bool:
 def current_adapter_results(candidates: list[Candidate]) -> list[Candidate]:
     if not candidates:
         return []
-    scores = [candidate.lexical_score for candidate in candidates]
+    scores = [candidate.ranking_score for candidate in candidates]
     low, high = min(scores), max(scores)
     span = high - low
     by_page: dict[str, tuple[float, Candidate]] = {}
     for candidate in candidates:
-        relative = 0.5 if span == 0 else (candidate.lexical_score - low) / span
+        relative = 0.5 if span == 0 else (candidate.ranking_score - low) / span
         raw_distance = 0.5 + (relative * 0.6)
         adjusted = current_adjustment(candidate, raw_distance)
         if adjusted is None:
@@ -446,23 +579,56 @@ def validate_artifact(
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    validate_retriever_split(args.retriever, args.split)
     dataset_path = Path(args.dataset)
     dataset = load_json(dataset_path)
     validate_dataset(dataset, args.split)
     if args.split == "holdout" and not args.allow_holdout:
         raise ValueError("holdout labels require --allow-holdout")
     tasks = [task for task in dataset["tasks"] if task["split"] == args.split]
-    with sqlite3.connect(args.artifact) as connection:
-        frozen_artifact = validate_artifact(connection, dataset, Path(args.manifest) if args.manifest else None)
-        validate_labels(connection, tasks)
-        results = []
-        for task in tasks:
-            candidates = fetch_candidates(connection, task["question"], task["platform"])
-            if args.retriever == "keyword":
-                displayed = keyword_results(candidates)
-            else:
-                displayed = current_adapter_results(candidates)
-            results.append(score_task(task, displayed, candidates))
+    dense_client = None
+    baseline_query_times_ms: list[float] = []
+    try:
+        with sqlite3.connect(args.artifact) as connection:
+            frozen_artifact = validate_artifact(
+                connection,
+                dataset,
+                Path(args.manifest) if args.manifest else None,
+            )
+            validate_labels(connection, tasks)
+            if args.retriever == "dense":
+                if args.dense_helper is None or args.model_cache is None:
+                    raise ValueError(
+                        "dense retrieval requires --dense-helper and --model-cache; "
+                        "the semantic path has no keyword fallback"
+                    )
+                dense_client = DenseClient(
+                    args.dense_helper, args.artifact, args.model_cache
+                )
+            results = []
+            for task in tasks:
+                started = time.perf_counter()
+                if dense_client is not None:
+                    candidates = dense_client.query(task["question"], task["platform"])
+                else:
+                    candidates = fetch_candidates(
+                        connection, task["question"], task["platform"]
+                    )
+                if args.retriever in {"keyword", "dense"}:
+                    displayed = plain_results(candidates)
+                else:
+                    displayed = current_adapter_results(candidates)
+                if dense_client is None:
+                    baseline_query_times_ms.append(
+                        (time.perf_counter() - started) * 1000
+                    )
+                results.append(score_task(task, displayed, candidates))
+    finally:
+        if dense_client is not None:
+            resources = dense_client.resources()
+            dense_client.close()
+        else:
+            resources = baseline_resources(baseline_query_times_ms)
     report = {
         "dataset_id": dataset["dataset_id"],
         "dataset_schema_version": dataset["schema_version"],
@@ -470,8 +636,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "split_id": dataset["split_id"],
         "split": args.split,
         "retriever": args.retriever,
-        "retriever_version": KEYWORD_RETRIEVER_VERSION if args.retriever == "keyword" else CURRENT_ADAPTER_VERSION,
+        "retriever_version": {
+            "keyword": KEYWORD_RETRIEVER_VERSION,
+            "current-adapter": CURRENT_ADAPTER_VERSION,
+            "dense": DENSE_RETRIEVER_VERSION,
+        }[args.retriever],
         "corpus": frozen_artifact,
+        "resources": resources,
         "historical_policy_smoke": "separate: scripts/smoke_offline.sh",
         "holdout_access": {
             "authorized": args.split != "holdout" or args.allow_holdout,
@@ -491,7 +662,21 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--manifest", type=Path)
     result.add_argument("--split", choices=("dev", "holdout"), default="dev")
     result.add_argument("--allow-holdout", action="store_true")
-    result.add_argument("--retriever", choices=("keyword", "current-adapter"), default="keyword")
+    result.add_argument(
+        "--retriever",
+        choices=("keyword", "current-adapter", "dense"),
+        default="keyword",
+    )
+    result.add_argument(
+        "--dense-helper",
+        type=Path,
+        help="Path to the provisioned tldr_subset binary for dense retrieval",
+    )
+    result.add_argument(
+        "--model-cache",
+        type=Path,
+        help="Offline fastembed cache containing the pinned MiniLM snapshot",
+    )
     result.add_argument("--output", type=Path)
     return result
 
@@ -509,6 +694,7 @@ def main(argv: list[str] | None = None) -> int:
         AttributeError,
         KeyError,
         OSError,
+        RuntimeError,
         sqlite3.Error,
         TypeError,
         ValueError,

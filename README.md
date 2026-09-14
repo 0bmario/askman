@@ -66,3 +66,5 @@ See [the reproducible corpus instructions](docs/reproducibility/tldr-subset.md)
 and the [full-corpus build record](docs/reproducibility/tldr-full-corpus.md).
 The frozen evaluation dataset and offline baseline runner are documented in
 [the evaluation record](docs/reproducibility/evaluation-baseline.md).
+The dense retrieval candidate is documented in the
+[dense retrieval instructions](docs/reproducibility/dense-retrieval.md).

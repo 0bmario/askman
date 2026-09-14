@@ -1,3 +1,4 @@
+import argparse
 import importlib.util
 import sqlite3
 import sys
@@ -123,6 +124,15 @@ class EvaluationRunnerTests(unittest.TestCase):
     def test_query_normalization_is_deterministic(self):
         self.assertEqual(RUNNER.normalized_tokens("CP, copy_copy cp"), ["copy_copy", "cp"])
         self.assertEqual(RUNNER.fts_query("CP, copy_copy cp"), '"copy_copy" AND "cp"')
+
+    def test_dense_retrieval_rejects_holdout_before_loading_labels(self):
+        args = argparse.Namespace(
+            retriever="dense",
+            split="holdout",
+            dataset=ROOT / "does-not-exist.json",
+        )
+        with self.assertRaisesRegex(ValueError, "development-only"):
+            RUNNER.run(args)
 
 
 if __name__ == "__main__":

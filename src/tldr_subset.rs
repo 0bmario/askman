@@ -1208,7 +1208,7 @@ fn write_artifact(
     })
 }
 
-fn validate_artifact(conn: &Connection) -> Result<()> {
+pub(crate) fn validate_artifact(conn: &Connection) -> Result<()> {
     let integrity: String = conn.query_row("PRAGMA integrity_check", [], |row| row.get(0))?;
     if integrity != "ok" {
         bail!("artifact integrity check failed: {integrity}");
@@ -1465,7 +1465,7 @@ fn validate_artifact(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
-fn artifact_metadata(conn: &Connection, key: &str) -> Result<String> {
+pub(crate) fn artifact_metadata(conn: &Connection, key: &str) -> Result<String> {
     conn.query_row(
         "SELECT value FROM artifact_metadata WHERE key = ?1",
         [key],
@@ -1491,7 +1491,7 @@ fn page_kind_from_name(name: &str) -> Result<PageKind> {
     }
 }
 
-fn selected_page_ids(conn: &Connection, platform: &str) -> Result<Vec<String>> {
+pub(crate) fn selected_page_ids(conn: &Connection, platform: &str) -> Result<Vec<String>> {
     let mut statement = conn.prepare("SELECT page_id, page_name, platform FROM pages")?;
     let rows = statement.query_map([], |row| {
         Ok((
@@ -1676,7 +1676,7 @@ fn sha256_hex(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
 
-fn process_peak_memory_bytes() -> Option<u64> {
+pub(crate) fn process_peak_memory_bytes() -> Option<u64> {
     #[cfg(target_os = "linux")]
     {
         let status = fs::read_to_string("/proc/self/status").ok()?;
