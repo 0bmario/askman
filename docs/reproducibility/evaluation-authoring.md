@@ -8,19 +8,21 @@ answerable, its acceptable example IDs and the correctness rationale.
 | --- | --- | --- |
 | dev | copy-dev | copy a source path to a destination |
 | dev | search-dev | search text recursively under a path |
-| dev | edit-dev | open or edit a text file |
 | dev | clipboard-dev | transfer input to a macOS clipboard |
-| dev | windows-dev | print formatted Windows output |
 | dev | coverage-dev | exercise missing, navigation-only and platform-inapplicable coverage |
-| holdout | path-duplication | copy paths while varying platform and wording |
-| holdout | tree-search | search a path with recursive grep syntax |
-| holdout | editor-launch | launch the text editor against a path |
-| holdout | clipboard-transfer | copy file or standard-input content on macOS |
-| holdout | formatted-output | emit a formatted value on Windows |
-| holdout | missing-coverage | request capabilities absent from the pinned selection |
+| dev | audit-dev | retain previously inspected prompts and missing capabilities as development regressions |
+| dev | platform-dev | check platform-specific absence without borrowing holdout answers |
+| holdout | editor-holdout | launch the text editor against a path |
+| holdout | windows-holdout | emit a formatted value on Windows |
+| holdout | missing-holdout | request capabilities absent from the pinned selection |
+| holdout | platform-holdout | check platform-specific absence |
+| holdout | reference-holdout | distinguish unsupported page/reference requests |
+| holdout | ambiguity-holdout | distinguish unsupported requests with overlapping wording |
 
 The four previously inspected prompts remain development-only regression cases:
 `move files to docs`, `restart systemd`, `find text in compressed logs`, and
 `make my database fast without changing anything`. The holdout file is kept
 separate and requires explicit access, so normal development runs cannot load
-its labels.
+its labels. The per-task intent freeze is recorded separately in
+`tests/fixtures/evaluation/task-intents-v1.json`; it contains no questions,
+labels, rationales or answer IDs.

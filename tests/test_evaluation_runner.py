@@ -27,32 +27,40 @@ def candidate(example_id):
 
 
 class EvaluationRunnerTests(unittest.TestCase):
-    def test_frozen_dataset_is_60_tasks_with_whole_family_splits(self):
-        datasets = [
-            RUNNER.load_json(ROOT / "tests/fixtures/evaluation/frozen-dev-v1.json"),
-            RUNNER.load_json(ROOT / "tests/fixtures/evaluation/frozen-holdout-v1.json"),
-        ]
-        for dataset, split in zip(datasets, ("dev", "holdout")):
-            RUNNER.validate_dataset(dataset, split)
-            self.assertEqual(dataset["split"], split)
-            self.assertEqual(len(dataset["tasks"]), 30)
-        self.assertEqual(sum(len(dataset["tasks"]) for dataset in datasets), 60)
+    def test_frozen_dev_dataset_has_30_tasks_and_whole_families(self):
+        dataset = RUNNER.load_json(ROOT / "tests/fixtures/evaluation/frozen-dev-v1.json")
+        RUNNER.validate_dataset(dataset, "dev")
+        self.assertEqual(dataset["split"], "dev")
+        self.assertEqual(len(dataset["tasks"]), 30)
         self.assertEqual(
-            {task["family"] for dataset in datasets for task in dataset["tasks"]},
+            {task["family"] for task in dataset["tasks"]},
             {
                 "copy-dev",
                 "search-dev",
-                "edit-dev",
                 "clipboard-dev",
-                "windows-dev",
                 "coverage-dev",
-                "path-duplication",
-                "tree-search",
-                "editor-launch",
-                "clipboard-transfer",
-                "formatted-output",
-                "missing-coverage",
+                "audit-dev",
+                "platform-dev",
             },
+        )
+
+    def test_dev_intents_match_dev_task_ids_without_labels(self):
+        dataset = RUNNER.load_json(ROOT / "tests/fixtures/evaluation/frozen-dev-v1.json")
+        intents = RUNNER.load_json(
+            ROOT / "tests/fixtures/evaluation/task-intents-v1.json"
+        )
+        dev_intents = [
+            entry for entry in intents["tasks"] if entry["split"] == "dev"
+        ]
+        self.assertEqual(
+            {entry["id"] for entry in dev_intents},
+            {task["id"] for task in dataset["tasks"]},
+        )
+        self.assertTrue(
+            all(
+                set(entry) == {"id", "split", "family", "intent"}
+                for entry in dev_intents
+            )
         )
 
     def test_multiple_valid_answers_succeed_at_three(self):

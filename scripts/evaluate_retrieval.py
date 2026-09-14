@@ -26,6 +26,8 @@ KEYWORD_RETRIEVER_VERSION = "keyword-fts5-v1"
 CURRENT_ADAPTER_VERSION = "current-askman-ranking-adapter-v1"
 SUPPORTED_PLATFORMS = {"common", "linux", "osx", "windows"}
 MAX_DISPLAYED_RESULTS = 3
+EXPECTED_FAMILIES_PER_SPLIT = 6
+TASKS_PER_FAMILY = 5
 LEXICAL_INDEX_TOKENIZER = "unicode61"
 LEXICAL_INDEX_FIELDS = [
     "page.command",
@@ -217,10 +219,11 @@ def current_adapter_results(candidates: list[Candidate]) -> list[Candidate]:
         if adjusted is None:
             continue
         previous = by_page.get(candidate.page_id)
-        if previous is None or (adjusted, candidate.example_id) < (
+        is_better_candidate = previous is None or (adjusted, candidate.example_id) < (
             previous[0],
             previous[1].example_id,
-        ):
+        )
+        if is_better_candidate:
             by_page[candidate.page_id] = (adjusted, candidate)
     ranked = sorted(
         by_page.values(), key=lambda item: (item[0], item[1].example_id)
@@ -295,40 +298,78 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
     if dataset.get("split") != expected_split:
         raise ValueError(f"dataset split must be {expected_split}")
     tasks = dataset.get("tasks")
-    if dataset.get("task_count") != 30:
+    if dataset.get("task_count") != EXPECTED_FAMILIES_PER_SPLIT * TASKS_PER_FAMILY:
         raise ValueError("each frozen split must declare exactly 30 tasks")
-    if not isinstance(tasks, list) or len(tasks) != 30:
+    has_wrong_task_list = not isinstance(tasks, list) or len(
+        tasks
+    ) != EXPECTED_FAMILIES_PER_SPLIT * TASKS_PER_FAMILY
+    if has_wrong_task_list:
         raise ValueError("each frozen split must contain exactly 30 tasks")
-    if any(task.get("split") != expected_split for task in tasks):
+    has_wrong_split = any(task.get("split") != expected_split for task in tasks)
+    if has_wrong_split:
         raise ValueError(f"all tasks must belong to the {expected_split} split")
     task_ids: set[str] = set()
     families: dict[str, set[str]] = {}
+    family_counts: dict[str, int] = {}
     for task in tasks:
         required = {"id", "split", "family", "question", "platform", "answerable", "acceptable_example_ids", "rationale"}
         if not required <= task.keys():
             raise ValueError(f"task {task.get('id')} is missing required labels")
-        if not isinstance(task["id"], str) or not task["id"] or task["id"] in task_ids:
+        task_id = task["id"]
+        has_invalid_task_id = (
+            not isinstance(task_id, str) or not task_id or task_id in task_ids
+        )
+        if has_invalid_task_id:
             raise ValueError(f"task IDs must be unique and non-empty: {task.get('id')}")
-        task_ids.add(task["id"])
-        if not isinstance(task["question"], str) or not task["question"].strip():
+        task_ids.add(task_id)
+        has_empty_question = (
+            not isinstance(task["question"], str) or not task["question"].strip()
+        )
+        if has_empty_question:
             raise ValueError(f"task {task['id']} has an empty question")
+        family = task["family"]
+        if not isinstance(family, str) or not family:
+            raise ValueError(f"task {task['id']} has an invalid family")
         if task["platform"] not in SUPPORTED_PLATFORMS:
             raise ValueError(f"task {task['id']} has unsupported platform")
         if not isinstance(task["answerable"], bool):
             raise ValueError(f"task {task['id']} has an invalid answerable label")
-        if not isinstance(task["rationale"], str) or not task["rationale"].strip():
+        has_empty_rationale = (
+            not isinstance(task["rationale"], str) or not task["rationale"].strip()
+        )
+        if has_empty_rationale:
             raise ValueError(f"task {task['id']} has an empty rationale")
         ids = task["acceptable_example_ids"]
-        if not isinstance(ids, list) or any(not isinstance(example_id, str) for example_id in ids):
+        has_invalid_example_ids = not isinstance(ids, list) or any(
+            not isinstance(example_id, str) for example_id in ids
+        )
+        if has_invalid_example_ids:
             raise ValueError(f"task {task['id']} has invalid acceptable example IDs")
-        if len(ids) != len(set(ids)):
+        has_duplicate_example_ids = len(ids) != len(set(ids))
+        if has_duplicate_example_ids:
             raise ValueError(f"task {task['id']} repeats an acceptable example ID")
-        if not task["answerable"] and task["acceptable_example_ids"]:
+        has_unexpected_acceptable_ids = (
+            not task["answerable"] and task["acceptable_example_ids"]
+        )
+        if has_unexpected_acceptable_ids:
             raise ValueError(f"unanswerable task {task['id']} has acceptable IDs")
-        if task["answerable"] and not task["acceptable_example_ids"]:
+        has_missing_acceptable_ids = task["answerable"] and not task[
+            "acceptable_example_ids"
+        ]
+        if has_missing_acceptable_ids:
             raise ValueError(f"answerable task {task['id']} has no acceptable IDs")
-        families.setdefault(task["family"], set()).add(task["split"])
-    if any(len(splits) != 1 for splits in families.values()):
+        families.setdefault(family, set()).add(task["split"])
+        family_counts[family] = family_counts.get(family, 0) + 1
+    has_wrong_family_count = len(families) != EXPECTED_FAMILIES_PER_SPLIT
+    if has_wrong_family_count:
+        raise ValueError("each frozen split must contain exactly six scenario families")
+    has_wrong_tasks_per_family = any(
+        count != TASKS_PER_FAMILY for count in family_counts.values()
+    )
+    if has_wrong_tasks_per_family:
+        raise ValueError("each scenario family must contain exactly five tasks")
+    has_cross_split_family = any(len(splits) != 1 for splits in families.values())
+    if has_cross_split_family:
         raise ValueError("scenario families must not cross the dev/holdout split")
 
 
@@ -354,7 +395,9 @@ def validate_labels(
     for task in tasks:
         if not task["answerable"]:
             continue
-        invalid_ids = set(task["acceptable_example_ids"]) - eligible_by_platform[task["platform"]]
+        invalid_ids = set(task["acceptable_example_ids"]) - eligible_by_platform[
+            task["platform"]
+        ]
         if invalid_ids:
             raise ValueError(
                 f"task {task['id']} labels examples outside the selected {task['platform']} corpus: "
@@ -457,14 +500,21 @@ def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
         report = run(args)
-    except (OSError, sqlite3.Error, ValueError, json.JSONDecodeError) as error:
+        encoded = json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.output:
+            args.output.write_text(encoded, encoding="utf-8")
+        else:
+            print(encoded, end="")
+    except (
+        AttributeError,
+        KeyError,
+        OSError,
+        sqlite3.Error,
+        TypeError,
+        ValueError,
+    ) as error:
         print(f"evaluation failed: {error}", file=sys.stderr)
         return 2
-    encoded = json.dumps(report, indent=2, sort_keys=True) + "\n"
-    if args.output:
-        args.output.write_text(encoded, encoding="utf-8")
-    else:
-        print(encoded, end="")
     return 0
 
 

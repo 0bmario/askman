@@ -15,9 +15,10 @@ It is preliminary engineering evidence, not user or production validation.
 The reviewed development labels live in
 `tests/fixtures/evaluation/frozen-dev-v1.json`; holdout labels live separately
 in `tests/fixtures/evaluation/frozen-holdout-v1.json`, outside the corpus
-snapshot. A normal development run reads only the development file. The files
-contain task intent, platform, acceptable example IDs and rationales; retrieval
-indexes contain only source-backed page/example fields. Four
+snapshot. A normal development run reads only the development file. The
+separate intent record contains task intent; the split files contain platform,
+acceptable example IDs and rationales. Retrieval indexes contain only
+source-backed page/example fields. Four
 previously inspected audit prompts remain development tasks: `move files to
 docs`, `restart systemd`, `find text in compressed logs`, and `make my database
 fast without changing anything`.
@@ -89,15 +90,15 @@ and denominators for:
 For the committed fixture, the deterministic keyword run currently reports:
 
 ```text
-dev:     Success@1 23/23, Success@3 23/23, candidate recall 23/23,
-         coverage 23/30, incorrect answered 0/23, false unanswerable 0/7
-holdout: Success@1 22/22, Success@3 22/22, candidate recall 22/22,
-         coverage 22/30, incorrect answered 0/22, false unanswerable 0/8
+dev:     Success@1 13/13, Success@3 13/13, candidate recall 13/13,
+         coverage 13/30, incorrect answered 0/13, false unanswerable 0/17
+holdout: Success@1 10/10, Success@3 10/10, candidate recall 10/10,
+         coverage 10/30, incorrect answered 0/10, false unanswerable 0/20
 ```
 
 The current-adapter run uses the same task results on this small fixture. The
 reported scores are not a quality claim; the fixture intentionally has only
-six operational examples and includes repeated paraphrase families.
+five operational examples and includes repeated paraphrase families.
 
 ## Hand checks
 
