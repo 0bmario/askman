@@ -6,11 +6,20 @@ use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
+use std::time::Instant;
 
 const ARTIFACT_KIND: &str = "askman.tldr-subset";
-const SCHEMA_VERSION: u32 = 2;
-const PARSER_VERSION: &str = "tldr-subset-v2";
+const SCHEMA_VERSION: u32 = 3;
+const PARSER_VERSION: &str = "tldr-subset-v3";
 const SUPPORTED_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
+const LEXICAL_INDEX_TOKENIZER: &str = "unicode61";
+const LEXICAL_QUERY_NORMALIZATION: &str = "split non-alphanumeric except underscore; lowercase ASCII; quote and AND-join unique sorted tokens";
+const LEXICAL_INDEX_FIELDS: [&str; 4] = [
+    "page.command",
+    "page.description",
+    "example.description",
+    "example.command",
+];
 
 #[derive(Debug, Clone)]
 pub struct BuildOptions {
@@ -26,6 +35,11 @@ pub struct BuildReport {
     pub page_count: usize,
     pub example_count: usize,
     pub source_digest: String,
+    pub excluded_count: usize,
+    pub build_time_ms: u128,
+    pub peak_memory_bytes: Option<u64>,
+    pub artifact_size_bytes: u64,
+    pub hardware: String,
 }
 
 #[derive(Debug, Clone)]
@@ -50,6 +64,22 @@ pub struct SubsetManifest {
     pub language: String,
     pub pages_root: String,
     pub files: Vec<String>,
+    #[serde(default)]
+    pub exclusions: Vec<SourceExclusion>,
+    pub lexical_index: LexicalIndexRecipe,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+pub struct SourceExclusion {
+    pub path: String,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+pub struct LexicalIndexRecipe {
+    pub tokenizer: String,
+    pub fields: Vec<String>,
+    pub query_normalization: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -141,12 +171,40 @@ struct SourceFile {
     platform: String,
     bytes: Vec<u8>,
     digest: String,
-    page: Page,
+    status: SourceFileStatus,
+    exclusion_reason: Option<String>,
+    page: Option<Page>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum SourceFileStatus {
+    Parsed,
+    Excluded,
+}
+
+impl SourceFileStatus {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Parsed => "parsed",
+            Self::Excluded => "excluded",
+        }
+    }
 }
 
 /// Build an isolated SQLite artifact from a manifest and already-provisioned files.
 /// No network access or installed Askman database lookup is performed here.
 pub fn build_artifact(options: BuildOptions) -> Result<BuildReport> {
+    build_artifact_with_failure_injection(options, None)
+}
+
+/// Build an artifact while optionally failing after the requested number of
+/// parsed pages have been written. This is a test seam for proving that a
+/// failed construction cannot replace an existing artifact.
+pub fn build_artifact_with_failure_injection(
+    options: BuildOptions,
+    fail_after_pages: Option<usize>,
+) -> Result<BuildReport> {
+    let started_at = Instant::now();
     let manifest = read_manifest(&options.manifest)?;
     validate_manifest(&manifest)?;
 
@@ -218,6 +276,8 @@ pub fn build_artifact(options: BuildOptions) -> Result<BuildReport> {
         &source_files,
         source_digest.clone(),
         output.clone(),
+        started_at,
+        fail_after_pages,
     );
     match build_result {
         Ok(report) => match fs::rename(&temporary, &output) {
@@ -599,7 +659,25 @@ fn validate_platform(platform: &str) -> Result<()> {
 }
 
 fn validate_source_references(source_files: &[SourceFile]) -> Result<()> {
-    let pages: Vec<Page> = source_files.iter().map(|file| file.page.clone()).collect();
+    let pages: Vec<Page> = source_files
+        .iter()
+        .filter_map(|file| file.page.clone())
+        .collect();
+    validate_page_references(&pages)
+}
+
+fn validate_page_references(pages: &[Page]) -> Result<()> {
+    let mut identities = HashSet::new();
+    for page in pages {
+        if !identities.insert((&page.platform, &page.page_name)) {
+            bail!(
+                "duplicate page identity: {} on platform {}",
+                page.page_name,
+                page.platform
+            );
+        }
+    }
+
     for platform in SUPPORTED_PLATFORMS {
         let selected: HashSet<String> = pages
             .iter()
@@ -609,7 +687,7 @@ fn validate_source_references(source_files: &[SourceFile]) -> Result<()> {
             })
             .map(|page| page.page_id.clone())
             .collect();
-        for page in &pages {
+        for page in pages {
             if selected.contains(&page.page_id) && page.kind != PageKind::Operational {
                 let mut stack = Vec::new();
                 resolve_page_name(&pages, &page.page_name, platform, &mut stack, None)?;
@@ -716,8 +794,8 @@ fn validate_manifest(manifest: &SubsetManifest) -> Result<()> {
             PARSER_VERSION
         );
     }
-    if manifest.language.is_empty() || manifest.pages_root.is_empty() {
-        bail!("manifest language and pages_root are required");
+    if manifest.language != "en" || manifest.pages_root.is_empty() {
+        bail!("manifest language must be `en` and pages_root is required");
     }
     if manifest.source.name != "tldr-pages" {
         bail!("manifest source must be tldr-pages");
@@ -746,47 +824,133 @@ fn validate_manifest(manifest: &SubsetManifest) -> Result<()> {
     if manifest.pages_root.contains('/') || manifest.pages_root.contains('\\') {
         bail!("manifest pages_root must be one relative directory name");
     }
+
+    let expected_fields = LEXICAL_INDEX_FIELDS
+        .iter()
+        .map(|field| (*field).to_string())
+        .collect::<Vec<_>>();
+    if manifest.lexical_index.tokenizer != LEXICAL_INDEX_TOKENIZER
+        || manifest.lexical_index.fields != expected_fields
+        || manifest.lexical_index.query_normalization != LEXICAL_QUERY_NORMALIZATION
+    {
+        bail!("manifest lexical_index recipe does not match the builder");
+    }
+
+    let mut selected_paths = HashSet::new();
+    for path in &manifest.files {
+        validate_selected_path(path, &manifest.pages_root)?;
+        if !selected_paths.insert(path) {
+            bail!("manifest selects duplicate file: {path}");
+        }
+    }
+
+    let mut excluded_paths = HashSet::new();
+    for exclusion in &manifest.exclusions {
+        validate_selected_path(&exclusion.path, &manifest.pages_root)?;
+        if exclusion.reason.trim().is_empty() {
+            bail!("manifest exclusion reason is empty: {}", exclusion.path);
+        }
+        if !excluded_paths.insert(&exclusion.path) {
+            bail!("manifest excludes duplicate file: {}", exclusion.path);
+        }
+        if !selected_paths.contains(&exclusion.path) {
+            bail!(
+                "manifest exclusion is not in files selection: {}",
+                exclusion.path
+            );
+        }
+    }
     Ok(())
 }
 
 fn load_source_files(manifest: &SubsetManifest, snapshot_root: &Path) -> Result<Vec<SourceFile>> {
-    let mut seen_paths = HashSet::new();
     let mut source_files = Vec::with_capacity(manifest.files.len());
+    let exclusions: HashMap<&str, &str> = manifest
+        .exclusions
+        .iter()
+        .map(|exclusion| (exclusion.path.as_str(), exclusion.reason.as_str()))
+        .collect();
+    let mut failures = Vec::new();
 
     for path in &manifest.files {
         let platform = validate_selected_path(path, &manifest.pages_root)?;
-        if !seen_paths.insert(path) {
-            bail!("manifest selects duplicate file: {path}");
-        }
 
         let selected_path = snapshot_root.join(path);
-        let canonical_path = fs::canonicalize(&selected_path)
-            .with_context(|| format!("selected file is missing: {path}"))?;
+        let canonical_path = match fs::canonicalize(&selected_path) {
+            Ok(path) => path,
+            Err(error) => {
+                failures.push(format!("{path}: selected file is missing ({error})"));
+                continue;
+            }
+        };
         if !canonical_path.starts_with(snapshot_root) {
             bail!("selected file escapes snapshot root: {path}");
         }
         if !canonical_path.is_file() {
-            bail!("selected file is not a regular file: {path}");
+            failures.push(format!("{path}: selected file is not a regular file"));
+            continue;
         }
 
-        let bytes = fs::read(&canonical_path)
-            .with_context(|| format!("failed to read selected file: {path}"))?;
-        let content = String::from_utf8(bytes.clone())
-            .with_context(|| format!("selected file is not UTF-8: {path}"))?;
-        let page = parse_page(
+        let bytes = match fs::read(&canonical_path) {
+            Ok(bytes) => bytes,
+            Err(error) => {
+                failures.push(format!("{path}: failed to read selected file ({error})"));
+                continue;
+            }
+        };
+        let digest = sha256_hex(&bytes);
+        if let Some(reason) = exclusions.get(path.as_str()) {
+            source_files.push(SourceFile {
+                path: path.clone(),
+                platform,
+                bytes,
+                digest,
+                status: SourceFileStatus::Excluded,
+                exclusion_reason: Some((*reason).to_string()),
+                page: None,
+            });
+            continue;
+        }
+
+        let content = match String::from_utf8(bytes.clone()) {
+            Ok(content) => content,
+            Err(error) => {
+                failures.push(format!("{path}: selected file is not UTF-8 ({error})"));
+                continue;
+            }
+        };
+        let page = match parse_page(
             path,
             &platform,
             &manifest.language,
             &manifest.source.revision,
             &content,
-        )?;
+        ) {
+            Ok(page) => page,
+            Err(error) => {
+                failures.push(error.to_string());
+                continue;
+            }
+        };
         source_files.push(SourceFile {
             path: path.clone(),
             platform,
-            digest: sha256_hex(&bytes),
             bytes,
-            page,
+            digest,
+            status: SourceFileStatus::Parsed,
+            exclusion_reason: None,
+            page: Some(page),
         });
+    }
+
+    if !failures.is_empty() {
+        if failures.len() == 1 {
+            bail!("{}", failures[0]);
+        }
+        bail!(
+            "artifact promotion blocked by selected page failures:\n{}",
+            failures.join("\n")
+        );
     }
 
     Ok(source_files)
@@ -821,6 +985,8 @@ fn write_artifact(
     source_files: &[SourceFile],
     source_digest: String,
     output: PathBuf,
+    started_at: Instant,
+    fail_after_pages: Option<usize>,
 ) -> Result<BuildReport> {
     let mut conn = Connection::open(temporary)
         .with_context(|| format!("failed to create artifact {}", temporary.display()))?;
@@ -834,7 +1000,8 @@ fn write_artifact(
              source_path TEXT PRIMARY KEY NOT NULL,
              sha256 TEXT NOT NULL,
              byte_len INTEGER NOT NULL,
-             status TEXT NOT NULL
+             status TEXT NOT NULL CHECK(status IN ('parsed', 'excluded')),
+             reason TEXT NOT NULL
          );
          CREATE TABLE pages (
              page_id TEXT PRIMARY KEY NOT NULL,
@@ -891,6 +1058,28 @@ fn write_artifact(
         ("content_license_url", manifest.source.license.url.clone()),
         ("language", manifest.language.clone()),
         ("pages_root", manifest.pages_root.clone()),
+        (
+            "source_selection",
+            serde_json::to_string(&manifest.files).expect("source selection is serializable"),
+        ),
+        (
+            "source_exclusions",
+            serde_json::to_string(&manifest.exclusions)
+                .expect("source exclusions are serializable"),
+        ),
+        (
+            "lexical_index_tokenizer",
+            manifest.lexical_index.tokenizer.clone(),
+        ),
+        (
+            "lexical_index_fields",
+            serde_json::to_string(&manifest.lexical_index.fields)
+                .expect("lexical fields are serializable"),
+        ),
+        (
+            "lexical_query_normalization",
+            manifest.lexical_index.query_normalization.clone(),
+        ),
     ];
     for (key, value) in metadata {
         transaction.execute(
@@ -900,17 +1089,25 @@ fn write_artifact(
     }
 
     let mut example_count = 0;
-    for (page_index, source_file) in source_files.iter().enumerate() {
-        let page_position = page_index + 1;
+    let mut page_count = 0;
+    for source_file in source_files {
         transaction.execute(
-            "INSERT INTO source_files(source_path, sha256, byte_len, status)
-             VALUES (?1, ?2, ?3, 'parsed')",
+            "INSERT INTO source_files(source_path, sha256, byte_len, status, reason)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
             params![
                 source_file.path,
                 source_file.digest,
-                source_file.bytes.len() as i64
+                source_file.bytes.len() as i64,
+                source_file.status.as_str(),
+                source_file.exclusion_reason.as_deref().unwrap_or(""),
             ],
         )?;
+
+        let Some(page) = source_file.page.as_ref() else {
+            continue;
+        };
+        page_count += 1;
+        let page_position = page_count;
         transaction.execute(
             "INSERT INTO pages(
                  page_id, page_name, command, description, source_path,
@@ -918,22 +1115,22 @@ fn write_artifact(
                  original_content, page_kind
              ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
             params![
-                source_file.page.page_id,
-                source_file.page.page_name,
-                source_file.page.command,
-                source_file.page.description,
-                source_file.page.source_path,
-                source_file.page.source_revision,
-                source_file.page.source_ref,
+                page.page_id,
+                page.page_name,
+                page.command,
+                page.description,
+                page.source_path,
+                page.source_revision,
+                page.source_ref,
                 source_file.platform,
-                source_file.page.language,
+                page.language,
                 page_position as i64,
-                source_file.page.original_content,
-                page_kind_name(source_file.page.kind),
+                page.original_content,
+                page_kind_name(page.kind),
             ],
         )?;
 
-        for example in &source_file.page.examples {
+        for example in &page.examples {
             transaction.execute(
                 "INSERT INTO examples(example_id, page_id, position, description, command, source_line)
                  VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
@@ -946,27 +1143,31 @@ fn write_artifact(
                     example.source_line as i64,
                 ],
             )?;
-            if source_file.page.kind == PageKind::Operational
+            if page.kind == PageKind::Operational
                 && !is_documentation_navigation(&example.description)
             {
                 transaction.execute(
                     "INSERT INTO example_lexical(example_id, lexical_text) VALUES (?1, ?2)",
-                    params![example.example_id, lexical_text(&source_file.page, example),],
+                    params![example.example_id, lexical_text(page, example),],
                 )?;
             }
             example_count += 1;
         }
-        for reference in &source_file.page.references {
+        for reference in &page.references {
             transaction.execute(
                 "INSERT INTO page_references(page_id, position, destination_name, source_line)
                  VALUES (?1, ?2, ?3, ?4)",
                 params![
-                    source_file.page.page_id,
+                    page.page_id,
                     reference.example_position as i64,
                     reference.destination_name,
                     reference.source_line as i64,
                 ],
             )?;
+        }
+
+        if fail_after_pages.is_some_and(|limit| page_count >= limit) {
+            bail!("failure injection interrupted construction after {page_count} pages");
         }
     }
     transaction.commit()?;
@@ -978,11 +1179,20 @@ fn write_artifact(
     let stored_examples: i64 =
         conn.query_row("SELECT COUNT(*) FROM examples", [], |row| row.get(0))?;
     let row_counts_match = accounted_files as usize == source_files.len()
-        && stored_pages as usize == source_files.len()
+        && stored_pages as usize == page_count
         && stored_examples as usize == example_count;
     if !row_counts_match {
         bail!("artifact row accounting mismatch before publication");
     }
+
+    let artifact_size_bytes = fs::metadata(temporary)
+        .with_context(|| format!("failed to stat artifact {}", temporary.display()))?
+        .len();
+    let peak_memory_bytes = process_peak_memory_bytes();
+    let excluded_count = source_files
+        .iter()
+        .filter(|source_file| source_file.status == SourceFileStatus::Excluded)
+        .count();
 
     Ok(BuildReport {
         output,
@@ -990,6 +1200,11 @@ fn write_artifact(
         page_count: stored_pages as usize,
         example_count: stored_examples as usize,
         source_digest,
+        excluded_count,
+        build_time_ms: started_at.elapsed().as_millis(),
+        peak_memory_bytes,
+        artifact_size_bytes,
+        hardware: hardware_label(),
     })
 }
 
@@ -998,19 +1213,11 @@ fn validate_artifact(conn: &Connection) -> Result<()> {
     if integrity != "ok" {
         bail!("artifact integrity check failed: {integrity}");
     }
-    let kind: String = conn.query_row(
-        "SELECT value FROM artifact_metadata WHERE key = 'artifact_kind'",
-        [],
-        |row| row.get(0),
-    )?;
+    let kind = artifact_metadata(conn, "artifact_kind")?;
     if kind != ARTIFACT_KIND {
         bail!("unsupported artifact kind: {kind}");
     }
-    let schema_version: String = conn.query_row(
-        "SELECT value FROM artifact_metadata WHERE key = 'schema_version'",
-        [],
-        |row| row.get(0),
-    )?;
+    let schema_version = artifact_metadata(conn, "schema_version")?;
     if schema_version != SCHEMA_VERSION.to_string() {
         bail!(
             "unsupported artifact schema version: {}; expected {}",
@@ -1018,7 +1225,253 @@ fn validate_artifact(conn: &Connection) -> Result<()> {
             SCHEMA_VERSION
         );
     }
+
+    let parser_version = artifact_metadata(conn, "parser_version")?;
+    if parser_version != PARSER_VERSION {
+        bail!("unsupported artifact parser version: {parser_version}");
+    }
+    if artifact_metadata(conn, "language")? != "en" {
+        bail!("artifact language is not English");
+    }
+    let artifact_source_revision = artifact_metadata(conn, "source_revision")?;
+    if artifact_source_revision.is_empty() {
+        bail!("artifact source revision is empty");
+    }
+    let source_digest = artifact_metadata(conn, "source_digest")?;
+    if source_digest.len() != 64 || !source_digest.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        bail!("artifact source digest is invalid");
+    }
+    if artifact_metadata(conn, "source_digest_algorithm")? != "sha256" {
+        bail!("artifact source digest algorithm is not SHA256");
+    }
+    if artifact_metadata(conn, "lexical_index_tokenizer")? != LEXICAL_INDEX_TOKENIZER {
+        bail!("artifact lexical index tokenizer does not match the builder");
+    }
+    let stored_fields: Vec<String> =
+        serde_json::from_str(&artifact_metadata(conn, "lexical_index_fields")?)
+            .context("artifact lexical index fields are invalid JSON")?;
+    let expected_fields = LEXICAL_INDEX_FIELDS
+        .iter()
+        .map(|field| (*field).to_string())
+        .collect::<Vec<_>>();
+    if stored_fields != expected_fields
+        || artifact_metadata(conn, "lexical_query_normalization")? != LEXICAL_QUERY_NORMALIZATION
+    {
+        bail!("artifact lexical index recipe does not match the builder");
+    }
+
+    let selected_paths: Vec<String> =
+        serde_json::from_str(&artifact_metadata(conn, "source_selection")?)
+            .context("artifact source selection is invalid JSON")?;
+    let exclusions: Vec<SourceExclusion> =
+        serde_json::from_str(&artifact_metadata(conn, "source_exclusions")?)
+            .context("artifact source exclusions are invalid JSON")?;
+    let pages_root = artifact_metadata(conn, "pages_root")?;
+    if pages_root.is_empty() {
+        bail!("artifact pages_root is empty");
+    }
+    for path in &selected_paths {
+        validate_selected_path(path, &pages_root)?;
+    }
+    for exclusion in &exclusions {
+        validate_selected_path(&exclusion.path, &pages_root)?;
+        if exclusion.reason.trim().is_empty() {
+            bail!("artifact exclusion reason is empty: {}", exclusion.path);
+        }
+    }
+    let exclusion_reasons: HashMap<&str, &str> = exclusions
+        .iter()
+        .map(|exclusion| (exclusion.path.as_str(), exclusion.reason.as_str()))
+        .collect();
+
+    let mut source_entries = Vec::new();
+    let mut statement = conn.prepare(
+        "SELECT source_path, sha256, byte_len, status, reason
+         FROM source_files ORDER BY rowid",
+    )?;
+    let rows = statement.query_map([], |row| {
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, i64>(2)?,
+            row.get::<_, String>(3)?,
+            row.get::<_, String>(4)?,
+        ))
+    })?;
+    for row in rows {
+        let (path, digest, byte_len, status, reason) = row?;
+        if digest.len() != 64
+            || !digest.bytes().all(|byte| byte.is_ascii_hexdigit())
+            || byte_len < 0
+        {
+            bail!("invalid source identity record: {path}");
+        }
+        match status.as_str() {
+            "parsed" if reason.is_empty() => {}
+            "excluded" => {
+                let Some(expected_reason) = exclusion_reasons.get(path.as_str()) else {
+                    bail!("excluded source has no manifest reason: {path}");
+                };
+                if reason != *expected_reason {
+                    bail!("excluded source reason mismatch: {path}");
+                }
+            }
+            _ => bail!("invalid source file status: {path}: {status}"),
+        }
+        source_entries.push((path, status));
+    }
+    let stored_paths: Vec<String> = source_entries
+        .iter()
+        .map(|(path, _)| path.clone())
+        .collect();
+    if stored_paths != selected_paths {
+        bail!("artifact source selection row accounting mismatch");
+    }
+    let stored_excluded_paths: HashSet<&str> = source_entries
+        .iter()
+        .filter(|(_, status)| status == "excluded")
+        .map(|(path, _)| path.as_str())
+        .collect();
+    if stored_excluded_paths.len() != exclusions.len()
+        || exclusions
+            .iter()
+            .any(|exclusion| !stored_excluded_paths.contains(exclusion.path.as_str()))
+    {
+        bail!("artifact exclusion row accounting mismatch");
+    }
+
+    let mut page_paths = HashSet::new();
+    let mut page_statement = conn.prepare(
+        "SELECT page_id, page_name, source_path, source_revision, source_ref,
+                platform, language, page_position
+         FROM pages ORDER BY page_position",
+    )?;
+    let page_rows = page_statement.query_map([], |row| {
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+            row.get::<_, String>(3)?,
+            row.get::<_, String>(4)?,
+            row.get::<_, String>(5)?,
+            row.get::<_, String>(6)?,
+            row.get::<_, i64>(7)?,
+        ))
+    })?;
+    for (index, row) in page_rows.enumerate() {
+        let (
+            page_id,
+            page_name,
+            source_path,
+            source_revision,
+            source_ref,
+            platform,
+            language,
+            page_position,
+        ) = row?;
+        if page_position != index as i64 + 1 {
+            bail!("page row accounting mismatch at {source_path}");
+        }
+        validate_platform(&platform)?;
+        let expected_page_name = page_name_from_source_path(&source_path)?;
+        if page_name != expected_page_name {
+            bail!("page name identity mismatch: {source_path}");
+        }
+        let expected_page_id = deterministic_id(
+            "page",
+            &[&source_revision, &source_path, &platform, &language],
+        );
+        if page_id != expected_page_id
+            || source_revision != artifact_source_revision
+            || source_ref != format!("tldr-pages@{source_revision}:{source_path}")
+        {
+            bail!("page source identity mismatch: {source_path}");
+        }
+        if !page_paths.insert(source_path.clone()) {
+            bail!("duplicate stored page source: {source_path}");
+        }
+    }
+    for (path, status) in &source_entries {
+        if status == "parsed" && !page_paths.contains(path) {
+            bail!("parsed source has no page row: {path}");
+        }
+        if status == "excluded" && page_paths.contains(path) {
+            bail!("excluded source has a page row: {path}");
+        }
+    }
+
+    let pages = load_pages(conn)?;
+    validate_page_references(&pages)?;
+    let mut expected_lexical = HashMap::new();
+    let mut expected_examples = 0usize;
+    for page in &pages {
+        if page.examples.is_empty() {
+            bail!("page contains no stored examples: {}", page.source_path);
+        }
+        for (index, example) in page.examples.iter().enumerate() {
+            if example.page_id != page.page_id
+                || example.position != index + 1
+                || example.example_id
+                    != deterministic_id("example", &[&page.page_id, &(index + 1).to_string()])
+                || example.source_line == 0
+            {
+                bail!("example source identity mismatch: {}", page.source_path);
+            }
+            expected_examples += 1;
+            if page.kind == PageKind::Operational
+                && !is_documentation_navigation(&example.description)
+            {
+                expected_lexical.insert(example.example_id.clone(), lexical_text(page, example));
+            }
+        }
+        if page.kind == PageKind::Operational && !page.references.is_empty() {
+            bail!("operational page has references: {}", page.source_path);
+        }
+        for reference in &page.references {
+            if !page
+                .examples
+                .iter()
+                .any(|example| example.position == reference.example_position)
+            {
+                bail!("reference position is missing: {}", page.source_path);
+            }
+        }
+    }
+
+    let stored_lexical: HashMap<String, String> = conn
+        .prepare("SELECT example_id, lexical_text FROM example_lexical")?
+        .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?
+        .collect::<rusqlite::Result<HashMap<_, _>>>()?;
+    if stored_lexical != expected_lexical {
+        bail!("lexical index row accounting mismatch");
+    }
+
+    let stored_examples: i64 =
+        conn.query_row("SELECT COUNT(*) FROM examples", [], |row| row.get(0))?;
+    let stored_references: i64 =
+        conn.query_row("SELECT COUNT(*) FROM page_references", [], |row| row.get(0))?;
+    let expected_references: usize = pages.iter().map(|page| page.references.len()).sum();
+    let parsed_count = source_entries
+        .iter()
+        .filter(|(_, status)| status == "parsed")
+        .count();
+    if source_entries.len() != selected_paths.len()
+        || pages.len() != parsed_count
+        || stored_examples as usize != expected_examples
+        || stored_references as usize != expected_references
+    {
+        bail!("artifact row accounting mismatch");
+    }
     Ok(())
+}
+
+fn artifact_metadata(conn: &Connection, key: &str) -> Result<String> {
+    conn.query_row(
+        "SELECT value FROM artifact_metadata WHERE key = ?1",
+        [key],
+        |row| row.get(0),
+    )
+    .with_context(|| format!("artifact metadata is missing: {key}"))
 }
 
 fn page_kind_name(kind: PageKind) -> &'static str {
@@ -1221,6 +1674,64 @@ fn deterministic_id(kind: &str, fields: &[&str]) -> String {
 
 fn sha256_hex(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
+}
+
+fn process_peak_memory_bytes() -> Option<u64> {
+    #[cfg(target_os = "linux")]
+    {
+        let status = fs::read_to_string("/proc/self/status").ok()?;
+        let kilobytes = status
+            .lines()
+            .find_map(|line| line.strip_prefix("VmHWM:"))?
+            .split_whitespace()
+            .next()?
+            .parse::<u64>()?;
+        return Some(kilobytes.saturating_mul(1024));
+    }
+
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    {
+        let mut usage = std::mem::MaybeUninit::<libc::rusage>::uninit();
+        // SAFETY: getrusage initializes the provided rusage structure on success.
+        let result = unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) };
+        if result == 0 {
+            // macOS reports ru_maxrss in bytes; Linux is handled above and reports KiB.
+            return Some(unsafe { usage.assume_init() }.ru_maxrss as u64);
+        }
+    }
+
+    None
+}
+
+fn hardware_label() -> String {
+    if let Some(label) = std::env::var_os("ASKMAN_BUILD_HARDWARE") {
+        let label = label.to_string_lossy().trim().to_string();
+        if !label.is_empty() {
+            return label;
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    if let Ok(output) = std::process::Command::new("sysctl")
+        .args(["-n", "hw.model"])
+        .output()
+        && output.status.success()
+    {
+        let model = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if !model.is_empty() {
+            return format!("{model} (macOS {})", std::env::consts::ARCH);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    if let Ok(model) = fs::read_to_string("/sys/devices/virtual/dmi/id/product_name") {
+        let model = model.trim();
+        if !model.is_empty() {
+            return format!("{model} (Linux {})", std::env::consts::ARCH);
+        }
+    }
+
+    format!("{} {}", std::env::consts::OS, std::env::consts::ARCH)
 }
 
 fn absolute_path(path: &Path) -> Result<PathBuf> {

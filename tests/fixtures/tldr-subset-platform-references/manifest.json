@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "parser_version": "tldr-subset-v2",
+  "schema_version": 3,
+  "parser_version": "tldr-subset-v3",
   "source": {
     "name": "tldr-pages",
     "revision": "fixture-tldr-platform-references-v1",
@@ -26,5 +26,10 @@
     "pages/common/just.1.md",
     "pages/common/just.js.md",
     "pages/common/tldr-token.md"
-  ]
+  ],
+  "lexical_index": {
+    "tokenizer": "unicode61",
+    "fields": ["page.command", "page.description", "example.description", "example.command"],
+    "query_normalization": "split non-alphanumeric except underscore; lowercase ASCII; quote and AND-join unique sorted tokens"
+  }
 }

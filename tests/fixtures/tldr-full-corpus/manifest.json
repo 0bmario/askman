@@ -3,9 +3,9 @@
   "parser_version": "tldr-subset-v3",
   "source": {
     "name": "tldr-pages",
-    "revision": "fixture-tldr-snapshot-v1",
+    "revision": "fixture-tldr-full-corpus-v1",
     "digest_algorithm": "sha256",
-    "digest": "0b23613237f45a0f7e376ed63b616aa7e2554836c7721044aa1468391a1cae44",
+    "digest": "5cefff74aec82018bd54887666fb1de5c185aa213bc5f2800b26b3441250c36a",
     "url": "https://github.com/tldr-pages/tldr",
     "attribution": "Content from the tldr-pages project.",
     "license": {
@@ -17,8 +17,18 @@
   "pages_root": "pages",
   "files": [
     "pages/common/cp.md",
-    "pages/common/ls.md",
-    "pages/linux/grep.md"
+    "pages/common/vi.md",
+    "pages/common/vim.md",
+    "pages/common/excluded.md",
+    "pages/linux/grep.md",
+    "pages/osx/pbcopy.md",
+    "pages/windows/printf.md"
+  ],
+  "exclusions": [
+    {
+      "path": "pages/common/excluded.md",
+      "reason": "fixture page documents an explicit parser exclusion"
+    }
   ],
   "lexical_index": {
     "tokenizer": "unicode61",
