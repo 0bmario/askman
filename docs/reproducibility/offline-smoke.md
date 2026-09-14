@@ -48,8 +48,8 @@ stable assertions. This harness always builds the checked-out source.
 The run directory contains:
 
 - `run-manifest.txt`: revision, lockfile and asset digests, runtime/linkage and
-  host information, and inference settings. The thread policy is recorded;
-  the effective ORT thread count is not instrumented.
+  host information, and inference settings. It records the online processor
+  count passed to ONNX Runtime as its intra-op thread count.
 - `offline-smoke.tsv`: the exact fixture snapshot used, with its SHA256 and
   the committed fixture SHA256 recorded separately in the manifest. A mismatch
   identifies a local fixture change.
@@ -119,8 +119,8 @@ has the same teardown behavior. It also does not measure retrieval quality or
 performance.
 
 Verbose output calls the heuristic-adjusted value `Ranking score`; it calls the
-unadjusted sqlite-vec value `Raw squared L2 distance`. The historical threshold
-and ordering remain unchanged.
+unadjusted sqlite-vec value `Raw L2 distance`. The historical threshold and
+ordering remain unchanged.
 
 ## Teardown finding
 

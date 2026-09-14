@@ -761,7 +761,7 @@ def hybrid_results(
 def current_adjustment(candidate: Candidate, raw_distance: float) -> float | None:
     """Adapt the current Rust ranking heuristics to lexical candidates.
 
-    The released ranker filters and adjusts MiniLM squared L2 distances. This adapter preserves
+    The released ranker filters and adjusts MiniLM L2 distances. This adapter preserves
     its filtering and command/domain multipliers while using a deterministic
     normalized FTS distance so both controlled baselines share one candidate
     pool.  It is intentionally not the historical-policy smoke run.

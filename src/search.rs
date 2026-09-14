@@ -44,15 +44,14 @@ const OFFICIAL_SITES: &[&str] = &[
     "greenwoodsoftware.",
 ];
 
-/// sqlite-vec vec0's default float distance is squared L2 unless the table
-/// declares another metric. The existing table does not declare one, so this
-/// threshold and the ranking behavior are intentionally retained as squared
-/// L2 values.
+/// sqlite-vec vec0's default float distance is L2 unless the table declares
+/// another metric. The existing table does not declare one, so this threshold
+/// and the ranking behavior are intentionally retained as L2 values.
 /// See: https://alexgarcia.xyz/sqlite-vec/features/knn.html
 const MAX_DISTANCE: f64 = 1.10;
 
 /// Metric returned by the current `pages_vec` schema.
-pub const DISTANCE_METRIC: &str = "squared L2";
+pub const DISTANCE_METRIC: &str = "L2";
 
 pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> TargetOs {
     match (linux, osx, windows) {
