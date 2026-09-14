@@ -5,6 +5,7 @@ use askman::tldr_subset::{
     query_artifact, query_artifact_for_platform,
 };
 use rusqlite::Connection;
+use sha2::{Digest, Sha256};
 use std::fs;
 use std::path::{Path, PathBuf};
 use tempfile::tempdir;
@@ -234,6 +235,36 @@ fn ordinary_tldr_token_is_searchable_and_not_a_reference() {
 }
 
 #[test]
+fn mixed_pages_do_not_index_navigation_examples() {
+    let snapshot = tempdir().unwrap();
+    write_snapshot_file(
+        snapshot.path(),
+        "pages/common/mixed.md",
+        "# mixed\n\n> A page with operational and navigation examples.\n\n- Run the operational command:\n\n`echo operational`\n\n- View documentation for the original command:\n\n`tldr vim`\n",
+    );
+    let output_dir = tempdir().unwrap();
+    let output = output_dir.path().join("subset.db");
+    build_custom_snapshot(snapshot.path(), &["pages/common/mixed.md"], output.clone()).unwrap();
+
+    let navigation_results = query_artifact(QueryOptions {
+        artifact: output.clone(),
+        query: "documentation original".to_string(),
+        limit: 10,
+    })
+    .unwrap();
+    assert!(navigation_results.is_empty());
+
+    let operational_results = query_artifact(QueryOptions {
+        artifact: output,
+        query: "run operational".to_string(),
+        limit: 10,
+    })
+    .unwrap();
+    assert_eq!(operational_results.len(), 1);
+    assert_eq!(operational_results[0].command, "echo operational");
+}
+
+#[test]
 fn disambiguation_lists_destinations_and_search_keeps_pages_distinct() {
     let output_dir = tempdir().unwrap();
     let output = output_dir.path().join("subset.db");
@@ -342,7 +373,7 @@ fn cyclic_references_fail_with_the_source_path_chain() {
     .to_string();
     assert!(
         error.contains(
-            "pages/common/a.md: cyclic page reference: pages/common/a.md -> pages/common/b.md -> pages/common/a.md"
+            "pages/common/b.md:7: cyclic page reference: pages/common/a.md -> pages/common/b.md -> pages/common/a.md"
         ),
         "{error}"
     );
@@ -373,6 +404,7 @@ fn build_custom_snapshot(
     files: &[&str],
     output: PathBuf,
 ) -> anyhow::Result<askman::tldr_subset::BuildReport> {
+    let digest = snapshot_digest_for_files(root, files);
     let file_list = files
         .iter()
         .map(|file| format!("\"{file}\""))
@@ -386,7 +418,7 @@ fn build_custom_snapshot(
     "name": "tldr-pages",
     "revision": "fixture-invalid-v1",
     "digest_algorithm": "sha256",
-    "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "digest": "{digest}",
     "url": "https://github.com/tldr-pages/tldr",
     "attribution": "Content from the tldr-pages project.",
     "license": {{"name": "MIT", "url": "https://github.com/tldr-pages/tldr/blob/main/LICENSE.md"}}
@@ -403,6 +435,26 @@ fn build_custom_snapshot(
         snapshot: root.to_path_buf(),
         output,
     })?)
+}
+
+fn snapshot_digest_for_files(root: &Path, files: &[&str]) -> String {
+    let mut entries = files
+        .iter()
+        .map(|file| (*file, fs::read(root.join(file)).unwrap()))
+        .collect::<Vec<_>>();
+    entries.sort_by(|left, right| left.0.cmp(right.0));
+
+    let mut hasher = Sha256::new();
+    hasher.update(b"askman-tldr-subset-snapshot-v1\n");
+    for (path, bytes) in entries {
+        hasher.update(path.as_bytes());
+        hasher.update([0]);
+        hasher.update(bytes.len().to_string().as_bytes());
+        hasher.update([0]);
+        hasher.update(bytes);
+        hasher.update([0]);
+    }
+    format!("{:x}", hasher.finalize())
 }
 
 #[test]

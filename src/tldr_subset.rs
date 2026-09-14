@@ -334,7 +334,8 @@ pub fn inspect_page(options: InspectOptions) -> Result<PageLookupResult> {
     validate_artifact(&conn)?;
     let pages = load_pages(&conn)?;
     let mut stack = Vec::new();
-    let destinations = resolve_page_name(&pages, &requested_name, &options.platform, &mut stack)?;
+    let destinations =
+        resolve_page_name(&pages, &requested_name, &options.platform, &mut stack, None)?;
 
     Ok(PageLookupResult {
         requested_name,
@@ -611,7 +612,7 @@ fn validate_source_references(source_files: &[SourceFile]) -> Result<()> {
         for page in &pages {
             if selected.contains(&page.page_id) && page.kind != PageKind::Operational {
                 let mut stack = Vec::new();
-                resolve_page_name(&pages, &page.page_name, platform, &mut stack)?;
+                resolve_page_name(&pages, &page.page_name, platform, &mut stack, None)?;
             }
         }
     }
@@ -635,6 +636,7 @@ fn resolve_page_name(
     page_name: &str,
     platform: &str,
     stack: &mut Vec<String>,
+    incoming_reference: Option<(&str, usize)>,
 ) -> Result<Vec<Page>> {
     let normalized_name = normalize_page_name(page_name)?;
     let page = select_page(pages, &normalized_name, platform)
@@ -643,11 +645,10 @@ fn resolve_page_name(
     if let Some(position) = stack.iter().position(|path| path == &page.source_path) {
         let mut cycle = stack[position..].to_vec();
         cycle.push(page.source_path.clone());
-        bail!(
-            "{}: cyclic page reference: {}",
-            page.source_path,
-            cycle.join(" -> ")
-        );
+        let location = incoming_reference
+            .map(|(source_path, source_line)| format!("{source_path}:{source_line}"))
+            .unwrap_or_else(|| page.source_path.clone());
+        bail!("{location}: cyclic page reference: {}", cycle.join(" -> "));
     }
 
     if page.kind == PageKind::Operational {
@@ -666,14 +667,20 @@ fn resolve_page_name(
                     reference.destination_name
                 )
             })?;
-        let resolved =
-            resolve_page_name(pages, &destination.page_name, platform, stack).map_err(|error| {
-                if error.to_string().contains("cyclic page reference") {
-                    error
-                } else {
-                    anyhow!("{}:{}: {}", page.source_path, reference.source_line, error)
-                }
-            })?;
+        let resolved = resolve_page_name(
+            pages,
+            &destination.page_name,
+            platform,
+            stack,
+            Some((&page.source_path, reference.source_line)),
+        )
+        .map_err(|error| {
+            if error.to_string().contains("cyclic page reference") {
+                error
+            } else {
+                anyhow!("{}:{}: {}", page.source_path, reference.source_line, error)
+            }
+        })?;
         for resolved_page in resolved {
             if !destinations
                 .iter()
@@ -939,7 +946,9 @@ fn write_artifact(
                     example.source_line as i64,
                 ],
             )?;
-            if source_file.page.kind == PageKind::Operational {
+            if source_file.page.kind == PageKind::Operational
+                && !is_documentation_navigation(&example.description)
+            {
                 transaction.execute(
                     "INSERT INTO example_lexical(example_id, lexical_text) VALUES (?1, ?2)",
                     params![example.example_id, lexical_text(&source_file.page, example),],
