@@ -80,12 +80,20 @@ released binary, operating system, CPU or future model/runtime combination
 has the same teardown behavior. It also does not measure retrieval quality or
 performance.
 
-On the tested macOS ARM64 host, the original build selected Homebrew ONNX
-Runtime 1.22.0 through pkg-config. It returned retrieval output, emitted
-duplicate ONNX schema warnings, and aborted with `mutex lock failed: Invalid
-argument` (status 134). A standalone native probe reproduced that abort when
-the ORT environment was retained through process teardown; explicitly
-releasing it exited cleanly. The Askman smoke run with the pinned ORT 1.20.0
-runtime exits cleanly without the warnings. This records the observed runtime
-boundary without claiming that duplicate schema warnings alone establish the
-cause.
+Verbose output calls the heuristic-adjusted value `Ranking score`; it calls the
+unadjusted sqlite-vec value `Raw L2 distance`. The historical threshold and
+ordering remain unchanged.
+
+## Teardown finding
+
+On 2026-09-14 at code revision `0c1fd02efcf701e79065de5bdf457da604a2ee3f`, an
+isolated build using the host's Homebrew ONNX Runtime `1.22.0` through
+pkg-config reproduced the prior failure. It returned retrieval output, emitted
+duplicate ONNX schema-registration errors, then exited `134` (`SIGABRT`) with
+`mutex lock failed: Invalid argument`. The full CLI process ran to teardown;
+the nonzero status and stderr were captured, not suppressed.
+
+The same queries using the explicitly provisioned ONNX Runtime `1.20.0` exited
+`0` under the network-denied sandbox and outside it. The evidence establishes
+the tested runtime boundary; it does not by itself prove which native runtime
+destructor or schema-registration path is causal.

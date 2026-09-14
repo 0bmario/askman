@@ -82,14 +82,7 @@ fn try_semantic_search(
             };
             println!(
                 "{}",
-                format!(
-                    "(Distance: {:.4} | Raw {}: {:.4} | Rules: {})",
-                    data.adjusted_score,
-                    search::DISTANCE_METRIC,
-                    data.raw_distance,
-                    rules
-                )
-                .bright_black()
+                verbose_score_line(data.adjusted_score, data.raw_distance, &rules).bright_black()
             );
         }
 
@@ -117,4 +110,29 @@ fn try_semantic_search(
     }
 
     Ok(())
+}
+
+fn verbose_score_line(adjusted_score: f64, raw_distance: f64, rules: &str) -> String {
+    format!(
+        "(Ranking score: {:.4} | Raw {} distance: {:.4} | Rules: {})",
+        adjusted_score,
+        search::DISTANCE_METRIC,
+        raw_distance,
+        rules
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn verbose_scores_name_ranking_score_and_raw_metric() {
+        let line = verbose_score_line(0.335, 0.5, "core_command (0.67x)");
+
+        assert_eq!(
+            line,
+            "(Ranking score: 0.3350 | Raw L2 distance: 0.5000 | Rules: core_command (0.67x))"
+        );
+    }
 }
