@@ -1,15 +1,16 @@
 use crate::db;
 use anyhow::{Context, Result, anyhow, bail};
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, params, params_from_iter};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 
 const ARTIFACT_KIND: &str = "askman.tldr-subset";
-const SCHEMA_VERSION: u32 = 1;
-const PARSER_VERSION: &str = "tldr-subset-v1";
+const SCHEMA_VERSION: u32 = 2;
+const PARSER_VERSION: &str = "tldr-subset-v2";
+const SUPPORTED_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
 
 #[derive(Debug, Clone)]
 pub struct BuildOptions {
@@ -32,6 +33,13 @@ pub struct QueryOptions {
     pub artifact: PathBuf,
     pub query: String,
     pub limit: usize,
+}
+
+#[derive(Debug, Clone)]
+pub struct InspectOptions {
+    pub artifact: PathBuf,
+    pub page: String,
+    pub platform: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -61,9 +69,25 @@ pub struct LicenseMetadata {
     pub url: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PageKind {
+    Operational,
+    Reference,
+    Disambiguation,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct PageReference {
+    pub destination_name: String,
+    pub example_position: usize,
+    pub source_line: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Page {
     pub page_id: String,
+    pub page_name: String,
     pub command: String,
     pub description: String,
     pub source_path: String,
@@ -73,15 +97,25 @@ pub struct Page {
     pub language: String,
     pub original_content: String,
     pub examples: Vec<Example>,
+    pub kind: PageKind,
+    pub references: Vec<PageReference>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Example {
     pub example_id: String,
     pub page_id: String,
     pub position: usize,
     pub description: String,
     pub command: String,
+    pub source_line: usize,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq)]
+pub struct PageLookupResult {
+    pub requested_name: String,
+    pub platform: String,
+    pub destinations: Vec<Page>,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -150,6 +184,7 @@ pub fn build_artifact(options: BuildOptions) -> Result<BuildReport> {
     }
 
     let source_files = load_source_files(&manifest, &snapshot_root)?;
+    validate_source_references(&source_files)?;
     let source_digest = snapshot_digest(&source_files);
     if source_digest != manifest.source.digest.to_ascii_lowercase() {
         bail!(
@@ -206,15 +241,31 @@ pub fn build_artifact(options: BuildOptions) -> Result<BuildReport> {
 
 /// Query the lexical index and return source-backed examples with parent identity.
 pub fn query_artifact(options: QueryOptions) -> Result<Vec<QueryResult>> {
+    query_artifact_for_platform(options, "common")
+}
+
+/// Query only the pages selected for one target platform.
+pub fn query_artifact_for_platform(
+    options: QueryOptions,
+    platform: &str,
+) -> Result<Vec<QueryResult>> {
     if options.limit == 0 {
         bail!("query limit must be greater than zero");
     }
+    validate_platform(platform)?;
     let fts_query = build_fts_query(&options.query)?;
     let conn = Connection::open(&options.artifact)
         .with_context(|| format!("failed to open artifact {}", options.artifact.display()))?;
     validate_artifact(&conn)?;
+    let selected_page_ids = selected_page_ids(&conn, platform)?;
+    if selected_page_ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    let page_placeholders = std::iter::repeat_n("?", selected_page_ids.len())
+        .collect::<Vec<_>>()
+        .join(", ");
 
-    let mut statement = conn.prepare(
+    let query = format!(
         "SELECT
              e.example_id,
              e.page_id,
@@ -232,10 +283,14 @@ pub fn query_artifact(options: QueryOptions) -> Result<Vec<QueryResult>> {
          JOIN examples AS e ON e.example_id = example_lexical.example_id
          JOIN pages AS p ON p.page_id = e.page_id
          WHERE example_lexical MATCH ?1
-         ORDER BY bm25(example_lexical), e.example_id
-         LIMIT ?2",
-    )?;
-    let rows = statement.query_map(params![fts_query, options.limit as i64], |row| {
+           AND p.page_id IN ({page_placeholders})
+         ORDER BY bm25(example_lexical), e.example_id",
+    );
+    let mut statement = conn.prepare(&query)?;
+    let query_params = params_from_iter(
+        std::iter::once(fts_query.as_str()).chain(selected_page_ids.iter().map(String::as_str)),
+    );
+    let rows = statement.query_map(query_params, |row| {
         Ok(QueryResult {
             rank: 0,
             example_id: row.get(0)?,
@@ -254,12 +309,38 @@ pub fn query_artifact(options: QueryOptions) -> Result<Vec<QueryResult>> {
     })?;
 
     let mut results = Vec::new();
-    for (rank, row) in rows.enumerate() {
+    let mut seen_pages = HashSet::new();
+    for row in rows {
         let mut result = row?;
-        result.rank = rank + 1;
+        if !seen_pages.insert(result.page_id.clone()) {
+            continue;
+        }
+        result.rank = results.len() + 1;
         results.push(result);
+        if results.len() == options.limit {
+            break;
+        }
     }
     Ok(results)
+}
+
+/// Inspect the full page selected for a name and platform. Reference pages are
+/// followed, while disambiguation pages return every distinct destination.
+pub fn inspect_page(options: InspectOptions) -> Result<PageLookupResult> {
+    validate_platform(&options.platform)?;
+    let requested_name = normalize_page_name(&options.page)?;
+    let conn = Connection::open(&options.artifact)
+        .with_context(|| format!("failed to open artifact {}", options.artifact.display()))?;
+    validate_artifact(&conn)?;
+    let pages = load_pages(&conn)?;
+    let mut stack = Vec::new();
+    let destinations = resolve_page_name(&pages, &requested_name, &options.platform, &mut stack)?;
+
+    Ok(PageLookupResult {
+        requested_name,
+        platform: options.platform,
+        destinations,
+    })
 }
 
 /// Parse one ordinary tldr page while retaining source context and example order.
@@ -346,6 +427,7 @@ pub fn parse_page(
                 position,
                 description,
                 command: command_text.to_string(),
+                source_line: line_number + 1,
             });
             continue;
         }
@@ -380,14 +462,18 @@ pub fn parse_page(
 
     let page_id = deterministic_id("page", &[source_revision, source_path, platform, language]);
     let source_ref = format!("tldr-pages@{source_revision}:{source_path}");
+    let page_name = page_name_from_source_path(source_path)?;
     for example in &mut examples {
         example.page_id = page_id.clone();
         example.example_id =
             deterministic_id("example", &[&page_id, &example.position.to_string()]);
     }
 
+    let (kind, references) = classify_page_references(source_path, &examples)?;
+
     Ok(Page {
         page_id,
+        page_name,
         command,
         description: description_lines.join("\n"),
         source_path: source_path.to_string(),
@@ -397,7 +483,208 @@ pub fn parse_page(
         language: language.to_string(),
         original_content: content.to_string(),
         examples,
+        kind,
+        references,
     })
+}
+
+fn classify_page_references(
+    source_path: &str,
+    examples: &[Example],
+) -> Result<(PageKind, Vec<PageReference>)> {
+    if examples.is_empty()
+        || !examples
+            .iter()
+            .all(|example| is_documentation_navigation(&example.description))
+    {
+        return Ok((PageKind::Operational, Vec::new()));
+    }
+
+    let mut references = Vec::with_capacity(examples.len());
+    for example in examples {
+        let destination_name = parse_reference_command(&example.command).ok_or_else(|| {
+            anyhow!(
+                "{}:{}: documentation-navigation example must invoke tldr with a destination",
+                source_path,
+                example.source_line
+            )
+        })?;
+        references.push(PageReference {
+            destination_name,
+            example_position: example.position,
+            source_line: example.source_line,
+        });
+    }
+
+    let kind = if references.len() == 1 {
+        PageKind::Reference
+    } else {
+        PageKind::Disambiguation
+    };
+    Ok((kind, references))
+}
+
+fn is_documentation_navigation(description: &str) -> bool {
+    let normalized = description.trim().to_ascii_lowercase();
+    normalized.starts_with("view documentation") || normalized.starts_with("view the documentation")
+}
+
+fn parse_reference_command(command: &str) -> Option<String> {
+    let mut tokens = command.split_whitespace();
+    if tokens.next()? != "tldr" {
+        return None;
+    }
+
+    let mut destination_tokens = Vec::new();
+    let mut skip_next = false;
+    for token in tokens {
+        if skip_next {
+            skip_next = false;
+            continue;
+        }
+        if token == "-p" || token == "--platform" {
+            skip_next = true;
+            continue;
+        }
+        if token.starts_with("--platform=") || token.starts_with("-p=") {
+            continue;
+        }
+        if token.starts_with('-') {
+            return None;
+        }
+        destination_tokens.push(token);
+    }
+    if skip_next || destination_tokens.is_empty() {
+        return None;
+    }
+
+    normalize_page_name(&destination_tokens.join("-")).ok()
+}
+
+fn page_name_from_source_path(source_path: &str) -> Result<String> {
+    let path = Path::new(source_path);
+    let name = path
+        .file_stem()
+        .and_then(|value| value.to_str())
+        .ok_or_else(|| anyhow!("invalid page source path: {source_path}"))?;
+    normalize_page_name(name)
+}
+
+fn normalize_page_name(name: &str) -> Result<String> {
+    let joined_words = name.split_whitespace().collect::<Vec<_>>().join("-");
+    let mut normalized = joined_words.as_str();
+    if let Some(without_extension) = normalized.strip_suffix(".md") {
+        normalized = without_extension;
+    }
+    if normalized.is_empty()
+        || normalized.contains('/')
+        || normalized.contains('\\')
+        || normalized.chars().any(char::is_whitespace)
+    {
+        bail!("invalid page name: {name}");
+    }
+    Ok(normalized.to_ascii_lowercase())
+}
+
+fn validate_platform(platform: &str) -> Result<()> {
+    if SUPPORTED_PLATFORMS.contains(&platform) {
+        Ok(())
+    } else {
+        bail!(
+            "unsupported target platform `{platform}`; expected one of: {}",
+            SUPPORTED_PLATFORMS.join(", ")
+        )
+    }
+}
+
+fn validate_source_references(source_files: &[SourceFile]) -> Result<()> {
+    let pages: Vec<Page> = source_files.iter().map(|file| file.page.clone()).collect();
+    for platform in SUPPORTED_PLATFORMS {
+        let selected: HashSet<String> = pages
+            .iter()
+            .filter(|page| {
+                select_page(&pages, &page.page_name, platform)
+                    .is_some_and(|selected| selected.page_id == page.page_id)
+            })
+            .map(|page| page.page_id.clone())
+            .collect();
+        for page in &pages {
+            if selected.contains(&page.page_id) && page.kind != PageKind::Operational {
+                let mut stack = Vec::new();
+                resolve_page_name(&pages, &page.page_name, platform, &mut stack)?;
+            }
+        }
+    }
+    Ok(())
+}
+
+fn select_page<'a>(pages: &'a [Page], page_name: &str, platform: &str) -> Option<&'a Page> {
+    let normalized_name = page_name.to_ascii_lowercase();
+    pages
+        .iter()
+        .find(|page| page.page_name == normalized_name && page.platform == platform)
+        .or_else(|| {
+            pages
+                .iter()
+                .find(|page| page.page_name == normalized_name && page.platform == "common")
+        })
+}
+
+fn resolve_page_name(
+    pages: &[Page],
+    page_name: &str,
+    platform: &str,
+    stack: &mut Vec<String>,
+) -> Result<Vec<Page>> {
+    let normalized_name = normalize_page_name(page_name)?;
+    let page = select_page(pages, &normalized_name, platform)
+        .ok_or_else(|| anyhow!("unresolved page reference `{normalized_name}`"))?;
+
+    if let Some(position) = stack.iter().position(|path| path == &page.source_path) {
+        let mut cycle = stack[position..].to_vec();
+        cycle.push(page.source_path.clone());
+        bail!(
+            "{}: cyclic page reference: {}",
+            page.source_path,
+            cycle.join(" -> ")
+        );
+    }
+
+    if page.kind == PageKind::Operational {
+        return Ok(vec![page.clone()]);
+    }
+
+    stack.push(page.source_path.clone());
+    let mut destinations = Vec::new();
+    for reference in &page.references {
+        let destination =
+            select_page(pages, &reference.destination_name, platform).ok_or_else(|| {
+                anyhow!(
+                    "{}:{}: unresolved page reference `{}`",
+                    page.source_path,
+                    reference.source_line,
+                    reference.destination_name
+                )
+            })?;
+        let resolved =
+            resolve_page_name(pages, &destination.page_name, platform, stack).map_err(|error| {
+                if error.to_string().contains("cyclic page reference") {
+                    error
+                } else {
+                    anyhow!("{}:{}: {}", page.source_path, reference.source_line, error)
+                }
+            })?;
+        for resolved_page in resolved {
+            if !destinations
+                .iter()
+                .any(|existing: &Page| existing.page_id == resolved_page.page_id)
+            {
+                destinations.push(resolved_page);
+            }
+        }
+    }
+    stack.pop();
+    Ok(destinations)
 }
 
 fn read_manifest(path: &Path) -> Result<SubsetManifest> {
@@ -544,6 +831,7 @@ fn write_artifact(
          );
          CREATE TABLE pages (
              page_id TEXT PRIMARY KEY NOT NULL,
+             page_name TEXT NOT NULL,
              command TEXT NOT NULL,
              description TEXT NOT NULL,
              source_path TEXT UNIQUE NOT NULL,
@@ -552,7 +840,8 @@ fn write_artifact(
              platform TEXT NOT NULL,
              language TEXT NOT NULL,
              page_position INTEGER NOT NULL,
-             original_content TEXT NOT NULL
+             original_content TEXT NOT NULL,
+             page_kind TEXT NOT NULL
          );
          CREATE TABLE examples (
              example_id TEXT PRIMARY KEY NOT NULL,
@@ -560,7 +849,15 @@ fn write_artifact(
              position INTEGER NOT NULL,
              description TEXT NOT NULL,
              command TEXT NOT NULL,
+             source_line INTEGER NOT NULL,
              UNIQUE(page_id, position)
+         );
+         CREATE TABLE page_references (
+             page_id TEXT NOT NULL REFERENCES pages(page_id),
+             position INTEGER NOT NULL,
+             destination_name TEXT NOT NULL,
+             source_line INTEGER NOT NULL,
+             PRIMARY KEY(page_id, position)
          );
          CREATE VIRTUAL TABLE example_lexical USING fts5(
              example_id UNINDEXED,
@@ -609,11 +906,13 @@ fn write_artifact(
         )?;
         transaction.execute(
             "INSERT INTO pages(
-                 page_id, command, description, source_path, source_revision,
-                 source_ref, platform, language, page_position, original_content
-             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+                 page_id, page_name, command, description, source_path,
+                 source_revision, source_ref, platform, language, page_position,
+                 original_content, page_kind
+             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
             params![
                 source_file.page.page_id,
+                source_file.page.page_name,
                 source_file.page.command,
                 source_file.page.description,
                 source_file.page.source_path,
@@ -623,26 +922,42 @@ fn write_artifact(
                 source_file.page.language,
                 page_position as i64,
                 source_file.page.original_content,
+                page_kind_name(source_file.page.kind),
             ],
         )?;
 
         for example in &source_file.page.examples {
             transaction.execute(
-                "INSERT INTO examples(example_id, page_id, position, description, command)
-                 VALUES (?1, ?2, ?3, ?4, ?5)",
+                "INSERT INTO examples(example_id, page_id, position, description, command, source_line)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
                 params![
                     example.example_id,
                     example.page_id,
                     example.position as i64,
                     example.description,
                     example.command,
+                    example.source_line as i64,
                 ],
             )?;
-            transaction.execute(
-                "INSERT INTO example_lexical(example_id, lexical_text) VALUES (?1, ?2)",
-                params![example.example_id, lexical_text(&source_file.page, example),],
-            )?;
+            if source_file.page.kind == PageKind::Operational {
+                transaction.execute(
+                    "INSERT INTO example_lexical(example_id, lexical_text) VALUES (?1, ?2)",
+                    params![example.example_id, lexical_text(&source_file.page, example),],
+                )?;
+            }
             example_count += 1;
+        }
+        for reference in &source_file.page.references {
+            transaction.execute(
+                "INSERT INTO page_references(page_id, position, destination_name, source_line)
+                 VALUES (?1, ?2, ?3, ?4)",
+                params![
+                    source_file.page.page_id,
+                    reference.example_position as i64,
+                    reference.destination_name,
+                    reference.source_line as i64,
+                ],
+            )?;
         }
     }
     transaction.commit()?;
@@ -682,7 +997,148 @@ fn validate_artifact(conn: &Connection) -> Result<()> {
     if kind != ARTIFACT_KIND {
         bail!("unsupported artifact kind: {kind}");
     }
+    let schema_version: String = conn.query_row(
+        "SELECT value FROM artifact_metadata WHERE key = 'schema_version'",
+        [],
+        |row| row.get(0),
+    )?;
+    if schema_version != SCHEMA_VERSION.to_string() {
+        bail!(
+            "unsupported artifact schema version: {}; expected {}",
+            schema_version,
+            SCHEMA_VERSION
+        );
+    }
     Ok(())
+}
+
+fn page_kind_name(kind: PageKind) -> &'static str {
+    match kind {
+        PageKind::Operational => "operational",
+        PageKind::Reference => "reference",
+        PageKind::Disambiguation => "disambiguation",
+    }
+}
+
+fn page_kind_from_name(name: &str) -> Result<PageKind> {
+    match name {
+        "operational" => Ok(PageKind::Operational),
+        "reference" => Ok(PageKind::Reference),
+        "disambiguation" => Ok(PageKind::Disambiguation),
+        _ => bail!("unsupported stored page kind: {name}"),
+    }
+}
+
+fn selected_page_ids(conn: &Connection, platform: &str) -> Result<Vec<String>> {
+    let mut statement = conn.prepare("SELECT page_id, page_name, platform FROM pages")?;
+    let rows = statement.query_map([], |row| {
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+        ))
+    })?;
+    let mut selected = HashMap::<String, (u8, String)>::new();
+    for row in rows {
+        let (page_id, page_name, page_platform) = row?;
+        let priority = if page_platform == platform {
+            2
+        } else if page_platform == "common" {
+            1
+        } else {
+            continue;
+        };
+        let entry = selected.entry(page_name).or_insert((0, String::new()));
+        if priority > entry.0 {
+            *entry = (priority, page_id);
+        }
+    }
+    let mut page_ids: Vec<String> = selected.into_values().map(|(_, page_id)| page_id).collect();
+    page_ids.sort();
+    Ok(page_ids)
+}
+
+fn load_pages(conn: &Connection) -> Result<Vec<Page>> {
+    let mut statement = conn.prepare(
+        "SELECT page_id, page_name, command, description, source_path,
+                source_revision, source_ref, platform, language, original_content,
+                page_kind
+         FROM pages
+         ORDER BY page_position",
+    )?;
+    let page_rows = statement.query_map([], |row| {
+        let page_id: String = row.get(0)?;
+        Ok(Page {
+            page_id,
+            page_name: row.get(1)?,
+            command: row.get(2)?,
+            description: row.get(3)?,
+            source_path: row.get(4)?,
+            source_revision: row.get(5)?,
+            source_ref: row.get(6)?,
+            platform: row.get(7)?,
+            language: row.get(8)?,
+            original_content: row.get(9)?,
+            examples: Vec::new(),
+            kind: page_kind_from_name(&row.get::<_, String>(10)?)
+                .map_err(|error| rusqlite::Error::ToSqlConversionFailure(error.into()))?,
+            references: Vec::new(),
+        })
+    })?;
+    let mut pages = Vec::new();
+    for row in page_rows {
+        pages.push(row?);
+    }
+
+    let mut examples = conn.prepare(
+        "SELECT example_id, page_id, position, description, command, source_line
+         FROM examples ORDER BY page_id, position",
+    )?;
+    let example_rows = examples.query_map([], |row| {
+        Ok(Example {
+            example_id: row.get(0)?,
+            page_id: row.get(1)?,
+            position: row.get::<_, i64>(2)? as usize,
+            description: row.get(3)?,
+            command: row.get(4)?,
+            source_line: row.get::<_, i64>(5)? as usize,
+        })
+    })?;
+    let page_indexes: HashMap<String, usize> = pages
+        .iter()
+        .enumerate()
+        .map(|(index, page)| (page.page_id.clone(), index))
+        .collect();
+    for row in example_rows {
+        let example = row?;
+        let page_index = page_indexes
+            .get(&example.page_id)
+            .ok_or_else(|| anyhow!("example references missing page: {}", example.page_id))?;
+        pages[*page_index].examples.push(example);
+    }
+
+    let mut references = conn.prepare(
+        "SELECT page_id, position, destination_name, source_line
+         FROM page_references ORDER BY page_id, position",
+    )?;
+    let reference_rows = references.query_map([], |row| {
+        Ok((
+            row.get::<_, String>(0)?,
+            PageReference {
+                destination_name: row.get(2)?,
+                example_position: row.get::<_, i64>(1)? as usize,
+                source_line: row.get::<_, i64>(3)? as usize,
+            },
+        ))
+    })?;
+    for row in reference_rows {
+        let (page_id, reference) = row?;
+        let page_index = page_indexes
+            .get(&page_id)
+            .ok_or_else(|| anyhow!("reference points to missing page: {page_id}"))?;
+        pages[*page_index].references.push(reference);
+    }
+    Ok(pages)
 }
 
 fn lexical_text(page: &Page, example: &Example) -> String {
