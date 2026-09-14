@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import platform as host_platform
 import re
 import sqlite3
 import sys
@@ -27,6 +26,27 @@ KEYWORD_RETRIEVER_VERSION = "keyword-fts5-v1"
 CURRENT_ADAPTER_VERSION = "current-askman-ranking-adapter-v1"
 SUPPORTED_PLATFORMS = {"common", "linux", "osx", "windows"}
 MAX_DISPLAYED_RESULTS = 3
+LEXICAL_INDEX_TOKENIZER = "unicode61"
+LEXICAL_INDEX_FIELDS = [
+    "page.command",
+    "page.description",
+    "example.description",
+    "example.command",
+]
+LEXICAL_QUERY_NORMALIZATION = (
+    "split non-alphanumeric except underscore; lowercase ASCII; "
+    "quote and AND-join unique sorted tokens"
+)
+OFFICIAL_SOURCE_MARKERS = (
+    "gnu.",
+    "kernel.",
+    "man7.",
+    "manned.",
+    "linux.",
+    "man.openbsd",
+    "man.freebsd",
+    "greenwoodsoftware.",
+)
 
 
 @dataclass(frozen=True)
@@ -152,30 +172,35 @@ def current_adjustment(candidate: Candidate, raw_distance: float) -> float | Non
     score = raw_distance
     description = candidate.page_description
     command = candidate.command
-    if any(site in description for site in (
-        "gnu.",
-        "kernel.",
-        "man7.",
-        "manned.",
-        "linux.",
-        "man.openbsd",
-        "man.freebsd",
-        "greenwoodsoftware.",
-    )):
+    if is_official_source(description):
         score *= 0.8
-    if command == "grep" or (
-        len(command) <= 3 and not command.startswith("q") and not command.startswith("z")
-    ):
+    if is_core_command(command):
         score *= 0.67
-    elif (
+    elif is_niche_variant(command):
+        score *= 1.33
+    return score
+
+
+def is_official_source(description: str) -> bool:
+    return any(marker in description for marker in OFFICIAL_SOURCE_MARKERS)
+
+
+def is_core_command(command: str) -> bool:
+    return command == "grep" or (
+        len(command) <= 3
+        and not command.startswith("q")
+        and not command.startswith("z")
+    )
+
+
+def is_niche_variant(command: str) -> bool:
+    return (
         "-" in command
         or command.startswith("q")
         or command.startswith("z")
         or (command.endswith("grep") and command != "grep")
         or command.endswith("all")
-    ):
-        score *= 1.33
-    return score
+    )
 
 
 def current_adapter_results(candidates: list[Candidate]) -> list[Candidate]:
@@ -184,21 +209,21 @@ def current_adapter_results(candidates: list[Candidate]) -> list[Candidate]:
     scores = [candidate.lexical_score for candidate in candidates]
     low, high = min(scores), max(scores)
     span = high - low
-    by_command: dict[str, tuple[float, Candidate]] = {}
+    by_page: dict[str, tuple[float, Candidate]] = {}
     for candidate in candidates:
         relative = 0.5 if span == 0 else (candidate.lexical_score - low) / span
         raw_distance = 0.5 + (relative * 0.6)
         adjusted = current_adjustment(candidate, raw_distance)
         if adjusted is None:
             continue
-        previous = by_command.get(candidate.command)
+        previous = by_page.get(candidate.page_id)
         if previous is None or (adjusted, candidate.example_id) < (
             previous[0],
             previous[1].example_id,
         ):
-            by_command[candidate.command] = (adjusted, candidate)
+            by_page[candidate.page_id] = (adjusted, candidate)
     ranked = sorted(
-        by_command.values(), key=lambda item: (item[0], item[1].example_id)
+        by_page.values(), key=lambda item: (item[0], item[1].example_id)
     )
     return [candidate for _, candidate in ranked[:MAX_DISPLAYED_RESULTS]]
 
@@ -233,6 +258,7 @@ def summarize(tasks: list[dict[str, Any]], results: list[dict[str, Any]]) -> dic
     by_id = {result["task_id"]: result for result in results}
     answerable_results = [by_id[task["id"]] for task in answerable]
     answered = [result for result in results if result["answered"]]
+    answered_answerable = [result for result in answerable_results if result["answered"]]
     return {
         "tasks": len(tasks),
         "answerable_tasks": len(answerable),
@@ -252,7 +278,7 @@ def summarize(tasks: list[dict[str, Any]], results: list[dict[str, Any]]) -> dic
         "coverage": {"count": len(answered), "denominator": len(tasks)},
         "incorrect_answered_tasks": {
             "count": sum(result["incorrect_answer"] for result in results),
-            "denominator": len(answered),
+            "denominator": len(answered_answerable),
         },
         "false_answers_on_unanswerable": {
             "count": sum(result["false_answer"] for result in results),
@@ -261,28 +287,42 @@ def summarize(tasks: list[dict[str, Any]], results: list[dict[str, Any]]) -> dic
     }
 
 
-def validate_dataset(dataset: dict[str, Any]) -> None:
+def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
     if dataset.get("schema_version") != DATASET_SCHEMA_VERSION:
         raise ValueError("unsupported evaluation dataset schema")
     if dataset.get("scorer_version") != SCORER_VERSION:
         raise ValueError("unsupported scorer version")
+    if dataset.get("split") != expected_split:
+        raise ValueError(f"dataset split must be {expected_split}")
     tasks = dataset.get("tasks")
-    if not isinstance(tasks, list) or len(tasks) != 60:
-        raise ValueError("frozen dataset must contain exactly 60 tasks")
-    splits = {task.get("split") for task in tasks}
-    if splits != {"dev", "holdout"}:
-        raise ValueError("dataset must contain dev and holdout splits")
-    if sum(task["split"] == "dev" for task in tasks) != 30:
-        raise ValueError("dataset must contain exactly 30 dev tasks")
-    if sum(task["split"] == "holdout" for task in tasks) != 30:
-        raise ValueError("dataset must contain exactly 30 holdout tasks")
+    if dataset.get("task_count") != 30:
+        raise ValueError("each frozen split must declare exactly 30 tasks")
+    if not isinstance(tasks, list) or len(tasks) != 30:
+        raise ValueError("each frozen split must contain exactly 30 tasks")
+    if any(task.get("split") != expected_split for task in tasks):
+        raise ValueError(f"all tasks must belong to the {expected_split} split")
+    task_ids: set[str] = set()
     families: dict[str, set[str]] = {}
     for task in tasks:
         required = {"id", "split", "family", "question", "platform", "answerable", "acceptable_example_ids", "rationale"}
         if not required <= task.keys():
             raise ValueError(f"task {task.get('id')} is missing required labels")
+        if not isinstance(task["id"], str) or not task["id"] or task["id"] in task_ids:
+            raise ValueError(f"task IDs must be unique and non-empty: {task.get('id')}")
+        task_ids.add(task["id"])
+        if not isinstance(task["question"], str) or not task["question"].strip():
+            raise ValueError(f"task {task['id']} has an empty question")
         if task["platform"] not in SUPPORTED_PLATFORMS:
             raise ValueError(f"task {task['id']} has unsupported platform")
+        if not isinstance(task["answerable"], bool):
+            raise ValueError(f"task {task['id']} has an invalid answerable label")
+        if not isinstance(task["rationale"], str) or not task["rationale"].strip():
+            raise ValueError(f"task {task['id']} has an empty rationale")
+        ids = task["acceptable_example_ids"]
+        if not isinstance(ids, list) or any(not isinstance(example_id, str) for example_id in ids):
+            raise ValueError(f"task {task['id']} has invalid acceptable example IDs")
+        if len(ids) != len(set(ids)):
+            raise ValueError(f"task {task['id']} repeats an acceptable example ID")
         if not task["answerable"] and task["acceptable_example_ids"]:
             raise ValueError(f"unanswerable task {task['id']} has acceptable IDs")
         if task["answerable"] and not task["acceptable_example_ids"]:
@@ -290,6 +330,36 @@ def validate_dataset(dataset: dict[str, Any]) -> None:
         families.setdefault(task["family"], set()).add(task["split"])
     if any(len(splits) != 1 for splits in families.values()):
         raise ValueError("scenario families must not cross the dev/holdout split")
+
+
+def validate_labels(
+    connection: sqlite3.Connection, tasks: list[dict[str, Any]]
+) -> None:
+    eligible_by_platform: dict[str, set[str]] = {}
+    for platform in SUPPORTED_PLATFORMS:
+        page_ids = selected_page_ids(connection, platform)
+        placeholders = ",".join("?" for _ in page_ids)
+        if not page_ids:
+            eligible_by_platform[platform] = set()
+            continue
+        rows = connection.execute(
+            f"""SELECT lexical.example_id
+                FROM example_lexical AS lexical
+                JOIN examples AS e ON e.example_id = lexical.example_id
+                WHERE e.page_id IN ({placeholders})""",
+            tuple(sorted(page_ids)),
+        )
+        eligible_by_platform[platform] = {row[0] for row in rows}
+
+    for task in tasks:
+        if not task["answerable"]:
+            continue
+        invalid_ids = set(task["acceptable_example_ids"]) - eligible_by_platform[task["platform"]]
+        if invalid_ids:
+            raise ValueError(
+                f"task {task['id']} labels examples outside the selected {task['platform']} corpus: "
+                + ", ".join(sorted(invalid_ids))
+            )
 
 
 def validate_artifact(
@@ -312,6 +382,14 @@ def validate_artifact(
                 f"frozen corpus mismatch for {key}: expected {expected}, got {checks.get(key)}; "
                 "labels are invalid for this artifact"
             )
+    expected_lexical_recipe = {
+        "lexical_index_tokenizer": LEXICAL_INDEX_TOKENIZER,
+        "lexical_index_fields": json.dumps(LEXICAL_INDEX_FIELDS, separators=(",", ":")),
+        "lexical_query_normalization": LEXICAL_QUERY_NORMALIZATION,
+    }
+    for key, expected in expected_lexical_recipe.items():
+        if actual.get(key) != expected:
+            raise ValueError(f"artifact lexical recipe mismatch for {key}")
     actual_corpus_id = f"{checks['source_revision']}:{checks['source_digest']}"
     if frozen.get("corpus_id") != actual_corpus_id:
         raise ValueError("frozen corpus ID mismatch; migrate labels explicitly")
@@ -327,12 +405,13 @@ def validate_artifact(
 def run(args: argparse.Namespace) -> dict[str, Any]:
     dataset_path = Path(args.dataset)
     dataset = load_json(dataset_path)
-    validate_dataset(dataset)
+    validate_dataset(dataset, args.split)
     if args.split == "holdout" and not args.allow_holdout:
         raise ValueError("holdout labels require --allow-holdout")
     tasks = [task for task in dataset["tasks"] if task["split"] == args.split]
     with sqlite3.connect(args.artifact) as connection:
         frozen_artifact = validate_artifact(connection, dataset, Path(args.manifest) if args.manifest else None)
+        validate_labels(connection, tasks)
         results = []
         for task in tasks:
             candidates = fetch_candidates(connection, task["question"], task["platform"])

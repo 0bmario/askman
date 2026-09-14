@@ -5,20 +5,24 @@ It is preliminary engineering evidence, not user or production validation.
 
 ## Frozen inputs
 
-- Dataset: `askman-evaluation-v1`, 60 tasks.
+- Dataset: `askman-evaluation-v1`, 60 tasks across two label files.
 - Split: `scenario-family-split-v1`, 30 development and 30 holdout tasks.
 - Scenarios stay whole: six families per split, five tasks per family.
 - Scorer: `task-scorer-v1`.
 - Corpus ID: `fixture-tldr-full-corpus-v1:d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822`.
 - Manifest SHA256: `68ae06300afdaee1515ef7c6248f35056e871e73d07778f2e1c2f636589c8461`.
 
-The reviewed labels live in
-`tests/fixtures/evaluation/frozen-tasks-v1.json`, outside the corpus snapshot.
-They contain task intent, platform, acceptable example IDs and rationales;
-retrieval indexes contain only source-backed page/example fields. Four
+The reviewed development labels live in
+`tests/fixtures/evaluation/frozen-dev-v1.json`; holdout labels live separately
+in `tests/fixtures/evaluation/frozen-holdout-v1.json`, outside the corpus
+snapshot. A normal development run reads only the development file. The files
+contain task intent, platform, acceptable example IDs and rationales; retrieval
+indexes contain only source-backed page/example fields. Four
 previously inspected audit prompts remain development tasks: `move files to
 docs`, `restart systemd`, `find text in compressed logs`, and `make my database
 fast without changing anything`.
+The authoring and adjudication record is in
+`docs/reproducibility/evaluation-authoring.md`.
 
 An answer is successful only when a displayed example ID is acceptable. A
 matching command name with unsuitable behavior receives no credit. Empty
@@ -36,21 +40,29 @@ cargo run --locked --offline --features dev --bin tldr_subset -- \
 python3 scripts/evaluate_retrieval.py \
   --artifact /tmp/askman-eval.db \
   --manifest tests/fixtures/tldr-full-corpus/manifest.json \
-  --dataset tests/fixtures/evaluation/frozen-tasks-v1.json \
+  --dataset tests/fixtures/evaluation/frozen-dev-v1.json \
   --split dev --retriever keyword
 
 python3 scripts/evaluate_retrieval.py \
   --artifact /tmp/askman-eval.db \
   --manifest tests/fixtures/tldr-full-corpus/manifest.json \
-  --dataset tests/fixtures/evaluation/frozen-tasks-v1.json \
+  --dataset tests/fixtures/evaluation/frozen-dev-v1.json \
   --split dev --retriever current-adapter
+
+# Holdout labels are a separate explicit input and require an access flag.
+python3 scripts/evaluate_retrieval.py \
+  --artifact /tmp/askman-eval.db \
+  --manifest tests/fixtures/tldr-full-corpus/manifest.json \
+  --dataset tests/fixtures/evaluation/frozen-holdout-v1.json \
+  --split holdout --allow-holdout --retriever keyword
 ```
 
-The default is development-only. Holdout labels require the explicit
-`--split holdout --allow-holdout`; the output records that access and its UTC
-time. The runner rejects a changed artifact or manifest, with an explicit
-migration/invalidation error. Rebuild the dataset labels and increment the
-dataset/corpus IDs before accepting changed source artifacts.
+The default is development-only. Holdout labels require the separate holdout
+file plus explicit `--split holdout --allow-holdout`; the output records that
+access and its UTC time. The runner rejects a changed artifact or manifest,
+missing acceptable IDs, or labels outside the selected platform, with an
+explicit migration/invalidation error. Rebuild the dataset labels and
+increment the dataset/corpus IDs before accepting changed source artifacts.
 
 `keyword` uses the artifact's declared FTS5 query recipe, platform precedence,
 and one result per selected page before displaying three results. The
@@ -71,7 +83,7 @@ and denominators for:
 - Success@1 and Success@3 over answerable tasks.
 - Candidate recall over answerable tasks, before display ranking.
 - Coverage over all tasks: non-empty displayed result.
-- Incorrect answered tasks over answered tasks: non-empty but no acceptable ID.
+- Incorrect answered tasks over answered answerable tasks: non-empty but no acceptable ID.
 - False answers on unanswerable tasks over unanswerable tasks.
 
 For the committed fixture, the deterministic keyword run currently reports:
@@ -80,7 +92,7 @@ For the committed fixture, the deterministic keyword run currently reports:
 dev:     Success@1 23/23, Success@3 23/23, candidate recall 23/23,
          coverage 23/30, incorrect answered 0/23, false unanswerable 0/7
 holdout: Success@1 22/22, Success@3 22/22, candidate recall 22/22,
-         coverage 23/30, incorrect answered 0/23, false unanswerable 1/8
+         coverage 22/30, incorrect answered 0/22, false unanswerable 0/8
 ```
 
 The current-adapter run uses the same task results on this small fixture. The

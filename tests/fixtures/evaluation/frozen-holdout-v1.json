@@ -1,0 +1,56 @@
+{
+  "dataset_id": "askman-evaluation-v1",
+  "schema_version": 1,
+  "scorer_version": "task-scorer-v1",
+  "split": "holdout",
+  "split_id": "scenario-family-split-v1",
+  "task_count": 30,
+  "freeze_note": "See docs/reproducibility/evaluation-authoring.md; author intent was written before corpus inspection and labels were then adjudicated against the pinned fixture.",
+  "corpus": {
+    "corpus_id": "fixture-tldr-full-corpus-v1:d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "fixture-tldr-full-corpus-v1",
+    "source_digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+    "manifest_sha256": "68ae06300afdaee1515ef7c6248f35056e871e73d07778f2e1c2f636589c8461"
+  },
+  "split_policy": "six distinct scenario families per split; five independently phrased tasks per family; no family crosses the split",
+  "tasks": [
+    {"id":"holdout-copy-01","split":"holdout","family":"path-duplication","question":"copy source destination path","platform":"common","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"],"rationale":"The cp example has source and destination placeholders for this operation."},
+    {"id":"holdout-copy-02","split":"holdout","family":"path-duplication","question":"copy source to destination path","platform":"common","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"],"rationale":"The selected cp example directly demonstrates source-to-destination copying."},
+    {"id":"holdout-copy-03","split":"holdout","family":"path-duplication","question":"cp path destination","platform":"linux","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"],"rationale":"Linux platform policy falls back to common cp, whose example matches."},
+    {"id":"holdout-copy-04","split":"holdout","family":"path-duplication","question":"copy files directories to location","platform":"osx","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"],"rationale":"No osx cp override exists; common cp is selected and its description covers both."},
+    {"id":"holdout-copy-05","split":"holdout","family":"path-duplication","question":"do not copy files","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"Negated request; a copy example is not a correct answer to a request not to copy."},
+
+    {"id":"holdout-search-01","split":"holdout","family":"tree-search","question":"grep recursively path","platform":"linux","answerable":true,"acceptable_example_ids":["example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"],"rationale":"grep -R is the pinned recursive search example."},
+    {"id":"holdout-search-02","split":"holdout","family":"tree-search","question":"grep -R path","platform":"linux","answerable":true,"acceptable_example_ids":["example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"],"rationale":"The exact command name, recursive flag and path argument are represented."},
+    {"id":"holdout-search-03","split":"holdout","family":"tree-search","question":"search pattern path","platform":"linux","answerable":true,"acceptable_example_ids":["example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"],"rationale":"The example searches recursively through a path for a pattern."},
+    {"id":"holdout-search-04","split":"holdout","family":"tree-search","question":"grep search path","platform":"linux","answerable":true,"acceptable_example_ids":["example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"],"rationale":"The selected grep example performs a search through a path."},
+    {"id":"holdout-search-05","split":"holdout","family":"tree-search","question":"find a regular expression in gzipped files","platform":"linux","answerable":false,"acceptable_example_ids":[],"rationale":"Compressed-file search is not covered by the pinned grep example."},
+
+    {"id":"holdout-edit-01","split":"holdout","family":"editor-launch","question":"edit text file","platform":"common","answerable":true,"acceptable_example_ids":["example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"],"rationale":"vim opens the supplied path for editing."},
+    {"id":"holdout-edit-02","split":"holdout","family":"editor-launch","question":"vim edit path","platform":"common","answerable":true,"acceptable_example_ids":["example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"],"rationale":"The indexed vim example is an editor invocation for a path."},
+    {"id":"holdout-edit-03","split":"holdout","family":"editor-launch","question":"open vim path","platform":"common","answerable":true,"acceptable_example_ids":["example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"],"rationale":"This is the demonstrated command shape for opening a file."},
+    {"id":"holdout-edit-04","split":"holdout","family":"editor-launch","question":"vim text file","platform":"linux","answerable":true,"acceptable_example_ids":["example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"],"rationale":"Linux has no vim override, so common vim is selected."},
+    {"id":"holdout-edit-05","split":"holdout","family":"editor-launch","question":"vim path file","platform":"osx","answerable":true,"acceptable_example_ids":["example-60ea56dba4e16eae32a0029cb7a1d5780293f51bb621b759550ebdca4e07e301"],"rationale":"The task names the resolved vim destination and its original example is accepted."},
+
+    {"id":"holdout-clipboard-01","split":"holdout","family":"clipboard-transfer","question":"pbcopy macOS input","platform":"osx","answerable":true,"acceptable_example_ids":["example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"pbcopy with file input is the pinned osx clipboard example."},
+    {"id":"holdout-clipboard-02","split":"holdout","family":"clipboard-transfer","question":"pbcopy file clipboard","platform":"osx","answerable":true,"acceptable_example_ids":["example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"The example transfers file contents to the clipboard."},
+    {"id":"holdout-clipboard-03","split":"holdout","family":"clipboard-transfer","question":"macOS copy to clipboard","platform":"osx","answerable":true,"acceptable_example_ids":["example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"The platform and clipboard behavior match pbcopy."},
+    {"id":"holdout-clipboard-04","split":"holdout","family":"clipboard-transfer","question":"pbcopy standard input","platform":"osx","answerable":true,"acceptable_example_ids":["example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"This names the command and input represented in the fixture."},
+    {"id":"holdout-clipboard-05","split":"holdout","family":"clipboard-transfer","question":"copy text into a Windows clipboard","platform":"windows","answerable":false,"acceptable_example_ids":[],"rationale":"The pinned corpus has no Windows clipboard page; the osx pbcopy page is excluded by platform policy."},
+
+    {"id":"holdout-windows-01","split":"holdout","family":"formatted-output","question":"printf Windows formatted","platform":"windows","answerable":true,"acceptable_example_ids":["example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"],"rationale":"The Windows printf example prints a formatted value."},
+    {"id":"holdout-windows-02","split":"holdout","family":"formatted-output","question":"Windows printf formatted","platform":"windows","answerable":true,"acceptable_example_ids":["example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"],"rationale":"The platform-specific page describes formatted output."},
+    {"id":"holdout-windows-03","split":"holdout","family":"formatted-output","question":"Windows print a value","platform":"windows","answerable":true,"acceptable_example_ids":["example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"],"rationale":"The selected printf example matches the requested output."},
+    {"id":"holdout-windows-04","split":"holdout","family":"formatted-output","question":"formatted printf value","platform":"windows","answerable":true,"acceptable_example_ids":["example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"],"rationale":"The command name and formatting behavior are exact."},
+    {"id":"holdout-windows-05","split":"holdout","family":"formatted-output","question":"formatted value","platform":"windows","answerable":true,"acceptable_example_ids":["example-74b7b8f8a0ffa8a9a63e40f480aa528c18be47c5f4fb76eae16647837294615c"],"rationale":"The fixture's formatted-value example is the accepted answer."},
+
+    {"id":"holdout-missing-01","split":"holdout","family":"missing-coverage","question":"list Kubernetes pods","platform":"linux","answerable":false,"acceptable_example_ids":[],"rationale":"No kubectl page exists in the pinned selection."},
+    {"id":"holdout-missing-02","split":"holdout","family":"missing-coverage","question":"compress a directory into a tarball","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"No archive or compression page is selected."},
+    {"id":"holdout-missing-03","split":"holdout","family":"missing-coverage","question":"show the current Git branch","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"Git is absent from the pinned fixture."},
+    {"id":"holdout-missing-04","split":"holdout","family":"missing-coverage","question":"change file permissions to executable","platform":"linux","answerable":false,"acceptable_example_ids":[],"rationale":"No chmod page is selected."},
+    {"id":"holdout-missing-05","split":"holdout","family":"missing-coverage","question":"send an HTTP request with curl","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"No curl page is selected; an empty result is correct for this benchmark."}
+  ]
+}

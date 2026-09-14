@@ -1,4 +1,5 @@
 import importlib.util
+import sqlite3
 import sys
 import unittest
 from pathlib import Path
@@ -27,10 +28,32 @@ def candidate(example_id):
 
 class EvaluationRunnerTests(unittest.TestCase):
     def test_frozen_dataset_is_60_tasks_with_whole_family_splits(self):
-        dataset = RUNNER.load_json(ROOT / "tests/fixtures/evaluation/frozen-tasks-v1.json")
-        RUNNER.validate_dataset(dataset)
-        self.assertEqual(len(dataset["tasks"]), 60)
-        self.assertEqual({task["split"] for task in dataset["tasks"]}, {"dev", "holdout"})
+        datasets = [
+            RUNNER.load_json(ROOT / "tests/fixtures/evaluation/frozen-dev-v1.json"),
+            RUNNER.load_json(ROOT / "tests/fixtures/evaluation/frozen-holdout-v1.json"),
+        ]
+        for dataset, split in zip(datasets, ("dev", "holdout")):
+            RUNNER.validate_dataset(dataset, split)
+            self.assertEqual(dataset["split"], split)
+            self.assertEqual(len(dataset["tasks"]), 30)
+        self.assertEqual(sum(len(dataset["tasks"]) for dataset in datasets), 60)
+        self.assertEqual(
+            {task["family"] for dataset in datasets for task in dataset["tasks"]},
+            {
+                "copy-dev",
+                "search-dev",
+                "edit-dev",
+                "clipboard-dev",
+                "windows-dev",
+                "coverage-dev",
+                "path-duplication",
+                "tree-search",
+                "editor-launch",
+                "clipboard-transfer",
+                "formatted-output",
+                "missing-coverage",
+            },
+        )
 
     def test_multiple_valid_answers_succeed_at_three(self):
         task = {"id": "multi", "answerable": True, "acceptable_example_ids": [GOOD, OTHER]}
@@ -63,9 +86,31 @@ class EvaluationRunnerTests(unittest.TestCase):
         self.assertTrue(false_answer["false_answer"])
 
     def test_dataset_labels_are_not_corpus_files(self):
-        dataset_path = ROOT / "tests/fixtures/evaluation/frozen-tasks-v1.json"
+        dataset_path = ROOT / "tests/fixtures/evaluation/frozen-dev-v1.json"
         corpus_root = (ROOT / "tests/fixtures/tldr-full-corpus").resolve()
         self.assertNotIn(corpus_root, dataset_path.resolve().parents)
+
+    def test_labels_must_exist_in_the_selected_lexical_corpus(self):
+        connection = sqlite3.connect(":memory:")
+        connection.executescript(
+            """
+            CREATE TABLE pages(page_id TEXT, page_name TEXT, platform TEXT, page_position INTEGER);
+            CREATE TABLE examples(example_id TEXT, page_id TEXT);
+            CREATE TABLE example_lexical(example_id TEXT);
+            INSERT INTO pages VALUES ('page-1', 'tool', 'common', 1);
+            INSERT INTO examples VALUES ('example-good', 'page-1');
+            INSERT INTO example_lexical VALUES ('example-good');
+            """
+        )
+        task = {
+            "id": "bad-label",
+            "answerable": True,
+            "acceptable_example_ids": ["example-missing"],
+            "platform": "common",
+        }
+        with self.assertRaisesRegex(ValueError, "example-missing"):
+            RUNNER.validate_labels(connection, [task])
+        connection.close()
 
     def test_query_normalization_is_deterministic(self):
         self.assertEqual(RUNNER.normalized_tokens("CP, copy_copy cp"), ["copy_copy", "cp"])
