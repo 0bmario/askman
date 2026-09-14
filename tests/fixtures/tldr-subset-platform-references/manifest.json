@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "parser_version": "tldr-subset-v2",
+  "source": {
+    "name": "tldr-pages",
+    "revision": "fixture-tldr-platform-references-v1",
+    "digest_algorithm": "sha256",
+    "digest": "87fda8eaceff31dcae3c69fbc572236197474e5b88d5bec63046c36f9de428ce",
+    "url": "https://github.com/tldr-pages/tldr",
+    "attribution": "Content from the tldr-pages project.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/tldr-pages/tldr/blob/main/LICENSE.md"
+    }
+  },
+  "language": "en",
+  "pages_root": "pages",
+  "files": [
+    "pages/common/printf.md",
+    "pages/linux/printf.md",
+    "pages/windows/printf.md",
+    "pages/common/vim.md",
+    "pages/common/vi.md",
+    "pages/common/old-printf.md",
+    "pages/common/just.md",
+    "pages/common/just.1.md",
+    "pages/common/just.js.md",
+    "pages/common/tldr-token.md"
+  ]
+}

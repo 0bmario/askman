@@ -1,5 +1,8 @@
 use anyhow::Result;
-use askman::tldr_subset::{BuildOptions, QueryOptions, build_artifact, query_artifact};
+use askman::tldr_subset::{
+    BuildOptions, InspectOptions, QueryOptions, build_artifact, inspect_page,
+    query_artifact_for_platform,
+};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
@@ -35,6 +38,21 @@ enum Command {
         /// Maximum number of examples to return.
         #[arg(long, default_value_t = 10)]
         limit: usize,
+        /// Target operating system. Common is used when no target override exists.
+        #[arg(long, alias = "os", default_value = "common")]
+        platform: String,
+    },
+    /// Inspect the selected full page, following references and listing disambiguation destinations.
+    Inspect {
+        /// SQLite artifact produced by `build`.
+        #[arg(long)]
+        artifact: PathBuf,
+        /// Page name or command, such as `git commit`.
+        #[arg(long)]
+        page: String,
+        /// Target operating system. Common is used when no target override exists.
+        #[arg(long, alias = "os", default_value = "common")]
+        platform: String,
     },
 }
 
@@ -62,13 +80,29 @@ fn main() -> Result<()> {
             artifact,
             query,
             limit,
+            platform,
         } => {
-            let results = query_artifact(QueryOptions {
-                artifact,
-                query,
-                limit,
-            })?;
+            let results = query_artifact_for_platform(
+                QueryOptions {
+                    artifact,
+                    query,
+                    limit,
+                },
+                &platform,
+            )?;
             println!("{}", serde_json::to_string_pretty(&results)?);
+        }
+        Command::Inspect {
+            artifact,
+            page,
+            platform,
+        } => {
+            let result = inspect_page(InspectOptions {
+                artifact,
+                page,
+                platform,
+            })?;
+            println!("{}", serde_json::to_string_pretty(&result)?);
         }
     }
 
