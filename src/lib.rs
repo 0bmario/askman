@@ -1,5 +1,7 @@
 pub mod cli;
 pub mod db;
+#[cfg(feature = "dev")]
+pub mod dense;
 pub mod embed;
 pub mod format;
 pub mod search;
