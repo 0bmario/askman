@@ -75,6 +75,17 @@ fn main() -> Result<()> {
                 report.file_count,
                 report.output.display()
             );
+            println!("excluded_files={}", report.excluded_count);
+            println!("build_time_ms={}", report.build_time_ms);
+            println!(
+                "peak_memory_bytes={}",
+                report
+                    .peak_memory_bytes
+                    .map_or_else(|| "unavailable".to_string(), |bytes| bytes.to_string())
+            );
+            println!("artifact_size_bytes={}", report.artifact_size_bytes);
+            println!("hardware={}", report.hardware);
+            println!("source_digest={}", report.source_digest);
         }
         Command::Query {
             artifact,

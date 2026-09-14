@@ -1,8 +1,9 @@
 #![cfg(feature = "dev")]
 
 use askman::tldr_subset::{
-    BuildOptions, InspectOptions, PageKind, QueryOptions, build_artifact, inspect_page, parse_page,
-    query_artifact, query_artifact_for_platform,
+    BuildOptions, InspectOptions, PageKind, QueryOptions, build_artifact,
+    build_artifact_with_failure_injection, inspect_page, parse_page, query_artifact,
+    query_artifact_for_platform,
 };
 use rusqlite::Connection;
 use sha2::{Digest, Sha256};
@@ -15,6 +16,8 @@ const FIXTURE_MANIFEST: &str = "tests/fixtures/tldr-subset/manifest.json";
 const REFERENCES_FIXTURE_ROOT: &str = "tests/fixtures/tldr-subset-platform-references";
 const REFERENCES_FIXTURE_MANIFEST: &str =
     "tests/fixtures/tldr-subset-platform-references/manifest.json";
+const FULL_CORPUS_FIXTURE_ROOT: &str = "tests/fixtures/tldr-full-corpus";
+const FULL_CORPUS_FIXTURE_MANIFEST: &str = "tests/fixtures/tldr-full-corpus/manifest.json";
 
 #[test]
 fn parses_typed_page_without_losing_order_or_placeholders() {
@@ -110,6 +113,205 @@ fn builds_and_queries_a_traceable_source_artifact() {
         .unwrap();
     assert!(!lexical_text.contains("# cp"));
     assert!(lexical_text.contains("Copy a file to another location:"));
+}
+
+#[test]
+fn builds_the_declared_four_platform_corpus_with_explicit_exclusions() {
+    let output_dir = tempdir().unwrap();
+    let output = output_dir.path().join("full-corpus.db");
+    let report = build_artifact(BuildOptions {
+        manifest: FULL_CORPUS_FIXTURE_MANIFEST.into(),
+        snapshot: FULL_CORPUS_FIXTURE_ROOT.into(),
+        output: output.clone(),
+    })
+    .unwrap();
+
+    assert_eq!(report.file_count, 7);
+    assert_eq!(report.excluded_count, 1);
+    assert_eq!(report.page_count, 6);
+    assert_eq!(report.example_count, 6);
+    assert!(report.build_time_ms < 10_000);
+    assert!(report.artifact_size_bytes > 0);
+    assert!(!report.hardware.is_empty());
+
+    let connection = Connection::open(&output).unwrap();
+    let excluded: (String, String) = connection
+        .query_row(
+            "SELECT status, reason FROM source_files WHERE source_path = 'pages/common/excluded.md'",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .unwrap();
+    assert_eq!(excluded.0, "excluded");
+    assert_eq!(
+        excluded.1,
+        "fixture page documents an explicit parser exclusion"
+    );
+    let selection: String = connection
+        .query_row(
+            "SELECT value FROM artifact_metadata WHERE key = 'source_selection'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert!(selection.contains("pages/osx/pbcopy.md"));
+    let recipe: String = connection
+        .query_row(
+            "SELECT value FROM artifact_metadata WHERE key = 'lexical_query_normalization'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert!(recipe.contains("AND-join"));
+
+    let linux = query_artifact_for_platform(
+        QueryOptions {
+            artifact: output.clone(),
+            query: "search patterns files".to_string(),
+            limit: 10,
+        },
+        "linux",
+    )
+    .unwrap();
+    assert_eq!(linux.len(), 1);
+    assert_eq!(linux[0].source_path, "pages/linux/grep.md");
+
+    let osx = query_artifact_for_platform(
+        QueryOptions {
+            artifact: output.clone(),
+            query: "macOS clipboard".to_string(),
+            limit: 10,
+        },
+        "osx",
+    )
+    .unwrap();
+    assert_eq!(osx.len(), 1);
+    assert_eq!(osx[0].source_path, "pages/osx/pbcopy.md");
+
+    let windows = query_artifact_for_platform(
+        QueryOptions {
+            artifact: output.clone(),
+            query: "formatted Windows".to_string(),
+            limit: 10,
+        },
+        "windows",
+    )
+    .unwrap();
+    assert_eq!(windows.len(), 1);
+    assert_eq!(windows[0].source_path, "pages/windows/printf.md");
+
+    let page = inspect_page(InspectOptions {
+        artifact: output,
+        page: "vi".to_string(),
+        platform: "common".to_string(),
+    })
+    .unwrap();
+    assert_eq!(page.destinations.len(), 1);
+    assert_eq!(page.destinations[0].page_name, "vim");
+}
+
+#[test]
+fn successful_build_replaces_an_existing_artifact_after_validation() {
+    let output_dir = tempdir().unwrap();
+    let output = output_dir.path().join("replacement.db");
+    build_artifact(BuildOptions {
+        manifest: FIXTURE_MANIFEST.into(),
+        snapshot: FIXTURE_ROOT.into(),
+        output: output.clone(),
+    })
+    .unwrap();
+
+    let report = build_artifact(BuildOptions {
+        manifest: REFERENCES_FIXTURE_MANIFEST.into(),
+        snapshot: REFERENCES_FIXTURE_ROOT.into(),
+        output: output.clone(),
+    })
+    .unwrap();
+    assert_eq!(report.page_count, 10);
+    assert_eq!(report.file_count, 10);
+    let inspected = inspect_page(InspectOptions {
+        artifact: output,
+        page: "vi".to_string(),
+        platform: "common".to_string(),
+    })
+    .unwrap();
+    assert_eq!(inspected.destinations[0].page_name, "vim");
+}
+
+#[test]
+fn malformed_rebuild_leaves_previous_artifact_untouched() {
+    let output_dir = tempdir().unwrap();
+    let output = output_dir.path().join("previous.db");
+    build_artifact(BuildOptions {
+        manifest: FIXTURE_MANIFEST.into(),
+        snapshot: FIXTURE_ROOT.into(),
+        output: output.clone(),
+    })
+    .unwrap();
+    let previous_bytes = fs::read(&output).unwrap();
+
+    let bad_snapshot = tempdir().unwrap();
+    write_snapshot_file(
+        bad_snapshot.path(),
+        "pages/common/bad.md",
+        "# bad\n\n- missing command\nnot a command\n",
+    );
+    let error = build_custom_snapshot(
+        bad_snapshot.path(),
+        &["pages/common/bad.md"],
+        output.clone(),
+    )
+    .unwrap_err()
+    .to_string();
+
+    assert!(error.contains("pages/common/bad.md:4:"), "{error}");
+    assert_eq!(fs::read(&output).unwrap(), previous_bytes);
+    assert!(!temporary_output_exists(output_dir.path(), "previous.db"));
+}
+
+#[test]
+fn interrupted_rebuild_leaves_previous_artifact_untouched() {
+    let output_dir = tempdir().unwrap();
+    let output = output_dir.path().join("previous.db");
+    build_artifact(BuildOptions {
+        manifest: FIXTURE_MANIFEST.into(),
+        snapshot: FIXTURE_ROOT.into(),
+        output: output.clone(),
+    })
+    .unwrap();
+    let previous_bytes = fs::read(&output).unwrap();
+
+    let error = build_artifact_with_failure_injection(
+        BuildOptions {
+            manifest: FIXTURE_MANIFEST.into(),
+            snapshot: FIXTURE_ROOT.into(),
+            output: output.clone(),
+        },
+        Some(1),
+    )
+    .unwrap_err()
+    .to_string();
+
+    assert!(error.contains("failure injection interrupted construction"));
+    assert_eq!(fs::read(&output).unwrap(), previous_bytes);
+    assert!(!temporary_output_exists(output_dir.path(), "previous.db"));
+}
+
+#[test]
+fn repeated_builds_have_equivalent_logical_records() {
+    let output_dir = tempdir().unwrap();
+    let first = output_dir.path().join("first.db");
+    let second = output_dir.path().join("second.db");
+    for output in [&first, &second] {
+        build_artifact(BuildOptions {
+            manifest: FULL_CORPUS_FIXTURE_MANIFEST.into(),
+            snapshot: FULL_CORPUS_FIXTURE_ROOT.into(),
+            output: output.to_path_buf(),
+        })
+        .unwrap();
+    }
+
+    assert_eq!(logical_records(&first), logical_records(&second));
 }
 
 #[test]
@@ -412,8 +614,8 @@ fn build_custom_snapshot(
         .join(",");
     let manifest = format!(
         r#"{{
-  "schema_version": 2,
-  "parser_version": "tldr-subset-v2",
+  "schema_version": 3,
+  "parser_version": "tldr-subset-v3",
   "source": {{
     "name": "tldr-pages",
     "revision": "fixture-invalid-v1",
@@ -425,7 +627,12 @@ fn build_custom_snapshot(
   }},
   "language": "en",
   "pages_root": "pages",
-  "files": [{file_list}]
+  "files": [{file_list}],
+  "lexical_index": {{
+    "tokenizer": "unicode61",
+    "fields": ["page.command", "page.description", "example.description", "example.command"],
+    "query_normalization": "split non-alphanumeric except underscore; lowercase ASCII; quote and AND-join unique sorted tokens"
+  }}
 }}"#
     );
     let manifest_path = root.join("manifest.json");
@@ -435,6 +642,135 @@ fn build_custom_snapshot(
         snapshot: root.to_path_buf(),
         output,
     })?)
+}
+
+fn temporary_output_exists(parent: &Path, file_name: &str) -> bool {
+    parent
+        .join(format!(".{file_name}.{}.part", std::process::id()))
+        .exists()
+}
+
+fn logical_records(path: &Path) -> Vec<String> {
+    let connection = Connection::open(path).unwrap();
+    let mut records = Vec::new();
+    records.push(format!(
+        "metadata:{:?}",
+        connection
+            .prepare("SELECT key, value FROM artifact_metadata ORDER BY key")
+            .unwrap()
+            .query_map([], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+            })
+            .unwrap()
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .unwrap()
+    ));
+    records.push(format!(
+        "source:{:?}",
+        connection
+            .prepare(
+                "SELECT source_path, sha256, byte_len, status, reason
+                 FROM source_files ORDER BY source_path",
+            )
+            .unwrap()
+            .query_map([], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, i64>(2)?,
+                    row.get::<_, String>(3)?,
+                    row.get::<_, String>(4)?,
+                ))
+            })
+            .unwrap()
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .unwrap()
+    ));
+    records.push(format!(
+        "pages:{:?}",
+        connection
+            .prepare(
+                "SELECT page_id, page_name, command, description, source_path,
+                        source_revision, source_ref, platform, language, page_position,
+                        original_content, page_kind
+                 FROM pages ORDER BY page_position",
+            )
+            .unwrap()
+            .query_map([], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, String>(3)?,
+                    row.get::<_, String>(4)?,
+                    row.get::<_, String>(5)?,
+                    row.get::<_, String>(6)?,
+                    row.get::<_, String>(7)?,
+                    row.get::<_, String>(8)?,
+                    row.get::<_, i64>(9)?,
+                    row.get::<_, String>(10)?,
+                    row.get::<_, String>(11)?,
+                ))
+            })
+            .unwrap()
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .unwrap()
+    ));
+    records.push(format!(
+        "examples:{:?}",
+        connection
+            .prepare(
+                "SELECT example_id, page_id, position, description, command, source_line
+                 FROM examples ORDER BY page_id, position",
+            )
+            .unwrap()
+            .query_map([], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, i64>(2)?,
+                    row.get::<_, String>(3)?,
+                    row.get::<_, String>(4)?,
+                    row.get::<_, i64>(5)?,
+                ))
+            })
+            .unwrap()
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .unwrap()
+    ));
+    records.push(format!(
+        "references:{:?}",
+        connection
+            .prepare(
+                "SELECT page_id, position, destination_name, source_line
+                 FROM page_references ORDER BY page_id, position",
+            )
+            .unwrap()
+            .query_map([], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, i64>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, i64>(3)?,
+                ))
+            })
+            .unwrap()
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .unwrap()
+    ));
+    records.push(format!(
+        "lexical:{:?}",
+        connection
+            .prepare("SELECT example_id, lexical_text FROM example_lexical ORDER BY example_id")
+            .unwrap()
+            .query_map([], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+            })
+            .unwrap()
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .unwrap()
+    ));
+    records
 }
 
 fn snapshot_digest_for_files(root: &Path, files: &[&str]) -> String {

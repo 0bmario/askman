@@ -25,6 +25,7 @@ indicatif = "0.18.4"
 serde = { version = "1.0.219", features = ["derive"], optional = true }
 serde_json = { version = "1.0.140", optional = true }
 sha2 = { version = "0.10.9", optional = true }
+libc = { version = "0.2.172", optional = true }
 
 [[bin]]
 name = "askman"
@@ -36,7 +37,7 @@ path = "src/bin/tldr_subset.rs"
 required-features = ["dev"]
 
 [features]
-dev = ["dep:serde", "dep:serde_json", "dep:sha2"]
+dev = ["dep:serde", "dep:serde_json", "dep:sha2", "dep:libc"]
 
 [dev-dependencies]
 tempfile = "3.19.1"

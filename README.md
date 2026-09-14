@@ -62,4 +62,5 @@ Thanks to the [tldr-pages](https://github.com/tldr-pages/tldr) project. The comm
 The milestone-1 corpus runner is separate from the shipping `askman` CLI. It
 only consumes a provisioned local snapshot and writes the explicitly supplied
 output path; it does not download tldr or touch Askman's installed database.
-See [the reproducible subset instructions](docs/reproducibility/tldr-subset.md).
+See [the reproducible corpus instructions](docs/reproducibility/tldr-subset.md)
+and the [full-corpus build record](docs/reproducibility/tldr-full-corpus.md).
