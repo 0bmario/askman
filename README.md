@@ -57,10 +57,9 @@ Then remove the binary itself: `rm ~/.local/bin/askman` or if installed via carg
 
 Thanks to the [tldr-pages](https://github.com/tldr-pages/tldr) project. The command data used by `askman` comes from their collection of simplified examples.
 
-## Rebuilding the Database
+## Developer tldr subset runner
 
-```bash
-cargo run --bin import_tldr --features dev
-```
-
-This fetches the latest tldr pages, extracts them, and builds a fresh `commands.db` for your system.
+The milestone-1 corpus runner is separate from the shipping `askman` CLI. It
+only consumes a provisioned local snapshot and writes the explicitly supplied
+output path; it does not download tldr or touch Askman's installed database.
+See [the reproducible subset instructions](docs/reproducibility/tldr-subset.md).
