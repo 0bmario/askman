@@ -11,12 +11,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 import sqlite3
 import subprocess
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -28,10 +29,63 @@ SCORER_VERSION = "task-scorer-v1"
 KEYWORD_RETRIEVER_VERSION = "keyword-fts5-v1"
 CURRENT_ADAPTER_VERSION = "current-askman-ranking-adapter-v1"
 DENSE_RETRIEVER_VERSION = "dense-vector-vec0-v1"
+HYBRID_RETRIEVER_VERSION = "hybrid-rrf-v1"
+HYBRID_CONFIG_SCHEMA_VERSION = 1
+FROZEN_HYBRID_CONFIG_SHA256 = (
+    "1059c9bf72e570cf431ccddb2676176bac65238b5c4c8a07b63891e5133a9c7f"
+)
 SUPPORTED_PLATFORMS = {"common", "linux", "osx", "windows"}
 MAX_DISPLAYED_RESULTS = 3
 EXPECTED_FAMILIES_PER_SPLIT = 6
 TASKS_PER_FAMILY = 5
+HYBRID_MAX_CANDIDATES = 12
+HYBRID_PLATFORM_POLICY = "artifact-selected-page-ids-v1"
+HYBRID_REFERENCE_POLICY = (
+    "source-backed-pages-only; page references never substitute examples"
+)
+HYBRID_CORPUS_FIELDS = (
+    "corpus_id",
+    "artifact_kind",
+    "schema_version",
+    "parser_version",
+    "source_revision",
+    "source_digest",
+    "manifest_sha256",
+)
+HYBRID_SELECTION_RULE = {
+    "primary_metric": "success_at_3",
+    "tie_breakers": [
+        "candidate_recall",
+        "coverage",
+        "total_candidate_budget",
+        "rrf_k",
+    ],
+    "guardrails": [
+        "do not increase false_answers_on_unanswerable",
+        "retain keyword and dense baselines",
+    ],
+    "text": (
+        "Maximize Success@3; break ties by candidate recall, coverage, lower "
+        "total candidate budget, then lower RRF k, subject to the false-answer "
+        "guardrail."
+    ),
+}
+FROZEN_METRICS = (
+    "candidate_recall",
+    "success_at_1",
+    "success_at_3",
+    "coverage",
+    "incorrect_answered_tasks",
+    "false_answers_on_unanswerable",
+)
+EXPECTED_DEV_METRIC_DENOMINATORS = {
+    "candidate_recall": 13,
+    "success_at_1": 13,
+    "success_at_3": 13,
+    "coverage": 30,
+    "incorrect_answered_tasks": 13,
+    "false_answers_on_unanswerable": 17,
+}
 LEXICAL_INDEX_TOKENIZER = "unicode61"
 LEXICAL_INDEX_FIELDS = [
     "page.command",
@@ -69,6 +123,60 @@ class Candidate:
     page_position: int
     example_position: int
     ranking_score: float
+
+
+@dataclass(frozen=True)
+class HybridCandidateConfig:
+    candidate_id: str
+    rrf_k: int
+    keyword_weight: float
+    dense_weight: float
+    keyword_budget: int
+    dense_budget: int
+    weak_match_cutoff: float
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "candidate_id": self.candidate_id,
+            "fusion": {
+                "method": "rrf",
+                "rrf_k": self.rrf_k,
+                "keyword_weight": self.keyword_weight,
+                "dense_weight": self.dense_weight,
+            },
+            "candidate_budgets": {
+                "keyword": self.keyword_budget,
+                "dense": self.dense_budget,
+            },
+            "weak_match_cutoff": self.weak_match_cutoff,
+        }
+
+
+@dataclass(frozen=True)
+class HybridConfig:
+    config_id: str
+    frozen: bool
+    frozen_at: str
+    dataset_id: str
+    split_id: str
+    corpus: dict[str, str]
+    dense_recipe: str
+    corpus_policy: str
+    reference_policy: str
+    retriever_versions: dict[str, str]
+    metrics: tuple[str, ...]
+    selection_rule: dict[str, Any]
+    candidates: tuple[HybridCandidateConfig, ...]
+    selected_candidate_id: str
+    development_results: dict[str, Any]
+
+    @property
+    def selected(self) -> HybridCandidateConfig:
+        return next(
+            candidate
+            for candidate in self.candidates
+            if candidate.candidate_id == self.selected_candidate_id
+        )
 
 
 def query_resources(query_times_ms: list[float]) -> dict[str, Any]:
@@ -132,11 +240,15 @@ class DenseClient:
         self.peak_memory_bytes = ready.get("peak_memory_bytes")
         self.startup_ms = (time.perf_counter() - started) * 1000
 
-    def query(self, question: str, platform: str) -> list[Candidate]:
+    def query(
+        self, question: str, platform: str, limit: int = MAX_DISPLAYED_RESULTS
+    ) -> list[Candidate]:
         if self.process.stdin is None or self.process.stdout is None:
             raise RuntimeError("dense helper is not connected")
+        if limit <= 0:
+            raise ValueError("dense candidate budget must be greater than zero")
         request = json.dumps(
-            {"query": question, "platform": platform, "limit": MAX_DISPLAYED_RESULTS}
+            {"query": question, "platform": platform, "limit": limit}
         )
         started = time.perf_counter()
         try:
@@ -216,6 +328,267 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def _require_non_empty_string(value: Any, name: str) -> str:
+    is_non_empty_string = isinstance(value, str) and bool(value.strip())
+    if not is_non_empty_string:
+        raise ValueError(f"hybrid config {name} must be a non-empty string")
+    return value
+
+
+def _require_bounded_int(value: Any, name: str, minimum: int, maximum: int) -> int:
+    is_valid_integer = (
+        not isinstance(value, bool)
+        and isinstance(value, int)
+        and minimum <= value <= maximum
+    )
+    if not is_valid_integer:
+        raise ValueError(
+            f"hybrid config {name} must be an integer from {minimum} through {maximum}"
+        )
+    return value
+
+
+def _require_bounded_float(value: Any, name: str, minimum: float, maximum: float) -> float:
+    is_number = not isinstance(value, bool) and isinstance(value, (int, float))
+    if not is_number:
+        raise ValueError(f"hybrid config {name} must be a number")
+    converted = float(value)
+    is_in_range = math.isfinite(converted) and minimum <= converted <= maximum
+    if not is_in_range:
+        raise ValueError(
+            f"hybrid config {name} must be finite and from {minimum} through {maximum}"
+        )
+    return converted
+
+
+def _require_metric_record(value: Any, name: str) -> dict[str, dict[str, int]]:
+    if not isinstance(value, dict):
+        raise ValueError(f"hybrid config {name} must be an object")
+    result: dict[str, dict[str, int]] = {}
+    for metric in FROZEN_METRICS:
+        metric_value = value.get(metric)
+        has_metric_pair = isinstance(metric_value, dict) and {
+            "count",
+            "denominator",
+        } <= metric_value.keys()
+        if not has_metric_pair:
+            raise ValueError(f"hybrid config {name} is missing metric {metric}")
+        count = metric_value["count"]
+        denominator = metric_value["denominator"]
+        has_valid_counts = (
+            isinstance(count, int)
+            and not isinstance(count, bool)
+            and isinstance(denominator, int)
+            and not isinstance(denominator, bool)
+            and 0 <= count <= denominator
+            and denominator > 0
+            and denominator == EXPECTED_DEV_METRIC_DENOMINATORS[metric]
+        )
+        if not has_valid_counts:
+            raise ValueError(f"hybrid config {name}.{metric} has invalid counts")
+        result[metric] = {"count": count, "denominator": denominator}
+    return result
+
+
+def load_hybrid_config(path: Path) -> HybridConfig:
+    raw = load_json(path)
+    if raw.get("schema_version") != HYBRID_CONFIG_SCHEMA_VERSION:
+        raise ValueError("unsupported hybrid config schema")
+    config_id = _require_non_empty_string(raw.get("config_id"), "config_id")
+    frozen = raw.get("frozen")
+    if not isinstance(frozen, bool):
+        raise ValueError("hybrid config frozen must be a boolean")
+    frozen_at = _require_non_empty_string(raw.get("frozen_at"), "frozen_at")
+    try:
+        datetime.fromisoformat(frozen_at)
+    except ValueError as error:
+        raise ValueError("hybrid config frozen_at must be an ISO-8601 timestamp") from error
+    dataset_id = _require_non_empty_string(raw.get("dataset_id"), "dataset_id")
+    split_id = _require_non_empty_string(raw.get("split_id"), "split_id")
+    dense_recipe = _require_non_empty_string(raw.get("dense_recipe"), "dense_recipe")
+    raw_corpus = raw.get("corpus")
+    has_corpus_fields = isinstance(raw_corpus, dict) and all(
+        isinstance(raw_corpus.get(field), str) and raw_corpus[field]
+        for field in HYBRID_CORPUS_FIELDS
+    )
+    if not has_corpus_fields:
+        raise ValueError("hybrid config must declare the frozen corpus identity")
+    corpus = {field: raw_corpus[field] for field in HYBRID_CORPUS_FIELDS}
+    if raw.get("corpus_policy") != HYBRID_PLATFORM_POLICY:
+        raise ValueError("hybrid config corpus/platform policy is incompatible")
+    if raw.get("reference_policy") != HYBRID_REFERENCE_POLICY:
+        raise ValueError("hybrid config reference policy is incompatible")
+
+    retriever_versions = raw.get("retriever_versions")
+    expected_versions = {
+        "keyword": KEYWORD_RETRIEVER_VERSION,
+        "dense": DENSE_RETRIEVER_VERSION,
+    }
+    if retriever_versions != expected_versions:
+        raise ValueError("hybrid config retriever versions are incompatible")
+
+    metrics = raw.get("metrics")
+    if metrics != list(FROZEN_METRICS):
+        raise ValueError("hybrid config metrics are not frozen to the evaluator metrics")
+    selection_rule = raw.get("selection_rule")
+    if selection_rule != HYBRID_SELECTION_RULE:
+        raise ValueError("hybrid config selection rule is not frozen")
+
+    raw_candidates = raw.get("candidates")
+    has_bounded_candidate_list = isinstance(raw_candidates, list) and (
+        1 <= len(raw_candidates) <= HYBRID_MAX_CANDIDATES
+    )
+    if not has_bounded_candidate_list:
+        raise ValueError(
+            f"hybrid config must contain from 1 through {HYBRID_MAX_CANDIDATES} candidates"
+        )
+    candidates: list[HybridCandidateConfig] = []
+    candidate_ids: set[str] = set()
+    for raw_candidate in raw_candidates:
+        if not isinstance(raw_candidate, dict):
+            raise ValueError("hybrid config candidates must be objects")
+        candidate_id = _require_non_empty_string(raw_candidate.get("id"), "candidate id")
+        if candidate_id in candidate_ids:
+            raise ValueError(f"hybrid config repeats candidate id: {candidate_id}")
+        candidate_ids.add(candidate_id)
+        fusion = raw_candidate.get("fusion")
+        is_rrf_fusion = isinstance(fusion, dict) and fusion.get("method") == "rrf"
+        if not is_rrf_fusion:
+            raise ValueError(f"hybrid candidate {candidate_id} must use rrf fusion")
+        budgets = raw_candidate.get("candidate_budgets")
+        if not isinstance(budgets, dict):
+            raise ValueError(f"hybrid candidate {candidate_id} is missing candidate budgets")
+        candidates.append(
+            HybridCandidateConfig(
+                candidate_id=candidate_id,
+                rrf_k=_require_bounded_int(
+                    fusion.get("rrf_k"), f"{candidate_id}.fusion.rrf_k", 1, 1000
+                ),
+                keyword_weight=_require_bounded_float(
+                    fusion.get("keyword_weight"),
+                    f"{candidate_id}.fusion.keyword_weight",
+                    0.01,
+                    4.0,
+                ),
+                dense_weight=_require_bounded_float(
+                    fusion.get("dense_weight"),
+                    f"{candidate_id}.fusion.dense_weight",
+                    0.01,
+                    4.0,
+                ),
+                keyword_budget=_require_bounded_int(
+                    budgets.get("keyword"), f"{candidate_id}.candidate_budgets.keyword", 1, 64
+                ),
+                dense_budget=_require_bounded_int(
+                    budgets.get("dense"), f"{candidate_id}.candidate_budgets.dense", 1, 64
+                ),
+                weak_match_cutoff=_require_bounded_float(
+                    raw_candidate.get("weak_match_cutoff"),
+                    f"{candidate_id}.weak_match_cutoff",
+                    0.0,
+                    1.0,
+                ),
+            )
+        )
+
+    selected_candidate_id = _require_non_empty_string(
+        raw.get("selected_candidate_id"), "selected_candidate_id"
+    )
+    if selected_candidate_id not in candidate_ids:
+        raise ValueError("hybrid config selected candidate is not in the candidate set")
+    raw_development_results = raw.get("development_results")
+    has_development_results = (
+        isinstance(raw_development_results, dict)
+        and raw_development_results.get("split") == "dev"
+        and raw_development_results.get("task_count") == 30
+        and isinstance(raw_development_results.get("baselines"), dict)
+        and isinstance(raw_development_results.get("candidates"), dict)
+    )
+    if not has_development_results:
+        raise ValueError("hybrid config must record development results")
+    raw_baselines = raw_development_results["baselines"]
+    baseline_names = {"keyword", "current-adapter", "dense"}
+    has_expected_baselines = set(raw_baselines) == baseline_names
+    if not has_expected_baselines:
+        raise ValueError("hybrid config must retain keyword, current-adapter, and dense baselines")
+    development_results: dict[str, Any] = {
+        "baselines": {
+            name: _require_metric_record(raw_baselines[name], f"baseline {name}")
+            for name in sorted(baseline_names)
+        },
+        "candidates": {},
+    }
+    raw_candidate_results = raw_development_results["candidates"]
+    has_all_candidate_results = set(raw_candidate_results) == candidate_ids
+    if not has_all_candidate_results:
+        raise ValueError("hybrid config development results must cover every candidate")
+    for candidate_id in sorted(candidate_ids):
+        development_results["candidates"][candidate_id] = _require_metric_record(
+            raw_candidate_results[candidate_id], f"candidate {candidate_id}"
+        )
+    config = HybridConfig(
+        config_id=config_id,
+        frozen=frozen,
+        frozen_at=frozen_at,
+        dataset_id=dataset_id,
+        split_id=split_id,
+        corpus=corpus,
+        dense_recipe=dense_recipe,
+        corpus_policy=raw["corpus_policy"],
+        reference_policy=raw["reference_policy"],
+        retriever_versions=retriever_versions,
+        metrics=tuple(metrics),
+        selection_rule=selection_rule,
+        candidates=tuple(candidates),
+        selected_candidate_id=selected_candidate_id,
+        development_results=development_results,
+    )
+    selected_by_rule = select_development_candidate(config)
+    if selected_by_rule != config.selected_candidate_id:
+        raise ValueError("hybrid config selected candidate does not match development results")
+    return config
+
+
+def select_development_candidate(config: HybridConfig) -> str:
+    """Apply the frozen development selection rule to recorded metrics."""
+    baseline_false_answers = config.development_results["baselines"]["keyword"][
+        "false_answers_on_unanswerable"
+    ]
+    baseline_false_rate = (
+        baseline_false_answers["count"] / baseline_false_answers["denominator"]
+    )
+    candidate_by_id = {candidate.candidate_id: candidate for candidate in config.candidates}
+    eligible: list[HybridCandidateConfig] = []
+    for candidate_id, metrics in config.development_results["candidates"].items():
+        false_answers = metrics["false_answers_on_unanswerable"]
+        false_answer_rate = false_answers["count"] / false_answers["denominator"]
+        does_not_increase_false_answers = false_answer_rate <= baseline_false_rate
+        if does_not_increase_false_answers:
+            eligible.append(candidate_by_id[candidate_id])
+    if not eligible:
+        raise ValueError("hybrid config has no candidate satisfying the false-answer guardrail")
+
+    def metric_rate(candidate_id: str, metric: str) -> float:
+        value = config.development_results["candidates"][candidate_id][metric]
+        return value["count"] / value["denominator"]
+
+    return min(
+        eligible,
+        key=lambda candidate: (
+            -metric_rate(candidate.candidate_id, "success_at_3"),
+            -metric_rate(candidate.candidate_id, "candidate_recall"),
+            -metric_rate(candidate.candidate_id, "coverage"),
+            candidate.keyword_budget + candidate.dense_budget,
+            candidate.rrf_k,
+            candidate.candidate_id,
+        ),
+    ).candidate_id
+
+
+def hybrid_candidate_report(config: HybridCandidateConfig) -> dict[str, Any]:
+    return config.as_dict()
+
+
 def normalized_tokens(question: str) -> list[str]:
     tokens = {
         token.lower()
@@ -259,8 +632,13 @@ def selected_page_ids(connection: sqlite3.Connection, platform: str) -> set[str]
 
 
 def fetch_candidates(
-    connection: sqlite3.Connection, question: str, platform: str
+    connection: sqlite3.Connection,
+    question: str,
+    platform: str,
+    limit: int | None = None,
 ) -> list[Candidate]:
+    if limit is not None and limit <= 0:
+        raise ValueError("keyword candidate budget must be greater than zero")
     page_ids = sorted(selected_page_ids(connection, platform))
     if not page_ids:
         return []
@@ -276,7 +654,12 @@ def fetch_candidates(
             ORDER BY bm25(example_lexical), e.example_id""",
         (fts_query(question), *page_ids),
     )
-    return [Candidate(*row) for row in rows]
+    candidates = [Candidate(*row) for row in rows]
+    if limit is None:
+        return candidates
+    # Dense retrieval already returns one best example per page. Use the same
+    # page-level budget for the lexical side so fusion ranks comparable pools.
+    return one_per_page(candidates)[:limit]
 
 
 def one_per_page(candidates: Iterable[Candidate]) -> list[Candidate]:
@@ -292,6 +675,87 @@ def one_per_page(candidates: Iterable[Candidate]) -> list[Candidate]:
 
 def plain_results(candidates: list[Candidate]) -> list[Candidate]:
     return one_per_page(candidates)[:MAX_DISPLAYED_RESULTS]
+
+
+def candidate_identity(candidate: Candidate) -> tuple[Any, ...]:
+    """Return the source-backed identity shared by lexical and dense rows."""
+    return (
+        candidate.page_id,
+        candidate.command,
+        candidate.page_description,
+        candidate.example_description,
+        candidate.source_path,
+        candidate.source_ref,
+        candidate.source_revision,
+        candidate.platform,
+        candidate.page_position,
+        candidate.example_position,
+    )
+
+
+def fuse_candidates(
+    keyword_candidates: list[Candidate],
+    dense_candidates: list[Candidate],
+    config: HybridCandidateConfig,
+) -> list[Candidate]:
+    """Fuse bounded retriever pools with normalized reciprocal-rank fusion.
+
+    Candidate recall is measured from this pre-cutoff pool. Weak-match filtering
+    happens only in `hybrid_results`, after page grouping.
+    """
+    by_id: dict[str, Candidate] = {}
+    fused_scores: dict[str, float] = {}
+    sources = (
+        (one_per_page(keyword_candidates)[: config.keyword_budget], config.keyword_weight),
+        (one_per_page(dense_candidates)[: config.dense_budget], config.dense_weight),
+    )
+    for candidates, weight in sources:
+        for rank, candidate in enumerate(candidates, start=1):
+            previous = by_id.get(candidate.example_id)
+            has_conflicting_identity = (
+                previous is not None
+                and candidate_identity(previous) != candidate_identity(candidate)
+            )
+            if has_conflicting_identity:
+                raise ValueError(
+                    "candidate identity mismatch for "
+                    f"{candidate.example_id} between keyword and dense retrieval"
+                )
+            by_id.setdefault(candidate.example_id, candidate)
+            fused_scores[candidate.example_id] = fused_scores.get(candidate.example_id, 0.0) + (
+                weight / (config.rrf_k + rank)
+            )
+
+    maximum_score = (
+        config.keyword_weight / (config.rrf_k + 1)
+        + config.dense_weight / (config.rrf_k + 1)
+    )
+    ranked = sorted(
+        by_id,
+        key=lambda example_id: (-fused_scores[example_id], example_id),
+    )
+    return [
+        replace(
+            by_id[example_id],
+            # Lower remains better for the existing Candidate/report shape.
+            ranking_score=-(fused_scores[example_id] / maximum_score),
+        )
+        for example_id in ranked
+    ]
+
+
+def hybrid_results(
+    candidates: list[Candidate], config: HybridCandidateConfig
+) -> list[Candidate]:
+    """Display close candidates as at most three distinct destination pages."""
+    close_matches = [
+        candidate
+        for candidate in candidates
+        # A strict boundary makes the 0.5 score of a one-retriever-only top hit
+        # weak when both retrievers have equal weight.
+        if -candidate.ranking_score > config.weak_match_cutoff
+    ]
+    return plain_results(close_matches)
 
 
 def current_adjustment(candidate: Candidate, raw_distance: float) -> float | None:
@@ -578,16 +1042,106 @@ def validate_artifact(
     return checks
 
 
+def validate_hybrid_config_for_dataset(
+    config: HybridConfig, dataset: dict[str, Any]
+) -> None:
+    if config.dataset_id != dataset.get("dataset_id"):
+        raise ValueError("hybrid config dataset ID does not match the evaluation dataset")
+    if config.split_id != dataset.get("split_id"):
+        raise ValueError("hybrid config split policy does not match the evaluation dataset")
+    dataset_corpus = dataset.get("corpus")
+    has_corpus_fields = isinstance(dataset_corpus, dict) and all(
+        field in dataset_corpus for field in HYBRID_CORPUS_FIELDS
+    )
+    if not has_corpus_fields:
+        raise ValueError("evaluation dataset is missing the frozen corpus identity")
+    expected_corpus = {
+        field: dataset_corpus[field] for field in HYBRID_CORPUS_FIELDS
+    }
+    if config.corpus != expected_corpus:
+        raise ValueError(
+            "hybrid config corpus identity does not match the evaluation dataset"
+        )
+
+
+def validate_hybrid_config_for_artifact(
+    config: HybridConfig, connection: sqlite3.Connection
+) -> None:
+    actual = metadata(connection)
+    if actual.get("dense_embedding_text_recipe") != config.dense_recipe:
+        raise ValueError(
+            "hybrid config dense recipe does not match the dense artifact"
+        )
+
+
+def validate_frozen_hybrid_config(
+    config: HybridConfig, config_digest: str | None
+) -> None:
+    is_frozen_config = config.frozen
+    has_committed_digest = config_digest == FROZEN_HYBRID_CONFIG_SHA256
+    if not is_frozen_config or not has_committed_digest:
+        raise ValueError(
+            "holdout comparison requires the committed frozen hybrid config"
+        )
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     validate_retriever_split(args.retriever, args.split)
+    is_holdout = args.split == "holdout"
+    holdout_access_granted = getattr(args, "allow_holdout", False)
+    if is_holdout and not holdout_access_granted:
+        raise ValueError("holdout labels require --allow-holdout")
+    hybrid_config = None
+    hybrid_candidate = None
+    hybrid_config_digest = None
+    if args.retriever == "hybrid":
+        hybrid_config_path = getattr(args, "hybrid_config", None)
+        if hybrid_config_path is None:
+            raise ValueError("hybrid retrieval requires --hybrid-config")
+        hybrid_config = load_hybrid_config(hybrid_config_path)
+        hybrid_config_digest = sha256_file(hybrid_config_path)
+        requested_candidate_id = getattr(args, "hybrid_candidate", None)
+        if requested_candidate_id is None:
+            hybrid_candidate = hybrid_config.selected
+        else:
+            is_unselected_holdout_candidate = (
+                is_holdout
+                and requested_candidate_id != hybrid_config.selected_candidate_id
+            )
+            if is_unselected_holdout_candidate:
+                raise ValueError(
+                    "holdout comparison must use the selected frozen hybrid candidate"
+                )
+            hybrid_candidate = next(
+                (
+                    candidate
+                    for candidate in hybrid_config.candidates
+                    if candidate.candidate_id == requested_candidate_id
+                ),
+                None,
+            )
+            if hybrid_candidate is None:
+                raise ValueError(
+                    f"unknown hybrid candidate: {requested_candidate_id}"
+                )
+        if is_holdout:
+            validate_frozen_hybrid_config(hybrid_config, hybrid_config_digest)
+    else:
+        has_hybrid_config = getattr(args, "hybrid_config", None) is not None
+        has_hybrid_candidate = getattr(args, "hybrid_candidate", None) is not None
+        if has_hybrid_config or has_hybrid_candidate:
+            raise ValueError(
+                "--hybrid-config and --hybrid-candidate are only valid with --retriever hybrid"
+            )
     dataset_path = Path(args.dataset)
     dataset = load_json(dataset_path)
     validate_dataset(dataset, args.split)
-    if args.split == "holdout" and not args.allow_holdout:
-        raise ValueError("holdout labels require --allow-holdout")
+    if hybrid_config is not None:
+        validate_hybrid_config_for_dataset(hybrid_config, dataset)
     tasks = [task for task in dataset["tasks"] if task["split"] == args.split]
     dense_client = None
     baseline_query_times_ms: list[float] = []
+    keyword_query_times_ms: list[float] = []
     try:
         with sqlite3.connect(args.artifact) as connection:
             frozen_artifact = validate_artifact(
@@ -595,11 +1149,17 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 dataset,
                 Path(args.manifest) if args.manifest else None,
             )
+            if hybrid_config is not None:
+                validate_hybrid_config_for_artifact(hybrid_config, connection)
             validate_labels(connection, tasks)
-            if args.retriever == "dense":
-                if args.dense_helper is None or args.model_cache is None:
+            uses_dense = args.retriever in {"dense", "hybrid"}
+            if uses_dense:
+                has_missing_dense_arguments = (
+                    args.dense_helper is None or args.model_cache is None
+                )
+                if has_missing_dense_arguments:
                     raise ValueError(
-                        "dense retrieval requires --dense-helper and --model-cache; "
+                        f"{args.retriever} retrieval requires --dense-helper and --model-cache; "
                         "the semantic path has no keyword fallback"
                     )
                 dense_client = DenseClient(
@@ -608,17 +1168,38 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             results = []
             for task in tasks:
                 started = time.perf_counter()
-                if dense_client is not None:
+                if args.retriever == "dense":
                     candidates = dense_client.query(task["question"], task["platform"])
+                elif args.retriever == "hybrid":
+                    keyword_started = time.perf_counter()
+                    keyword_candidates = fetch_candidates(
+                        connection,
+                        task["question"],
+                        task["platform"],
+                        hybrid_candidate.keyword_budget,
+                    )
+                    keyword_query_times_ms.append(
+                        (time.perf_counter() - keyword_started) * 1000
+                    )
+                    dense_candidates = dense_client.query(
+                        task["question"],
+                        task["platform"],
+                        hybrid_candidate.dense_budget,
+                    )
+                    candidates = fuse_candidates(
+                        keyword_candidates, dense_candidates, hybrid_candidate
+                    )
                 else:
                     candidates = fetch_candidates(
                         connection, task["question"], task["platform"]
                     )
                 if args.retriever in {"keyword", "dense"}:
                     displayed = plain_results(candidates)
+                elif args.retriever == "hybrid":
+                    displayed = hybrid_results(candidates, hybrid_candidate)
                 else:
                     displayed = current_adapter_results(candidates)
-                if dense_client is None:
+                if args.retriever in {"keyword", "current-adapter"}:
                     baseline_query_times_ms.append(
                         (time.perf_counter() - started) * 1000
                     )
@@ -626,6 +1207,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     finally:
         if dense_client is not None:
             resources = dense_client.resources()
+            if args.retriever == "hybrid":
+                resources["keyword"] = query_resources(keyword_query_times_ms)
             dense_client.close()
         else:
             resources = baseline_resources(baseline_query_times_ms)
@@ -640,14 +1223,39 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "keyword": KEYWORD_RETRIEVER_VERSION,
             "current-adapter": CURRENT_ADAPTER_VERSION,
             "dense": DENSE_RETRIEVER_VERSION,
+            "hybrid": HYBRID_RETRIEVER_VERSION,
         }[args.retriever],
         "corpus": frozen_artifact,
         "resources": resources,
+        "hybrid": (
+            {
+                "config_id": hybrid_config.config_id,
+                "config_sha256": hybrid_config_digest,
+                "config_frozen": hybrid_config.frozen,
+                "config_frozen_at": hybrid_config.frozen_at,
+                "dataset_id": hybrid_config.dataset_id,
+                "split_id": hybrid_config.split_id,
+                "corpus": hybrid_config.corpus,
+                "dense_recipe": hybrid_config.dense_recipe,
+                "corpus_policy": hybrid_config.corpus_policy,
+                "reference_policy": hybrid_config.reference_policy,
+                "retriever_versions": hybrid_config.retriever_versions,
+                "metrics": list(hybrid_config.metrics),
+                "selection_rule": hybrid_config.selection_rule,
+                "development_selected_candidate_id": select_development_candidate(
+                    hybrid_config
+                ),
+                "development_results": hybrid_config.development_results,
+                "candidate": hybrid_candidate_report(hybrid_candidate),
+            }
+            if hybrid_config is not None
+            else None
+        ),
         "historical_policy_smoke": "separate: scripts/smoke_offline.sh",
         "holdout_access": {
-            "authorized": args.split != "holdout" or args.allow_holdout,
-            "recorded": args.split == "holdout",
-            "utc": datetime.now(timezone.utc).isoformat() if args.split == "holdout" else None,
+            "authorized": not is_holdout or holdout_access_granted,
+            "recorded": is_holdout,
+            "utc": datetime.now(timezone.utc).isoformat() if is_holdout else None,
         },
         "summary": summarize(tasks, results),
         "tasks": results,
@@ -664,7 +1272,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--allow-holdout", action="store_true")
     result.add_argument(
         "--retriever",
-        choices=("keyword", "current-adapter", "dense"),
+        choices=("keyword", "current-adapter", "dense", "hybrid"),
         default="keyword",
     )
     result.add_argument(
@@ -676,6 +1284,15 @@ def parser() -> argparse.ArgumentParser:
         "--model-cache",
         type=Path,
         help="Offline fastembed cache containing the pinned MiniLM snapshot",
+    )
+    result.add_argument(
+        "--hybrid-config",
+        type=Path,
+        help="Frozen development/holdout configuration for hybrid retrieval",
+    )
+    result.add_argument(
+        "--hybrid-candidate",
+        help="Development-only candidate ID from --hybrid-config for bounded tuning",
     )
     result.add_argument("--output", type=Path)
     return result
