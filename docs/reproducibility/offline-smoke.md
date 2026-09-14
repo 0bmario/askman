@@ -94,9 +94,9 @@ set +e
         "$RUN_DIR/host-target/release/askman" \
         --linux "move files to docs" \
         > "$RUN_DIR/host-query.txt" 2>&1
-status=$?
+query_status=$?
 set -e
-printf 'exit_status=%s\n' "$status" | tee "$RUN_DIR/host-query-status.txt"
+printf 'exit_status=%s\n' "$query_status" | tee "$RUN_DIR/host-query-status.txt"
 ```
 
 If the host runtime or architecture differs, record that the comparison is
