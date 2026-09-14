@@ -83,10 +83,11 @@ with Rust 1.88.0, `fastembed 4.8.0`, `sqlite-vec 0.1.6`, and ONNX Runtime
 
 Build time was 11 ms for the lexical artifact and 11 ms for the dense index;
 database sizes were 77,824 and 1,720,320 bytes respectively. The five
-fresh-process runs measured initialization p50/p95 of 3,426.941/3,431.956 ms,
-model load p50/p95 of 3,418/3,424 ms, query p50/p95 of 2.291/4.730 ms, and
-maximum reported peak memory of 345,407,488 bytes. The one warmed process
-measured query p50/p95 of 2.355/4.588 ms and 343,228,416 bytes peak memory.
+fresh-process runs measured initialization p50/p95 of 3,430.286/3,450.765 ms,
+model load p50/p95 of 3,421/3,441 ms, end-to-end query p50/p95 of 2.243/4.048
+ms, and maximum reported peak memory of 345,423,872 bytes. The one warmed
+process measured end-to-end query p50/p95 of 2.203/4.971 ms and 344,702,976
+bytes peak memory.
 The network probe passed under the deny policy.
 
 The report retains exact digests and per-task data; the table above is only the
