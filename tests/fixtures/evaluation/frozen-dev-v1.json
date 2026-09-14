@@ -1,0 +1,56 @@
+{
+  "dataset_id": "askman-evaluation-v1",
+  "schema_version": 1,
+  "scorer_version": "task-scorer-v1",
+  "split": "dev",
+  "split_id": "scenario-family-split-v1",
+  "task_count": 30,
+  "freeze_note": "See docs/reproducibility/evaluation-authoring.md; author intent was written before corpus inspection and labels were then adjudicated against the pinned fixture.",
+  "corpus": {
+    "corpus_id": "fixture-tldr-full-corpus-v1:d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "fixture-tldr-full-corpus-v1",
+    "source_digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+    "manifest_sha256": "68ae06300afdaee1515ef7c6248f35056e871e73d07778f2e1c2f636589c8461"
+  },
+  "split_policy": "six distinct scenario families per split; five independently phrased tasks per family; no family crosses the split",
+  "tasks": [
+    {"id":"dev-copy-01","split":"dev","family":"copy-dev","question":"copy file location","platform":"common","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"],"rationale":"The pinned cp example copies one source path to one destination path."},
+    {"id":"dev-copy-02","split":"dev","family":"copy-dev","question":"cp copy","platform":"common","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"],"rationale":"The task names the selected command and requests its demonstrated file-copy behavior."},
+    {"id":"dev-copy-03","split":"dev","family":"copy-dev","question":"source destination","platform":"common","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"],"rationale":"The example has source and destination placeholders and performs this operation."},
+    {"id":"dev-copy-04","split":"dev","family":"copy-dev","question":"copy files directories","platform":"common","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c"],"rationale":"The cp page description explicitly covers files and directories; its only indexed example is accepted."},
+    {"id":"dev-copy-05","split":"dev","family":"copy-dev","question":"move files to docs","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"Audit prompt retained as development-only; the pinned corpus has copy but no move example."},
+
+    {"id":"dev-search-01","split":"dev","family":"search-dev","question":"search patterns files","platform":"linux","answerable":true,"acceptable_example_ids":["example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"],"rationale":"The Linux grep example searches for patterns in files."},
+    {"id":"dev-search-02","split":"dev","family":"search-dev","question":"grep -R recursively","platform":"linux","answerable":true,"acceptable_example_ids":["example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"],"rationale":"The exact recursive flag and behavior match the indexed grep example."},
+    {"id":"dev-search-03","split":"dev","family":"search-dev","question":"pattern path","platform":"linux","answerable":true,"acceptable_example_ids":["example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"],"rationale":"The example searches recursively for a pattern in a path."},
+    {"id":"dev-search-04","split":"dev","family":"search-dev","question":"find text in compressed logs","platform":"linux","answerable":false,"acceptable_example_ids":[],"rationale":"Audit prompt retained as development-only; no decompression-aware or zgrep example is in the pinned corpus."},
+    {"id":"dev-search-05","split":"dev","family":"search-dev","question":"grep search files","platform":"linux","answerable":true,"acceptable_example_ids":["example-015133a61a0e11c9a7343ef3b659076b09b35fd3ea2ba32ce5a2cb566a9c503d"],"rationale":"The recursive grep example is the only indexed example satisfying this task."},
+
+    {"id":"dev-clipboard-01","split":"dev","family":"clipboard-dev","question":"copy text clipboard","platform":"osx","answerable":true,"acceptable_example_ids":["example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"The osx pbcopy example copies file input to the clipboard."},
+    {"id":"dev-clipboard-02","split":"dev","family":"clipboard-dev","question":"pbcopy file","platform":"osx","answerable":true,"acceptable_example_ids":["example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"The example uses input redirection into pbcopy."},
+    {"id":"dev-clipboard-03","split":"dev","family":"clipboard-dev","question":"macOS clipboard","platform":"osx","answerable":true,"acceptable_example_ids":["example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"The platform-specific example demonstrates exactly this clipboard transfer."},
+    {"id":"dev-clipboard-04","split":"dev","family":"clipboard-dev","question":"standard input clipboard","platform":"osx","answerable":true,"acceptable_example_ids":["example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"The exact input behavior matches the indexed example."},
+    {"id":"dev-clipboard-05","split":"dev","family":"clipboard-dev","question":"copy","platform":"osx","answerable":true,"acceptable_example_ids":["example-973581b90aa76deb9163cdb8ab00d36335e8dbd2a7deb21a6f9bd68604c3bd1c","example-58f62f3e041c2c49e4b33a0fe6f14d4dacb9bc04e0a38896c2be3b98e4428221"],"rationale":"Intentionally ambiguous task; both selected copy examples are acceptable interpretations, exercising multiple-valid labels."},
+
+    {"id":"dev-coverage-01","split":"dev","family":"coverage-dev","question":"restart systemd","platform":"linux","answerable":false,"acceptable_example_ids":[],"rationale":"Audit prompt retained as development-only; systemd is absent from the pinned selection."},
+    {"id":"dev-coverage-02","split":"dev","family":"coverage-dev","question":"show documentation for vi","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"The selected vi page is navigation-only and is deliberately not indexed as an operational answer."},
+    {"id":"dev-coverage-03","split":"dev","family":"coverage-dev","question":"copy text to the clipboard on Linux","platform":"linux","answerable":false,"acceptable_example_ids":[],"rationale":"The only clipboard page is osx-specific and platform policy excludes it for Linux."},
+    {"id":"dev-coverage-04","split":"dev","family":"coverage-dev","question":"what command handles package installation","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"No package-manager page is selected in the pinned fixture."},
+    {"id":"dev-coverage-05","split":"dev","family":"coverage-dev","question":"list Kubernetes pods","platform":"linux","answerable":false,"acceptable_example_ids":[],"rationale":"No kubectl page is selected in the pinned fixture."},
+
+    {"id":"dev-audit-01","split":"dev","family":"audit-dev","question":"make my database fast without changing anything","platform":"windows","answerable":false,"acceptable_example_ids":[],"rationale":"Audit prompt retained as development-only; no database-performance example is in this corpus."},
+    {"id":"dev-audit-02","split":"dev","family":"audit-dev","question":"change file permissions to executable","platform":"linux","answerable":false,"acceptable_example_ids":[],"rationale":"No chmod page is selected in the pinned fixture."},
+    {"id":"dev-audit-03","split":"dev","family":"audit-dev","question":"send an HTTP request with curl","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"No curl page is selected in the pinned fixture."},
+    {"id":"dev-audit-04","split":"dev","family":"audit-dev","question":"compress a directory into a tarball","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"No archive or compression page is selected."},
+    {"id":"dev-audit-05","split":"dev","family":"audit-dev","question":"show the current Git branch","platform":"common","answerable":false,"acceptable_example_ids":[],"rationale":"Git is absent from the pinned fixture."},
+
+    {"id":"dev-platform-01","split":"dev","family":"platform-dev","question":"copy text into a Windows clipboard","platform":"windows","answerable":false,"acceptable_example_ids":[],"rationale":"The pinned corpus has no Windows clipboard page."},
+    {"id":"dev-platform-02","split":"dev","family":"platform-dev","question":"restart a launchd service","platform":"osx","answerable":false,"acceptable_example_ids":[],"rationale":"No launchd page is selected in the pinned fixture."},
+    {"id":"dev-platform-03","split":"dev","family":"platform-dev","question":"install a package on Windows","platform":"windows","answerable":false,"acceptable_example_ids":[],"rationale":"No Windows package-manager page is selected."},
+    {"id":"dev-platform-04","split":"dev","family":"platform-dev","question":"find Kubernetes pods on Windows","platform":"windows","answerable":false,"acceptable_example_ids":[],"rationale":"No kubectl page is selected in the pinned fixture."},
+    {"id":"dev-platform-05","split":"dev","family":"platform-dev","question":"run curl on Windows","platform":"windows","answerable":false,"acceptable_example_ids":[],"rationale":"No curl page is selected in the pinned fixture."}
+  ]
+}

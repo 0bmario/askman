@@ -64,3 +64,5 @@ only consumes a provisioned local snapshot and writes the explicitly supplied
 output path; it does not download tldr or touch Askman's installed database.
 See [the reproducible corpus instructions](docs/reproducibility/tldr-subset.md)
 and the [full-corpus build record](docs/reproducibility/tldr-full-corpus.md).
+The frozen evaluation dataset and offline baseline runner are documented in
+[the evaluation record](docs/reproducibility/evaluation-baseline.md).
