@@ -26,6 +26,15 @@ The immutable `evaluation-v1` task set used to detect accidental changes during 
 **Release benchmark**:
 The `evaluation-v2` task set used to compare `retrieval-v2` with `main`; its policy is defined in ADR 0002.
 
+**Success@1**:
+The percentage of answerable tasks whose first displayed example is acceptable.
+
+**Success@3**:
+The percentage of answerable tasks with at least one acceptable example among the first three displayed results.
+
+**Scenario family**:
+A group of related evaluation tasks representing one intent pattern for per-family comparison.
+
 **Answerable task**:
 An evaluation task for which the selected corpus contains an acceptable command example for the requested platform.
 
