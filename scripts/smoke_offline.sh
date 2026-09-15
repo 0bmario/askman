@@ -151,6 +151,10 @@ dependency_version() {
     ' "$REPO_ROOT/Cargo.lock"
 }
 
+online_processor_count() {
+    getconf _NPROCESSORS_ONLN 2>/dev/null || printf '%s' unavailable
+}
+
 verify_asset() {
     local path="$1"
     local expected="$2"
@@ -262,7 +266,8 @@ write_manifest() {
         printf '%s\n' "embedding_max_length=512 (fastembed 4.8.0 default)"
         printf '%s\n' "embedding_output=fastembed normalized vectors"
         printf '%s\n' "sqlite_vec_distance=L2 (vec0 default; schema does not declare another metric)"
-        printf '%s\n' "ort_intra_threads_policy=Rust available_parallelism at process start (fastembed 4.8.0); effective count not instrumented"
+        printf '%s\n' "ort_intra_threads_policy=Rust available_parallelism at process start (fastembed 4.8.0)"
+        printf '%s\n' "online_processor_count=$(online_processor_count)"
         printf '%s\n' "query_fixture=$run_dir/offline-smoke.tsv"
         printf '%s\n' "query_fixture_sha256=$(sha256_file "$run_dir/offline-smoke.tsv")"
         printf '%s\n' "committed_fixture_sha256=$(git -C "$REPO_ROOT" show HEAD:tests/fixtures/offline-smoke.tsv | shasum -a 256 | awk '{print $1}')"
