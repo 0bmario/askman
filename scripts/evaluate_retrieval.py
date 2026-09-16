@@ -24,7 +24,6 @@ from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DATASET_SCHEMA_VERSION = 1
 SUPPORTED_DATASET_SCHEMA_VERSIONS = {1, 2}
 EVALUATION_V2_DATASET_ID = "askman-evaluation-v2"
 EVALUATION_V2_SCHEMA_VERSION = 2
@@ -915,11 +914,10 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
         raise ValueError("unsupported evaluation dataset schema")
     if dataset.get("scorer_version") != SCORER_VERSION:
         raise ValueError("unsupported scorer version")
-    if schema_version == EVALUATION_V2_SCHEMA_VERSION and dataset.get(
-        "dataset_id"
-    ) != EVALUATION_V2_DATASET_ID:
+    is_evaluation_v2 = schema_version == EVALUATION_V2_SCHEMA_VERSION
+    if is_evaluation_v2 and dataset.get("dataset_id") != EVALUATION_V2_DATASET_ID:
         raise ValueError("schema 2 datasets must use the evaluation-v2 dataset ID")
-    if schema_version == EVALUATION_V2_SCHEMA_VERSION:
+    if is_evaluation_v2:
         if dataset.get("split_id") != EVALUATION_V2_SPLIT_ID:
             raise ValueError("evaluation-v2 dataset has the wrong split ID")
         if dataset.get("split_policy") != EVALUATION_V2_SPLIT_POLICY:
@@ -1010,7 +1008,7 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
     has_cross_split_family = any(len(splits) != 1 for splits in families.values())
     if has_cross_split_family:
         raise ValueError("scenario families must not cross the dev/holdout split")
-    if schema_version == EVALUATION_V2_SCHEMA_VERSION:
+    if is_evaluation_v2:
         answerable_count = sum(task["answerable"] for task in tasks)
         unanswerable_count = len(tasks) - answerable_count
         if dataset.get("answerable_task_count") != answerable_count:

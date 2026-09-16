@@ -20,7 +20,7 @@ The checked-in freeze record is
 - Corpus manifest SHA256:
   `68ae06300afdaee1515ef7c6248f35056e871e73d07778f2e1c2f636589c8461`.
 - Freeze manifest SHA256:
-  `dce32fae03d9ee9e86b9fb15ae669897b3443e64f87454db5ace87e93f0a1937`.
+  `f517343a047cb9a6c36b6d15d13425dc54a49b6e4c26e20bbffd61e955819921`.
 
 Input SHA256 values:
 
@@ -29,7 +29,7 @@ Input SHA256 values:
 | `frozen-dev-v2.json` | `0c82627a899c65bcfede704be04d4cabd8b424f7317fadbd2c30a44e03305d8d` |
 | `frozen-holdout-v2.json` | `c64b40aaca8476c2ea0019a8b6bd9b9e6d11a7865169bb7c5d934a6e3c8280ab` |
 | `task-intents-v2.json` | `d29f296152632e7dda89f2927213408142a272a04b600f100577c3b366071920` |
-| `scripts/evaluate_retrieval.py` | `1c53e7c3a0ba1f848d4ceb16245da7320bc9031650ea7c0f0399fb5b445c9220` |
+| `scripts/evaluate_retrieval.py` | `006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90` |
 
 Validate the complete freeze without an artifact or network:
 

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import importlib.util
 import json
 import re
@@ -33,22 +32,6 @@ if SPEC is None or SPEC.loader is None:
 RUNNER = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = RUNNER
 SPEC.loader.exec_module(RUNNER)
-
-
-def load_json(path: Path) -> dict[str, Any]:
-    with path.open(encoding="utf-8") as handle:
-        value = json.load(handle)
-    if not isinstance(value, dict):
-        raise ValueError(f"expected JSON object in {path}")
-    return value
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def resolve_path(value: Any) -> Path:
@@ -134,7 +117,7 @@ def validate_intents(
 
 
 def validate_manifest(manifest_path: Path) -> None:
-    manifest = load_json(manifest_path)
+    manifest = RUNNER.load_json(manifest_path)
     if manifest.get("schema_version") != EXPECTED_MANIFEST_SCHEMA_VERSION:
         raise ValueError("unsupported evaluation-v2 freeze manifest schema")
     if manifest.get("benchmark_id") != EXPECTED_DATASET_ID:
@@ -154,14 +137,14 @@ def validate_manifest(manifest_path: Path) -> None:
     if not isinstance(scorer, dict) or scorer.get("version") != EXPECTED_SCORER_VERSION:
         raise ValueError("freeze manifest is missing scorer metadata")
     scorer_path = resolve_path(scorer.get("implementation"))
-    if sha256_file(scorer_path) != scorer.get("sha256"):
+    if RUNNER.sha256_file(scorer_path) != scorer.get("sha256"):
         raise ValueError("scorer implementation digest does not match the freeze manifest")
 
     corpus = manifest.get("corpus")
     if not isinstance(corpus, dict):
         raise ValueError("freeze manifest is missing corpus identity")
-    source_manifest = load_json(EXPECTED_CORPUS_MANIFEST)
-    actual_manifest_digest = sha256_file(EXPECTED_CORPUS_MANIFEST)
+    source_manifest = RUNNER.load_json(EXPECTED_CORPUS_MANIFEST)
+    actual_manifest_digest = RUNNER.sha256_file(EXPECTED_CORPUS_MANIFEST)
     source = source_manifest.get("source", {})
     expected_source = {
         "source_revision": source.get("revision"),
@@ -185,9 +168,9 @@ def validate_manifest(manifest_path: Path) -> None:
         if path in paths:
             raise ValueError("development and holdout inputs must be separate files")
         paths.add(path)
-        if sha256_file(path) != entry.get("sha256"):
+        if RUNNER.sha256_file(path) != entry.get("sha256"):
             raise ValueError(f"{split} dataset digest does not match the freeze manifest")
-        dataset = load_json(path)
+        dataset = RUNNER.load_json(path)
         RUNNER.validate_dataset(dataset, split)
         if dataset.get("split_policy") != manifest.get("split_policy"):
             raise ValueError(f"{split} dataset split policy differs from freeze manifest")
@@ -216,16 +199,16 @@ def validate_manifest(manifest_path: Path) -> None:
     if not isinstance(provenance_file, dict):
         raise ValueError("freeze manifest is missing provenance file metadata")
     intent_path = resolve_path(provenance_file.get("path"))
-    if sha256_file(intent_path) != provenance_file.get("sha256"):
+    if RUNNER.sha256_file(intent_path) != provenance_file.get("sha256"):
         raise ValueError("intent provenance digest does not match the freeze manifest")
-    intents = load_json(intent_path)
+    intents = RUNNER.load_json(intent_path)
     validate_intents(intents, datasets["dev"], datasets["holdout"])
 
 
 def parser() -> argparse.ArgumentParser:
-    result = argparse.ArgumentParser(description=__doc__)
-    result.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    return result
+    argument_parser = argparse.ArgumentParser(description=__doc__)
+    argument_parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    return argument_parser
 
 
 def main(argv: list[str] | None = None) -> int:

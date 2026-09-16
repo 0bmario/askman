@@ -8,7 +8,7 @@
   "scorer": {
     "version": "task-scorer-v1",
     "implementation": "scripts/evaluate_retrieval.py",
-    "sha256": "1c53e7c3a0ba1f848d4ceb16245da7320bc9031650ea7c0f0399fb5b445c9220"
+    "sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
   },
   "split_id": "scenario-family-split-v2",
   "split_policy": "twelve distinct scenario families per split; five independently phrased tasks per family; no family crosses the dev/holdout split",
