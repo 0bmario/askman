@@ -1,0 +1,709 @@
+{
+  "dataset_id": "askman-evaluation-v2",
+  "schema_version": 2,
+  "scorer_version": "task-scorer-v1",
+  "split": "holdout",
+  "split_id": "scenario-family-split-v2",
+  "split_policy": "twelve distinct scenario families per split; five independently phrased tasks per family; no family crosses the dev/holdout split",
+  "task_count": 60,
+  "answerable_task_count": 30,
+  "unanswerable_task_count": 30,
+  "freeze_id": "evaluation-v2-release-benchmark-v3",
+  "provenance": {
+    "intent_record": "tests/fixtures/evaluation/task-intents-v2-expanded.json",
+    "intent_schema_version": 1,
+    "intent_freeze_id": "evaluation-v2-intents-v3",
+    "labels_adjudicated_after_intent_freeze": true
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "tasks": [
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-01",
+      "split": "holdout",
+      "family": "holdout39-common-file-concatenation",
+      "question": "concatenate several files into one output file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+      ],
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-02",
+      "split": "holdout",
+      "family": "holdout39-common-file-concatenation",
+      "question": "join multiple files into a single output",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+      ],
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-03",
+      "split": "holdout",
+      "family": "holdout39-common-file-concatenation",
+      "question": "append the contents of several files into one result file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+      ],
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-04",
+      "split": "holdout",
+      "family": "holdout39-common-file-concatenation",
+      "question": "combine input files into one output file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+      ],
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-05",
+      "split": "holdout",
+      "family": "holdout39-common-file-concatenation",
+      "question": "write several files together to an output",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+      ],
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-01",
+      "split": "holdout",
+      "family": "holdout39-common-text-sort-descending",
+      "question": "sort text lines in descending order",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+      ],
+      "rationale": "The pinned sort example orders lines in descending order."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-02",
+      "split": "holdout",
+      "family": "holdout39-common-text-sort-descending",
+      "question": "order a file's lines from highest to lowest",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+      ],
+      "rationale": "The pinned sort example orders lines in descending order."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-03",
+      "split": "holdout",
+      "family": "holdout39-common-text-sort-descending",
+      "question": "sort command output in reverse order",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+      ],
+      "rationale": "The pinned sort example orders lines in descending order."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-04",
+      "split": "holdout",
+      "family": "holdout39-common-text-sort-descending",
+      "question": "arrange text lines in descending order",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+      ],
+      "rationale": "The pinned sort example orders lines in descending order."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-05",
+      "split": "holdout",
+      "family": "holdout39-common-text-sort-descending",
+      "question": "reverse-sort the lines of a text file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+      ],
+      "rationale": "The pinned sort example orders lines in descending order."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-01",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported-dns",
+      "question": "resolve a DNS name from a common shell",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no DNS lookup example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-02",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported-dns",
+      "question": "look up a hostname from the terminal",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no DNS lookup example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-03",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported-dns",
+      "question": "query a domain name at the command line",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no DNS lookup example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-04",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported-dns",
+      "question": "perform a DNS lookup from a shell",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no DNS lookup example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-05",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported-dns",
+      "question": "translate a hostname to an address in the terminal",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no DNS lookup example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-01",
+      "split": "holdout",
+      "family": "holdout39-linux-apt-update",
+      "question": "refresh the Debian package index with apt",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "The pinned apt example updates the available package index."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-02",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-pacman",
+      "question": "install a package with pacman on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-03",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-pacman",
+      "question": "use pacman to install software on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-04",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-pacman",
+      "question": "add a package with the pacman manager",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-05",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-pacman",
+      "question": "install Linux software from a pacman repository",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-01",
+      "split": "holdout",
+      "family": "holdout39-linux-apt-update",
+      "question": "update the available package list on Debian",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "The pinned apt example updates the available package index."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-02",
+      "split": "holdout",
+      "family": "holdout39-linux-apt-update",
+      "question": "reload apt's package index on Linux",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "The pinned apt example updates the available package index."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-03",
+      "split": "holdout",
+      "family": "holdout39-linux-apt-update",
+      "question": "synchronize the Debian package catalog",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "The pinned apt example updates the available package index."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-04",
+      "split": "holdout",
+      "family": "holdout39-linux-apt-update",
+      "question": "fetch the latest package index with apt",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "The pinned apt example updates the available package index."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-05",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-pacman",
+      "question": "download and install a package with pacman",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-01",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-firewall",
+      "question": "set an nftables firewall policy on a Linux host",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-02",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-firewall",
+      "question": "write a Linux firewall rule for nftables",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-03",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-firewall",
+      "question": "define a packet-filter rule with nftables on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-04",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-firewall",
+      "question": "permit traffic using a Linux nftables firewall rule",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-05",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-firewall",
+      "question": "deny traffic through a Linux nftables rule",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-01",
+      "split": "holdout",
+      "family": "holdout39-osx-open-default",
+      "question": "open a file with its default macOS application",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "The pinned open example launches a file with its associated application."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-02",
+      "split": "holdout",
+      "family": "holdout39-osx-open-default",
+      "question": "launch the associated Mac app for a file",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "The pinned open example launches a file with its associated application."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-03",
+      "split": "holdout",
+      "family": "holdout39-osx-open-default",
+      "question": "use Finder's file association to open a document",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "The pinned open example launches a file with its associated application."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-04",
+      "split": "holdout",
+      "family": "holdout39-osx-open-default",
+      "question": "open a document in its default application on macOS",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "The pinned open example launches a file with its associated application."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-05",
+      "split": "holdout",
+      "family": "holdout39-osx-open-default",
+      "question": "start the default application for a Mac file",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "The pinned open example launches a file with its associated application."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-01",
+      "split": "holdout",
+      "family": "holdout39-osx-speech-phrase",
+      "question": "speak a phrase aloud with macOS say",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
+      ],
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-02",
+      "split": "holdout",
+      "family": "holdout39-osx-speech-phrase",
+      "question": "have the Mac say a short phrase",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
+      ],
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-03",
+      "split": "holdout",
+      "family": "holdout39-osx-speech-phrase",
+      "question": "read a spoken phrase using the say command",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
+      ],
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-04",
+      "split": "holdout",
+      "family": "holdout39-osx-speech-phrase",
+      "question": "use macOS say to speak text",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
+      ],
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-05",
+      "split": "holdout",
+      "family": "holdout39-osx-speech-phrase",
+      "question": "make the say command read a phrase aloud",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
+      ],
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-01",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported-sms",
+      "question": "send an SMS from a macOS terminal",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no SMS-sending example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-02",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported-sms",
+      "question": "text a phone from the Mac command line",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no SMS-sending example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-03",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported-sms",
+      "question": "send a message through an SMS command on macOS",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no SMS-sending example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-04",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported-sms",
+      "question": "deliver an SMS using a Mac shell",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no SMS-sending example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-05",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported-sms",
+      "question": "write and send a text message from Terminal",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no SMS-sending example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-01",
+      "split": "holdout",
+      "family": "holdout39-windows-list-current",
+      "question": "list non-hidden entries in the current Windows directory",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+        "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+      ],
+      "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-02",
+      "split": "holdout",
+      "family": "holdout39-windows-list-current",
+      "question": "show ordinary files and folders in the current Windows directory",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+        "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+      ],
+      "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-03",
+      "split": "holdout",
+      "family": "holdout39-windows-list-current",
+      "question": "display the current Windows directory without hidden items",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+        "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+      ],
+      "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-04",
+      "split": "holdout",
+      "family": "holdout39-windows-list-current",
+      "question": "list visible entries from the current Windows folder",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+        "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+      ],
+      "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-05",
+      "split": "holdout",
+      "family": "holdout39-windows-list-current",
+      "question": "show the non-hidden contents of the current Windows directory",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+        "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+      ],
+      "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-01",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-event-log",
+      "question": "inspect Windows event records from PowerShell",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-02",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-event-log",
+      "question": "read recent entries from the Windows event log",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-03",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-event-log",
+      "question": "review Windows event log records",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-04",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-event-log",
+      "question": "display recent entries from a Windows event log",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-05",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-event-log",
+      "question": "query the Windows event log for records",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-01",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-firewall",
+      "question": "configure a Windows firewall rule",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no firewall-configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-02",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-firewall",
+      "question": "add a firewall rule on Windows",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no firewall-configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-03",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-firewall",
+      "question": "block a port with the Windows firewall",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no firewall-configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-04",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-firewall",
+      "question": "allow traffic through Windows Firewall",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no firewall-configuration example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-05",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-firewall",
+      "question": "edit Windows firewall policy from a shell",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no firewall-configuration example."
+    }
+  ]
+}

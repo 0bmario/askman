@@ -1,0 +1,704 @@
+{
+  "dataset_id": "askman-evaluation-v2",
+  "schema_version": 2,
+  "scorer_version": "task-scorer-v1",
+  "split": "dev",
+  "split_id": "scenario-family-split-v2",
+  "split_policy": "twelve distinct scenario families per split; five independently phrased tasks per family; no family crosses the dev/holdout split",
+  "task_count": 60,
+  "answerable_task_count": 30,
+  "unanswerable_task_count": 30,
+  "freeze_id": "evaluation-v2-release-benchmark-v3",
+  "provenance": {
+    "intent_record": "tests/fixtures/evaluation/task-intents-v2-expanded.json",
+    "intent_schema_version": 1,
+    "intent_freeze_id": "evaluation-v2-intents-v3",
+    "labels_adjudicated_after_intent_freeze": true
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "tasks": [
+    {
+      "id": "dev-v2r1-devcommon-file-content-01",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "question": "show the contents of a file in a shell",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "rationale": "The pinned cat example prints a file's contents to stdout."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-content-02",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "question": "print a file's contents to the terminal",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "rationale": "The pinned cat example prints a file's contents to stdout."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-content-03",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "question": "read a file to standard output",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "rationale": "The pinned cat example prints a file's contents to stdout."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-content-04",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "question": "display a text file in the terminal",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "rationale": "The pinned cat example prints a file's contents to stdout."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-content-05",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "question": "write a file's contents to stdout",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "rationale": "The pinned cat example prints a file's contents to stdout."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-01",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "question": "copy one file to another path",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+      ],
+      "rationale": "Both pinned cp examples copy one file to a destination."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-02",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "question": "duplicate a file at a destination path",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+      ],
+      "rationale": "Both pinned cp examples copy one file to a destination."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-03",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "question": "make a second copy of one file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+      ],
+      "rationale": "Both pinned cp examples copy one file to a destination."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-04",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "question": "copy a single file into another directory",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+      ],
+      "rationale": "Both pinned cp examples copy one file to a destination."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-05",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "question": "put one file in a destination directory",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+      ],
+      "rationale": "Both pinned cp examples copy one file to a destination."
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-01",
+      "split": "dev",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "create a password-protected archive with a common shell command",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no password-protected archive example."
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-02",
+      "split": "dev",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "make an encrypted archive from the shell",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no password-protected archive example."
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-03",
+      "split": "dev",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "compress files into a password-protected archive",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no password-protected archive example."
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-04",
+      "split": "dev",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "write a password-encrypted archive at the terminal",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no password-protected archive example."
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-05",
+      "split": "dev",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "protect a shell-created archive with a password",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common bundle has no password-protected archive example."
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-01",
+      "split": "dev",
+      "family": "dev39-linux-systemd-restart",
+      "question": "restart a systemd service on Linux",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "rationale": "The pinned systemctl example supports restarting a service."
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-02",
+      "split": "dev",
+      "family": "dev39-linux-systemd-restart",
+      "question": "use systemd to restart a Linux service",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "rationale": "The pinned systemctl example supports restarting a service."
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-03",
+      "split": "dev",
+      "family": "dev39-linux-systemd-restart",
+      "question": "restart one Linux unit with systemctl",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "rationale": "The pinned systemctl example supports restarting a service."
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-04",
+      "split": "dev",
+      "family": "dev39-linux-systemd-restart",
+      "question": "make systemd restart a service",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "rationale": "The pinned systemctl example supports restarting a service."
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-05",
+      "split": "dev",
+      "family": "dev39-linux-systemd-restart",
+      "question": "restart a running service from Linux systemd",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "rationale": "The pinned systemctl example supports restarting a service."
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-01",
+      "split": "dev",
+      "family": "dev39-linux-interface-address",
+      "question": "list IPv4 addresses assigned to Linux network interfaces",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-02",
+      "split": "dev",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "configure a Linux firewall rule with nftables",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-03",
+      "split": "dev",
+      "family": "dev39-linux-interface-address",
+      "question": "show the IPv4 addresses on Linux interfaces",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-04",
+      "split": "dev",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "add a Linux nftables firewall rule",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-05",
+      "split": "dev",
+      "family": "dev39-linux-interface-address",
+      "question": "display interface IPv4 addresses on Linux",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-01",
+      "split": "dev",
+      "family": "dev39-linux-interface-address",
+      "question": "print Linux interface address information",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-02",
+      "split": "dev",
+      "family": "dev39-linux-interface-address",
+      "question": "inspect assigned IPv4 addresses on Linux interfaces",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-03",
+      "split": "dev",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "create an nftables rule on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-04",
+      "split": "dev",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "allow traffic with a Linux nftables rule",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-05",
+      "split": "dev",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "block traffic using nftables on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-01",
+      "split": "dev",
+      "family": "dev39-osx-clipboard-output",
+      "question": "copy shell output to the macOS clipboard",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+      ],
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-02",
+      "split": "dev",
+      "family": "dev39-osx-clipboard-output",
+      "question": "send terminal output to the Mac pasteboard",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+      ],
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-03",
+      "split": "dev",
+      "family": "dev39-osx-clipboard-output",
+      "question": "place command results in the macOS clipboard",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+      ],
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-04",
+      "split": "dev",
+      "family": "dev39-osx-clipboard-output",
+      "question": "pipe command output into the Apple clipboard",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+      ],
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-05",
+      "split": "dev",
+      "family": "dev39-osx-clipboard-output",
+      "question": "put standard output on the Mac pasteboard",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+      ],
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-01",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "read EXIF metadata from a photo on macOS",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-02",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "inspect a picture's EXIF fields from the Mac terminal",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-03",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "show camera metadata for an image on macOS",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-04",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "extract EXIF tags from a Mac photo",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-05",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "display photo metadata from a macOS shell",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-01",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "flush the macOS DNS cache from the terminal",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-02",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "clear cached DNS entries on macOS",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-03",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "empty the Mac resolver cache from a shell",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-04",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "reset macOS DNS caching",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-05",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "remove cached DNS records on a Mac",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-01",
+      "split": "dev",
+      "family": "dev39-windows-file-copy-single",
+      "question": "copy one Windows file to another path",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+      ],
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-02",
+      "split": "dev",
+      "family": "dev39-windows-file-copy-single",
+      "question": "duplicate a single file in a Windows directory",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+      ],
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-03",
+      "split": "dev",
+      "family": "dev39-windows-file-copy-single",
+      "question": "copy one file into a different Windows folder",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+      ],
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-04",
+      "split": "dev",
+      "family": "dev39-windows-file-copy-single",
+      "question": "make a second copy of one Windows file",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+      ],
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-05",
+      "split": "dev",
+      "family": "dev39-windows-file-copy-single",
+      "question": "put one Windows file at a destination path",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+      ],
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-01",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "query the Windows registry from a shell",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no registry-query example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-02",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "inspect a Windows registry key at the command line",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no registry-query example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-03",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "read registry values on Windows",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no registry-query example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-04",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "look up a Windows registry entry in PowerShell",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no registry-query example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-05",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "search the Windows registry from a terminal",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no registry-query example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-01",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "view Windows event logs",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-02",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "read the Windows event log from a shell",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-03",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "inspect Windows event log entries",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-04",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "show recent Windows event logs",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-05",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "query event logs on Windows",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows bundle has no event-log example."
+    }
+  ]
+}

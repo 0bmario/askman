@@ -1,0 +1,640 @@
+{
+  "report_kind": "evaluation-v2-expanded-dev-baseline",
+  "benchmark_id": "askman-evaluation-v2",
+  "freeze_id": "evaluation-v2-release-benchmark-v3",
+  "freeze_manifest": {
+    "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
+    "sha256": "4f258311db08cad15c1473c77ff6d98e2fa3b0044990fcdfcbc8110f96fc46dc"
+  },
+  "recorded_at": "2026-09-16T21:44:54.195798+00:00",
+  "split": "dev",
+  "split_id": "scenario-family-split-v2",
+  "retriever": "keyword",
+  "retriever_version": "keyword-fts5-v1",
+  "dataset_sha256": "216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d",
+  "scorer": {
+    "version": "task-scorer-v1",
+    "implementation": "scripts/evaluate_retrieval.py",
+    "sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "artifact_build": {
+    "pages": 24,
+    "examples": 142,
+    "command": "cargo run --locked --offline --features dev --bin tldr_subset -- build --manifest tests/fixtures/tldr-evaluation-v2/manifest.json --snapshot tests/fixtures/tldr-evaluation-v2 --output /tmp/askman-evaluation-v2-expanded.db"
+  },
+  "holdout_access": {
+    "authorized": true,
+    "recorded": false,
+    "utc": null
+  },
+  "summary": {
+    "answerable_tasks": 30,
+    "candidate_recall": {
+      "count": 1,
+      "denominator": 30
+    },
+    "coverage": {
+      "count": 1,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 0,
+      "denominator": 30
+    },
+    "incorrect_answered_tasks": {
+      "count": 0,
+      "denominator": 1
+    },
+    "success_at_1": {
+      "count": 1,
+      "denominator": 30
+    },
+    "success_at_3": {
+      "count": 1,
+      "denominator": 30
+    },
+    "tasks": 60,
+    "unanswerable_tasks": 30
+  },
+  "note": "Keyword baseline is a protocol smoke on the expanded fixture; it is not a production-quality retrieval claim.",
+  "support_catalog": {
+    "path": "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json",
+    "sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+    "catalog_id": "evaluation-v2-expanded-support-catalog-v1"
+  },
+  "full_corpus_catalog": {
+    "path": "tests/fixtures/evaluation/evaluation-v2-corpus-catalog-expanded.json",
+    "sha256": "124cb74e632c6905933481883da7fb6c3bd4924238153f0db2e321a1fea8c68f",
+    "catalog_id": "evaluation-v2-expanded-full-corpus-catalog-v1"
+  },
+  "breakdowns": {
+    "overall": {
+      "tasks": 60,
+      "answerable_tasks": 30,
+      "unanswerable_tasks": 30,
+      "success_at_1": {
+        "count": 1,
+        "denominator": 30
+      },
+      "success_at_3": {
+        "count": 1,
+        "denominator": 30
+      },
+      "candidate_recall": {
+        "count": 1,
+        "denominator": 30
+      },
+      "coverage": {
+        "count": 1,
+        "denominator": 60
+      },
+      "incorrect_answered_tasks": {
+        "count": 0,
+        "denominator": 1
+      },
+      "false_answers_on_unanswerable": {
+        "count": 0,
+        "denominator": 30
+      }
+    },
+    "platform": {
+      "common": {
+        "tasks": 15,
+        "answerable_tasks": 10,
+        "unanswerable_tasks": 5,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 10
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 10
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 10
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 15
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "linux": {
+        "tasks": 15,
+        "answerable_tasks": 10,
+        "unanswerable_tasks": 5,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 10
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 10
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 10
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 15
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "osx": {
+        "tasks": 15,
+        "answerable_tasks": 5,
+        "unanswerable_tasks": 10,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 5
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 15
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 10
+        }
+      },
+      "windows": {
+        "tasks": 15,
+        "answerable_tasks": 5,
+        "unanswerable_tasks": 10,
+        "success_at_1": {
+          "count": 1,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 1,
+          "denominator": 5
+        },
+        "candidate_recall": {
+          "count": 1,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 1,
+          "denominator": 15
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 1
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 10
+        }
+      }
+    },
+    "family": {
+      "dev39-common-file-content": {
+        "tasks": 5,
+        "answerable_tasks": 5,
+        "unanswerable_tasks": 0,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 5
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 0
+        }
+      },
+      "dev39-common-file-copy": {
+        "tasks": 5,
+        "answerable_tasks": 5,
+        "unanswerable_tasks": 0,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 5
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 0
+        }
+      },
+      "dev39-common-unsupported-file-encryption": {
+        "tasks": 5,
+        "answerable_tasks": 0,
+        "unanswerable_tasks": 5,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 0
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 0
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 0
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "dev39-linux-firewall-unsupported": {
+        "tasks": 5,
+        "answerable_tasks": 0,
+        "unanswerable_tasks": 5,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 0
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 0
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 0
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "dev39-linux-interface-address": {
+        "tasks": 5,
+        "answerable_tasks": 5,
+        "unanswerable_tasks": 0,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 5
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 0
+        }
+      },
+      "dev39-linux-systemd-restart": {
+        "tasks": 5,
+        "answerable_tasks": 5,
+        "unanswerable_tasks": 0,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 5
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 0
+        }
+      },
+      "dev39-osx-clipboard-output": {
+        "tasks": 5,
+        "answerable_tasks": 5,
+        "unanswerable_tasks": 0,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 5
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 0
+        }
+      },
+      "dev39-osx-unsupported-dns": {
+        "tasks": 5,
+        "answerable_tasks": 0,
+        "unanswerable_tasks": 5,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 0
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 0
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 0
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "dev39-osx-unsupported-exif": {
+        "tasks": 5,
+        "answerable_tasks": 0,
+        "unanswerable_tasks": 5,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 0
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 0
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 0
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "dev39-windows-file-copy-single": {
+        "tasks": 5,
+        "answerable_tasks": 5,
+        "unanswerable_tasks": 0,
+        "success_at_1": {
+          "count": 1,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 1,
+          "denominator": 5
+        },
+        "candidate_recall": {
+          "count": 1,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 1,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 1
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 0
+        }
+      },
+      "dev39-windows-unsupported-event-log": {
+        "tasks": 5,
+        "answerable_tasks": 0,
+        "unanswerable_tasks": 5,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 0
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 0
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 0
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "dev39-windows-unsupported-registry": {
+        "tasks": 5,
+        "answerable_tasks": 0,
+        "unanswerable_tasks": 5,
+        "success_at_1": {
+          "count": 0,
+          "denominator": 0
+        },
+        "success_at_3": {
+          "count": 0,
+          "denominator": 0
+        },
+        "candidate_recall": {
+          "count": 0,
+          "denominator": 0
+        },
+        "coverage": {
+          "count": 0,
+          "denominator": 5
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 0
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 5
+        }
+      }
+    }
+  },
+  "failure_examples": {
+    "metric": "success_at_3",
+    "count": 29,
+    "denominator": 30,
+    "examples": [
+      {
+        "task_id": "dev-v2r1-devcommon-file-content-01",
+        "question": "show the contents of a file in a shell",
+        "platform": "common",
+        "family": "dev39-common-file-content",
+        "acceptable_example_ids": [
+          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        ],
+        "displayed_example_ids": [],
+        "candidate_example_ids": [],
+        "failure": "no acceptable result in first three displayed results"
+      },
+      {
+        "task_id": "dev-v2r1-devcommon-file-content-02",
+        "question": "print a file's contents to the terminal",
+        "platform": "common",
+        "family": "dev39-common-file-content",
+        "acceptable_example_ids": [
+          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        ],
+        "displayed_example_ids": [],
+        "candidate_example_ids": [],
+        "failure": "no acceptable result in first three displayed results"
+      },
+      {
+        "task_id": "dev-v2r1-devcommon-file-content-03",
+        "question": "read a file to standard output",
+        "platform": "common",
+        "family": "dev39-common-file-content",
+        "acceptable_example_ids": [
+          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        ],
+        "displayed_example_ids": [],
+        "candidate_example_ids": [],
+        "failure": "no acceptable result in first three displayed results"
+      }
+    ]
+  },
+  "reproduction": {
+    "commands": [
+      "python3 scripts/validate_evaluation_v2.py --manifest tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
+      "cargo run --locked --offline --features dev --bin tldr_subset -- build --manifest tests/fixtures/tldr-evaluation-v2/manifest.json --snapshot tests/fixtures/tldr-evaluation-v2 --output /tmp/askman-evaluation-v2-expanded.db",
+      "python3 scripts/evaluate_retrieval.py --artifact /tmp/askman-evaluation-v2-expanded.db --manifest tests/fixtures/tldr-evaluation-v2/manifest.json --dataset tests/fixtures/evaluation/frozen-dev-v2-expanded.json --split dev --retriever keyword",
+      "python3 scripts/evaluate_retrieval.py --artifact /tmp/askman-evaluation-v2-expanded.db --manifest tests/fixtures/tldr-evaluation-v2/manifest.json --dataset tests/fixtures/evaluation/frozen-holdout-v2-expanded.json --split holdout --allow-holdout --retriever keyword"
+    ]
+  },
+  "limitations": [
+    "This is a corpus-backed keyword baseline on the expanded fixture, not a paired main-vs-retrieval-v2 release-gate comparison.",
+    "No paired bootstrap interval was run; the ADR statistical gate is unassessed.",
+    "No paired warmed-query p95 latency or peak-memory comparison was run; the ADR resource gate is unassessed.",
+    "The keyword results are protocol evidence for the pinned fixture, not a production-quality retrieval claim.",
+    "Task labels and abstention absence are limited to the explicitly audited support catalog and pinned 142-example corpus inventory."
+  ],
+  "recommendation": {
+    "result": "inconclusive",
+    "reason": "Inconclusive: this evidence is not a paired main-vs-retrieval-v2 release-gate comparison; paired gain, bootstrap, latency, and memory evidence are absent."
+  }
+}

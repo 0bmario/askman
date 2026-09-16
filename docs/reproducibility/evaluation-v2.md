@@ -4,6 +4,10 @@ Issue #30 freezes the benchmark for the later `main` versus `retrieval-v2`
 release gate. `evaluation-v1` remains the small regression benchmark; it is
 not release evidence.
 
+Issue #39 adds the versioned, broader corpus-backed freeze in
+[`evaluation-v2-expanded.md`](evaluation-v2-expanded.md). This document remains
+the original `evaluation-v2` protocol freeze.
+
 ## Frozen inputs
 
 The checked-in freeze record is

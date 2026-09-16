@@ -1,0 +1,1307 @@
+{
+  "schema_version": 1,
+  "catalog_id": "evaluation-v2-expanded-full-corpus-catalog-v1",
+  "dataset_id": "askman-evaluation-v2",
+  "source_manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8",
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "inventory": {
+    "method": "Deterministic full-corpus inventory: enumerate every pinned source example and classify non-support entries by exact source-section text; overlapping entries retain the hand-audited support behavior.",
+    "classification": "source_section_for_unadjudicated_entries",
+    "reviewed_at": "2026-09-16",
+    "identity_recorded": false,
+    "inputs": [
+      "tests/fixtures/tldr-evaluation-v2/manifest.json",
+      "tests/fixtures/tldr-evaluation-v2/pages/",
+      "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json"
+    ],
+    "limitations": "This catalog proves pinned source coverage and citation linkage only. Source-section classifications are not semantic equivalence judgments; the 19-entry support catalog remains the hand-audited acceptability ledger."
+  },
+  "entries": {
+    "example-00bbff7f142bf20c7bcc5c53a7c669908fc51cbb59b00f400567fcd2a0055549": {
+      "source_path": "pages/osx/mdfind.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Find a file containing a string, in a given directory:",
+      "command": "mdfind -onlyin {{directory}} \"{{query}}\"",
+      "behavior_classification": "Find a file containing a string, in a given directory:",
+      "classification_basis": "source_section"
+    },
+    "example-010e1e30b93a3df3794409f3c6a51bde3672f3ab81c2e881b94a06166d04b856": {
+      "source_path": "pages/windows/cat.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "View documentation for PowerShell's `Get-Content` command:",
+      "command": "tldr get-content",
+      "behavior_classification": "View documentation for PowerShell's `Get-Content` command:",
+      "classification_basis": "source_section"
+    },
+    "example-011841c17bb47a0959c6f904421fe8999ec8524178684750864e7d14b518fafc": {
+      "source_path": "pages/linux/systemctl.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "Reload systemd, scan for new or changed units:",
+      "command": "systemctl daemon-reload",
+      "behavior_classification": "Reload systemd, scan for new or changed units:",
+      "classification_basis": "source_section"
+    },
+    "example-0381c06079b9332c10b3cdf29086ac8b6064a08f2c3c5a93717f56a5555171ff": {
+      "source_path": "pages/linux/systemctl.md",
+      "source_line": 37,
+      "source_position": 8,
+      "section": "Show the contents & absolute path of a unit file or edit it:",
+      "command": "systemctl {{cat|edit}} {{unit}}",
+      "behavior_classification": "Show the contents & absolute path of a unit file or edit it:",
+      "classification_basis": "source_section"
+    },
+    "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a": {
+      "source_path": "pages/osx/pbcopy.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Place the results of a specific command in the clipboard:",
+      "command": "find . -type t -name \"*.png\" | pbcopy",
+      "behavior_classification": "copy shell output to the macOS clipboard",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-0bf2884bddad6e8bb2a68899d4e1487c2af856b4736e9922ab104889df1aa408": {
+      "source_path": "pages/windows/dir.md",
+      "source_line": 28,
+      "source_position": 6,
+      "section": "Sort results by date/time, oldest first:",
+      "command": "dir /o:d",
+      "behavior_classification": "Sort results by date/time, oldest first:",
+      "classification_basis": "source_section"
+    },
+    "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069": {
+      "source_path": "pages/osx/pbpaste.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Use the contents of the clipboard as input to a command:",
+      "command": "pbpaste | {{grep search_string}}",
+      "behavior_classification": "Use the contents of the clipboard as input to a command:",
+      "classification_basis": "source_section"
+    },
+    "example-0fd79d14a79a448576568d86bd405f2ab60ffc545fe5f9e48956a2fa7f240b13": {
+      "source_path": "pages/linux/free.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Display system memory:",
+      "command": "free",
+      "behavior_classification": "Display system memory:",
+      "classification_basis": "source_section"
+    },
+    "example-13c8699b86f8979b78ad259f5ebcf17efb41517059d9ae59f9d4230b6b80b0e0": {
+      "source_path": "pages/common/cp.md",
+      "source_line": 28,
+      "source_position": 6,
+      "section": "Copy all files with a specific extension to another location, in interactive mode (prompts user before overwriting):",
+      "command": "cp {{[-i|--interactive]}} {{*.ext}} {{path/to/target_directory}}",
+      "behavior_classification": "Copy all files with a specific extension to another location, in interactive mode (prompts user before overwriting):",
+      "classification_basis": "source_section"
+    },
+    "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52": {
+      "source_path": "pages/linux/journalctl.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "Show logs for a given unit since the last time it started:",
+      "command": "journalctl _SYSTEMD_INVOCATION_ID=$(systemctl show --value --property=InvocationID {{unit}})",
+      "behavior_classification": "Show logs for a given unit since the last time it started:",
+      "classification_basis": "source_section"
+    },
+    "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6": {
+      "source_path": "pages/windows/get-childitem.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "List items in the current directory, including hidden items:",
+      "command": "Get-ChildItem -Hidden",
+      "behavior_classification": "List items in the current directory, including hidden items:",
+      "classification_basis": "source_section"
+    },
+    "example-18b8228973643cd6ddacd395575bcc764d5a30cf0eee12df9e0b74d406dbe5ef": {
+      "source_path": "pages/linux/df.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "Display filesystems but exclude the specified types:",
+      "command": "df {{[-x|--exclude-type]}} {{squashfs}} {{[-x|--exclude-type]}} {{tmpfs}}",
+      "behavior_classification": "Display filesystems but exclude the specified types:",
+      "classification_basis": "source_section"
+    },
+    "example-1a58727cf64aba0eb09878322a5478ad30697c7db71e83d6e9da9857a1bc921a": {
+      "source_path": "pages/osx/say.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "List the available voices (different voices speak in different languages):",
+      "command": "say --voice \"?\"",
+      "behavior_classification": "List the available voices (different voices speak in different languages):",
+      "classification_basis": "source_section"
+    },
+    "example-218cad5dd34381708a69491c6060470eb2bf4d6ce10b57fd710a0122bedcca01": {
+      "source_path": "pages/common/grep.md",
+      "source_line": 29,
+      "source_position": 6,
+      "section": "Print only the matched text:",
+      "command": "grep {{[-o|--only-matching]}} \"{{search_pattern}}\" {{path/to/file}}",
+      "behavior_classification": "Print only the matched text:",
+      "classification_basis": "source_section"
+    },
+    "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153": {
+      "source_path": "pages/common/cp.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Copy a file into another directory, keeping the filename:",
+      "command": "cp {{path/to/source_file}} {{path/to/target_parent_directory}}",
+      "behavior_classification": "copy one common-platform file to another path",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-25c6586273d26bc16764aa1e96f645b310b059f28268a939024d9e26ee748892": {
+      "source_path": "pages/common/find.md",
+      "source_line": 37,
+      "source_position": 8,
+      "section": "Search for either empty files or directories and delete them verbosely:",
+      "command": "find {{path/to/directory}} -type {{f|d}} -empty -delete -print",
+      "behavior_classification": "Search for either empty files or directories and delete them verbosely:",
+      "classification_basis": "source_section"
+    },
+    "example-26a75f510d23eade1920023e9d21690e523c6712534627e709bc9c6acf4c41a3": {
+      "source_path": "pages/linux/apt.md",
+      "source_line": 34,
+      "source_position": 7,
+      "section": "Upgrade all installed packages to their latest versions:",
+      "command": "sudo apt upgrade",
+      "behavior_classification": "Upgrade all installed packages to their latest versions:",
+      "classification_basis": "source_section"
+    },
+    "example-26c2742f375015e84ac61f1c323bdde3641ebd0d34179fba484df7cffa8fb735": {
+      "source_path": "pages/linux/ip.md",
+      "source_line": 33,
+      "source_position": 7,
+      "section": "Add/Delete an IP address to an interface:",
+      "command": "sudo ip {{[a|address]}} {{add|delete}} {{ip_address}}/{{mask}} dev {{ethX}}",
+      "behavior_classification": "Add/Delete an IP address to an interface:",
+      "classification_basis": "source_section"
+    },
+    "example-27ab83042189abdf6441a8e35bf82d93bff77b26dcc7fa77213f04a0b68be934": {
+      "source_path": "pages/windows/move.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "Do not prompt for confirmation before overwriting existing files:",
+      "command": "move /Y {{path\\to\\source}} {{path\\to\\existing_directory}}",
+      "behavior_classification": "Do not prompt for confirmation before overwriting existing files:",
+      "classification_basis": "source_section"
+    },
+    "example-2abf38a4f04947106d31a574559f7e21ec43c8c60d7e042916b6e5f324cb91f4": {
+      "source_path": "pages/linux/free.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Display memory in Bytes/KB/MB/GB:",
+      "command": "free -{{b|k|m|g}}",
+      "behavior_classification": "Display memory in Bytes/KB/MB/GB:",
+      "classification_basis": "source_section"
+    },
+    "example-2ca48048a9bc31100090e0337babefb491ff308fcf502a414c589893a981e0e5": {
+      "source_path": "pages/windows/cat.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "View documentation for the original `cat` command:",
+      "command": "tldr cat {{[-p|--platform]}} common",
+      "behavior_classification": "View documentation for the original `cat` command:",
+      "classification_basis": "source_section"
+    },
+    "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351": {
+      "source_path": "pages/common/grep.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Search for a pattern within files:",
+      "command": "grep \"{{search_pattern}}\" {{path/to/file1 path/to/file2 ...}}",
+      "behavior_classification": "Search for a pattern within files:",
+      "classification_basis": "source_section"
+    },
+    "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb": {
+      "source_path": "pages/linux/apt.md",
+      "source_line": 22,
+      "source_position": 4,
+      "section": "Show detailed information about a package:",
+      "command": "apt show {{package}}",
+      "behavior_classification": "Show detailed information about a package:",
+      "classification_basis": "source_section"
+    },
+    "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41": {
+      "source_path": "pages/windows/findstr.md",
+      "source_line": 28,
+      "source_position": 6,
+      "section": "Find a literal string (containing spaces) in all text files:",
+      "command": "findstr /c:\"{{string1 string2 ...}}\" *.txt",
+      "behavior_classification": "Find a literal string (containing spaces) in all text files:",
+      "classification_basis": "source_section"
+    },
+    "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc": {
+      "source_path": "pages/common/sed.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "Print just a first line to `stdout`:",
+      "command": "{{command}} | sed -n '1p'",
+      "behavior_classification": "Print just a first line to `stdout`:",
+      "classification_basis": "source_section"
+    },
+    "example-34dc301369a6806ac1ea9a879f05d745d333553cdc8d73eae653a38eba3240e3": {
+      "source_path": "pages/linux/systemctl.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "List failed units:",
+      "command": "systemctl --failed",
+      "behavior_classification": "List failed units:",
+      "classification_basis": "source_section"
+    },
+    "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0": {
+      "source_path": "pages/linux/ip.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "List interfaces with brief link layer info:",
+      "command": "ip {{[-br|-brief]}} {{[l|link]}}",
+      "behavior_classification": "List interfaces with brief link layer info:",
+      "classification_basis": "source_section"
+    },
+    "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078": {
+      "source_path": "pages/windows/get-childitem.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "List all non-hidden items in the current directory:",
+      "command": "Get-ChildItem",
+      "behavior_classification": "list non-hidden entries in the current Windows directory",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398": {
+      "source_path": "pages/common/cat.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "Write `stdin` to a file:",
+      "command": "cat - > {{path/to/file}}",
+      "behavior_classification": "Write `stdin` to a file:",
+      "classification_basis": "source_section"
+    },
+    "example-376799c4c44eb53e83e7abc95787b370bf11b82778628c98b5a369c61702957e": {
+      "source_path": "pages/osx/mdfind.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Find a file by its name:",
+      "command": "mdfind -name {{file}}",
+      "behavior_classification": "Find a file by its name:",
+      "classification_basis": "source_section"
+    },
+    "example-37cdfdfe2d6c22084e82141bb12c6bbf98f22ec017b221c38c1939fa7bd5b201": {
+      "source_path": "pages/osx/say.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Read a file aloud:",
+      "command": "say --input-file {{filename.txt}}",
+      "behavior_classification": "Read a file aloud:",
+      "classification_basis": "source_section"
+    },
+    "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43": {
+      "source_path": "pages/common/grep.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "Search for a pattern in all files recursively in a directory, ignoring binary files:",
+      "command": "grep {{[-rI|--recursive --binary-files=without-match]}} \"{{search_pattern}}\" {{path/to/directory}}",
+      "behavior_classification": "Search for a pattern in all files recursively in a directory, ignoring binary files:",
+      "classification_basis": "source_section"
+    },
+    "example-40787df1cf3b3fb9e70fd2f9272c026f8a24c6b0d2207b37cc37c449a674cf7a": {
+      "source_path": "pages/windows/copy.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "Copy files with a specific extension:",
+      "command": "copy {{path\\to\\source_directory\\*.ext}} {{path\\to\\target_directory}}",
+      "behavior_classification": "Copy files with a specific extension:",
+      "classification_basis": "source_section"
+    },
+    "example-453abcea6ea8baded3debf3c7dc4ded44ee04405706cd1c95f4eb11faaab182c": {
+      "source_path": "pages/osx/mdfind.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Find a file by its content:",
+      "command": "mdfind \"{{query}}\"",
+      "behavior_classification": "Find a file by its content:",
+      "classification_basis": "source_section"
+    },
+    "example-469ff55ef896f21e9c3c70bc16e2305597b6b02e3134e0f3b270b2b4f6180836": {
+      "source_path": "pages/osx/screencapture.md",
+      "source_line": 28,
+      "source_position": 6,
+      "section": "Make a screen recording and save it to a file:",
+      "command": "screencapture -v {{path/to/file.mp4}}",
+      "behavior_classification": "Make a screen recording and save it to a file:",
+      "classification_basis": "source_section"
+    },
+    "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc": {
+      "source_path": "pages/common/cat.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Concatenate several files into an output file:",
+      "command": "cat {{path/to/file1 path/to/file2 ...}} > {{path/to/output_file}}",
+      "behavior_classification": "concatenate multiple files into one output file",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24": {
+      "source_path": "pages/common/sort.md",
+      "source_line": 32,
+      "source_position": 7,
+      "section": "Sort a file preserving only unique lines:",
+      "command": "sort {{[-u|--unique]}} {{path/to/file}}",
+      "behavior_classification": "Sort a file preserving only unique lines:",
+      "classification_basis": "source_section"
+    },
+    "example-4ea4d1bd06297a4ec9afc53fc92e2b756a58b74d5cd360551eef43887e64c2ed": {
+      "source_path": "pages/linux/ip.md",
+      "source_line": 29,
+      "source_position": 6,
+      "section": "Make an interface up/down:",
+      "command": "sudo ip {{[l|link]}} {{[s|set]}} {{ethX}} {{up|down}}",
+      "behavior_classification": "Make an interface up/down:",
+      "classification_basis": "source_section"
+    },
+    "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b": {
+      "source_path": "pages/linux/apt.md",
+      "source_line": 30,
+      "source_position": 6,
+      "section": "Remove a package (use `purge` instead to also remove configuration files):",
+      "command": "sudo apt remove {{package}}",
+      "behavior_classification": "Remove a package (use `purge` instead to also remove configuration files):",
+      "classification_basis": "source_section"
+    },
+    "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376": {
+      "source_path": "pages/linux/apt.md",
+      "source_line": 38,
+      "source_position": 8,
+      "section": "List all installed packages:",
+      "command": "apt list {{[-i|--installed]}}",
+      "behavior_classification": "List all installed packages:",
+      "classification_basis": "source_section"
+    },
+    "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b": {
+      "source_path": "pages/osx/pbcopy.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Place the contents of a specific file in the clipboard:",
+      "command": "pbcopy < {{path/to/file}}",
+      "behavior_classification": "Place the contents of a specific file in the clipboard:",
+      "classification_basis": "source_section"
+    },
+    "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce": {
+      "source_path": "pages/osx/open.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Open a file with the associated application:",
+      "command": "open {{file.ext}}",
+      "behavior_classification": "open a file with its default macOS application",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-594b6e4037fe5c79012ce50068b4f4dd9775f3cdda8d0dea2253c98eebd42ae6": {
+      "source_path": "pages/osx/screencapture.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Take a screenshot and open it in Preview, instead of saving:",
+      "command": "screencapture -P",
+      "behavior_classification": "Take a screenshot and open it in Preview, instead of saving:",
+      "classification_basis": "source_section"
+    },
+    "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842": {
+      "source_path": "pages/common/sort.md",
+      "source_line": 36,
+      "source_position": 8,
+      "section": "Sort a file, printing the output to the specified output file (can be used to sort a file in-place):",
+      "command": "sort {{[-o|--output]}} {{path/to/output_file}} {{path/to/input_file}}",
+      "behavior_classification": "Sort a file, printing the output to the specified output file (can be used to sort a file in-place):",
+      "classification_basis": "source_section"
+    },
+    "example-5d09c75a518514e31f768a34add321aa8ffd2802819fce2b3c674266bbe18640": {
+      "source_path": "pages/common/sort.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Sort a file in case-insensitive way:",
+      "command": "sort {{[-f|--ignore-case]}} {{path/to/file}}",
+      "behavior_classification": "Sort a file in case-insensitive way:",
+      "classification_basis": "source_section"
+    },
+    "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade": {
+      "source_path": "pages/linux/systemctl.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "Start/Stop/Restart/Reload/Show the status of a service:",
+      "command": "systemctl {{start|stop|restart|reload|status}} {{unit}}",
+      "behavior_classification": "restart a Linux systemd service",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-64133c1ce13e1204c356d33d618e77e08d7c5560ff552b5e6c45f3e42ac61ea5": {
+      "source_path": "pages/windows/move.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "View documentation of the equivalent PowerShell command:",
+      "command": "tldr move-item",
+      "behavior_classification": "View documentation of the equivalent PowerShell command:",
+      "classification_basis": "source_section"
+    },
+    "example-64d2bca80b945d449e02a015e46da78ddbc1c31ae96c7aecd521b73a199b5ec6": {
+      "source_path": "pages/linux/systemctl.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Show all running services:",
+      "command": "systemctl status",
+      "behavior_classification": "Show all running services:",
+      "classification_basis": "source_section"
+    },
+    "example-6650aada822cf387a5574f42e02bc3b42ab84e2c4063c7a0c6366292bbb83d4b": {
+      "source_path": "pages/windows/dir.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "Show a bare list of directories and files, with no additional information:",
+      "command": "dir /b",
+      "behavior_classification": "Show a bare list of directories and files, with no additional information:",
+      "classification_basis": "source_section"
+    },
+    "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485": {
+      "source_path": "pages/common/grep.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "Print file name and line number for each match with color output:",
+      "command": "grep {{[-Hn|--with-filename --line-number]}} --color=always \"{{search_pattern}}\" {{path/to/file}}",
+      "behavior_classification": "Print file name and line number for each match with color output:",
+      "classification_basis": "source_section"
+    },
+    "example-6a895683594f0e1af4ba619ed22ae064a2f09ad3a4449f8c665780cfcbd44253": {
+      "source_path": "pages/common/cp.md",
+      "source_line": 32,
+      "source_position": 7,
+      "section": "Follow symbolic links before copying:",
+      "command": "cp {{[-L|--dereference]}} {{link}} {{path/to/target_directory}}",
+      "behavior_classification": "Follow symbolic links before copying:",
+      "classification_basis": "source_section"
+    },
+    "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344": {
+      "source_path": "pages/linux/ip.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "List interfaces with detailed info:",
+      "command": "ip {{[a|address]}}",
+      "behavior_classification": "list IPv4 addresses assigned to Linux network interfaces",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-7053f2f0a3561ee0fa6c9251568d68be19a49dd6a3accf714ce4b102f716eaa9": {
+      "source_path": "pages/windows/copy.md",
+      "source_line": 29,
+      "source_position": 6,
+      "section": "Copy a file and prompt before overwriting:",
+      "command": "copy /-y {{path\\to\\source_file}} {{path\\to\\target_file}}",
+      "behavior_classification": "Copy a file and prompt before overwriting:",
+      "classification_basis": "source_section"
+    },
+    "example-711dc9e8f8f4535abc5311d3242d35a349cdfb905a21bcaeb3b2cec947ddf80d": {
+      "source_path": "pages/windows/copy.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "Copy all files from one directory to another directory:",
+      "command": "copy {{path\\to\\source_directory\\*}} {{path\\to\\target_directory}}",
+      "behavior_classification": "Copy all files from one directory to another directory:",
+      "classification_basis": "source_section"
+    },
+    "example-72069b7f688efc1ad6e2e48ba1a29800dffdc9c7644f6e8bb17f77864ebda5f2": {
+      "source_path": "pages/common/find.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "Find files matching a given pattern, excluding specific paths:",
+      "command": "find {{path/to/directory}} -name '{{*.py}}' -not -path '{{*/site-packages/*}}'",
+      "behavior_classification": "Find files matching a given pattern, excluding specific paths:",
+      "classification_basis": "source_section"
+    },
+    "example-724e3719743b247049c4132dd9feb3092c28515d41455a9813847269b5e8dc7d": {
+      "source_path": "pages/linux/systemctl.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "Enable/Disable a unit to be started on bootup:",
+      "command": "systemctl {{enable|disable}} {{unit}}",
+      "behavior_classification": "Enable/Disable a unit to be started on bootup:",
+      "classification_basis": "source_section"
+    },
+    "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39": {
+      "source_path": "pages/common/sed.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Replace all `apple` (basic `regex`) occurrences with `mango` (basic `regex`) in all input lines and print the result to `stdout`:",
+      "command": "{{command}} | sed 's/apple/mango/g'",
+      "behavior_classification": "Replace all `apple` (basic `regex`) occurrences with `mango` (basic `regex`) in all input lines and print the result to `stdout`:",
+      "classification_basis": "source_section"
+    },
+    "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5": {
+      "source_path": "pages/common/grep.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Search for an exact string (disables `regex`es):",
+      "command": "grep {{[-F|--fixed-strings]}} \"{{exact_string}}\" {{path/to/file}}",
+      "behavior_classification": "Search for an exact string (disables `regex`es):",
+      "classification_basis": "source_section"
+    },
+    "example-78126bf8914de541904d6bdad5a11e75e704ea53d4cd96c02196623b5dcbebfd": {
+      "source_path": "pages/common/sort.md",
+      "source_line": 28,
+      "source_position": 6,
+      "section": "As above, but when items in the 3rd field are equal, sort by the 4th field by numbers with exponents:",
+      "command": "sort {{[-t|--field-separator]}} : {{[-k|--key]}} 3,3n {{[-k|--key]}} 4,4g /etc/passwd",
+      "behavior_classification": "As above, but when items in the 3rd field are equal, sort by the 4th field by numbers with exponents:",
+      "classification_basis": "source_section"
+    },
+    "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26": {
+      "source_path": "pages/windows/move.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "Move a file or directory across drives:",
+      "command": "move {{C:\\path\\to\\source}} {{D:\\path\\to\\target}}",
+      "behavior_classification": "Move a file or directory across drives:",
+      "classification_basis": "source_section"
+    },
+    "example-797edc7a941bf8625877aabaafdd48201acad6518d471218f09c2683a350f31d": {
+      "source_path": "pages/linux/journalctl.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "Filter messages within a time range (either timestamp or placeholders like `yesterday`):",
+      "command": "journalctl {{[-S|--since]}} {{now|today|yesterday|tomorrow|...}} {{[-U|--until]}} \"{{YYYY-MM-DD HH:MM:SS}}\"",
+      "behavior_classification": "Filter messages within a time range (either timestamp or placeholders like `yesterday`):",
+      "classification_basis": "source_section"
+    },
+    "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b": {
+      "source_path": "pages/windows/copy.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Copy a file to another location:",
+      "command": "copy {{path\\to\\source_file}} {{path\\to\\target_file}}",
+      "behavior_classification": "copy one Windows file to another path",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097": {
+      "source_path": "pages/linux/apt.md",
+      "source_line": 18,
+      "source_position": 3,
+      "section": "Search packages by name only (supports wildcards like `*`):",
+      "command": "apt list {{package}}",
+      "behavior_classification": "Search packages by name only (supports wildcards like `*`):",
+      "classification_basis": "source_section"
+    },
+    "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e": {
+      "source_path": "pages/common/grep.md",
+      "source_line": 33,
+      "source_position": 7,
+      "section": "Read data from `stdin` and do not print lines that match a pattern:",
+      "command": "cat {{path/to/file}} | grep {{[-v|--invert-match]}} \"{{search_pattern}}\"",
+      "behavior_classification": "Read data from `stdin` and do not print lines that match a pattern:",
+      "classification_basis": "source_section"
+    },
+    "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3": {
+      "source_path": "pages/windows/dir.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Show the contents of the current directory, including hidden ones:",
+      "command": "dir /a",
+      "behavior_classification": "Show the contents of the current directory, including hidden ones:",
+      "classification_basis": "source_section"
+    },
+    "example-8187774143ede47a5738bd7f0cd997d87aecb98e0e77e24ae4dcdb301dde5b39": {
+      "source_path": "pages/windows/dir.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "Show the contents of a given directory, including hidden ones:",
+      "command": "dir {{path\\to\\directory}} /a",
+      "behavior_classification": "Show the contents of a given directory, including hidden ones:",
+      "classification_basis": "source_section"
+    },
+    "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167": {
+      "source_path": "pages/osx/screencapture.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Take a screenshot and save it to a file:",
+      "command": "screencapture {{path/to/file.png}}",
+      "behavior_classification": "Take a screenshot and save it to a file:",
+      "classification_basis": "source_section"
+    },
+    "example-82cdd72543d3433fc292d57f20f47ade70befaa7497253651fd3ec01c34d1557": {
+      "source_path": "pages/windows/findstr.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Find one or more strings in a piped command's output:",
+      "command": "{{dir}} | findstr \"{{string1 string2 ...}}\"",
+      "behavior_classification": "Find one or more strings in a piped command's output:",
+      "classification_basis": "source_section"
+    },
+    "example-899be5423d13c42fe2a430cc06b8539e18124b979b0555ed71bd134c2f875375": {
+      "source_path": "pages/common/find.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "Find files matching a given size range, limiting the recursive depth to \"1\":",
+      "command": "find {{path/to/directory}} -maxdepth 1 -size {{+500k}} -size {{-10M}}",
+      "behavior_classification": "Find files matching a given size range, limiting the recursive depth to \"1\":",
+      "classification_basis": "source_section"
+    },
+    "example-8c222f364f31888667827b5e955c16f956fa15c4c469184050efe56b247ee614": {
+      "source_path": "pages/osx/pbpaste.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Write the contents of the clipboard to a file:",
+      "command": "pbpaste > {{path/to/file}}",
+      "behavior_classification": "Write the contents of the clipboard to a file:",
+      "classification_basis": "source_section"
+    },
+    "example-8c61537cc284fc35018aa7b58c7e910338579fbacceb15f175687f2734fea4f4": {
+      "source_path": "pages/common/grep.md",
+      "source_line": 37,
+      "source_position": 8,
+      "section": "Use extended `regex`es (supports ?, +, {}, (), and |), in case-insensitive mode:",
+      "command": "grep {{[-Ei|--extended-regexp --ignore-case]}} \"{{search_pattern}}\" {{path/to/file}}",
+      "behavior_classification": "Use extended `regex`es (supports ?, +, {}, (), and |), in case-insensitive mode:",
+      "classification_basis": "source_section"
+    },
+    "example-8ce4049b12e6fbdd8ddf55f64fe04680b35071710b29124b53a08b088e26429d": {
+      "source_path": "pages/common/find.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Find files matching multiple path/name patterns:",
+      "command": "find {{path/to/directory}} -path '{{*/path/*/*.ext}}' -or -name '{{*pattern*}}'",
+      "behavior_classification": "Find files matching multiple path/name patterns:",
+      "classification_basis": "source_section"
+    },
+    "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d": {
+      "source_path": "pages/common/find.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Find files by extension:",
+      "command": "find {{path/to/directory}} -name '{{*.ext}}'",
+      "behavior_classification": "Find files by extension:",
+      "classification_basis": "source_section"
+    },
+    "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f": {
+      "source_path": "pages/common/cp.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "Copy a directory recursively, in verbose mode (shows files as they are copied):",
+      "command": "cp {{[-vr|--verbose --recursive]}} {{path/to/source_directory}} {{path/to/target_directory}}",
+      "behavior_classification": "Copy a directory recursively, in verbose mode (shows files as they are copied):",
+      "classification_basis": "source_section"
+    },
+    "example-919b9bbb472e6c0d858c0468f2e80a835c266af944209da72656a19382fc61d5": {
+      "source_path": "pages/linux/df.md",
+      "source_line": 29,
+      "source_position": 6,
+      "section": "Display filesystem types:",
+      "command": "df {{[-T|--print-type]}}",
+      "behavior_classification": "Display filesystem types:",
+      "classification_basis": "source_section"
+    },
+    "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c": {
+      "source_path": "pages/osx/open.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "[R]eveal a file in Finder:",
+      "command": "open -R {{path/to/file}}",
+      "behavior_classification": "[R]eveal a file in Finder:",
+      "classification_basis": "source_section"
+    },
+    "example-9401e615e42aac59e1c88665393b3e85c5bd4766b64dd13b1d3e1f8fb044d20c": {
+      "source_path": "pages/common/sort.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "Sort a file using numeric rather than alphabetic order:",
+      "command": "sort {{[-n|--numeric-sort]}} {{path/to/file}}",
+      "behavior_classification": "Sort a file using numeric rather than alphabetic order:",
+      "classification_basis": "source_section"
+    },
+    "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69": {
+      "source_path": "pages/common/cat.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Append several files to an output file:",
+      "command": "cat {{path/to/file1 path/to/file2 ...}} >> {{path/to/output_file}}",
+      "behavior_classification": "concatenate multiple files into one output file",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-99a63bd24baae3b5b6807d9f2d7b072644308b45acf21216a9a3ef7f7360bd9b": {
+      "source_path": "pages/windows/move.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Rename a file or directory when the target is not an existing directory:",
+      "command": "move {{path\\to\\source}} {{path\\to\\target}}",
+      "behavior_classification": "Rename a file or directory when the target is not an existing directory:",
+      "classification_basis": "source_section"
+    },
+    "example-9b5d6d53a8a23ea03fe7bc1aa1eb50e505ca44f0329e9e53ea99d5286e87ff0b": {
+      "source_path": "pages/common/cp.md",
+      "source_line": 36,
+      "source_position": 8,
+      "section": "Use the full path of source files, creating any missing intermediate directories when copying:",
+      "command": "cp --parents {{source/path/to/file}} {{path/to/target_file}}",
+      "behavior_classification": "Use the full path of source files, creating any missing intermediate directories when copying:",
+      "classification_basis": "source_section"
+    },
+    "example-9bc5ba41e0eb5a49d3d6ba0b8f745482bb8fe2f16c9b118e95b297297e006536": {
+      "source_path": "pages/osx/screencapture.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "Take a screenshot of a selected rectangular area:",
+      "command": "screencapture -i {{path/to/file.png}}",
+      "behavior_classification": "Take a screenshot of a selected rectangular area:",
+      "classification_basis": "source_section"
+    },
+    "example-9c3f58af214e9a579b9f6943bc021cdb16a28ef87eba18ff5d7bde38affe3e85": {
+      "source_path": "pages/linux/df.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "Display the filesystem containing the specified file or directory:",
+      "command": "df {{path/to/file_or_directory}}",
+      "behavior_classification": "Display the filesystem containing the specified file or directory:",
+      "classification_basis": "source_section"
+    },
+    "example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322": {
+      "source_path": "pages/windows/findstr.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "Find strings in all files using `regex`:",
+      "command": "findstr /r \"{{regex}}\" *",
+      "behavior_classification": "Find strings in all files using `regex`:",
+      "classification_basis": "source_section"
+    },
+    "example-a057373ff643fe0023f9f7455b1119a1785629e82599e16c31fb91557733a8cb": {
+      "source_path": "pages/windows/findstr.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Find one or more strings in all files recur[s]ively:",
+      "command": "findstr /s \"{{string1 string2 ...}}\" *",
+      "behavior_classification": "Find one or more strings in all files recur[s]ively:",
+      "classification_basis": "source_section"
+    },
+    "example-a075ea8bf47d68389d089aac4d0e2465d70e05889e6306ead44ee83da9ea0104": {
+      "source_path": "pages/windows/copy.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "Copy multiple files to a directory:",
+      "command": "copy {{path\\to\\file1 path\\to\\file2 ...}} {{path\\to\\target_directory}}",
+      "behavior_classification": "Copy multiple files to a directory:",
+      "classification_basis": "source_section"
+    },
+    "example-a0b449d505106555f15ec7c8b99bdb6689bc18a1e9db862019a1c6bff8a2d16a": {
+      "source_path": "pages/linux/journalctl.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Show all messages with priority level 3 (errors) from the boot before last shutdown:",
+      "command": "journalctl {{[-b|--boot]}} -1 {{[-p|--priority]}} 3",
+      "behavior_classification": "Show all messages with priority level 3 (errors) from the boot before last shutdown:",
+      "classification_basis": "source_section"
+    },
+    "example-a4a5b10d133dec76d003217eb9b481d3c931e2b205118e567edb8938ca059f55": {
+      "source_path": "pages/osx/open.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "Open the current directory in Finder:",
+      "command": "open .",
+      "behavior_classification": "Open the current directory in Finder:",
+      "classification_basis": "source_section"
+    },
+    "example-a4d81f4c9aff81c07c7186179825359d4ac3ee8d412ee7e395eb60bd703489ff": {
+      "source_path": "pages/linux/ip.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "Show neighbors (ARP table):",
+      "command": "ip {{[n|neighbor]}}",
+      "behavior_classification": "Show neighbors (ARP table):",
+      "classification_basis": "source_section"
+    },
+    "example-a7feb3a93c27eb17f637a76744525635c5348b8cf36f1164be50a4bf01f537cf": {
+      "source_path": "pages/windows/move.md",
+      "source_line": 29,
+      "source_position": 6,
+      "section": "Prompt for confirmation before overwriting existing files, regardless of file permissions:",
+      "command": "move /-Y {{path\\to\\source}} {{path\\to\\existing_directory}}",
+      "behavior_classification": "Prompt for confirmation before overwriting existing files, regardless of file permissions:",
+      "classification_basis": "source_section"
+    },
+    "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf": {
+      "source_path": "pages/osx/say.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Say a phrase aloud:",
+      "command": "say \"{{I like to ride my bike.}}\"",
+      "behavior_classification": "speak a phrase aloud with macOS say",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-ab19aefda2e3cfb2186012fcf4a4404a8915afdae649c10563a4c0a691662074": {
+      "source_path": "pages/osx/screencapture.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Take a screenshot including the mouse cursor:",
+      "command": "screencapture -C {{path/to/file.png}}",
+      "behavior_classification": "Take a screenshot including the mouse cursor:",
+      "classification_basis": "source_section"
+    },
+    "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d": {
+      "source_path": "pages/linux/apt.md",
+      "source_line": 10,
+      "source_position": 1,
+      "section": "Update the list of available packages and versions (recommended before running other `apt` commands):",
+      "command": "sudo apt update",
+      "behavior_classification": "refresh the Debian package index with apt",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff": {
+      "source_path": "pages/osx/say.md",
+      "source_line": 28,
+      "source_position": 6,
+      "section": "Create an audio file of the spoken text:",
+      "command": "say --output-file {{filename.aiff}} \"{{Here's to the Crazy Ones.}}\"",
+      "behavior_classification": "Create an audio file of the spoken text:",
+      "classification_basis": "source_section"
+    },
+    "example-ae1dbfa9e9e60412355997fc3c762fa5b6e4d14be3c5d7c01c9767059011ba05": {
+      "source_path": "pages/linux/ip.md",
+      "source_line": 37,
+      "source_position": 8,
+      "section": "Add a default route:",
+      "command": "sudo ip {{[r|route]}} {{[a|add]}} default via {{ip_address}} dev {{ethX}}",
+      "behavior_classification": "Add a default route:",
+      "classification_basis": "source_section"
+    },
+    "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6": {
+      "source_path": "pages/windows/get-childitem.md",
+      "source_line": 25,
+      "source_position": 5,
+      "section": "List items in a directory other than the current one:",
+      "command": "Get-ChildItem -Path {{path\\to\\directory}}",
+      "behavior_classification": "List items in a directory other than the current one:",
+      "classification_basis": "source_section"
+    },
+    "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651": {
+      "source_path": "pages/common/cat.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Print the contents of a file to `stdout`:",
+      "command": "cat {{path/to/file}}",
+      "behavior_classification": "display a file's contents in a shell",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24": {
+      "source_path": "pages/osx/say.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "Say something in Polish:",
+      "command": "say --voice {{Zosia}} \"{{Litwo, ojczyzno moja!}}\"",
+      "behavior_classification": "speak a phrase aloud with macOS say",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-bc21810afaa8a4f09d57669a89e3a858de9a580a0b707c6a95b2de0cc91af5b5": {
+      "source_path": "pages/linux/ip.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "Display the routing table:",
+      "command": "ip {{[r|route]}}",
+      "behavior_classification": "Display the routing table:",
+      "classification_basis": "source_section"
+    },
+    "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904": {
+      "source_path": "pages/linux/apt.md",
+      "source_line": 14,
+      "source_position": 2,
+      "section": "Search packages by name or description:",
+      "command": "apt search {{package}}",
+      "behavior_classification": "Search packages by name or description:",
+      "classification_basis": "source_section"
+    },
+    "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b": {
+      "source_path": "pages/common/cp.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Copy a file to another location:",
+      "command": "cp {{path/to/source_file}} {{path/to/target_file}}",
+      "behavior_classification": "copy one common-platform file to another path",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-bf4ed164f02ca1cb3afb2f85921fa4c3639f571a15c348f7bb00680f4e7c5a17": {
+      "source_path": "pages/windows/findstr.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Find one or more strings in all files:",
+      "command": "findstr \"{{string1 string2 ...}}\" *",
+      "behavior_classification": "Find one or more strings in all files:",
+      "classification_basis": "source_section"
+    },
+    "example-c271943f3dad6797361b9e6b7fefb432da846eb2bf306addf579d49fab7474ba": {
+      "source_path": "pages/linux/systemctl.md",
+      "source_line": 33,
+      "source_position": 7,
+      "section": "List all service/socket/automount units filtering by running/failed state:",
+      "command": "systemctl list-units {{[-t|--type]}} {{service|socket|automount|...}} --state {{failed|running}}",
+      "behavior_classification": "List all service/socket/automount units filtering by running/failed state:",
+      "classification_basis": "source_section"
+    },
+    "example-c5fcd87e47e9d553fdb1891154e8176aabb962d6465da156970ef98684e31805": {
+      "source_path": "pages/common/find.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "Find directories matching a given name, in case-insensitive mode:",
+      "command": "find {{path/to/directory}} -type d -iname '{{*lib*}}'",
+      "behavior_classification": "Find directories matching a given name, in case-insensitive mode:",
+      "classification_basis": "source_section"
+    },
+    "example-c69f9f2ef51fdde5ea10fad22fa2f1a8f13cee435b2ce9354b69eed777c0be59": {
+      "source_path": "pages/windows/get-childitem.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "List only directories in the current directory:",
+      "command": "Get-ChildItem -Directory",
+      "behavior_classification": "List only directories in the current directory:",
+      "classification_basis": "source_section"
+    },
+    "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238": {
+      "source_path": "pages/common/cat.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "Copy the contents of a file into an output file without buffering:",
+      "command": "cat -u {{/dev/tty12}} > {{/dev/tty13}}",
+      "behavior_classification": "Copy the contents of a file into an output file without buffering:",
+      "classification_basis": "source_section"
+    },
+    "example-ca1e1eb99dc4ed5ed7666c3464df94fa1438a7f92ffcd52d8626f982c0f51f0b": {
+      "source_path": "pages/linux/df.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "Include statistics on the number of free inodes:",
+      "command": "df {{[-i|--inodes]}}",
+      "behavior_classification": "Include statistics on the number of free inodes:",
+      "classification_basis": "source_section"
+    },
+    "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730": {
+      "source_path": "pages/common/sed.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Execute a specific script [f]ile and print the result to `stdout`:",
+      "command": "{{command}} | sed -f {{path/to/script.sed}}",
+      "behavior_classification": "Execute a specific script [f]ile and print the result to `stdout`:",
+      "classification_basis": "source_section"
+    },
+    "example-cff6ab09d9188f20b21210dbc40500fadf5705093b0875de340dd7553cf3a33f": {
+      "source_path": "pages/linux/journalctl.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "Show all messages by a specific unit:",
+      "command": "journalctl {{[-u|--unit]}} {{unit}}",
+      "behavior_classification": "Show all messages by a specific unit:",
+      "classification_basis": "source_section"
+    },
+    "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8": {
+      "source_path": "pages/common/sort.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Sort a file in descending order:",
+      "command": "sort {{[-r|--reverse]}} {{path/to/file}}",
+      "behavior_classification": "sort text lines in descending order",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-d16a1c35cef57806a7c7ac819ae912941f17fd3a39cae869a700c8557974d6b2": {
+      "source_path": "pages/windows/get-childitem.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "List only files in the current directory:",
+      "command": "Get-ChildItem -File",
+      "behavior_classification": "List only files in the current directory:",
+      "classification_basis": "source_section"
+    },
+    "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357": {
+      "source_path": "pages/common/find.md",
+      "source_line": 33,
+      "source_position": 7,
+      "section": "Find all files modified today and pass the results to a single command as arguments:",
+      "command": "find {{path/to/directory}} -daystart -mtime {{-1}} -exec {{tar -cvf archive.tar}} {} \\+",
+      "behavior_classification": "Find all files modified today and pass the results to a single command as arguments:",
+      "classification_basis": "source_section"
+    },
+    "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba": {
+      "source_path": "pages/windows/copy.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Copy a file into another directory, keeping the filename:",
+      "command": "copy {{path\\to\\source_file}} {{path\\to\\target_directory}}",
+      "behavior_classification": "copy one Windows file to another path",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-d71952b51686dab66762a1775289ab7d0103d5ef6b6cb7fd7dcde5001955f7aa": {
+      "source_path": "pages/windows/findstr.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "Find strings using a case-[i]nsensitive search:",
+      "command": "findstr /i \"{{string1 string2 ...}}\" *",
+      "behavior_classification": "Find strings using a case-[i]nsensitive search:",
+      "classification_basis": "source_section"
+    },
+    "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1": {
+      "source_path": "pages/common/sort.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "Sort `/etc/passwd` by the 3rd field onward of each line numerically, using `:` as a field separator:",
+      "command": "sort {{[-t|--field-separator]}} : {{[-k|--key]}} 3n /etc/passwd",
+      "behavior_classification": "Sort `/etc/passwd` by the 3rd field onward of each line numerically, using `:` as a field separator:",
+      "classification_basis": "source_section"
+    },
+    "example-da5da8ecc41b766f610565f3a5609529202c2ed456f1310668ea319630ced4c4": {
+      "source_path": "pages/linux/systemctl.md",
+      "source_line": 29,
+      "source_position": 6,
+      "section": "Check if a unit is active/enabled/failed:",
+      "command": "systemctl {{is-active|is-enabled|is-failed}} {{unit}}",
+      "behavior_classification": "Check if a unit is active/enabled/failed:",
+      "classification_basis": "source_section"
+    },
+    "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703": {
+      "source_path": "pages/windows/dir.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Show the contents of the current directory:",
+      "command": "dir",
+      "behavior_classification": "list non-hidden entries in the current Windows directory",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-dc37bc1e174ccc19c0595098d7c6e0de7fbf6ec84ab9c4724a06523521160e67": {
+      "source_path": "pages/windows/findstr.md",
+      "source_line": 32,
+      "source_position": 7,
+      "section": "Display the line [n]umber before each matching line:",
+      "command": "findstr /n \"{{string1 string2 ...}}\" *",
+      "behavior_classification": "Display the line [n]umber before each matching line:",
+      "classification_basis": "source_section"
+    },
+    "example-dd279d068c60ce4a0d37f9fc8e088ad12a84f4846efffc4142794bd184a3bdb1": {
+      "source_path": "pages/windows/dir.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Show the contents of a given directory:",
+      "command": "dir {{path\\to\\directory}}",
+      "behavior_classification": "Show the contents of a given directory:",
+      "classification_basis": "source_section"
+    },
+    "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0": {
+      "source_path": "pages/osx/open.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Run a graphical macOS app based on the [b]undle identifier (refer to `osascript` for an easy way to get this):",
+      "command": "open -b {{com.domain.application}}",
+      "behavior_classification": "Run a graphical macOS app based on the [b]undle identifier (refer to `osascript` for an easy way to get this):",
+      "classification_basis": "source_section"
+    },
+    "example-de107995bedda7e289e93021973e10f02da017edd74ade823f66110a33c44072": {
+      "source_path": "pages/linux/free.md",
+      "source_line": 20,
+      "source_position": 4,
+      "section": "Refresh the output every 2 seconds:",
+      "command": "free {{[-s|--seconds]}} 2",
+      "behavior_classification": "Refresh the output every 2 seconds:",
+      "classification_basis": "source_section"
+    },
+    "example-de64dda539bedf85793c294db045de42f64d51d1d8eb5caac45dd1d87aab70bf": {
+      "source_path": "pages/osx/screencapture.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "Take a screenshot after a delay:",
+      "command": "screencapture -T {{seconds}} {{path/to/file.png}}",
+      "behavior_classification": "Take a screenshot after a delay:",
+      "classification_basis": "source_section"
+    },
+    "example-df0e494352d457d0a19d99c8dd070346d43f2d17261a71c20a10620459028d62": {
+      "source_path": "pages/common/grep.md",
+      "source_line": 21,
+      "source_position": 4,
+      "section": "Print 3 lines of [C]ontext around, [B]efore, or [A]fter each match:",
+      "command": "grep {{--context|--before-context|--after-context}} 3 \"{{search_pattern}}\" {{path/to/file}}",
+      "behavior_classification": "Print 3 lines of [C]ontext around, [B]efore, or [A]fter each match:",
+      "classification_basis": "source_section"
+    },
+    "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85": {
+      "source_path": "pages/common/find.md",
+      "source_line": 29,
+      "source_position": 6,
+      "section": "Run a command for each file (use {} within the command to access the filename):",
+      "command": "find {{path/to/directory}} -name '{{*.ext}}' -exec {{wc -l}} {} \\;",
+      "behavior_classification": "Run a command for each file (use {} within the command to access the filename):",
+      "classification_basis": "source_section"
+    },
+    "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16": {
+      "source_path": "pages/linux/apt.md",
+      "source_line": 26,
+      "source_position": 5,
+      "section": "Install a package, or update it to the latest version:",
+      "command": "sudo apt install {{package}}",
+      "behavior_classification": "Install a package, or update it to the latest version:",
+      "classification_basis": "source_section"
+    },
+    "example-e289813d18091e93b087eefe1f3b3a028a681047f0c372e67caea94d89bb2bd8": {
+      "source_path": "pages/linux/df.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "Display all filesystems in human-readable form:",
+      "command": "df {{[-h|--human-readable]}}",
+      "behavior_classification": "Display all filesystems in human-readable form:",
+      "classification_basis": "source_section"
+    },
+    "example-e3c3c406155b49077479b68066a9f86636c2294945c631feff0bdecfcb2f1892": {
+      "source_path": "pages/common/cp.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "Copy multiple files at once to a directory:",
+      "command": "cp {{[-t|--target-directory]}} {{path/to/destination_directory}} {{path/to/file1 path/to/file2 ...}}",
+      "behavior_classification": "Copy multiple files at once to a directory:",
+      "classification_basis": "source_section"
+    },
+    "example-e749fca6b213fe21f43536cc5a1d83dc0397c5604015dc9f393bd2086dbcae84": {
+      "source_path": "pages/linux/journalctl.md",
+      "source_line": 29,
+      "source_position": 6,
+      "section": "Show all messages by a specific process:",
+      "command": "journalctl _PID={{process_id}}",
+      "behavior_classification": "Show all messages by a specific process:",
+      "classification_basis": "source_section"
+    },
+    "example-e82618df8cd0c15eaca3f9c921a14388eff84312d4abb315fd53b0be6da215b9": {
+      "source_path": "pages/windows/move.md",
+      "source_line": 17,
+      "source_position": 3,
+      "section": "Move a file or directory into an existing directory:",
+      "command": "move {{path\\to\\source}} {{path\\to\\existing_directory}}",
+      "behavior_classification": "Move a file or directory into an existing directory:",
+      "classification_basis": "source_section"
+    },
+    "example-e9a06761f805ebd38f261901a08cefd8d9a7e2ad648d16a1d21fcfeb94e7b4ce": {
+      "source_path": "pages/linux/journalctl.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Show the latest `n` lines and follow new messages (like `tail --follow` for traditional syslog):",
+      "command": "journalctl {{[-n|--lines]}} {{n}} {{[-f|--follow]}}",
+      "behavior_classification": "Show the latest `n` lines and follow new messages (like `tail --follow` for traditional syslog):",
+      "classification_basis": "source_section"
+    },
+    "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d": {
+      "source_path": "pages/osx/say.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Say a phrase with a custom voice and speech rate:",
+      "command": "say --voice {{voice}} --rate {{words_per_minute}} \"{{I'm sorry Dave, I can't let you do that.}}\"",
+      "behavior_classification": "speak a phrase aloud with macOS say",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e": {
+      "source_path": "pages/linux/ip.md",
+      "source_line": 13,
+      "source_position": 2,
+      "section": "List interfaces with brief network layer info:",
+      "command": "ip {{[-br|-brief]}} {{[a|address]}}",
+      "behavior_classification": "list IPv4 addresses assigned to Linux network interfaces",
+      "classification_basis": "hand_audited_support_subset"
+    },
+    "example-ef87c19e056c3915d0d682e5076e58ba59f94e405517ac83af9f4d9e5df5cfc0": {
+      "source_path": "pages/windows/findstr.md",
+      "source_line": 36,
+      "source_position": 8,
+      "section": "Display only the filenames that contain a [m]atch:",
+      "command": "findstr /m \"{{string1 string2 ...}}\" *",
+      "behavior_classification": "Display only the filenames that contain a [m]atch:",
+      "classification_basis": "source_section"
+    },
+    "example-f02a9932c497bb41ff8bbddf727ddfc5d5407ddfcb187a58ec6fc43a068b6021": {
+      "source_path": "pages/osx/open.md",
+      "source_line": 12,
+      "source_position": 2,
+      "section": "Run a graphical macOS [a]pplication:",
+      "command": "open -a \"{{Application}}\"",
+      "behavior_classification": "Run a graphical macOS [a]pplication:",
+      "classification_basis": "source_section"
+    },
+    "example-f22866a28532b383fd5f022f2639743b7bfe2426dba3f84fb7ed62f213601ec3": {
+      "source_path": "pages/common/cp.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Recursively copy a directory's contents to another location (if the destination exists, the directory is copied inside it):",
+      "command": "cp {{[-r|--recursive]}} {{path/to/source_directory}} {{path/to/target_directory}}",
+      "behavior_classification": "Recursively copy a directory's contents to another location (if the destination exists, the directory is copied inside it):",
+      "classification_basis": "source_section"
+    },
+    "example-f25a989decc5c357977fa4cbb2214c15cf15286f275b99850bb18c114f4fb73b": {
+      "source_path": "pages/linux/journalctl.md",
+      "source_line": 33,
+      "source_position": 7,
+      "section": "Show all messages by a specific executable:",
+      "command": "journalctl {{path/to/executable}}",
+      "behavior_classification": "Show all messages by a specific executable:",
+      "classification_basis": "source_section"
+    },
+    "example-f5e56e87483f8054b7c1db12d642a63c32b36caf410ef713dd388f59c604c293": {
+      "source_path": "pages/linux/journalctl.md",
+      "source_line": 37,
+      "source_position": 8,
+      "section": "Delete journal logs which are older than 2 days:",
+      "command": "journalctl --vacuum-time 2d",
+      "behavior_classification": "Delete journal logs which are older than 2 days:",
+      "classification_basis": "source_section"
+    },
+    "example-f632ec772f5c9ae6d66d4358b393e057fffaf9652e2a7802e6059fefcd49f156": {
+      "source_path": "pages/linux/free.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Display memory in human-readable units:",
+      "command": "free {{[-h|--human]}}",
+      "behavior_classification": "Display memory in human-readable units:",
+      "classification_basis": "source_section"
+    },
+    "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de": {
+      "source_path": "pages/common/sort.md",
+      "source_line": 8,
+      "source_position": 1,
+      "section": "Sort a file in ascending order:",
+      "command": "sort {{path/to/file}}",
+      "behavior_classification": "Sort a file in ascending order:",
+      "classification_basis": "source_section"
+    },
+    "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950": {
+      "source_path": "pages/windows/cat.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Check whether `cat` is properly installed by printing its version number. If this command evaluates into an error, PowerShell may have substituted this command with `Get-Content`:",
+      "command": "cat --version",
+      "behavior_classification": "Check whether `cat` is properly installed by printing its version number. If this command evaluates into an error, PowerShell may have substituted this command with `Get-Content`:",
+      "classification_basis": "source_section"
+    },
+    "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40": {
+      "source_path": "pages/linux/df.md",
+      "source_line": 9,
+      "source_position": 1,
+      "section": "Display all filesystems and their disk usage:",
+      "command": "df",
+      "behavior_classification": "Display all filesystems and their disk usage:",
+      "classification_basis": "source_section"
+    },
+    "example-fe9c05ef58c170bfcfd1374cae3526ebdb01ca4808b9729134ebace26c357ba2": {
+      "source_path": "pages/osx/open.md",
+      "source_line": 32,
+      "source_position": 7,
+      "section": "Open a [n]ew instance of an application specified via bundle identifier:",
+      "command": "open -n -b {{com.domain.application}}",
+      "behavior_classification": "Open a [n]ew instance of an application specified via bundle identifier:",
+      "classification_basis": "source_section"
+    },
+    "example-feeb38c3a5624b69a03318a433f44b55f3c057ec51658accda7ad92bb6cb9ba4": {
+      "source_path": "pages/osx/open.md",
+      "source_line": 28,
+      "source_position": 6,
+      "section": "Open all the files of a given extension in the current directory with the associated application:",
+      "command": "open {{*.ext}}",
+      "behavior_classification": "Open all the files of a given extension in the current directory with the associated application:",
+      "classification_basis": "source_section"
+    }
+  }
+}
