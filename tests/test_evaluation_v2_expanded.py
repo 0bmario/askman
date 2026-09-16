@@ -241,8 +241,8 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.holdout,
                 self.intents,
                 self.catalog,
+                self.manifest["support_catalog"],
                 self.manifest["corpus"],
-                self.manifest["corpus_manifest"],
             )
 
     def test_hand_checks_reject_unsupported_citation_id(self):
@@ -264,8 +264,60 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.holdout,
                 self.intents,
                 self.catalog,
+                self.manifest["support_catalog"],
                 self.manifest["corpus"],
-                self.manifest["corpus_manifest"],
+            )
+
+    def test_hand_checks_reject_false_abstention_scan(self):
+        mutated = copy.deepcopy(self.manifest["hand_checks"])
+        record = next(
+            record
+            for record in mutated
+            if not next(
+                task
+                for task in self.development["tasks"] + self.holdout["tasks"]
+                if task["id"] == record["task_id"]
+            )["answerable"]
+        )
+        record["evidence"]["behavior"]["no_match_scan"]["matching_example_ids"] = [
+            next(iter(self.catalog["entries"]))
+        ]
+        with self.assertRaisesRegex(ValueError, "no-match scan"):
+            VALIDATOR.validate_hand_checks(
+                mutated,
+                self.manifest["hand_check_provenance"],
+                self.development,
+                self.holdout,
+                self.intents,
+                self.catalog,
+                self.manifest["support_catalog"],
+                self.manifest["corpus"],
+            )
+
+    def test_hand_checks_reject_stale_no_match_scan(self):
+        mutated = copy.deepcopy(self.manifest["hand_checks"])
+        record = next(
+            record
+            for record in mutated
+            if not next(
+                task
+                for task in self.development["tasks"] + self.holdout["tasks"]
+                if task["id"] == record["task_id"]
+            )["answerable"]
+        )
+        record["evidence"]["acceptable_support"]["no_match_scan"][
+            "catalog_sha256"
+        ] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "no-match scan"):
+            VALIDATOR.validate_hand_checks(
+                mutated,
+                self.manifest["hand_check_provenance"],
+                self.development,
+                self.holdout,
+                self.intents,
+                self.catalog,
+                self.manifest["support_catalog"],
+                self.manifest["corpus"],
             )
 
     def test_intents_have_provenance_only_and_match_labels(self):
@@ -286,8 +338,8 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
             self.holdout,
             self.intents,
             self.catalog,
+            self.manifest["support_catalog"],
             self.manifest["corpus"],
-            self.manifest["corpus_manifest"],
         )
         self.assertEqual(
             len(self.manifest["hand_checks"]),
@@ -305,8 +357,8 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.holdout,
                 self.intents,
                 self.catalog,
+                self.manifest["support_catalog"],
                 self.manifest["corpus"],
-                self.manifest["corpus_manifest"],
             )
 
     def test_published_reports_pin_all_release_digests(self):

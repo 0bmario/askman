@@ -482,11 +482,10 @@ def validate_hand_check_citations(
     expected_example_ids: list[str],
     support_catalog: dict[str, Any],
     corpus: dict[str, Any],
-    corpus_manifest_path: str,
     task_id: str,
     dimension: str,
 ) -> None:
-    """Require hand-check citations to resolve to the pinned catalog or corpus."""
+    """Require answerable hand-check citations to resolve to the pinned catalog."""
     required_citation_fields = {
         "catalog_entry_id",
         "source_path",
@@ -506,9 +505,7 @@ def validate_hand_check_citations(
     )
     if not source_digest_is_pinned:
         raise ValueError("hand-check citations require a pinned corpus source digest")
-    expected_manifest_path = corpus_manifest_path
     catalog_citation_ids: list[str] = []
-    manifest_citation_count = 0
     for citation in citations:
         citation_shape_is_valid = (
             isinstance(citation, dict) and set(citation) == required_citation_fields
@@ -519,17 +516,6 @@ def validate_hand_check_citations(
         if not source_digest_matches:
             raise ValueError(f"hand-check {dimension} citation digest mismatch for {task_id}")
         catalog_entry_id = citation["catalog_entry_id"]
-        if catalog_entry_id is None:
-            manifest_citation_is_valid = (
-                citation["source_path"] == expected_manifest_path
-                and citation["source_line"] is None
-                and citation["section"] == "files"
-                and resolve_path(expected_manifest_path).is_file()
-            )
-            if not manifest_citation_is_valid:
-                raise ValueError(f"hand-check {dimension} citation does not resolve for {task_id}")
-            manifest_citation_count += 1
-            continue
         catalog_entry = catalog_entries.get(catalog_entry_id)
         catalog_entry_is_supported = isinstance(catalog_entry, dict)
         if not catalog_entry_is_supported:
@@ -547,17 +533,71 @@ def validate_hand_check_citations(
 
     citation_ids_are_unique = len(catalog_citation_ids) == len(set(catalog_citation_ids))
     expected_ids_are_cited = set(catalog_citation_ids) == set(expected_example_ids)
-    manifest_citation_is_exclusive = (
-        not expected_example_ids and manifest_citation_count > 0 and not catalog_citation_ids
-    )
-    catalog_citations_are_exclusive = (
+    catalog_citations_are_complete = (
         bool(expected_example_ids)
-        and manifest_citation_count == 0
         and citation_ids_are_unique
         and expected_ids_are_cited
     )
-    if not (manifest_citation_is_exclusive or catalog_citations_are_exclusive):
+    if not catalog_citations_are_complete:
         raise ValueError(f"hand-check {dimension} citations do not match support for {task_id}")
+
+
+def validate_no_match_scan(
+    scan: Any,
+    expected_intent: str,
+    support_catalog: dict[str, Any],
+    support_catalog_pin: dict[str, Any],
+    task_id: str,
+    dimension: str,
+) -> None:
+    """Require deterministic absence evidence over the pinned audited catalog."""
+    required_scan_fields = {
+        "catalog_id",
+        "catalog_sha256",
+        "scanned_example_count",
+        "normalized_task_intent",
+        "matching_example_ids",
+    }
+    scan_shape_is_valid = isinstance(scan, dict) and set(scan) == required_scan_fields
+    if not scan_shape_is_valid:
+        raise ValueError(f"hand-check {dimension} no-match scan is incomplete for {task_id}")
+    catalog_entries = support_catalog.get("entries")
+    catalog_entries_are_recorded = isinstance(catalog_entries, dict)
+    if not catalog_entries_are_recorded:
+        raise ValueError("support catalog must declare example entries")
+    catalog_pin_is_complete = (
+        isinstance(support_catalog_pin, dict)
+        and {"path", "sha256", "catalog_id"} <= support_catalog_pin.keys()
+    )
+    if not catalog_pin_is_complete:
+        raise ValueError("no-match scan support catalog pin is incomplete")
+    actual_catalog_digest = RUNNER.sha256_file(resolve_path(support_catalog_pin["path"]))
+    catalog_digest_is_current = actual_catalog_digest == support_catalog_pin["sha256"]
+    catalog_id_is_consistent = (
+        scan["catalog_id"] == support_catalog_pin["catalog_id"]
+        and support_catalog.get("catalog_id") == support_catalog_pin["catalog_id"]
+    )
+    catalog_digest_is_consistent = (
+        scan["catalog_sha256"] == support_catalog_pin["sha256"]
+        and scan["catalog_sha256"] == actual_catalog_digest
+    )
+    scanned_count_matches_catalog = (
+        scan["scanned_example_count"] == len(catalog_entries)
+    )
+    normalized_intent_matches = scan["normalized_task_intent"] == expected_intent
+    matching_example_ids_are_empty = scan["matching_example_ids"] == []
+    no_match_scan_is_valid = all(
+        (
+            catalog_digest_is_current,
+            catalog_id_is_consistent,
+            catalog_digest_is_consistent,
+            scanned_count_matches_catalog,
+            normalized_intent_matches,
+            matching_example_ids_are_empty,
+        )
+    )
+    if not no_match_scan_is_valid:
+        raise ValueError(f"hand-check {dimension} no-match scan is inconsistent for {task_id}")
 
 
 def validate_hand_checks(
@@ -567,8 +607,8 @@ def validate_hand_checks(
     holdout: dict[str, Any],
     intents: dict[str, Any],
     support_catalog: dict[str, Any],
+    support_catalog_pin: dict[str, Any],
     corpus: dict[str, Any],
-    corpus_manifest_path: str,
 ) -> None:
     """Verify evidence-bearing independent checks against frozen task labels."""
     if not isinstance(provenance, dict):
@@ -680,24 +720,56 @@ def validate_hand_checks(
         )
         if support_evidence_is_inconsistent:
             raise ValueError(f"hand-check acceptable support mismatch for {task_id}")
-        validate_hand_check_citations(
-            behavior.get("citations"),
-            task["acceptable_example_ids"],
-            support_catalog,
-            corpus,
-            corpus_manifest_path,
-            task_id,
-            "behavior",
-        )
-        validate_hand_check_citations(
-            support.get("citations"),
-            task["acceptable_example_ids"],
-            support_catalog,
-            corpus,
-            corpus_manifest_path,
-            task_id,
-            "acceptable support",
-        )
+        if task["answerable"]:
+            answerable_evidence_uses_catalog_citations = (
+                "citations" in behavior
+                and "citations" in support
+                and "no_match_scan" not in behavior
+                and "no_match_scan" not in support
+            )
+            if not answerable_evidence_uses_catalog_citations:
+                raise ValueError(f"hand-check answerable evidence lacks catalog citations for {task_id}")
+            validate_hand_check_citations(
+                behavior["citations"],
+                task["acceptable_example_ids"],
+                support_catalog,
+                corpus,
+                task_id,
+                "behavior",
+            )
+            validate_hand_check_citations(
+                support["citations"],
+                task["acceptable_example_ids"],
+                support_catalog,
+                corpus,
+                task_id,
+                "acceptable support",
+            )
+        else:
+            unanswerable_evidence_uses_no_match_scans = (
+                "no_match_scan" in behavior
+                and "no_match_scan" in support
+                and "citations" not in behavior
+                and "citations" not in support
+            )
+            if not unanswerable_evidence_uses_no_match_scans:
+                raise ValueError(f"hand-check unanswerable evidence lacks no-match scans for {task_id}")
+            validate_no_match_scan(
+                behavior["no_match_scan"],
+                expected_intent,
+                support_catalog,
+                support_catalog_pin,
+                task_id,
+                "behavior",
+            )
+            validate_no_match_scan(
+                support["no_match_scan"],
+                expected_intent,
+                support_catalog,
+                support_catalog_pin,
+                task_id,
+                "acceptable support",
+            )
         abstention = evidence["abstention"]
         expected_abstention_result = "not_applicable" if task["answerable"] else "confirmed"
         abstention_evidence_is_inconsistent = (
@@ -822,6 +894,7 @@ def validate_manifest(manifest_path: Path) -> None:
     validate_family_intents(intents, datasets["dev"], datasets["holdout"])
     support_audit = manifest.get("support_audit")
     support_catalog = None
+    support_catalog_pin = None
     if support_audit is not None:
         validate_split_question_disjointness(
             datasets["dev"], datasets["holdout"]
@@ -865,8 +938,8 @@ def validate_manifest(manifest_path: Path) -> None:
             datasets["holdout"],
             intents,
             support_catalog,
+            support_catalog_pin,
             corpus,
-            corpus_manifest_value or str(corpus_manifest_path.relative_to(ROOT)),
         )
 
 

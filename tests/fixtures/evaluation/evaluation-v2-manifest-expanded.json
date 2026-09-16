@@ -163,29 +163,25 @@
           "result": "match",
           "observed_intent": "create a password-protected archive with a common shell command",
           "evidence": "Independent family review records the exact behavior: create a password-protected archive with a common shell command.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "create a password-protected archive with a common shell command",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned common bundle has no password-protected archive example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "create a password-protected archive with a common shell command",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -311,29 +307,25 @@
           "result": "match",
           "observed_intent": "configure a Linux firewall rule with nftables",
           "evidence": "Independent family review records the exact behavior: configure a Linux firewall rule with nftables.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "configure a Linux firewall rule with nftables",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned Linux bundle has no nftables firewall configuration example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "configure a Linux firewall rule with nftables",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -399,29 +391,25 @@
           "result": "match",
           "observed_intent": "read EXIF metadata from a photo on macOS",
           "evidence": "Independent family review records the exact behavior: read EXIF metadata from a photo on macOS.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "read EXIF metadata from a photo on macOS",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned macOS bundle has no EXIF inspection example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "read EXIF metadata from a photo on macOS",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -442,29 +430,25 @@
           "result": "match",
           "observed_intent": "flush the macOS DNS cache from the terminal",
           "evidence": "Independent family review records the exact behavior: flush the macOS DNS cache from the terminal.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "flush the macOS DNS cache from the terminal",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned macOS bundle has no DNS-cache example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "flush the macOS DNS cache from the terminal",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -545,29 +529,25 @@
           "result": "match",
           "observed_intent": "query the Windows registry from a shell",
           "evidence": "Independent family review records the exact behavior: query the Windows registry from a shell.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "query the Windows registry from a shell",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned Windows bundle has no registry-query example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "query the Windows registry from a shell",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -588,29 +568,25 @@
           "result": "match",
           "observed_intent": "view Windows event logs",
           "evidence": "Independent family review records the exact behavior: view Windows event logs.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "view Windows event logs",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned Windows bundle has no event-log example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "view Windows event logs",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -721,29 +697,25 @@
           "result": "match",
           "observed_intent": "resolve a DNS name from a common shell",
           "evidence": "Independent family review records the exact behavior: resolve a DNS name from a common shell.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "resolve a DNS name from a common shell",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned common bundle has no DNS lookup example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "resolve a DNS name from a common shell",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -809,29 +781,25 @@
           "result": "match",
           "observed_intent": "install a package with pacman on Linux",
           "evidence": "Independent family review records the exact behavior: install a package with pacman on Linux.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "install a package with pacman on Linux",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned Linux bundle contains apt pages but no pacman package manager example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "install a package with pacman on Linux",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -852,29 +820,25 @@
           "result": "match",
           "observed_intent": "configure a Linux firewall rule with nftables",
           "evidence": "Independent family review records the exact behavior: configure a Linux firewall rule with nftables.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "configure a Linux firewall rule with nftables",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned Linux bundle has no nftables firewall configuration example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "configure a Linux firewall rule with nftables",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -1015,29 +979,25 @@
           "result": "match",
           "observed_intent": "send an SMS from a macOS terminal",
           "evidence": "Independent family review records the exact behavior: send an SMS from a macOS terminal.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "send an SMS from a macOS terminal",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned macOS bundle has no SMS-sending example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "send an SMS from a macOS terminal",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -1118,29 +1078,25 @@
           "result": "match",
           "observed_intent": "view Windows event logs",
           "evidence": "Independent family review records the exact behavior: view Windows event logs.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "view Windows event logs",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned Windows bundle has no event-log example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "view Windows event logs",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",
@@ -1161,29 +1117,25 @@
           "result": "match",
           "observed_intent": "configure a Windows firewall rule",
           "evidence": "Independent family review records the exact behavior: configure a Windows firewall rule.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "configure a Windows firewall rule",
+            "matching_example_ids": []
+          }
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
           "evidence": "The pinned Windows bundle has no firewall-configuration example.",
-          "citations": [
-            {
-              "catalog_entry_id": null,
-              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
-              "source_line": null,
-              "section": "files",
-              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
-            }
-          ]
+          "no_match_scan": {
+            "catalog_id": "evaluation-v2-expanded-support-catalog-v1",
+            "catalog_sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
+            "scanned_example_count": 19,
+            "normalized_task_intent": "configure a Windows firewall rule",
+            "matching_example_ids": []
+          }
         },
         "abstention": {
           "result": "confirmed",

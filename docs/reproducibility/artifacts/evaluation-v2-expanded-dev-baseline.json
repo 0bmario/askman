@@ -4,7 +4,7 @@
   "freeze_id": "evaluation-v2-release-benchmark-v3",
   "freeze_manifest": {
     "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
-    "sha256": "dc9c707853d0de9acb77f0169907fa3de6fe2beb31904a2c5ee64a59f7642dd4"
+    "sha256": "17175e7a8422472a8d86aaa1bb837cbd458ec71cfdb970c66c616ca58642a877"
   },
   "recorded_at": "2026-09-16T20:40:37Z",
   "split": "dev",
