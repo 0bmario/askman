@@ -36,6 +36,11 @@ name = "tldr_subset"
 path = "src/bin/tldr_subset.rs"
 required-features = ["dev"]
 
+[[bin]]
+name = "askman_candidate"
+path = "src/bin/askman_candidate.rs"
+required-features = ["dev"]
+
 [features]
 dev = ["dep:serde", "dep:serde_json", "dep:sha2", "dep:libc"]
 

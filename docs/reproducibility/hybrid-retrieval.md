@@ -24,6 +24,25 @@ budgets are page-level budgets: each side is reduced to its best ranked example
 per selected page before fusion. The runner reports candidate recall separately
 from display Success@1/3; ordering scores are not exposed as confidence.
 
+## Candidate CLI
+
+The development-only `askman_candidate` binary takes one explicit matching
+bundle. Pass the same versioned bundle used by the evaluation benchmark; bundle
+validation checks its manifest, component digests, pinned model assets, CLI
+compatibility, and frozen dense recipe before querying. Querying does not fetch
+assets or fall back to a single retriever.
+
+```sh
+cargo run --locked --offline --features dev --bin askman_candidate -- \
+  --bundle /tmp/askman-matching-bundle \
+  --linux search patterns files
+```
+
+Use `--osx` or `--windows` for another target platform. `--verbose` exposes a
+diagnostic normalized ranking score; it is not a confidence percentage. The
+shipping `askman` binary remains unchanged, while `tldr_subset query` and
+`dense-server` remain available for keyword-only and dense-only diagnostics.
+
 ## Development tuning
 
 The bounded candidate set was run on the 30 development tasks before the

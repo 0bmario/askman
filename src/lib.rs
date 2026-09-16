@@ -6,6 +6,8 @@ pub mod db;
 pub mod dense;
 pub mod embed;
 pub mod format;
+#[cfg(feature = "dev")]
+pub mod hybrid;
 pub mod search;
 #[cfg(feature = "dev")]
 pub mod tldr_subset;
