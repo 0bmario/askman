@@ -53,7 +53,6 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
             holdout=self.holdout,
             intents=self.intents,
             support_catalog=self.catalog,
-            support_catalog_pin=self.manifest["support_catalog"],
             full_corpus_catalog=self.full_catalog,
             full_corpus_catalog_pin=self.manifest["full_corpus_catalog"],
             corpus=self.manifest["corpus"],

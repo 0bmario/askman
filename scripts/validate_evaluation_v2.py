@@ -41,7 +41,6 @@ class HandCheckValidationContext:
     holdout: dict[str, Any]
     intents: dict[str, Any]
     support_catalog: dict[str, Any]
-    support_catalog_pin: dict[str, Any]
     full_corpus_catalog: dict[str, Any]
     full_corpus_catalog_pin: dict[str, Any]
     corpus: dict[str, Any]
@@ -802,7 +801,6 @@ def validate_hand_checks(
     holdout = context.holdout
     intents = context.intents
     support_catalog = context.support_catalog
-    support_catalog_pin = context.support_catalog_pin
     full_corpus_catalog = context.full_corpus_catalog
     full_corpus_catalog_pin = context.full_corpus_catalog_pin
     corpus = context.corpus
@@ -1172,7 +1170,6 @@ def validate_manifest(manifest_path: Path) -> None:
                 holdout=datasets["holdout"],
                 intents=intents,
                 support_catalog=support_catalog,
-                support_catalog_pin=support_catalog_pin,
                 full_corpus_catalog=full_corpus_catalog,
                 full_corpus_catalog_pin=full_corpus_catalog_pin,
                 corpus=corpus,
