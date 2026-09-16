@@ -1,6 +1,6 @@
 # Askman Retrieval Context
 
-This glossary defines the product language for the Better Askman work. Release and evaluation policy lives in the ADRs.
+This glossary defines the product language for the Better Askman work. Release and evaluation policy lives in the [ADRs](adr/).
 
 **Askman**:
 An offline CLI that maps natural-language terminal tasks to command examples.
