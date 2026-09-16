@@ -11,20 +11,20 @@ The currently shipped Askman behavior used as the comparison baseline.
 _Avoid_: actual version
 
 **Retrieval-v2**:
-The candidate retrieval path intended to become the improved shipped version after it passes the release gate.
+The candidate retrieval path.
 _Avoid_: finished release
 
 **Better Askman**:
-A shipped Askman version that is a measured improvement over `main` without safety, platform, offline, or operational regressions.
+An Askman release that improves on `main` without required regressions.
 
 **Evaluation task**:
 A labeled natural-language request used to judge whether Askman displays an acceptable command example or correctly abstains.
 
 **Regression benchmark**:
-The immutable `evaluation-v1` task set used to detect accidental changes during retrieval work.
+The `evaluation-v1` task set for detecting accidental changes.
 
 **Release benchmark**:
-The `evaluation-v2` task set used to compare `retrieval-v2` with `main`; its policy is defined in ADR 0002.
+The `evaluation-v2` task set for comparing `retrieval-v2` with `main`.
 
 **Success@1**:
 The percentage of answerable tasks whose first displayed example is acceptable.
@@ -33,7 +33,7 @@ The percentage of answerable tasks whose first displayed example is acceptable.
 The percentage of answerable tasks with at least one acceptable example among the first three displayed results.
 
 **Scenario family**:
-A group of related evaluation tasks representing one intent pattern for per-family comparison.
+A group of related evaluation tasks.
 
 **Answerable task**:
 An evaluation task for which the selected corpus contains an acceptable command example for the requested platform.
@@ -45,49 +45,43 @@ An evaluation task for which the selected corpus and platform contain no accepta
 A corpus example whose demonstrated behavior fully satisfies an answerable task for its requested platform.
 
 **Incorrect answer**:
-A displayed result that does not satisfy an answerable task.
+A result that fails an answerable task.
 
 **False answer**:
-A non-empty result for an evaluation task labeled unanswerable.
+A result returned for an unanswerable task.
 
 **Paired comparison**:
-An evaluation of `main` and `retrieval-v2` using identical task inputs, target-platform flags, corpus or matching bundle, model and other assets, runtime conditions, and network policy.
+A comparison of `main` and `retrieval-v2` on the same evaluation tasks and conditions.
 
 **User-visible result**:
-The command examples and abstentions printed by the Askman CLI; internal retrieval metrics are diagnostics.
+The command examples or abstention shown by Askman.
 
 **Hybrid retrieval**:
 A retrieval path combining lexical and dense candidate retrieval before producing one final ordered result set.
 
 **Rank fusion**:
-The lightweight combination of independent retrieval rankings used by hybrid retrieval; it is not a learned second-stage reranker.
-
-**Diagnostic retrieval modes**:
-Keyword-only and dense-only paths used to investigate retrieval behavior, not permanent user-selectable modes.
+The combination of independent retrieval rankings into one ordered result set.
 
 **Abstention**:
 The deliberate `No good matches found.` outcome when no candidate clears the confidence policy.
 
 **Matching bundle**:
-The versioned offline corpus, retrieval indexes, and embedding model required by a compatible Askman release.
+Versioned offline assets used by a compatible Askman release.
 
 **Explicit update**:
-A deliberate user-requested change to the active matching bundle; normal searches do not update assets.
+A deliberate user-requested change to the active matching bundle.
 
 **Active bundle**:
-The validated matching bundle selected for current queries.
+The matching bundle used for current queries.
 
 **Rollback**:
-Restoring a previously valid compatible release state after an update fails or is rejected.
-
-**Package distribution**:
-The Askman CLI is published to crates.io and compatible matching bundles are published as GitHub Release assets.
+Restoring a previous valid release state.
 
 **Release version**:
-The first Better Askman release is `0.4.0`.
+The identifier for a published Askman release.
 
 **Benchmark provenance**:
-Release tasks are authored from public, license-compatible user intents before retrieval outputs are inspected, then labeled against the pinned corpus with stable IDs and rationales; private data and copied candidate answers are excluded.
+The origin and traceability of benchmark tasks.
 
 **Pareto improvement**:
-An improvement in primary usefulness without regression in safety, platform coverage, offline behavior, or agreed operational limits.
+An improvement in primary usefulness without required regressions.
