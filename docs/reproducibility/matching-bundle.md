@@ -17,6 +17,11 @@ cargo run --locked --offline --features dev --bin tldr_subset -- \
   --cli-compatibility 'askman=0.3.3'
 ```
 
+`--cli-compatibility` must use `askman=<version>` with no whitespace. The
+builder requires the manifest selection, including excluded files, to cover
+every `.md` page below `pages/common`, `pages/linux`, `pages/osx`, and
+`pages/windows` in the pinned snapshot.
+
 The output contains:
 
 - `manifest.json`: deterministic bundle identity, source revision/digest,
@@ -39,9 +44,10 @@ cargo run --locked --offline --features dev --bin tldr_subset -- \
 
 Builds use a temporary sibling directory and publish only after corpus,
 lexical, dense, model, digest, compatibility, and four-platform checks pass.
-Malformed or interrupted builds are removed without replacing an existing
-usable bundle. Existing page/example IDs, command syntax, source references,
-original content, and platform metadata are retained from the corpus builder.
+The output path must be new; an existing file or directory is refused. This
+keeps a usable bundle intact if construction is malformed or interrupted.
+Existing page/example IDs, command syntax, source references, original
+content, and platform metadata are retained from the corpus builder.
 
 This ticket does not implement bundle update, release publishing, or shipping
 CLI integration.

@@ -30,11 +30,14 @@ enum Command {
         /// Offline fastembed cache containing the pinned model snapshot.
         #[arg(long)]
         model_cache: PathBuf,
-        /// Bundle directory to create or replace transactionally.
+        /// New bundle directory to create transactionally; existing paths are refused.
         #[arg(long)]
         output: PathBuf,
-        /// CLI version/range compatible with this bundle.
-        #[arg(long, default_value = env!("CARGO_PKG_VERSION"))]
+        /// CLI compatibility declaration in the form `askman=<version>` with no whitespace.
+        #[arg(
+            long,
+            default_value = concat!("askman=", env!("CARGO_PKG_VERSION"))
+        )]
         cli_compatibility: String,
     },
     /// Validate a previously built matching bundle without network access.

@@ -38,8 +38,6 @@ pub struct BundleBuildReport {
     pub bundle_id: String,
     pub page_count: usize,
     pub example_count: usize,
-    pub component_count: usize,
-    pub artifact_size_bytes: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -100,6 +98,7 @@ pub struct BundleAsset {
 #[derive(Debug, Serialize)]
 struct BundleIdentity<'a> {
     bundle_version: &'a str,
+    cli_compatibility: &'a str,
     source: &'a SourceMetadata,
     platforms: &'a [String],
     lexical_index: &'a IndexComponent,
@@ -111,18 +110,23 @@ struct BundleIdentity<'a> {
 /// Build one self-contained, offline matching bundle from provisioned inputs.
 /// All validation happens in the temporary directory before publication.
 pub fn build_matching_bundle(options: BundleBuildOptions) -> Result<BundleBuildReport> {
-    if options.cli_compatibility.trim().is_empty() {
-        bail!("CLI compatibility declaration must not be empty");
-    }
+    validate_cli_compatibility(&options.cli_compatibility)?;
 
     let source_manifest = read_subset_manifest(&options.manifest)?;
     let output = absolute_path(&options.output)?;
+    if output.exists() {
+        bail!(
+            "refusing to replace existing matching bundle output {}; choose a new versioned output path",
+            output.display()
+        );
+    }
     let snapshot = fs::canonicalize(&options.snapshot).with_context(|| {
         format!(
             "failed to resolve provisioned snapshot root {}",
             options.snapshot.display()
         )
     })?;
+    validate_complete_snapshot(&source_manifest, &snapshot)?;
     let model_cache = fs::canonicalize(&options.model_cache).with_context(|| {
         format!(
             "failed to resolve provisioned model cache {}",
@@ -199,7 +203,7 @@ fn build_temporary_bundle(
     let model_output = temporary.join(MODEL_DIRECTORY);
     copy_model_assets(model_cache, &model_output)?;
     let dense_output = temporary.join(MATCHING_DATABASE);
-    let dense_report = crate::dense::build_dense_index(crate::dense::DenseBuildOptions {
+    crate::dense::build_dense_index(crate::dense::DenseBuildOptions {
         artifact: lexical_output.clone(),
         model_cache: model_output.clone(),
         output: dense_output.clone(),
@@ -267,8 +271,6 @@ fn build_temporary_bundle(
         bundle_id: manifest.bundle_id,
         page_count: lexical_report.page_count,
         example_count: lexical_report.example_count,
-        component_count: 3,
-        artifact_size_bytes: dense_report.artifact_size_bytes,
     })
 }
 
@@ -311,7 +313,6 @@ pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
     let model_root = root.join(MODEL_DIRECTORY);
     validate_dense_artifact_file(&database, &model_root)?;
     let connection = Connection::open(&database)?;
-    validate_artifact(&connection)?;
     let source_digest = artifact_metadata(&connection, "source_digest")?;
     if source_digest != manifest.source.digest {
         bail!("bundle source digest does not match the matching database");
@@ -370,27 +371,9 @@ fn validate_manifest_shape(manifest: &BundleManifest) -> Result<()> {
     {
         bail!("unsupported matching bundle manifest version or kind");
     }
-    if manifest.cli_compatibility.trim().is_empty() {
-        bail!("matching bundle CLI compatibility is empty");
-    }
-    if manifest.platform_selection.platforms
-        != REQUIRED_PLATFORMS
-            .iter()
-            .map(|value| value.to_string())
-            .collect::<Vec<_>>()
-        || manifest.platform_selection.filtering != "query-time"
-    {
-        bail!("matching bundle platform selection is incompatible");
-    }
-    if manifest.dense_index.version != DENSE_INDEX_VERSION
-        || manifest.embedding_model.id != MODEL_ID
-        || manifest.embedding_model.revision != MODEL_REVISION
-        || manifest.embedding_model.runtime != MODEL_RUNTIME
-        || manifest.embedding_model.dimension != MODEL_DIMENSION
-        || manifest.embedding_model.max_length != MODEL_MAX_LENGTH
-    {
-        bail!("matching bundle dense/model compatibility metadata is invalid");
-    }
+    validate_cli_compatibility(&manifest.cli_compatibility)?;
+    validate_platform_selection(&manifest.platform_selection)?;
+    validate_dense_model_metadata(manifest)?;
     if manifest.embedding_model.assets.len() != MODEL_FILES.len() + 1 {
         bail!("matching bundle embedding model asset inventory is incomplete");
     }
@@ -445,6 +428,128 @@ fn validate_model_manifest(root: &Path, model: &EmbeddingModel) -> Result<()> {
         bail!("matching bundle embedding model asset inventory is incompatible");
     }
     Ok(())
+}
+
+fn validate_platform_selection(selection: &PlatformSelection) -> Result<()> {
+    let expected = REQUIRED_PLATFORMS
+        .iter()
+        .map(|value| value.to_string())
+        .collect::<Vec<_>>();
+    if selection.platforms != expected || selection.filtering != "query-time" {
+        bail!("matching bundle platform selection is incompatible");
+    }
+    Ok(())
+}
+
+fn validate_dense_model_metadata(manifest: &BundleManifest) -> Result<()> {
+    if manifest.dense_index.version != DENSE_INDEX_VERSION
+        || manifest.embedding_model.id != MODEL_ID
+        || manifest.embedding_model.revision != MODEL_REVISION
+        || manifest.embedding_model.runtime != MODEL_RUNTIME
+        || manifest.embedding_model.dimension != MODEL_DIMENSION
+        || manifest.embedding_model.max_length != MODEL_MAX_LENGTH
+    {
+        bail!("matching bundle dense/model compatibility metadata is invalid");
+    }
+    Ok(())
+}
+
+fn validate_cli_compatibility(value: &str) -> Result<()> {
+    let Some(version) = value.strip_prefix("askman=") else {
+        bail!("CLI compatibility must use the format askman=<version>");
+    };
+    if version.is_empty() || version.chars().any(char::is_whitespace) {
+        bail!("CLI compatibility version must be non-empty and contain no whitespace");
+    }
+    Ok(())
+}
+
+fn validate_complete_snapshot(manifest: &SubsetManifest, snapshot: &Path) -> Result<()> {
+    let mut declared = manifest
+        .files
+        .iter()
+        .map(|path| path.replace('\\', "/"))
+        .collect::<HashSet<_>>();
+    declared.extend(
+        manifest
+            .exclusions
+            .iter()
+            .map(|exclusion| exclusion.path.replace('\\', "/")),
+    );
+    let mut discovered = HashSet::new();
+    for platform in REQUIRED_PLATFORMS {
+        let platform_root = snapshot.join("pages").join(platform);
+        if !platform_root.is_dir() {
+            bail!("complete matching snapshot is missing platform directory: {platform}");
+        }
+        collect_snapshot_pages(&platform_root, snapshot, &mut discovered)?;
+    }
+    if declared != discovered {
+        let missing = discovered
+            .difference(&declared)
+            .cloned()
+            .collect::<Vec<_>>();
+        let unexpected = declared
+            .difference(&discovered)
+            .cloned()
+            .collect::<Vec<_>>();
+        bail!(
+            "complete matching snapshot file selection is incompatible; missing from manifest: {}; not present in snapshot: {}",
+            display_paths(&missing),
+            display_paths(&unexpected)
+        );
+    }
+    Ok(())
+}
+
+fn collect_snapshot_pages(
+    directory: &Path,
+    snapshot: &Path,
+    discovered: &mut HashSet<String>,
+) -> Result<()> {
+    let mut entries = fs::read_dir(directory)
+        .with_context(|| {
+            format!(
+                "failed to enumerate snapshot directory {}",
+                directory.display()
+            )
+        })?
+        .collect::<std::io::Result<Vec<_>>>()?;
+    entries.sort_by_key(|entry| entry.file_name());
+    for entry in entries {
+        let path = entry.path();
+        let canonical = fs::canonicalize(&path)
+            .with_context(|| format!("failed to resolve snapshot entry {}", path.display()))?;
+        if !canonical.starts_with(snapshot) {
+            bail!("snapshot entry escapes snapshot root: {}", path.display());
+        }
+        if canonical.is_dir() {
+            collect_snapshot_pages(&canonical, snapshot, discovered)?;
+            continue;
+        }
+        if canonical.is_file()
+            && canonical.extension().and_then(|value| value.to_str()) == Some("md")
+        {
+            let relative = canonical
+                .strip_prefix(snapshot)
+                .map_err(|_| anyhow!("snapshot page is outside snapshot root"))?
+                .to_str()
+                .ok_or_else(|| anyhow!("snapshot page path is not UTF-8: {}", canonical.display()))?
+                .replace('\\', "/");
+            discovered.insert(relative);
+        }
+    }
+    Ok(())
+}
+
+fn display_paths(paths: &[String]) -> String {
+    if paths.is_empty() {
+        "none".to_string()
+    } else {
+        let mut paths = paths.to_vec();
+        paths.sort();
+        paths.join(", ")
+    }
 }
 
 fn model_manifest(model_root: &Path) -> Result<EmbeddingModel> {
@@ -536,6 +641,7 @@ fn write_manifest(path: &Path, manifest: &BundleManifest) -> Result<()> {
 fn bundle_id(manifest: &BundleManifest) -> Result<String> {
     let identity = BundleIdentity {
         bundle_version: &manifest.bundle_version,
+        cli_compatibility: &manifest.cli_compatibility,
         source: &manifest.source,
         platforms: &manifest.platform_selection.platforms,
         lexical_index: &manifest.lexical_index,
@@ -577,32 +683,14 @@ fn validate_sha256(value: &str) -> Result<()> {
 }
 
 fn publish_directory(temporary: &Path, output: &Path) -> Result<()> {
-    if output.exists() && !output.is_dir() {
-        bail!("bundle output is not a directory: {}", output.display());
+    if output.exists() {
+        bail!(
+            "refusing to replace existing matching bundle output {}; choose a new versioned output path",
+            output.display()
+        );
     }
-    if !output.exists() {
-        return fs::rename(temporary, output)
-            .with_context(|| format!("failed to publish matching bundle {}", output.display()));
-    }
-    let backup = output.with_file_name(format!(
-        ".{}.{}.old",
-        output.file_name().unwrap().to_string_lossy(),
-        std::process::id()
-    ));
-    if backup.exists() {
-        bail!("bundle backup path already exists: {}", backup.display());
-    }
-    fs::rename(output, &backup)?;
-    match fs::rename(temporary, output) {
-        Ok(()) => {
-            let _ = fs::remove_dir_all(backup);
-            Ok(())
-        }
-        Err(error) => {
-            let _ = fs::rename(&backup, output);
-            Err(error).context("failed to publish matching bundle")
-        }
-    }
+    fs::rename(temporary, output)
+        .with_context(|| format!("failed to publish matching bundle {}", output.display()))
 }
 
 fn absolute_path(path: &Path) -> Result<PathBuf> {
@@ -686,6 +774,10 @@ mod tests {
         let first = bundle_id(&manifest).unwrap();
         let second = bundle_id(&manifest.clone()).unwrap();
         assert_eq!(first, second);
+
+        let mut changed_compatibility = manifest;
+        changed_compatibility.cli_compatibility = "askman=0.3.4".to_string();
+        assert_ne!(first, bundle_id(&changed_compatibility).unwrap());
     }
 
     #[test]
@@ -693,5 +785,69 @@ mod tests {
         assert!(validate_relative_path("../matching.db").is_err());
         assert!(validate_relative_path("/tmp/matching.db").is_err());
         assert!(validate_relative_path("matching.db").is_ok());
+    }
+
+    #[test]
+    fn cli_compatibility_requires_an_askman_version_without_whitespace() {
+        assert!(validate_cli_compatibility("askman=0.3.3").is_ok());
+        for invalid in ["", "0.3.3", "askman=", "askman=0.3 3"] {
+            assert!(validate_cli_compatibility(invalid).is_err(), "{invalid:?}");
+        }
+    }
+
+    #[test]
+    fn existing_bundle_is_refused_without_changing_it() {
+        let directory = tempfile::tempdir().unwrap();
+        let output = directory.path().join("matching-bundle");
+        fs::create_dir(&output).unwrap();
+        let marker = output.join("marker");
+        fs::write(&marker, b"previous bundle").unwrap();
+
+        let error = build_matching_bundle(BundleBuildOptions {
+            manifest: "tests/fixtures/tldr-full-corpus/manifest.json".into(),
+            snapshot: "tests/fixtures/tldr-full-corpus".into(),
+            model_cache: directory.path().join("missing-model-cache"),
+            output: output.clone(),
+            cli_compatibility: "askman=0.3.3".to_string(),
+        })
+        .unwrap_err()
+        .to_string();
+
+        assert!(error.contains("refusing to replace existing matching bundle output"));
+        assert_eq!(fs::read(&marker).unwrap(), b"previous bundle");
+    }
+
+    #[test]
+    fn bundle_rejects_a_manifest_that_omits_a_snapshot_page() {
+        let directory = tempfile::tempdir().unwrap();
+        let source_manifest =
+            fs::read_to_string("tests/fixtures/tldr-full-corpus/manifest.json").unwrap();
+        let mut manifest: serde_json::Value = serde_json::from_str(&source_manifest).unwrap();
+        manifest["files"]
+            .as_array_mut()
+            .unwrap()
+            .retain(|path| path.as_str() != Some("pages/windows/printf.md"));
+        let manifest_path = directory.path().join("manifest.json");
+        fs::write(
+            &manifest_path,
+            serde_json::to_vec_pretty(&manifest).unwrap(),
+        )
+        .unwrap();
+
+        let error = build_matching_bundle(BundleBuildOptions {
+            manifest: manifest_path,
+            snapshot: "tests/fixtures/tldr-full-corpus".into(),
+            model_cache: directory.path().join("missing-model-cache"),
+            output: directory.path().join("matching-bundle"),
+            cli_compatibility: "askman=0.3.3".to_string(),
+        })
+        .unwrap_err()
+        .to_string();
+
+        assert!(
+            error.contains("missing from manifest: pages/windows/printf.md"),
+            "{error}"
+        );
+        assert!(!directory.path().join("matching-bundle").exists());
     }
 }
