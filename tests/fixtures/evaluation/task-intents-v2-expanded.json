@@ -1,0 +1,876 @@
+{
+  "intent_schema_version": 1,
+  "dataset_id": "askman-evaluation-v2",
+  "intent_freeze": {
+    "id": "evaluation-v2-intents-v2",
+    "authored_at": "2026-09-16",
+    "authored_before_retrieval_inspection": true,
+    "method": "Author five paraphrases per scenario family from public workflow intents before inspecting retrieval output; do not copy source answers or use private prompts."
+  },
+  "source_catalog": [
+    {
+      "id": "tldr-pages",
+      "url": "https://github.com/tldr-pages/tldr/tree/e1cb966e711d73c42d75e79834be7e4dc17264ef",
+      "license": "MIT",
+      "license_url": "https://github.com/tldr-pages/tldr/blob/e1cb966e711d73c42d75e79834be7e4dc17264ef/LICENSE.md",
+      "use": "Public workflow categories only; the intent record contains no copied page text, questions, labels, rationales, or example IDs."
+    }
+  ],
+  "source_categories": {
+    "file-inspection": "reading or combining files from a shell",
+    "file-copy": "copying files to another path",
+    "recursive-search": "searching a directory tree for files or text",
+    "unsupported-capability": "public shell capabilities absent from the pinned corpus",
+    "service-management": "inspecting or controlling Linux systemd services",
+    "network-inspection": "inspecting Linux interfaces and routing",
+    "clipboard-transfer": "moving shell data to or from the macOS clipboard",
+    "text-filtering": "transforming or ordering text lines",
+    "package-management": "managing Debian packages on Linux",
+    "desktop-launch": "opening macOS files, folders, and applications",
+    "text-to-speech": "speaking text or saving speech audio on macOS",
+    "directory-listing": "listing Windows files and directories"
+  },
+  "tasks": [
+    {
+      "id": "dev-v2r1-devcommon-file-content-01",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or combine text files from a shell"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-content-02",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or combine text files from a shell"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-content-03",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or combine text files from a shell"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-content-04",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or combine text files from a shell"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-content-05",
+      "split": "dev",
+      "family": "dev39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or combine text files from a shell"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-01",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy one file to another path"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-02",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy one file to another path"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-03",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy one file to another path"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-04",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy one file to another path"
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-05",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy one file to another path"
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-01",
+      "split": "dev",
+      "family": "dev39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-02",
+      "split": "dev",
+      "family": "dev39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-03",
+      "split": "dev",
+      "family": "dev39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-04",
+      "split": "dev",
+      "family": "dev39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devcommon-unsupported-05",
+      "split": "dev",
+      "family": "dev39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-01",
+      "split": "dev",
+      "family": "dev39-linux-services",
+      "source_category": "service-management",
+      "intent": "inspect or control systemd services on Linux"
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-02",
+      "split": "dev",
+      "family": "dev39-linux-services",
+      "source_category": "service-management",
+      "intent": "inspect or control systemd services on Linux"
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-03",
+      "split": "dev",
+      "family": "dev39-linux-services",
+      "source_category": "service-management",
+      "intent": "inspect or control systemd services on Linux"
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-04",
+      "split": "dev",
+      "family": "dev39-linux-services",
+      "source_category": "service-management",
+      "intent": "inspect or control systemd services on Linux"
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-05",
+      "split": "dev",
+      "family": "dev39-linux-services",
+      "source_category": "service-management",
+      "intent": "inspect or control systemd services on Linux"
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-01",
+      "split": "dev",
+      "family": "dev39-linux-network",
+      "source_category": "network-inspection",
+      "intent": "inspect Linux interfaces or routing"
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-02",
+      "split": "dev",
+      "family": "dev39-linux-network",
+      "source_category": "network-inspection",
+      "intent": "inspect Linux interfaces or routing"
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-03",
+      "split": "dev",
+      "family": "dev39-linux-network",
+      "source_category": "network-inspection",
+      "intent": "inspect Linux interfaces or routing"
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-04",
+      "split": "dev",
+      "family": "dev39-linux-network",
+      "source_category": "network-inspection",
+      "intent": "inspect Linux interfaces or routing"
+    },
+    {
+      "id": "dev-v2r1-devlinux-network-05",
+      "split": "dev",
+      "family": "dev39-linux-network",
+      "source_category": "network-inspection",
+      "intent": "inspect Linux interfaces or routing"
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-01",
+      "split": "dev",
+      "family": "dev39-linux-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-02",
+      "split": "dev",
+      "family": "dev39-linux-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-03",
+      "split": "dev",
+      "family": "dev39-linux-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-04",
+      "split": "dev",
+      "family": "dev39-linux-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devlinux-unsupported-05",
+      "split": "dev",
+      "family": "dev39-linux-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-01",
+      "split": "dev",
+      "family": "dev39-osx-clipboard",
+      "source_category": "clipboard-transfer",
+      "intent": "transfer shell data to or from the macOS clipboard"
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-02",
+      "split": "dev",
+      "family": "dev39-osx-clipboard",
+      "source_category": "clipboard-transfer",
+      "intent": "transfer shell data to or from the macOS clipboard"
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-03",
+      "split": "dev",
+      "family": "dev39-osx-clipboard",
+      "source_category": "clipboard-transfer",
+      "intent": "transfer shell data to or from the macOS clipboard"
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-04",
+      "split": "dev",
+      "family": "dev39-osx-clipboard",
+      "source_category": "clipboard-transfer",
+      "intent": "transfer shell data to or from the macOS clipboard"
+    },
+    {
+      "id": "dev-v2r1-devosx-clipboard-05",
+      "split": "dev",
+      "family": "dev39-osx-clipboard",
+      "source_category": "clipboard-transfer",
+      "intent": "transfer shell data to or from the macOS clipboard"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-01",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-02",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-03",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-04",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-a-05",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-01",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-02",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-03",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-04",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devosx-unsupported-b-05",
+      "split": "dev",
+      "family": "dev39-osx-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-01",
+      "split": "dev",
+      "family": "dev39-windows-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy files with the Windows command prompt"
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-02",
+      "split": "dev",
+      "family": "dev39-windows-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy files with the Windows command prompt"
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-03",
+      "split": "dev",
+      "family": "dev39-windows-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy files with the Windows command prompt"
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-04",
+      "split": "dev",
+      "family": "dev39-windows-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy files with the Windows command prompt"
+    },
+    {
+      "id": "dev-v2r1-devwindows-file-copy-05",
+      "split": "dev",
+      "family": "dev39-windows-file-copy",
+      "source_category": "file-copy",
+      "intent": "copy files with the Windows command prompt"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-01",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-02",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-03",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-04",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-a-05",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-01",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-02",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-03",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-04",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "dev-v2r1-devwindows-unsupported-b-05",
+      "split": "dev",
+      "family": "dev39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-01",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or concatenate files from a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-02",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or concatenate files from a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-03",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or concatenate files from a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-04",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or concatenate files from a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-05",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "source_category": "file-inspection",
+      "intent": "read or concatenate files from a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-01",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "source_category": "text-filtering",
+      "intent": "transform or order lines of text in a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-02",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "source_category": "text-filtering",
+      "intent": "transform or order lines of text in a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-03",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "source_category": "text-filtering",
+      "intent": "transform or order lines of text in a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-04",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "source_category": "text-filtering",
+      "intent": "transform or order lines of text in a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-05",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "source_category": "text-filtering",
+      "intent": "transform or order lines of text in a shell"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-01",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-02",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-03",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-04",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-05",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a common shell capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-01",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "source_category": "package-management",
+      "intent": "search, install, or update Debian packages on Linux"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-02",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "source_category": "package-management",
+      "intent": "search, install, or update Debian packages on Linux"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-03",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "source_category": "package-management",
+      "intent": "search, install, or update Debian packages on Linux"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-04",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "source_category": "package-management",
+      "intent": "search, install, or update Debian packages on Linux"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-05",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "source_category": "package-management",
+      "intent": "search, install, or update Debian packages on Linux"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-01",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-02",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-03",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-04",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-05",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-01",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-02",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-03",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-04",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-05",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Linux capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-01",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "source_category": "desktop-launch",
+      "intent": "open files, directories, or applications on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-02",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "source_category": "desktop-launch",
+      "intent": "open files, directories, or applications on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-03",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "source_category": "desktop-launch",
+      "intent": "open files, directories, or applications on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-04",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "source_category": "desktop-launch",
+      "intent": "open files, directories, or applications on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-05",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "source_category": "desktop-launch",
+      "intent": "open files, directories, or applications on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-01",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "source_category": "text-to-speech",
+      "intent": "speak text or save spoken audio on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-02",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "source_category": "text-to-speech",
+      "intent": "speak text or save spoken audio on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-03",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "source_category": "text-to-speech",
+      "intent": "speak text or save spoken audio on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-04",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "source_category": "text-to-speech",
+      "intent": "speak text or save spoken audio on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-05",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "source_category": "text-to-speech",
+      "intent": "speak text or save spoken audio on macOS"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-01",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-02",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-03",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-04",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-05",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "source_category": "unsupported-capability",
+      "intent": "request a macOS capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-01",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "source_category": "directory-listing",
+      "intent": "list files and directories on Windows"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-02",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "source_category": "directory-listing",
+      "intent": "list files and directories on Windows"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-03",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "source_category": "directory-listing",
+      "intent": "list files and directories on Windows"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-04",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "source_category": "directory-listing",
+      "intent": "list files and directories on Windows"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-05",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "source_category": "directory-listing",
+      "intent": "list files and directories on Windows"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-01",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-02",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-03",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-04",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-05",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "source_category": "unsupported-capability",
+      "intent": "request a Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-01",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-02",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-03",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-04",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-05",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "source_category": "unsupported-capability",
+      "intent": "request another Windows capability absent from the pinned corpus"
+    }
+  ]
+}
+

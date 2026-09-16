@@ -68,6 +68,8 @@ The frozen evaluation dataset and offline baseline runner are documented in
 [the evaluation record](docs/reproducibility/evaluation-baseline.md).
 The public release benchmark is documented in
 [the evaluation-v2 freeze record](docs/reproducibility/evaluation-v2.md).
+The expanded corpus-backed release evidence is documented in
+[the evaluation-v2 expanded record](docs/reproducibility/evaluation-v2-expanded.md).
 The dense retrieval candidate is documented in the
 [dense retrieval instructions](docs/reproducibility/dense-retrieval.md).
 The hybrid comparison, bounded development tuning, and frozen operating point

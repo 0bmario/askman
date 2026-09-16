@@ -1,0 +1,694 @@
+{
+  "dataset_id": "askman-evaluation-v2",
+  "schema_version": 2,
+  "scorer_version": "task-scorer-v1",
+  "split": "holdout",
+  "split_id": "scenario-family-split-v2",
+  "split_policy": "twelve distinct scenario families per split; five independently phrased tasks per family; no family crosses the dev/holdout split",
+  "task_count": 60,
+  "answerable_task_count": 30,
+  "unanswerable_task_count": 30,
+  "freeze_id": "evaluation-v2-release-benchmark-v2",
+  "provenance": {
+    "intent_record": "tests/fixtures/evaluation/task-intents-v2-expanded.json",
+    "intent_schema_version": 1,
+    "intent_freeze_id": "evaluation-v2-intents-v2",
+    "labels_adjudicated_after_intent_freeze": true
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "tasks": [
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-01",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "question": "display the contents of a text file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "rationale": "The pinned common cat page prints file contents."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-02",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "question": "concatenate two files into an output file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+      ],
+      "rationale": "cat's concatenation example covers joining files into an output."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-03",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "question": "append several files to an existing file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+      ],
+      "rationale": "The selected page documents appending several files."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-04",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "question": "write standard input into a file",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398"
+      ],
+      "rationale": "The stdin example writes shell input to a file."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-file-content-05",
+      "split": "holdout",
+      "family": "holdout39-common-file-content",
+      "question": "read a file without buffering it",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "rationale": "The unbuffered cat example matches the requested behavior."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-01",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "question": "replace every occurrence of one word in streamed text",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39"
+      ],
+      "rationale": "The pinned sed replacement example transforms every matching occurrence."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-02",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "question": "sort the lines of a file in reverse order",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+      ],
+      "rationale": "The selected sort page has a reverse-order example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-03",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "question": "print only the first line from command output",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc"
+      ],
+      "rationale": "sed's first-line example prints only the requested output line."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-04",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "question": "sort a file while keeping unique lines",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24"
+      ],
+      "rationale": "The unique sort example removes duplicate lines while ordering them."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-text-filter-05",
+      "split": "holdout",
+      "family": "holdout39-common-text-filter",
+      "question": "apply a sed script to command output",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730"
+      ],
+      "rationale": "The sed script-file example applies a transformation to command output."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-01",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "question": "compare two files line by line",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No selected common page documents a line-by-line diff workflow."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-02",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "question": "watch a directory and run a command on changes",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common selection has no filesystem-watch example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-03",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "question": "extract a gzip archive",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The expanded corpus contains no gzip extraction page."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-04",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "question": "calculate a file checksum",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No selected common example calculates checksums."
+    },
+    {
+      "id": "holdout-v2r1-holdoutcommon-unsupported-05",
+      "split": "holdout",
+      "family": "holdout39-common-unsupported",
+      "question": "resolve a DNS name from the shell",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The fixture has no DNS lookup workflow."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-01",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "question": "refresh the Debian package index",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "The Linux apt page documents refreshing package metadata."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-02",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "question": "search for a package by description on Linux",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904"
+      ],
+      "rationale": "apt's search example covers package-name and description search."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-03",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "question": "install a package with apt",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16"
+      ],
+      "rationale": "The selected page provides the sudo apt install workflow."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-04",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "question": "remove a Debian package",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b"
+      ],
+      "rationale": "The apt remove example covers removing a Debian package."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-packages-05",
+      "split": "holdout",
+      "family": "holdout39-linux-packages",
+      "question": "list installed apt packages",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376"
+      ],
+      "rationale": "The installed-package example matches listing packages already present."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-01",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "question": "list all Linux processes",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux selection has no process-listing page."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-02",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "question": "change permissions on a Linux directory",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No selected Linux page changes file or directory permissions."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-03",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "question": "show the size of every subdirectory",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The corpus has no directory-size inspection example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-04",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "question": "capture packets on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The expanded fixture includes no packet-capture workflow."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-a-05",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-a",
+      "question": "configure a Linux firewall",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No selected Linux page configures a firewall."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-01",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "question": "create a Linux user account",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The selected Linux pages contain no user-management example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-02",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "question": "compress a directory on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No pinned page provides a Linux archive-compression workflow."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-03",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "question": "inspect open files on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The fixture has no open-file inspection page."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-04",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "question": "schedule a cron job",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The expanded corpus contains no cron scheduling example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutlinux-unsupported-b-05",
+      "split": "holdout",
+      "family": "holdout39-linux-unsupported-b",
+      "question": "manage a Docker container on Linux",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No selected page manages Docker containers."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-01",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "question": "open a file in its default Mac application",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "The osx open page covers opening a file with its associated application."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-02",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "question": "launch a graphical application on macOS",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-f02a9932c497bb41ff8bbddf727ddfc5d5407ddfcb187a58ec6fc43a068b6021",
+        "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0"
+      ],
+      "rationale": "The application and bundle examples both launch graphical apps."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-03",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "question": "open the current folder in Finder",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-a4a5b10d133dec76d003217eb9b481d3c931e2b205118e567edb8938ca059f55"
+      ],
+      "rationale": "open's current-directory example launches Finder for the folder."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-04",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "question": "reveal a file in Finder",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "rationale": "The reveal example directly matches showing a file in Finder."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-navigation-05",
+      "split": "holdout",
+      "family": "holdout39-osx-navigation",
+      "question": "open a new app instance by bundle identifier",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-fe9c05ef58c170bfcfd1374cae3526ebdb01ca4808b9729134ebace26c357ba2"
+      ],
+      "rationale": "The final open example starts a new bundle-identified app instance."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-01",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "question": "make the Mac speak a phrase",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+      ],
+      "rationale": "The first say example speaks a supplied phrase."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-02",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "question": "read a text file aloud on macOS",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-37cdfdfe2d6c22084e82141bb12c6bbf98f22ec017b221c38c1939fa7bd5b201"
+      ],
+      "rationale": "say's input-file example reads a text file aloud."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-03",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "question": "use a different voice for speech synthesis",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d"
+      ],
+      "rationale": "The custom voice example covers selecting a voice and rate."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-04",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "question": "list the voices available to the say command",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-1a58727cf64aba0eb09878322a5478ad30697c7db71e83d6e9da9857a1bc921a"
+      ],
+      "rationale": "The voice-listing example enumerates available speech voices."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-speech-05",
+      "split": "holdout",
+      "family": "holdout39-osx-speech",
+      "question": "save spoken text as an AIFF file",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "rationale": "The output-file example saves synthesized speech as audio."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-01",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "question": "check which applications start at login on macOS",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The selected osx pages have no login-item inspection workflow."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-02",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "question": "repair a Mac disk from the command line",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No pinned macOS page repairs disks."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-03",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "question": "read EXIF metadata from a photo on macOS",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The fixture contains no photo-metadata inspection example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-04",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "question": "change the Mac system timezone from the shell",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The expanded selection has no timezone-management page."
+    },
+    {
+      "id": "holdout-v2r1-holdoutosx-unsupported-05",
+      "split": "holdout",
+      "family": "holdout39-osx-unsupported",
+      "question": "send an SMS from a macOS terminal",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No selected page sends SMS messages."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-01",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "question": "list the files in the current Windows directory",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+        "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+      ],
+      "rationale": "Both Windows listing pages cover the current directory."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-02",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "question": "show hidden items in a Windows folder",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3",
+        "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6"
+      ],
+      "rationale": "dir /a and Get-ChildItem -Hidden provide hidden-item support."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-03",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "question": "list only files with PowerShell",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d16a1c35cef57806a7c7ac819ae912941f17fd3a39cae869a700c8557974d6b2"
+      ],
+      "rationale": "Get-ChildItem -File directly lists only files."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-04",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "question": "display a bare Windows directory listing",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6650aada822cf387a5574f42e02bc3b42ab84e2c4063c7a0c6366292bbb83d4b"
+      ],
+      "rationale": "dir /b supplies a bare directory listing."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-listing-05",
+      "split": "holdout",
+      "family": "holdout39-windows-listing",
+      "question": "show folders under another Windows path",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-dd279d068c60ce4a0d37f9fc8e088ad12a84f4846efffc4142794bd184a3bdb1",
+        "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6"
+      ],
+      "rationale": "The path examples in dir and Get-ChildItem cover another folder."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-01",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "question": "list Windows services",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The selected Windows pages do not list services."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-02",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "question": "find a file by name with Windows tools",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No pinned page searches for files by name."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-03",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "question": "set a Windows scheduled task",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The fixture has no scheduled-task workflow."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-04",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "question": "display the Windows IP configuration",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No selected Windows page reports IP configuration."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-a-05",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-a",
+      "question": "view Windows event logs",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The expanded corpus contains no event-log page."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-01",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "question": "delete a Windows directory recursively",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The selected Windows pages contain no recursive-directory deletion workflow."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-02",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "question": "configure a Windows firewall rule",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No pinned Windows page configures firewall rules."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-03",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "question": "rename many files with PowerShell",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The corpus has no batch file-renaming example."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-04",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "question": "get the Windows computer serial number",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The expanded fixture lacks computer-identity inspection."
+    },
+    {
+      "id": "holdout-v2r1-holdoutwindows-unsupported-b-05",
+      "split": "holdout",
+      "family": "holdout39-windows-unsupported-b",
+      "question": "install a Windows package from the command line",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "No selected page installs Windows packages."
+    }
+  ]
+}
+

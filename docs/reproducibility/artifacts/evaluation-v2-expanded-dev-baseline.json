@@ -1,0 +1,51 @@
+{
+  "report_kind": "evaluation-v2-expanded-dev-baseline",
+  "benchmark_id": "askman-evaluation-v2",
+  "freeze_id": "evaluation-v2-release-benchmark-v2",
+  "freeze_manifest": {
+    "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
+    "sha256": "108c45e591c3698c44dc8de5852ccaaa771bfa7c0b4d70d7f92c7ae926a5fd0e"
+  },
+  "recorded_at": "2026-09-16T18:50:38Z",
+  "split": "dev",
+  "split_id": "scenario-family-split-v2",
+  "retriever": "keyword",
+  "retriever_version": "keyword-fts5-v1",
+  "dataset_sha256": "4a4fc03dae5d244dbd9dd14214df418cfb7701d2efdfeb0e50a50b93231ade6b",
+  "scorer": {
+    "version": "task-scorer-v1",
+    "implementation": "scripts/evaluate_retrieval.py",
+    "sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "artifact_build": {
+    "pages": 24,
+    "examples": 142,
+    "command": "cargo run --locked --offline --features dev --bin tldr_subset -- build --manifest tests/fixtures/tldr-evaluation-v2/manifest.json --snapshot tests/fixtures/tldr-evaluation-v2 --output /tmp/askman-evaluation-v2-expanded.db"
+  },
+  "holdout_access": {
+    "authorized": true,
+    "recorded": false,
+    "utc": null
+  },
+  "summary": {
+    "tasks": 60,
+    "answerable_tasks": 30,
+    "unanswerable_tasks": 30,
+    "candidate_recall": {"count": 2, "denominator": 30},
+    "success_at_1": {"count": 2, "denominator": 30},
+    "success_at_3": {"count": 2, "denominator": 30},
+    "coverage": {"count": 2, "denominator": 60},
+    "incorrect_answered_tasks": {"count": 0, "denominator": 2},
+    "false_answers_on_unanswerable": {"count": 0, "denominator": 30}
+  },
+  "note": "Keyword baseline is a protocol smoke on the expanded fixture; it is not a production-quality retrieval claim."
+}

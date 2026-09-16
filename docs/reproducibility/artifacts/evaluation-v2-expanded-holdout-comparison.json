@@ -1,0 +1,55 @@
+{
+  "report_kind": "evaluation-v2-expanded-authorized-holdout-comparison",
+  "benchmark_id": "askman-evaluation-v2",
+  "freeze_id": "evaluation-v2-release-benchmark-v2",
+  "freeze_manifest": {
+    "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
+    "sha256": "108c45e591c3698c44dc8de5852ccaaa771bfa7c0b4d70d7f92c7ae926a5fd0e"
+  },
+  "recorded_at": "2026-09-16T18:50:38Z",
+  "split": "holdout",
+  "split_id": "scenario-family-split-v2",
+  "retriever": "keyword",
+  "retriever_version": "keyword-fts5-v1",
+  "dataset_sha256": "9990a0af84df731a727d08751210ec46be0b9546d0b44444b701874dd801623c",
+  "scorer": {
+    "version": "task-scorer-v1",
+    "implementation": "scripts/evaluate_retrieval.py",
+    "sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "holdout_access": {
+    "authorized": true,
+    "recorded": true,
+    "utc": "2026-09-16T18:50:38Z"
+  },
+  "comparison": {
+    "development_report": "docs/reproducibility/artifacts/evaluation-v2-expanded-dev-baseline.json",
+    "same_retriever_and_scorer": true,
+    "metrics": {
+      "success_at_3": {"dev": {"count": 2, "denominator": 30}, "holdout": {"count": 2, "denominator": 30}},
+      "coverage": {"dev": {"count": 2, "denominator": 60}, "holdout": {"count": 2, "denominator": 60}},
+      "false_answers_on_unanswerable": {"dev": {"count": 0, "denominator": 30}, "holdout": {"count": 0, "denominator": 30}}
+    }
+  },
+  "summary": {
+    "tasks": 60,
+    "answerable_tasks": 30,
+    "unanswerable_tasks": 30,
+    "candidate_recall": {"count": 2, "denominator": 30},
+    "success_at_1": {"count": 2, "denominator": 30},
+    "success_at_3": {"count": 2, "denominator": 30},
+    "coverage": {"count": 2, "denominator": 60},
+    "incorrect_answered_tasks": {"count": 0, "denominator": 2},
+    "false_answers_on_unanswerable": {"count": 0, "denominator": 30}
+  },
+  "note": "Authorized once after freeze; keyword comparison is release evidence for the pinned fixture, not a production-quality retrieval claim."
+}

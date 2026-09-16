@@ -143,8 +143,14 @@ def validate_manifest(manifest_path: Path) -> None:
     corpus = manifest.get("corpus")
     if not isinstance(corpus, dict):
         raise ValueError("freeze manifest is missing corpus identity")
-    source_manifest = RUNNER.load_json(EXPECTED_CORPUS_MANIFEST)
-    actual_manifest_digest = RUNNER.sha256_file(EXPECTED_CORPUS_MANIFEST)
+    corpus_manifest_value = manifest.get("corpus_manifest")
+    corpus_manifest_path = (
+        resolve_path(corpus_manifest_value)
+        if corpus_manifest_value is not None
+        else EXPECTED_CORPUS_MANIFEST
+    )
+    source_manifest = RUNNER.load_json(corpus_manifest_path)
+    actual_manifest_digest = RUNNER.sha256_file(corpus_manifest_path)
     source = source_manifest.get("source", {})
     expected_source = {
         "source_revision": source.get("revision"),

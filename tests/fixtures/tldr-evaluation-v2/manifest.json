@@ -1,0 +1,49 @@
+{
+  "schema_version": 3,
+  "parser_version": "tldr-subset-v3",
+  "source": {
+    "name": "tldr-pages",
+    "revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "digest_algorithm": "sha256",
+    "digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "url": "https://github.com/tldr-pages/tldr",
+    "attribution": "Content from the tldr-pages project.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/tldr-pages/tldr/blob/e1cb966e711d73c42d75e79834be7e4dc17264ef/LICENSE.md"
+    }
+  },
+  "language": "en",
+  "pages_root": "pages",
+  "files": [
+    "pages/common/cat.md",
+    "pages/common/cp.md",
+    "pages/common/find.md",
+    "pages/common/grep.md",
+    "pages/common/sed.md",
+    "pages/common/sort.md",
+    "pages/linux/apt.md",
+    "pages/linux/df.md",
+    "pages/linux/free.md",
+    "pages/linux/ip.md",
+    "pages/linux/journalctl.md",
+    "pages/linux/systemctl.md",
+    "pages/osx/mdfind.md",
+    "pages/osx/open.md",
+    "pages/osx/pbcopy.md",
+    "pages/osx/pbpaste.md",
+    "pages/osx/say.md",
+    "pages/osx/screencapture.md",
+    "pages/windows/cat.md",
+    "pages/windows/copy.md",
+    "pages/windows/dir.md",
+    "pages/windows/findstr.md",
+    "pages/windows/get-childitem.md",
+    "pages/windows/move.md"
+  ],
+  "lexical_index": {
+    "tokenizer": "unicode61",
+    "fields": ["page.command", "page.description", "example.description", "example.command"],
+    "query_normalization": "split non-alphanumeric except underscore; lowercase ASCII; quote and AND-join unique sorted tokens"
+  }
+}
