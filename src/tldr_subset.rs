@@ -82,7 +82,7 @@ pub struct LexicalIndexRecipe {
     pub query_normalization: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct SourceMetadata {
     pub name: String,
     pub revision: String,
@@ -93,7 +93,7 @@ pub struct SourceMetadata {
     pub license: LicenseMetadata,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct LicenseMetadata {
     pub name: String,
     pub url: String,

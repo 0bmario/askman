@@ -1,3 +1,5 @@
+#[cfg(feature = "dev")]
+pub mod bundle;
 pub mod cli;
 pub mod db;
 #[cfg(feature = "dev")]

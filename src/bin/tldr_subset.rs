@@ -1,4 +1,5 @@
 use anyhow::Result;
+use askman::bundle::{BundleBuildOptions, build_matching_bundle, validate_matching_bundle};
 use askman::dense::{
     DenseBuildOptions, DenseRecipe, DenseServerOptions, build_dense_index, run_query_server,
 };
@@ -18,6 +19,33 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Command {
+    /// Build and validate one self-contained offline matching bundle.
+    BundleBuild {
+        /// JSON manifest declaring the source metadata and selected files.
+        #[arg(long)]
+        manifest: PathBuf,
+        /// Root of the provisioned local tldr snapshot.
+        #[arg(long)]
+        snapshot: PathBuf,
+        /// Offline fastembed cache containing the pinned model snapshot.
+        #[arg(long)]
+        model_cache: PathBuf,
+        /// New bundle directory to create transactionally; existing paths are refused.
+        #[arg(long)]
+        output: PathBuf,
+        /// CLI compatibility declaration in the form `askman=<version>` with no whitespace.
+        #[arg(
+            long,
+            default_value = concat!("askman=", env!("CARGO_PKG_VERSION"))
+        )]
+        cli_compatibility: String,
+    },
+    /// Validate a previously built matching bundle without network access.
+    BundleValidate {
+        /// Bundle directory produced by `bundle-build`.
+        #[arg(long)]
+        bundle: PathBuf,
+    },
     /// Build a replacement SQLite artifact from a provisioned local snapshot.
     Build {
         /// JSON manifest declaring the source metadata and selected files.
@@ -88,6 +116,32 @@ enum Command {
 
 fn main() -> Result<()> {
     match Args::parse().command {
+        Command::BundleBuild {
+            manifest,
+            snapshot,
+            model_cache,
+            output,
+            cli_compatibility,
+        } => {
+            let report = build_matching_bundle(BundleBuildOptions {
+                manifest,
+                snapshot,
+                model_cache,
+                output,
+                cli_compatibility,
+            })?;
+            println!(
+                "built matching bundle {} with {} pages and {} examples into {}",
+                report.bundle_id,
+                report.page_count,
+                report.example_count,
+                report.output.display()
+            );
+        }
+        Command::BundleValidate { bundle } => {
+            let manifest = validate_matching_bundle(&bundle)?;
+            println!("valid matching bundle {}", manifest.bundle_id);
+        }
         Command::Build {
             manifest,
             snapshot,
