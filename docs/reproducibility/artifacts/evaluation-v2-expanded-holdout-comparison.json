@@ -4,14 +4,14 @@
   "freeze_id": "evaluation-v2-release-benchmark-v3",
   "freeze_manifest": {
     "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
-    "sha256": "638877da6555224cc602817ce3cbb4f0769919f779f3d2a1ae17cda9fcbede15"
+    "sha256": "49f94adeec52a70e02a9130ba004760492187969dc963e11c2eac2b1c6376a2c"
   },
-  "recorded_at": "2026-09-16T19:43:53Z",
+  "recorded_at": "2026-09-16T20:11:54Z",
   "split": "holdout",
   "split_id": "scenario-family-split-v2",
   "retriever": "keyword",
   "retriever_version": "keyword-fts5-v1",
-  "dataset_sha256": "bbcb51f825c17fa8b9cfdcc0ce3b7e9b873e01a22f82414d3208c373d0803865",
+  "dataset_sha256": "b6cc7ddb34c03e7da460f351bf602a21c95af04a5a352d63da25d857841d5ce7",
   "scorer": {
     "version": "task-scorer-v1",
     "implementation": "scripts/evaluate_retrieval.py",
@@ -29,7 +29,7 @@
   "holdout_access": {
     "authorized": true,
     "recorded": true,
-    "utc": "2026-09-16T19:43:53.087534+00:00"
+    "utc": "2026-09-16T20:11:54.252378+00:00"
   },
   "comparison": {
     "development_report": "docs/reproducibility/artifacts/evaluation-v2-expanded-dev-baseline.json",
@@ -96,5 +96,10 @@
     "tasks": 60,
     "unanswerable_tasks": 30
   },
-  "note": "Authorized once after freeze; keyword comparison is release evidence for the pinned fixture, not a production-quality retrieval claim."
+  "note": "Authorized once after freeze; keyword comparison is release evidence for the pinned fixture, not a production-quality retrieval claim.",
+  "support_catalog": {
+    "path": "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json",
+    "sha256": "71f47833109c5066ca0d54dc67bb69f625cebc88dd60f8dd71a6c2c74555b53c",
+    "catalog_id": "evaluation-v2-expanded-support-catalog-v1"
+  }
 }

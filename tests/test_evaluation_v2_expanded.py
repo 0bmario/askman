@@ -12,6 +12,7 @@ DEV_PATH = ROOT / "tests/fixtures/evaluation/frozen-dev-v2-expanded.json"
 HOLDOUT_PATH = ROOT / "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json"
 CORPUS_PATH = ROOT / "tests/fixtures/tldr-evaluation-v2/manifest.json"
 INTENTS_PATH = ROOT / "tests/fixtures/evaluation/task-intents-v2-expanded.json"
+CATALOG_PATH = ROOT / "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json"
 REPORT_PATHS = {
     "dev": ROOT / "docs/reproducibility/artifacts/evaluation-v2-expanded-dev-baseline.json",
     "holdout": ROOT / "docs/reproducibility/artifacts/evaluation-v2-expanded-holdout-comparison.json",
@@ -42,6 +43,7 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         self.holdout = json.loads(HOLDOUT_PATH.read_text(encoding="utf-8"))
         self.corpus = json.loads(CORPUS_PATH.read_text(encoding="utf-8"))
         self.intents = json.loads(INTENTS_PATH.read_text(encoding="utf-8"))
+        self.catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
 
     def test_versioned_expanded_freeze_validates(self):
         VALIDATOR.validate_manifest(MANIFEST_PATH)
@@ -69,11 +71,25 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
 
     def test_expanded_pair_preserves_balance_platforms_and_multi_support(self):
         RUNNER.validate_dataset_pair(self.development, self.holdout)
+        VALIDATOR.validate_split_question_disjointness(
+            self.development, self.holdout
+        )
         VALIDATOR.validate_family_intents(
             self.intents, self.development, self.holdout
         )
+        VALIDATOR.validate_support_catalog(
+            self.catalog,
+            self.manifest,
+            self.corpus,
+            self.development,
+            self.holdout,
+        )
         VALIDATOR.validate_support_audit(
-            self.manifest["support_audit"], self.development, self.holdout
+            self.manifest["support_audit"],
+            self.development,
+            self.holdout,
+            self.intents,
+            self.catalog,
         )
         for dataset in (self.development, self.holdout):
             self.assertEqual(len(dataset["tasks"]), 60)
@@ -111,12 +127,48 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
 
     def test_support_audit_rejects_unrelated_example(self):
         mutated = copy.deepcopy(self.development)
+        mutated_audit = copy.deepcopy(self.manifest["support_audit"])
+        task_id = mutated["tasks"][0]["id"]
         mutated["tasks"][0]["acceptable_example_ids"] = [
             "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
         ]
-        with self.assertRaisesRegex(ValueError, "acceptable support mismatch"):
+        mutated_audit["tasks"][task_id]["acceptable_example_ids"] = mutated["tasks"][0][
+            "acceptable_example_ids"
+        ]
+        with self.assertRaisesRegex(ValueError, "support catalog behavior"):
             VALIDATOR.validate_support_audit(
-                self.manifest["support_audit"], mutated, self.holdout
+                mutated_audit,
+                mutated,
+                self.holdout,
+                self.intents,
+                self.catalog,
+            )
+
+    def test_support_catalog_rejects_unlinked_source_section(self):
+        mutated = copy.deepcopy(self.catalog)
+        example_id = (
+            "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        )
+        mutated["entries"][example_id]["section"] = (
+            "Concatenate several files into an output file:"
+        )
+        with self.assertRaisesRegex(ValueError, "source section"):
+            VALIDATOR.validate_support_catalog(
+                mutated,
+                self.manifest,
+                self.corpus,
+                self.development,
+                self.holdout,
+            )
+
+    def test_split_question_validation_rejects_normalized_leakage(self):
+        mutated = copy.deepcopy(self.holdout)
+        mutated["tasks"][0]["question"] = (
+            "  Configure a Linux firewall rule with nftables!!! "
+        )
+        with self.assertRaisesRegex(ValueError, "questions overlap after normalization"):
+            VALIDATOR.validate_split_question_disjointness(
+                self.development, mutated
             )
 
     def test_holdout_append_task_uses_append_example(self):
@@ -176,9 +228,11 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         for split, report_path in REPORT_PATHS.items():
             report = json.loads(report_path.read_text(encoding="utf-8"))
             dataset_path = DEV_PATH if split == "dev" else HOLDOUT_PATH
+            self.assertEqual(report["freeze_id"], self.manifest["freeze_id"])
             self.assertEqual(
                 report["dataset_sha256"], VALIDATOR.RUNNER.sha256_file(dataset_path)
             )
+            self.assertEqual(report["support_catalog"], self.manifest["support_catalog"])
             self.assertEqual(report["corpus"], self.manifest["corpus"])
             self.assertEqual(report["scorer"]["sha256"], self.manifest["scorer"]["sha256"])
             self.assertEqual(

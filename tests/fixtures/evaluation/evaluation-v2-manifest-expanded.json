@@ -41,7 +41,7 @@
     },
     "holdout": {
       "path": "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json",
-      "sha256": "bbcb51f825c17fa8b9cfdcc0ce3b7e9b873e01a22f82414d3208c373d0803865",
+      "sha256": "b6cc7ddb34c03e7da460f351bf602a21c95af04a5a352d63da25d857841d5ce7",
       "access": "requires --split holdout --allow-holdout; access is recorded in the evaluator report"
     }
   },
@@ -1433,9 +1433,15 @@
       "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
       "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json",
       "tests/fixtures/evaluation/task-intents-v2-expanded.json",
+      "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json",
       "tests/fixtures/tldr-evaluation-v2/manifest.json"
     ],
     "reviewed_at": "2026-09-16",
     "identity_recorded": false
+  },
+  "support_catalog": {
+    "path": "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json",
+    "sha256": "71f47833109c5066ca0d54dc67bb69f625cebc88dd60f8dd71a6c2c74555b53c",
+    "catalog_id": "evaluation-v2-expanded-support-catalog-v1"
   }
 }

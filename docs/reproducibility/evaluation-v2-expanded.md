@@ -1,9 +1,9 @@
 # Evaluation-v2 expanded release evidence
 
 This is the corrected versioned follow-up to the preliminary `evaluation-v2`
-freeze from issue #30. The original `evaluation-v2-manifest.json`, datasets,
-provenance, and scorer remain unchanged. It supersedes the attempted expanded
-freeze `evaluation-v2-release-benchmark-v2`.
+freeze from issue #30. The original evaluation-v1 and evaluation-v2 fixture,
+provenance, manifest, and scorer artifacts remain unchanged. It supersedes the
+attempted expanded freeze `evaluation-v2-release-benchmark-v2`.
 
 ## Frozen inputs
 
@@ -20,11 +20,13 @@ freeze `evaluation-v2-release-benchmark-v2`.
 - Corpus manifest digest:
   `b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8`
 - Expanded freeze manifest digest:
-  `638877da6555224cc602817ce3cbb4f0769919f779f3d2a1ae17cda9fcbede15`
+  `49f94adeec52a70e02a9130ba004760492187969dc963e11c2eac2b1c6376a2c`
 - Dev dataset digest:
   `216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d`
 - Holdout dataset digest:
-  `bbcb51f825c17fa8b9cfdcc0ce3b7e9b873e01a22f82414d3208c373d0803865`
+  `b6cc7ddb34c03e7da460f351bf602a21c95af04a5a352d63da25d857841d5ce7`
+- Support catalog digest:
+  `71f47833109c5066ca0d54dc67bb69f625cebc88dd60f8dd71a6c2c74555b53c`
 - Intent provenance digest:
   `6f2b5c7a6b3a555aff538d6d85348d612828ff28b48db44c8a3f7610f40c2bfb`
 - Scorer digest:
@@ -37,6 +39,7 @@ Files:
 - Dev: `tests/fixtures/evaluation/frozen-dev-v2-expanded.json`
 - Holdout: `tests/fixtures/evaluation/frozen-holdout-v2-expanded.json`
 - Authoring provenance: `tests/fixtures/evaluation/task-intents-v2-expanded.json`
+- Support catalog: `tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json`
 - Dev results: `docs/reproducibility/artifacts/evaluation-v2-expanded-dev-baseline.json`
 - Holdout results: `docs/reproducibility/artifacts/evaluation-v2-expanded-holdout-comparison.json`
 
@@ -46,7 +49,14 @@ rationales. Twenty-four evidence-bearing hand-check records cover every
 family, platform, split, and answerability label; their provenance records the
 independent review method without fabricating a reviewer identity. Validation
 rejects mixed-family intents, unrelated support IDs, stale freeze identities,
-and inconsistent hand-check evidence.
+inconsistent hand-check evidence, and normalized prompt leakage between splits.
+
+The separately pinned support catalog maps each accepted example ID to its
+source page, source line/position, exact source section, and hand-audited
+canonical behavior. Its method is an independent page/section review; the
+validator checks deterministic ID linkage, exact catalog linkage, and behavior
+labels. It does not infer semantic equivalence or claim automatic semantic
+truth beyond the catalog.
 
 The matching bundle is MIT-licensed tldr-pages content. Questions were
 authored before retrieval inspection. Labels and rationales were then
