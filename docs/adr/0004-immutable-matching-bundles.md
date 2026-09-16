@@ -1,6 +1,7 @@
 # Immutable matching bundles
 
-Published matching bundle versions are immutable. Every update uses a new bundle ID; an existing bundle ID is never overwritten.
+Published matching bundle versions are immutable. Every update uses a new bundle
+ID; an existing bundle ID is never overwritten.
 
 Each Askman release will identify one complete, cross-platform matching bundle
 containing `common`, `linux`, `osx`, and `windows` pages; target-platform
