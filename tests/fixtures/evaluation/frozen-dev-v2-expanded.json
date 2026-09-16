@@ -12,7 +12,7 @@
   "provenance": {
     "intent_record": "tests/fixtures/evaluation/task-intents-v2-expanded.json",
     "intent_schema_version": 1,
-    "intent_freeze_id": "evaluation-v2-intents-v2",
+    "intent_freeze_id": "evaluation-v2-intents-v3",
     "labels_adjudicated_after_intent_freeze": true
   },
   "corpus": {
@@ -29,25 +29,25 @@
       "id": "dev-v2r1-devcommon-file-content-01",
       "split": "dev",
       "family": "dev39-common-file-content",
-      "question": "show the text inside a file",
+      "question": "show the contents of a file in a shell",
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
         "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
       ],
-      "rationale": "The pinned common cat page prints a file to standard output."
+      "rationale": "The pinned cat example prints a file's contents to stdout."
     },
     {
       "id": "dev-v2r1-devcommon-file-content-02",
       "split": "dev",
       "family": "dev39-common-file-content",
-      "question": "print a file's contents in the terminal",
+      "question": "print a file's contents to the terminal",
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
         "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
       ],
-      "rationale": "The selected cat example directly displays a file's contents."
+      "rationale": "The pinned cat example prints a file's contents to stdout."
     },
     {
       "id": "dev-v2r1-devcommon-file-content-03",
@@ -59,637 +59,646 @@
       "acceptable_example_ids": [
         "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
       ],
-      "rationale": "cat's first example supplies the requested file-reading behavior."
+      "rationale": "The pinned cat example prints a file's contents to stdout."
     },
     {
       "id": "dev-v2r1-devcommon-file-content-04",
       "split": "dev",
       "family": "dev39-common-file-content",
-      "question": "display what is in this text file",
+      "question": "display a text file in the terminal",
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
         "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
       ],
-      "rationale": "The corpus includes a common cat workflow for terminal file output."
+      "rationale": "The pinned cat example prints a file's contents to stdout."
     },
     {
       "id": "dev-v2r1-devcommon-file-content-05",
       "split": "dev",
       "family": "dev39-common-file-content",
-      "question": "send a file's contents to stdout",
+      "question": "write a file's contents to stdout",
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
         "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
       ],
-      "rationale": "The labeled cat example covers writing file contents to stdout."
+      "rationale": "The pinned cat example prints a file's contents to stdout."
     },
     {
       "id": "dev-v2r1-devcommon-file-copy-01",
       "split": "dev",
       "family": "dev39-common-file-copy",
-      "question": "copy one file to a new path",
+      "question": "copy one file to another path",
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
         "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
         "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
       ],
-      "rationale": "The pinned cp page has direct file-to-file and file-to-directory examples."
+      "rationale": "Both pinned cp examples copy one file to a destination."
     },
     {
       "id": "dev-v2r1-devcommon-file-copy-02",
       "split": "dev",
       "family": "dev39-common-file-copy",
-      "question": "duplicate a file somewhere else",
+      "question": "duplicate a file at a destination path",
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
         "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
         "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
       ],
-      "rationale": "The two labeled cp examples cover copying a file to a path or directory."
+      "rationale": "Both pinned cp examples copy one file to a destination."
     },
     {
       "id": "dev-v2r1-devcommon-file-copy-03",
       "split": "dev",
       "family": "dev39-common-file-copy",
-      "question": "make a copy of a source file at a target path",
-      "platform": "common",
-      "answerable": true,
-      "acceptable_example_ids": [
-        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b"
-      ],
-      "rationale": "cp's direct file-to-file example provides the requested support."
-    },
-    {
-      "id": "dev-v2r1-devcommon-file-copy-04",
-      "split": "dev",
-      "family": "dev39-common-file-copy",
-      "question": "copy a file into another directory",
-      "platform": "common",
-      "answerable": true,
-      "acceptable_example_ids": [
-        "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
-      ],
-      "rationale": "cp's file-into-directory example matches the full behavior."
-    },
-    {
-      "id": "dev-v2r1-devcommon-file-copy-05",
-      "split": "dev",
-      "family": "dev39-common-file-copy",
-      "question": "put a duplicate of this file in a destination",
+      "question": "make a second copy of one file",
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
         "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
         "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
       ],
-      "rationale": "Either labeled cp example performs the requested single-file copy."
+      "rationale": "Both pinned cp examples copy one file to a destination."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-04",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "question": "copy a single file into another directory",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+      ],
+      "rationale": "Both pinned cp examples copy one file to a destination."
+    },
+    {
+      "id": "dev-v2r1-devcommon-file-copy-05",
+      "split": "dev",
+      "family": "dev39-common-file-copy",
+      "question": "put one file in a destination directory",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+      ],
+      "rationale": "Both pinned cp examples copy one file to a destination."
     },
     {
       "id": "dev-v2r1-devcommon-unsupported-01",
       "split": "dev",
-      "family": "dev39-common-unsupported",
-      "question": "encrypt a file with a common command",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "create a password-protected archive with a common shell command",
       "platform": "common",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No selected common page provides a complete file-encryption workflow."
+      "rationale": "The pinned common bundle has no password-protected archive example."
     },
     {
       "id": "dev-v2r1-devcommon-unsupported-02",
       "split": "dev",
-      "family": "dev39-common-unsupported",
-      "question": "monitor a directory for changes continuously",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "make an encrypted archive from the shell",
       "platform": "common",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The pinned common selection has no directory-watch command."
+      "rationale": "The pinned common bundle has no password-protected archive example."
     },
     {
       "id": "dev-v2r1-devcommon-unsupported-03",
       "split": "dev",
-      "family": "dev39-common-unsupported",
-      "question": "create a password-protected archive",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "compress files into a password-protected archive",
       "platform": "common",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The corpus does not include an archive-encryption example."
+      "rationale": "The pinned common bundle has no password-protected archive example."
     },
     {
       "id": "dev-v2r1-devcommon-unsupported-04",
       "split": "dev",
-      "family": "dev39-common-unsupported",
-      "question": "show the differences between two files",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "write a password-encrypted archive at the terminal",
       "platform": "common",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No selected page documents comparing two files with a diff workflow."
+      "rationale": "The pinned common bundle has no password-protected archive example."
     },
     {
       "id": "dev-v2r1-devcommon-unsupported-05",
       "split": "dev",
-      "family": "dev39-common-unsupported",
-      "question": "download a file over HTTP from the shell",
+      "family": "dev39-common-unsupported-file-encryption",
+      "question": "protect a shell-created archive with a password",
       "platform": "common",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The broader fixture has no HTTP-download page in common."
+      "rationale": "The pinned common bundle has no password-protected archive example."
     },
     {
       "id": "dev-v2r1-devlinux-services-01",
       "split": "dev",
-      "family": "dev39-linux-services",
-      "question": "list failed systemd units on Linux",
-      "platform": "linux",
-      "answerable": true,
-      "acceptable_example_ids": [
-        "example-34dc301369a6806ac1ea9a879f05d745d333553cdc8d73eae653a38eba3240e3"
-      ],
-      "rationale": "The Linux systemctl page explicitly lists failed units."
-    },
-    {
-      "id": "dev-v2r1-devlinux-services-02",
-      "split": "dev",
-      "family": "dev39-linux-services",
-      "question": "restart a Linux service with systemd",
+      "family": "dev39-linux-systemd-restart",
+      "question": "restart a systemd service on Linux",
       "platform": "linux",
       "answerable": true,
       "acceptable_example_ids": [
         "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
       ],
-      "rationale": "systemctl's service-control example covers restarting a Linux service."
+      "rationale": "The pinned systemctl example supports restarting a service."
+    },
+    {
+      "id": "dev-v2r1-devlinux-services-02",
+      "split": "dev",
+      "family": "dev39-linux-systemd-restart",
+      "question": "use systemd to restart a Linux service",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "rationale": "The pinned systemctl example supports restarting a service."
     },
     {
       "id": "dev-v2r1-devlinux-services-03",
       "split": "dev",
-      "family": "dev39-linux-services",
-      "question": "check whether a systemd unit is active",
+      "family": "dev39-linux-systemd-restart",
+      "question": "restart one Linux unit with systemctl",
       "platform": "linux",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-da5da8ecc41b766f610565f3a5609529202c2ed456f1310668ea319630ced4c4"
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
       ],
-      "rationale": "The selected systemctl page documents active-unit checks."
+      "rationale": "The pinned systemctl example supports restarting a service."
     },
     {
       "id": "dev-v2r1-devlinux-services-04",
       "split": "dev",
-      "family": "dev39-linux-services",
-      "question": "show running services on a Linux machine",
+      "family": "dev39-linux-systemd-restart",
+      "question": "make systemd restart a service",
       "platform": "linux",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-64d2bca80b945d449e02a015e46da78ddbc1c31ae96c7aecd521b73a199b5ec6"
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
       ],
-      "rationale": "The first systemctl example shows running services."
+      "rationale": "The pinned systemctl example supports restarting a service."
     },
     {
       "id": "dev-v2r1-devlinux-services-05",
       "split": "dev",
-      "family": "dev39-linux-services",
-      "question": "reload systemd after changing a unit",
+      "family": "dev39-linux-systemd-restart",
+      "question": "restart a running service from Linux systemd",
       "platform": "linux",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-011841c17bb47a0959c6f904421fe8999ec8524178684750864e7d14b518fafc"
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
       ],
-      "rationale": "The pinned page provides the daemon-reload workflow."
+      "rationale": "The pinned systemctl example supports restarting a service."
     },
     {
       "id": "dev-v2r1-devlinux-network-01",
       "split": "dev",
-      "family": "dev39-linux-network",
-      "question": "list network interfaces on Linux",
+      "family": "dev39-linux-interface-address",
+      "question": "list IPv4 addresses assigned to Linux network interfaces",
       "platform": "linux",
       "answerable": true,
       "acceptable_example_ids": [
         "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
         "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
       ],
-      "rationale": "The ip page provides detailed and brief interface listings."
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
     },
     {
       "id": "dev-v2r1-devlinux-network-02",
       "split": "dev",
-      "family": "dev39-linux-network",
-      "question": "show the Linux routing table",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "configure a Linux firewall rule with nftables",
       "platform": "linux",
-      "answerable": true,
-      "acceptable_example_ids": [
-        "example-bc21810afaa8a4f09d57669a89e3a858de9a580a0b707c6a95b2de0cc91af5b5"
-      ],
-      "rationale": "The ip routing example directly displays the Linux routing table."
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
     },
     {
       "id": "dev-v2r1-devlinux-network-03",
       "split": "dev",
-      "family": "dev39-linux-network",
-      "question": "display brief address information for interfaces",
+      "family": "dev39-linux-interface-address",
+      "question": "show the IPv4 addresses on Linux interfaces",
       "platform": "linux",
       "answerable": true,
       "acceptable_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
         "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
       ],
-      "rationale": "The brief address example covers compact interface inspection."
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
     },
     {
       "id": "dev-v2r1-devlinux-network-04",
       "split": "dev",
-      "family": "dev39-linux-network",
-      "question": "inspect the ARP neighbors on Linux",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "add a Linux nftables firewall rule",
       "platform": "linux",
-      "answerable": true,
-      "acceptable_example_ids": [
-        "example-a4d81f4c9aff81c07c7186179825359d4ac3ee8d412ee7e395eb60bd703489ff"
-      ],
-      "rationale": "The pinned ip page includes the neighbor-table workflow."
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
     },
     {
       "id": "dev-v2r1-devlinux-network-05",
       "split": "dev",
-      "family": "dev39-linux-network",
-      "question": "see detailed network device information",
+      "family": "dev39-linux-interface-address",
+      "question": "display interface IPv4 addresses on Linux",
       "platform": "linux",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344"
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
       ],
-      "rationale": "The selected Linux corpus provides detailed interface inspection with ip."
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
     },
     {
       "id": "dev-v2r1-devlinux-unsupported-01",
       "split": "dev",
-      "family": "dev39-linux-unsupported",
-      "question": "list running processes on Linux",
+      "family": "dev39-linux-interface-address",
+      "question": "print Linux interface address information",
       "platform": "linux",
-      "answerable": false,
-      "acceptable_example_ids": [],
-      "rationale": "The pinned Linux pages contain no process-listing example."
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
     },
     {
       "id": "dev-v2r1-devlinux-unsupported-02",
       "split": "dev",
-      "family": "dev39-linux-unsupported",
-      "question": "change permissions on a Linux file",
+      "family": "dev39-linux-interface-address",
+      "question": "inspect assigned IPv4 addresses on Linux interfaces",
       "platform": "linux",
-      "answerable": false,
-      "acceptable_example_ids": [],
-      "rationale": "No selected Linux page changes file permissions."
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
     },
     {
       "id": "dev-v2r1-devlinux-unsupported-03",
       "split": "dev",
-      "family": "dev39-linux-unsupported",
-      "question": "mount a filesystem on Linux",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "create an nftables rule on Linux",
       "platform": "linux",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The fixture has no Linux filesystem-mount workflow."
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
     },
     {
       "id": "dev-v2r1-devlinux-unsupported-04",
       "split": "dev",
-      "family": "dev39-linux-unsupported",
-      "question": "show per-directory disk usage on Linux",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "allow traffic with a Linux nftables rule",
       "platform": "linux",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "Directory-level disk usage is not covered by the selected pages."
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
     },
     {
       "id": "dev-v2r1-devlinux-unsupported-05",
       "split": "dev",
-      "family": "dev39-linux-unsupported",
-      "question": "terminate a Linux process by name",
+      "family": "dev39-linux-firewall-unsupported",
+      "question": "block traffic using nftables on Linux",
       "platform": "linux",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The pinned Linux selection has no process-termination example."
+      "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
     },
     {
       "id": "dev-v2r1-devosx-clipboard-01",
       "split": "dev",
-      "family": "dev39-osx-clipboard",
-      "question": "copy a file into the macOS clipboard",
+      "family": "dev39-osx-clipboard-output",
+      "question": "copy shell output to the macOS clipboard",
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b"
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
       ],
-      "rationale": "The pinned pbcopy file-input example copies a file to the macOS clipboard."
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
     },
     {
       "id": "dev-v2r1-devosx-clipboard-02",
       "split": "dev",
-      "family": "dev39-osx-clipboard",
-      "question": "send command output to the Mac pasteboard",
+      "family": "dev39-osx-clipboard-output",
+      "question": "send terminal output to the Mac pasteboard",
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
         "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
       ],
-      "rationale": "pbcopy's command-output example supports sending shell results to the pasteboard."
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
     },
     {
       "id": "dev-v2r1-devosx-clipboard-03",
       "split": "dev",
-      "family": "dev39-osx-clipboard",
-      "question": "write the macOS clipboard to a file",
+      "family": "dev39-osx-clipboard-output",
+      "question": "place command results in the macOS clipboard",
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-8c222f364f31888667827b5e955c16f956fa15c4c469184050efe56b247ee614"
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
       ],
-      "rationale": "The selected pbpaste page writes clipboard contents to a file."
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
     },
     {
       "id": "dev-v2r1-devosx-clipboard-04",
       "split": "dev",
-      "family": "dev39-osx-clipboard",
-      "question": "pipe clipboard text into grep on macOS",
+      "family": "dev39-osx-clipboard-output",
+      "question": "pipe command output into the Apple clipboard",
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
       ],
-      "rationale": "pbpaste's pipe example supplies clipboard-to-command behavior."
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
     },
     {
       "id": "dev-v2r1-devosx-clipboard-05",
       "split": "dev",
-      "family": "dev39-osx-clipboard",
-      "question": "move shell input into the Apple clipboard",
+      "family": "dev39-osx-clipboard-output",
+      "question": "put standard output on the Mac pasteboard",
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b",
         "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
       ],
-      "rationale": "The expanded macOS corpus covers shell input transfer with pbcopy."
+      "rationale": "The pinned pbcopy output example copies command results to the clipboard."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-a-01",
       "split": "dev",
-      "family": "dev39-osx-unsupported-a",
-      "question": "convert a HEIC image to JPEG on macOS",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "read EXIF metadata from a photo on macOS",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The selected macOS pages have no image-conversion workflow."
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-a-02",
       "split": "dev",
-      "family": "dev39-osx-unsupported-a",
-      "question": "connect to a Wi-Fi network from the shell on macOS",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "inspect a picture's EXIF fields from the Mac terminal",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No pinned osx example configures a Wi-Fi connection."
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-a-03",
       "split": "dev",
-      "family": "dev39-osx-unsupported-a",
-      "question": "inspect Mac battery cycle count",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "show camera metadata for an image on macOS",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The fixture contains no battery-health inspection example."
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-a-04",
       "split": "dev",
-      "family": "dev39-osx-unsupported-a",
-      "question": "change the default application for a file type on macOS",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "extract EXIF tags from a Mac photo",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The selected macOS corpus does not change default file associations."
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-a-05",
       "split": "dev",
-      "family": "dev39-osx-unsupported-a",
-      "question": "mount a disk image on macOS",
+      "family": "dev39-osx-unsupported-exif",
+      "question": "display photo metadata from a macOS shell",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No pinned macOS page mounts a disk image."
+      "rationale": "The pinned macOS bundle has no EXIF inspection example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-b-01",
       "split": "dev",
-      "family": "dev39-osx-unsupported-b",
-      "question": "record a video call on macOS",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "flush the macOS DNS cache from the terminal",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The pinned screencapture page covers screenshots and screen recordings, not video-call recording."
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-b-02",
       "split": "dev",
-      "family": "dev39-osx-unsupported-b",
-      "question": "list installed Mac applications from the terminal",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "clear cached DNS entries on macOS",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No selected osx page lists installed applications."
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-b-03",
       "split": "dev",
-      "family": "dev39-osx-unsupported-b",
-      "question": "flush the DNS cache on macOS",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "empty the Mac resolver cache from a shell",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The expanded fixture has no DNS-cache workflow."
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-b-04",
       "split": "dev",
-      "family": "dev39-osx-unsupported-b",
-      "question": "print the current macOS version",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "reset macOS DNS caching",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The selected pages do not provide a macOS-version command."
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
     },
     {
       "id": "dev-v2r1-devosx-unsupported-b-05",
       "split": "dev",
-      "family": "dev39-osx-unsupported-b",
-      "question": "create a bootable macOS installer",
+      "family": "dev39-osx-unsupported-dns",
+      "question": "remove cached DNS records on a Mac",
       "platform": "osx",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The corpus contains no bootable-installer creation example."
+      "rationale": "The pinned macOS bundle has no DNS-cache example."
     },
     {
       "id": "dev-v2r1-devwindows-file-copy-01",
       "split": "dev",
-      "family": "dev39-windows-file-copy",
-      "question": "copy a file to another path on Windows",
+      "family": "dev39-windows-file-copy-single",
+      "question": "copy one Windows file to another path",
       "platform": "windows",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b"
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
       ],
-      "rationale": "The Windows copy page documents direct file copying."
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
     },
     {
       "id": "dev-v2r1-devwindows-file-copy-02",
       "split": "dev",
-      "family": "dev39-windows-file-copy",
-      "question": "duplicate a file into a Windows directory",
+      "family": "dev39-windows-file-copy-single",
+      "question": "duplicate a single file in a Windows directory",
       "platform": "windows",
       "answerable": true,
       "acceptable_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
         "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
       ],
-      "rationale": "Its second example covers copying into a destination directory."
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
     },
     {
       "id": "dev-v2r1-devwindows-file-copy-03",
       "split": "dev",
-      "family": "dev39-windows-file-copy",
-      "question": "copy several files to a Windows folder",
+      "family": "dev39-windows-file-copy-single",
+      "question": "copy one file into a different Windows folder",
       "platform": "windows",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-a075ea8bf47d68389d089aac4d0e2465d70e05889e6306ead44ee83da9ea0104"
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
       ],
-      "rationale": "The selected copy page includes multiple-file support."
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
     },
     {
       "id": "dev-v2r1-devwindows-file-copy-04",
       "split": "dev",
-      "family": "dev39-windows-file-copy",
-      "question": "copy every file from one Windows directory to another",
+      "family": "dev39-windows-file-copy-single",
+      "question": "make a second copy of one Windows file",
       "platform": "windows",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-711dc9e8f8f4535abc5311d3242d35a349cdfb905a21bcaeb3b2cec947ddf80d"
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
       ],
-      "rationale": "The fourth copy example covers copying a directory's files."
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
     },
     {
       "id": "dev-v2r1-devwindows-file-copy-05",
       "split": "dev",
-      "family": "dev39-windows-file-copy",
-      "question": "copy a Windows file and ask before overwriting",
+      "family": "dev39-windows-file-copy-single",
+      "question": "put one Windows file at a destination path",
       "platform": "windows",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-7053f2f0a3561ee0fa6c9251568d68be19a49dd6a3accf714ce4b102f716eaa9"
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
       ],
-      "rationale": "The final labeled copy example prompts before overwrite."
+      "rationale": "The pinned copy examples support copying one Windows file to another location."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-a-01",
       "split": "dev",
-      "family": "dev39-windows-unsupported-a",
-      "question": "list running processes with PowerShell",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "query the Windows registry from a shell",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The selected Windows pages contain no process-listing workflow."
+      "rationale": "The pinned Windows bundle has no registry-query example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-a-02",
       "split": "dev",
-      "family": "dev39-windows-unsupported-a",
-      "question": "compress a folder on Windows",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "inspect a Windows registry key at the command line",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No pinned Windows page compresses a folder."
+      "rationale": "The pinned Windows bundle has no registry-query example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-a-03",
       "split": "dev",
-      "family": "dev39-windows-unsupported-a",
-      "question": "query the Windows registry",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "read registry values on Windows",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The corpus has no registry-query example."
+      "rationale": "The pinned Windows bundle has no registry-query example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-a-04",
       "split": "dev",
-      "family": "dev39-windows-unsupported-a",
-      "question": "set a Windows environment variable",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "look up a Windows registry entry in PowerShell",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The selected pages do not set environment variables."
+      "rationale": "The pinned Windows bundle has no registry-query example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-a-05",
       "split": "dev",
-      "family": "dev39-windows-unsupported-a",
-      "question": "test a network connection from PowerShell",
+      "family": "dev39-windows-unsupported-registry",
+      "question": "search the Windows registry from a terminal",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No pinned Windows page tests network connectivity."
+      "rationale": "The pinned Windows bundle has no registry-query example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-b-01",
       "split": "dev",
-      "family": "dev39-windows-unsupported-b",
-      "question": "start a Windows service from the command line",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "view Windows event logs",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The expanded Windows selection contains no service-control page."
+      "rationale": "The pinned Windows bundle has no event-log example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-b-02",
       "split": "dev",
-      "family": "dev39-windows-unsupported-b",
-      "question": "show free disk space on Windows",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "read the Windows event log from a shell",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No selected Windows page reports free disk space."
+      "rationale": "The pinned Windows bundle has no event-log example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-b-03",
       "split": "dev",
-      "family": "dev39-windows-unsupported-b",
-      "question": "download a URL in PowerShell",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "inspect Windows event log entries",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The fixture intentionally has no web-request workflow."
+      "rationale": "The pinned Windows bundle has no event-log example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-b-04",
       "split": "dev",
-      "family": "dev39-windows-unsupported-b",
-      "question": "kill a Windows process by PID",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "show recent Windows event logs",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "The selected pages have no process-termination example."
+      "rationale": "The pinned Windows bundle has no event-log example."
     },
     {
       "id": "dev-v2r1-devwindows-unsupported-b-05",
       "split": "dev",
-      "family": "dev39-windows-unsupported-b",
-      "question": "change file permissions on Windows",
+      "family": "dev39-windows-unsupported-event-log",
+      "question": "query event logs on Windows",
       "platform": "windows",
       "answerable": false,
       "acceptable_example_ids": [],
-      "rationale": "No pinned Windows example changes file permissions."
+      "rationale": "The pinned Windows bundle has no event-log example."
     }
   ]
 }
-

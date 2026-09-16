@@ -1,17 +1,17 @@
 {
   "report_kind": "evaluation-v2-expanded-authorized-holdout-comparison",
   "benchmark_id": "askman-evaluation-v2",
-  "freeze_id": "evaluation-v2-release-benchmark-v2",
+  "freeze_id": "evaluation-v2-release-benchmark-v3",
   "freeze_manifest": {
     "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
-    "sha256": "108c45e591c3698c44dc8de5852ccaaa771bfa7c0b4d70d7f92c7ae926a5fd0e"
+    "sha256": "a56789df8d4304035b07497bb1c1083cc68546971972a8db2f6e76d1d00e21d8"
   },
-  "recorded_at": "2026-09-16T18:50:38Z",
+  "recorded_at": "2026-09-16T19:20:55.729820+00:00",
   "split": "holdout",
   "split_id": "scenario-family-split-v2",
   "retriever": "keyword",
   "retriever_version": "keyword-fts5-v1",
-  "dataset_sha256": "9990a0af84df731a727d08751210ec46be0b9546d0b44444b701874dd801623c",
+  "dataset_sha256": "8cf0faeeb7e339d1adc70195dc85f4aebdb83de5e720d65a4d6bc9714a9d68e9",
   "scorer": {
     "version": "task-scorer-v1",
     "implementation": "scripts/evaluate_retrieval.py",
@@ -35,8 +35,8 @@
     "development_report": "docs/reproducibility/artifacts/evaluation-v2-expanded-dev-baseline.json",
     "same_retriever_and_scorer": true,
     "metrics": {
-      "success_at_3": {"dev": {"count": 2, "denominator": 30}, "holdout": {"count": 2, "denominator": 30}},
-      "coverage": {"dev": {"count": 2, "denominator": 60}, "holdout": {"count": 2, "denominator": 60}},
+      "success_at_3": {"dev": {"count": 1, "denominator": 30}, "holdout": {"count": 1, "denominator": 30}},
+      "coverage": {"dev": {"count": 1, "denominator": 60}, "holdout": {"count": 1, "denominator": 60}},
       "false_answers_on_unanswerable": {"dev": {"count": 0, "denominator": 30}, "holdout": {"count": 0, "denominator": 30}}
     }
   },
@@ -44,11 +44,11 @@
     "tasks": 60,
     "answerable_tasks": 30,
     "unanswerable_tasks": 30,
-    "candidate_recall": {"count": 2, "denominator": 30},
-    "success_at_1": {"count": 2, "denominator": 30},
-    "success_at_3": {"count": 2, "denominator": 30},
-    "coverage": {"count": 2, "denominator": 60},
-    "incorrect_answered_tasks": {"count": 0, "denominator": 2},
+    "candidate_recall": {"count": 1, "denominator": 30},
+    "success_at_1": {"count": 1, "denominator": 30},
+    "success_at_3": {"count": 1, "denominator": 30},
+    "coverage": {"count": 1, "denominator": 60},
+    "incorrect_answered_tasks": {"count": 0, "denominator": 1},
     "false_answers_on_unanswerable": {"count": 0, "denominator": 30}
   },
   "note": "Authorized once after freeze; keyword comparison is release evidence for the pinned fixture, not a production-quality retrieval claim."

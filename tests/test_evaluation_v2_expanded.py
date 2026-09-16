@@ -1,5 +1,6 @@
 import json
 import importlib.util
+import copy
 import sys
 import unittest
 from pathlib import Path
@@ -45,7 +46,7 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
     def test_versioned_expanded_freeze_validates(self):
         VALIDATOR.validate_manifest(MANIFEST_PATH)
         self.assertEqual(
-            self.manifest["previous_freeze_id"], "evaluation-v2-release-benchmark-v1"
+            self.manifest["previous_freeze_id"], "evaluation-v2-release-benchmark-v2"
         )
 
     def test_corpus_is_broader_and_publicly_pinned(self):
@@ -59,6 +60,12 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
 
     def test_expanded_pair_preserves_balance_platforms_and_multi_support(self):
         RUNNER.validate_dataset_pair(self.development, self.holdout)
+        VALIDATOR.validate_family_intents(
+            self.intents, self.development, self.holdout
+        )
+        VALIDATOR.validate_support_audit(
+            self.manifest["support_audit"], self.development, self.holdout
+        )
         for dataset in (self.development, self.holdout):
             self.assertEqual(len(dataset["tasks"]), 60)
             self.assertEqual(sum(task["answerable"] for task in dataset["tasks"]), 30)
@@ -79,6 +86,29 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 if task["answerable"]
             )
         )
+
+    def test_family_intent_validation_rejects_mixed_family(self):
+        mutated = copy.deepcopy(self.intents)
+        family_records = [
+            task
+            for task in mutated["tasks"]
+            if task["family"] == "dev39-common-file-content"
+        ]
+        family_records[-1]["intent"] = "a different behavior"
+        with self.assertRaisesRegex(ValueError, "one exact"):
+            VALIDATOR.validate_family_intents(
+                mutated, self.development, self.holdout
+            )
+
+    def test_support_audit_rejects_unrelated_example(self):
+        mutated = copy.deepcopy(self.development)
+        mutated["tasks"][0]["acceptable_example_ids"] = [
+            "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+        ]
+        with self.assertRaisesRegex(ValueError, "acceptable support mismatch"):
+            VALIDATOR.validate_support_audit(
+                self.manifest["support_audit"], mutated, self.holdout
+            )
 
     def test_intents_have_provenance_only_and_match_labels(self):
         VALIDATOR.validate_intents(self.intents, self.development, self.holdout)

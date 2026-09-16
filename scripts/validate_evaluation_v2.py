@@ -116,6 +116,72 @@ def validate_intents(
         raise ValueError("intent and label task IDs do not match")
 
 
+def validate_family_intents(
+    intents: dict[str, Any], development: dict[str, Any], holdout: dict[str, Any]
+) -> None:
+    """Require one platform/label/source intent per five-task family."""
+    intent_by_id = {task["id"]: task for task in intents["tasks"]}
+    signatures: dict[str, set[tuple[Any, ...]]] = {}
+    for task in development["tasks"] + holdout["tasks"]:
+        intent = intent_by_id[task["id"]]
+        signature = (
+            task["platform"],
+            task["answerable"],
+            intent["source_category"],
+            intent["intent"],
+        )
+        signatures.setdefault(task["family"], set()).add(signature)
+    mixed = [family for family, values in signatures.items() if len(values) != 1]
+    if mixed:
+        raise ValueError(
+            "families must contain one exact platform/label/intent: "
+            + ", ".join(sorted(mixed))
+        )
+
+
+def validate_support_audit(
+    audit: dict[str, Any],
+    development: dict[str, Any],
+    holdout: dict[str, Any],
+    intents: dict[str, Any] | None = None,
+) -> None:
+    """Verify every task label against its independently hand-audited support set."""
+    if audit.get("schema_version") != 1:
+        raise ValueError("unsupported support-audit schema")
+    families = audit.get("families")
+    if not isinstance(families, dict):
+        raise ValueError("support audit must declare family rules")
+    tasks = development["tasks"] + holdout["tasks"]
+    expected_families = {task["family"] for task in tasks}
+    if set(families) != expected_families:
+        raise ValueError("support audit families do not match the frozen tasks")
+    intent_by_id = (
+        {task["id"]: task for task in intents["tasks"]}
+        if intents is not None
+        else {}
+    )
+    for task in tasks:
+        rule = families.get(task["family"])
+        if not isinstance(rule, dict):
+            raise ValueError(f"missing support audit rule for {task['family']}")
+        if task["platform"] != rule.get("platform"):
+            raise ValueError(f"support audit platform mismatch for {task['id']}")
+        if task["answerable"] != rule.get("answerable"):
+            raise ValueError(f"support audit label mismatch for {task['id']}")
+        expected_ids = rule.get("acceptable_example_ids")
+        if task["acceptable_example_ids"] != expected_ids:
+            raise ValueError(
+                f"acceptable support mismatch for {task['id']}; "
+                "labels must equal the hand-audited support set"
+            )
+        if rule.get("intent") is None or not str(rule["intent"]).strip():
+            raise ValueError(f"support audit is missing the behavior intent for {task['id']}")
+        if intents is not None and rule["intent"] != intent_by_id[task["id"]]["intent"]:
+            raise ValueError(f"support audit intent mismatch for {task['id']}")
+        if any(not EXAMPLE_ID.fullmatch(example_id) for example_id in expected_ids):
+            raise ValueError(f"support audit has an unstable example ID for {task['id']}")
+
+
 def validate_manifest(manifest_path: Path) -> None:
     manifest = RUNNER.load_json(manifest_path)
     if manifest.get("schema_version") != EXPECTED_MANIFEST_SCHEMA_VERSION:
@@ -209,6 +275,12 @@ def validate_manifest(manifest_path: Path) -> None:
         raise ValueError("intent provenance digest does not match the freeze manifest")
     intents = RUNNER.load_json(intent_path)
     validate_intents(intents, datasets["dev"], datasets["holdout"])
+    validate_family_intents(intents, datasets["dev"], datasets["holdout"])
+    support_audit = manifest.get("support_audit")
+    if support_audit is not None:
+        validate_support_audit(
+            support_audit, datasets["dev"], datasets["holdout"], intents
+        )
 
 
 def parser() -> argparse.ArgumentParser:
