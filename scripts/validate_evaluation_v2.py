@@ -24,6 +24,9 @@ EXPECTED_CORPUS_MANIFEST = ROOT / "tests/fixtures/tldr-full-corpus/manifest.json
 EXPECTED_INTENT_FIELDS = {"id", "split", "family", "source_category", "intent"}
 EXPECTED_SUPPORT_AUDIT_SCHEMA_VERSION = 2
 EXPECTED_SUPPORT_CATALOG_SCHEMA_VERSION = 1
+EXPECTED_FULL_CORPUS_CATALOG_SCHEMA_VERSION = 1
+EXPECTED_FULL_CORPUS_EXAMPLE_COUNT = 142
+EXPECTED_HAND_CHECK_TASK_COUNT = 120
 LEGACY_MANIFEST_FREEZE_ID = "evaluation-v2-release-benchmark-v1"
 EXAMPLE_ID = re.compile(r"example-[0-9a-f]{64}\Z")
 QUESTION_TOKEN = re.compile(r"[a-z0-9]+")
@@ -173,6 +176,45 @@ def expected_example_id(
         "page", [source_revision, source_path, platform, language]
     )
     return deterministic_id("example", [page_id, str(source_position)])
+
+
+def pinned_source_examples(source_manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Index every source example using the pinned parser-visible citation fields."""
+    examples: dict[str, dict[str, Any]] = {}
+    for source_path in source_manifest["files"]:
+        source_file = ROOT / "tests/fixtures/tldr-evaluation-v2" / source_path
+        source_lines = source_file.read_text(encoding="utf-8").splitlines()
+        for source_line, raw_line in enumerate(source_lines, start=1):
+            command = raw_line.strip()
+            command_is_recorded = command.startswith("`") and command.endswith("`")
+            if not command_is_recorded:
+                continue
+            source_section_line = next(
+                (
+                    line_number
+                    for line_number in range(source_line - 1, max(source_line - 3, 0), -1)
+                    if source_lines[line_number - 1].strip().startswith("- ")
+                ),
+                None,
+            )
+            if source_section_line is None:
+                raise ValueError(f"source example has no section: {source_path}:{source_line}")
+            section = source_lines[source_section_line - 1].strip()[2:]
+            source_position = sum(
+                line.strip().startswith("- ")
+                for line in source_lines[:source_section_line]
+            )
+            example_id = expected_example_id(source_manifest, source_path, source_position)
+            if example_id in examples:
+                raise ValueError(f"source example ID is duplicated: {example_id}")
+            examples[example_id] = {
+                "source_path": source_path,
+                "source_line": source_line,
+                "source_position": source_position,
+                "section": section,
+                "command": command[1:-1],
+            }
+    return examples
 
 
 def validate_split_question_disjointness(
@@ -380,6 +422,115 @@ def validate_support_catalog(
             raise ValueError(f"support catalog evidence is incomplete: {example_id}")
 
 
+def validate_full_corpus_catalog(
+    catalog: dict[str, Any],
+    manifest: dict[str, Any],
+    source_manifest: dict[str, Any],
+    support_catalog: dict[str, Any],
+) -> None:
+    """Validate the exhaustive source inventory used by abstention scans."""
+    if catalog.get("schema_version") != EXPECTED_FULL_CORPUS_CATALOG_SCHEMA_VERSION:
+        raise ValueError("unsupported full-corpus catalog schema")
+    if not isinstance(catalog.get("catalog_id"), str) or not catalog["catalog_id"]:
+        raise ValueError("full-corpus catalog ID is missing")
+    if catalog.get("dataset_id") != manifest.get("benchmark_id"):
+        raise ValueError("full-corpus catalog has the wrong dataset ID")
+    if catalog.get("corpus") != manifest.get("corpus"):
+        raise ValueError("full-corpus catalog corpus identity differs from freeze manifest")
+    if catalog.get("source_manifest_sha256") != manifest["corpus"]["manifest_sha256"]:
+        raise ValueError("full-corpus catalog is not pinned to the freeze corpus manifest")
+
+    inventory = catalog.get("inventory")
+    required_inventory_fields = {
+        "method",
+        "classification",
+        "reviewed_at",
+        "identity_recorded",
+        "inputs",
+        "limitations",
+    }
+    inventory_is_complete = (
+        isinstance(inventory, dict)
+        and required_inventory_fields <= inventory.keys()
+    )
+    if not inventory_is_complete:
+        raise ValueError("full-corpus catalog inventory provenance is incomplete")
+    inventory_method_is_recorded = (
+        isinstance(inventory["method"], str) and bool(inventory["method"].strip())
+    )
+    inventory_classification_is_declared = (
+        inventory["classification"] == "source_section_for_unadjudicated_entries"
+    )
+    inventory_identity_is_omitted = inventory["identity_recorded"] is False
+    inventory_limitations_are_recorded = (
+        isinstance(inventory["limitations"], str)
+        and bool(inventory["limitations"].strip())
+    )
+    inventory_inputs_are_recorded = (
+        isinstance(inventory["inputs"], list)
+        and bool(inventory["inputs"])
+        and all(isinstance(item, str) and item.strip() for item in inventory["inputs"])
+    )
+    if not inventory_method_is_recorded:
+        raise ValueError("full-corpus catalog inventory method is empty")
+    if not inventory_classification_is_declared:
+        raise ValueError("full-corpus catalog classification method is unsupported")
+    if not inventory_identity_is_omitted:
+        raise ValueError("full-corpus catalog must not fabricate a reviewer identity")
+    if not inventory_limitations_are_recorded:
+        raise ValueError("full-corpus catalog limitations are empty")
+    if not inventory_inputs_are_recorded:
+        raise ValueError("full-corpus catalog inventory inputs are incomplete")
+
+    entries = catalog.get("entries")
+    expected_entries = pinned_source_examples(source_manifest)
+    expected_example_ids = set(expected_entries)
+    if not isinstance(entries, dict):
+        raise ValueError("full-corpus catalog must declare example entries")
+    if len(expected_entries) != EXPECTED_FULL_CORPUS_EXAMPLE_COUNT:
+        raise ValueError("pinned corpus example count is not 142")
+    if set(entries) != expected_example_ids:
+        raise ValueError("full-corpus catalog must cover exactly all pinned examples")
+    support_entries = support_catalog.get("entries")
+    if not isinstance(support_entries, dict):
+        raise ValueError("support catalog must declare example entries")
+    required_entry_fields = {
+        "source_path",
+        "source_line",
+        "source_position",
+        "section",
+        "command",
+        "behavior_classification",
+        "classification_basis",
+    }
+    for example_id, expected_entry in expected_entries.items():
+        entry = entries.get(example_id)
+        entry_is_complete = (
+            isinstance(entry, dict) and set(entry) == required_entry_fields
+        )
+        if not entry_is_complete:
+            raise ValueError(f"full-corpus catalog entry is incomplete: {example_id}")
+        source_citation_matches = all(
+            entry[field] == expected_entry[field]
+            for field in ("source_path", "source_line", "source_position", "section", "command")
+        )
+        if not source_citation_matches:
+            raise ValueError(f"full-corpus catalog citation mismatch: {example_id}")
+        support_entry = support_entries.get(example_id)
+        if support_entry is None:
+            expected_behavior = expected_entry["section"]
+            expected_basis = "source_section"
+        else:
+            expected_behavior = support_entry["canonical_behavior"]
+            expected_basis = "hand_audited_support_subset"
+        behavior_classification_matches = (
+            entry["behavior_classification"] == expected_behavior
+        )
+        classification_basis_matches = entry["classification_basis"] == expected_basis
+        if not behavior_classification_matches or not classification_basis_matches:
+            raise ValueError(f"full-corpus catalog behavior classification mismatch: {example_id}")
+
+
 def validate_support_audit(
     audit: dict[str, Any],
     development: dict[str, Any],
@@ -545,15 +696,19 @@ def validate_hand_check_citations(
 def validate_no_match_scan(
     scan: Any,
     expected_intent: str,
-    support_catalog: dict[str, Any],
-    support_catalog_pin: dict[str, Any],
+    full_corpus_catalog: dict[str, Any],
+    full_corpus_catalog_pin: dict[str, Any],
+    corpus: dict[str, Any],
     task_id: str,
     dimension: str,
 ) -> None:
-    """Require deterministic absence evidence over the pinned audited catalog."""
+    """Require deterministic absence evidence over the complete pinned corpus."""
     required_scan_fields = {
         "catalog_id",
+        "catalog_path",
         "catalog_sha256",
+        "source_manifest_sha256",
+        "source_digest",
         "scanned_example_count",
         "normalized_task_intent",
         "matching_example_ids",
@@ -561,36 +716,56 @@ def validate_no_match_scan(
     scan_shape_is_valid = isinstance(scan, dict) and set(scan) == required_scan_fields
     if not scan_shape_is_valid:
         raise ValueError(f"hand-check {dimension} no-match scan is incomplete for {task_id}")
-    catalog_entries = support_catalog.get("entries")
+    catalog_entries = full_corpus_catalog.get("entries")
     catalog_entries_are_recorded = isinstance(catalog_entries, dict)
     if not catalog_entries_are_recorded:
-        raise ValueError("support catalog must declare example entries")
+        raise ValueError("full-corpus catalog must declare example entries")
     catalog_pin_is_complete = (
-        isinstance(support_catalog_pin, dict)
-        and {"path", "sha256", "catalog_id"} <= support_catalog_pin.keys()
+        isinstance(full_corpus_catalog_pin, dict)
+        and {"path", "sha256", "catalog_id"} <= full_corpus_catalog_pin.keys()
     )
     if not catalog_pin_is_complete:
-        raise ValueError("no-match scan support catalog pin is incomplete")
-    actual_catalog_digest = RUNNER.sha256_file(resolve_path(support_catalog_pin["path"]))
-    catalog_digest_is_current = actual_catalog_digest == support_catalog_pin["sha256"]
+        raise ValueError("no-match scan full-corpus catalog pin is incomplete")
+    actual_catalog_path = resolve_path(full_corpus_catalog_pin["path"])
+    actual_catalog_digest = RUNNER.sha256_file(actual_catalog_path)
+    catalog_digest_is_current = (
+        actual_catalog_digest == full_corpus_catalog_pin["sha256"]
+    )
+    catalog_path_is_consistent = (
+        scan["catalog_path"] == full_corpus_catalog_pin["path"]
+    )
     catalog_id_is_consistent = (
-        scan["catalog_id"] == support_catalog_pin["catalog_id"]
-        and support_catalog.get("catalog_id") == support_catalog_pin["catalog_id"]
+        scan["catalog_id"] == full_corpus_catalog_pin["catalog_id"]
+        and full_corpus_catalog.get("catalog_id")
+        == full_corpus_catalog_pin["catalog_id"]
     )
     catalog_digest_is_consistent = (
-        scan["catalog_sha256"] == support_catalog_pin["sha256"]
+        scan["catalog_sha256"] == full_corpus_catalog_pin["sha256"]
         and scan["catalog_sha256"] == actual_catalog_digest
+    )
+    source_manifest_digest_is_consistent = (
+        scan["source_manifest_sha256"] == corpus["manifest_sha256"]
+        and scan["source_manifest_sha256"]
+        == full_corpus_catalog["source_manifest_sha256"]
+    )
+    source_digest_is_consistent = (
+        scan["source_digest"] == corpus["source_digest"]
+        and scan["source_digest"] == full_corpus_catalog["corpus"]["source_digest"]
     )
     scanned_count_matches_catalog = (
         scan["scanned_example_count"] == len(catalog_entries)
+        and scan["scanned_example_count"] == EXPECTED_FULL_CORPUS_EXAMPLE_COUNT
     )
     normalized_intent_matches = scan["normalized_task_intent"] == expected_intent
     matching_example_ids_are_empty = scan["matching_example_ids"] == []
     no_match_scan_is_valid = all(
         (
             catalog_digest_is_current,
+            catalog_path_is_consistent,
             catalog_id_is_consistent,
             catalog_digest_is_consistent,
+            source_manifest_digest_is_consistent,
+            source_digest_is_consistent,
             scanned_count_matches_catalog,
             normalized_intent_matches,
             matching_example_ids_are_empty,
@@ -608,6 +783,8 @@ def validate_hand_checks(
     intents: dict[str, Any],
     support_catalog: dict[str, Any],
     support_catalog_pin: dict[str, Any],
+    full_corpus_catalog: dict[str, Any],
+    full_corpus_catalog_pin: dict[str, Any],
     corpus: dict[str, Any],
 ) -> None:
     """Verify evidence-bearing independent checks against frozen task labels."""
@@ -620,6 +797,8 @@ def validate_hand_checks(
         "inputs",
         "reviewed_at",
         "identity_recorded",
+        "scope",
+        "reviewed_task_count",
     }
     provenance_fields_are_complete = required_provenance <= provenance.keys()
     if not provenance_fields_are_complete:
@@ -657,6 +836,16 @@ def validate_hand_checks(
     )
     if not review_inputs_are_valid:
         raise ValueError("hand-check provenance inputs must be non-empty strings")
+    review_scope_is_recorded = isinstance(provenance["scope"], str) and bool(
+        provenance["scope"].strip()
+    )
+    reviewed_task_count_is_exact = (
+        provenance["reviewed_task_count"] == EXPECTED_HAND_CHECK_TASK_COUNT
+    )
+    if not review_scope_is_recorded:
+        raise ValueError("hand-check provenance scope is empty")
+    if not reviewed_task_count_is_exact:
+        raise ValueError("hand-check provenance task count must be exactly 120")
 
     hand_checks_are_recorded = isinstance(hand_checks, list) and bool(hand_checks)
     if not hand_checks_are_recorded:
@@ -757,16 +946,18 @@ def validate_hand_checks(
             validate_no_match_scan(
                 behavior["no_match_scan"],
                 expected_intent,
-                support_catalog,
-                support_catalog_pin,
+                full_corpus_catalog,
+                full_corpus_catalog_pin,
+                corpus,
                 task_id,
                 "behavior",
             )
             validate_no_match_scan(
                 support["no_match_scan"],
                 expected_intent,
-                support_catalog,
-                support_catalog_pin,
+                full_corpus_catalog,
+                full_corpus_catalog_pin,
+                corpus,
                 task_id,
                 "acceptable support",
             )
@@ -789,6 +980,9 @@ def validate_hand_checks(
             if evidence_text_is_missing:
                 raise ValueError(f"hand-check {dimension} evidence is empty for {task_id}")
 
+    expected_task_ids = set(task_by_id)
+    if seen_task_ids != expected_task_ids:
+        raise ValueError("hand-check records do not provide exact task-ID coverage")
     if seen_families != expected_families:
         raise ValueError("hand-check records do not cover every scenario family")
     if seen_platforms != {"common", "linux", "osx", "windows"}:
@@ -895,6 +1089,8 @@ def validate_manifest(manifest_path: Path) -> None:
     support_audit = manifest.get("support_audit")
     support_catalog = None
     support_catalog_pin = None
+    full_corpus_catalog = None
+    full_corpus_catalog_pin = None
     if support_audit is not None:
         validate_split_question_disjointness(
             datasets["dev"], datasets["holdout"]
@@ -927,10 +1123,29 @@ def validate_manifest(manifest_path: Path) -> None:
             intents,
             support_catalog,
         )
+        full_corpus_catalog_pin = manifest.get("full_corpus_catalog")
+        full_catalog_pin_is_complete = (
+            isinstance(full_corpus_catalog_pin, dict)
+            and required_catalog_pin_fields <= full_corpus_catalog_pin.keys()
+        )
+        if not full_catalog_pin_is_complete:
+            raise ValueError("expanded freeze is missing full-corpus catalog metadata")
+        full_corpus_catalog_path = resolve_path(full_corpus_catalog_pin.get("path"))
+        if RUNNER.sha256_file(full_corpus_catalog_path) != full_corpus_catalog_pin.get("sha256"):
+            raise ValueError("full-corpus catalog digest does not match the freeze manifest")
+        full_corpus_catalog = RUNNER.load_json(full_corpus_catalog_path)
+        if full_corpus_catalog.get("catalog_id") != full_corpus_catalog_pin["catalog_id"]:
+            raise ValueError("full-corpus catalog ID does not match the freeze manifest")
+        validate_full_corpus_catalog(
+            full_corpus_catalog,
+            manifest,
+            source_manifest,
+            support_catalog,
+        )
     hand_checks = manifest.get("hand_checks")
     if hand_checks is not None:
-        if support_catalog is None:
-            raise ValueError("hand checks require a support catalog")
+        if support_catalog is None or full_corpus_catalog is None:
+            raise ValueError("hand checks require support and full-corpus catalogs")
         validate_hand_checks(
             hand_checks,
             manifest.get("hand_check_provenance"),
@@ -939,6 +1154,8 @@ def validate_manifest(manifest_path: Path) -> None:
             intents,
             support_catalog,
             support_catalog_pin,
+            full_corpus_catalog,
+            full_corpus_catalog_pin,
             corpus,
         )
 

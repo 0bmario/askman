@@ -4,7 +4,7 @@
   "freeze_id": "evaluation-v2-release-benchmark-v3",
   "freeze_manifest": {
     "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
-    "sha256": "17175e7a8422472a8d86aaa1bb837cbd458ec71cfdb970c66c616ca58642a877"
+    "sha256": "06297787191f7f186fa20baf4a5a7e9d831871d72c68ec685c8a586455d172ec"
   },
   "recorded_at": "2026-09-16T20:40:37Z",
   "split": "dev",
@@ -70,5 +70,10 @@
     "path": "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json",
     "sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
     "catalog_id": "evaluation-v2-expanded-support-catalog-v1"
+  },
+  "full_corpus_catalog": {
+    "path": "tests/fixtures/evaluation/evaluation-v2-corpus-catalog-expanded.json",
+    "sha256": "124cb74e632c6905933481883da7fb6c3bd4924238153f0db2e321a1fea8c68f",
+    "catalog_id": "evaluation-v2-expanded-full-corpus-catalog-v1"
   }
 }

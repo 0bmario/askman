@@ -20,13 +20,15 @@ attempted expanded freeze `evaluation-v2-release-benchmark-v2`.
 - Corpus manifest digest:
   `b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8`
 - Expanded freeze manifest digest:
-  `17175e7a8422472a8d86aaa1bb837cbd458ec71cfdb970c66c616ca58642a877`
+  `06297787191f7f186fa20baf4a5a7e9d831871d72c68ec685c8a586455d172ec`
 - Dev dataset digest:
   `216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d`
 - Holdout dataset digest:
   `3fe95900c7957218d540d657d816cc1486ad05430a0010059263f9cef803826d`
 - Support catalog digest:
   `62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990`
+- Full-corpus catalog digest:
+  `124cb74e632c6905933481883da7fb6c3bd4924238153f0db2e321a1fea8c68f`
 - Intent provenance digest:
   `6f2b5c7a6b3a555aff538d6d85348d612828ff28b48db44c8a3f7610f40c2bfb`
 - Scorer digest:
@@ -39,35 +41,42 @@ Files:
 - Dev: `tests/fixtures/evaluation/frozen-dev-v2-expanded.json`
 - Holdout: `tests/fixtures/evaluation/frozen-holdout-v2-expanded.json`
 - Authoring provenance: `tests/fixtures/evaluation/task-intents-v2-expanded.json`
-- Support catalog: `tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json`
+- Hand-audited support catalog: `tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json`
+- Full-corpus catalog: `tests/fixtures/evaluation/evaluation-v2-corpus-catalog-expanded.json`
 - Dev results: `docs/reproducibility/artifacts/evaluation-v2-expanded-dev-baseline.json`
 - Holdout results: `docs/reproducibility/artifacts/evaluation-v2-expanded-holdout-comparison.json`
 
 The manifest's executable `support_audit` v2 binds each family's exact
 behavior, platform, and label, plus task-level acceptable example IDs and
-rationales. Twenty-four evidence-bearing hand-check records cover every
-family, platform, split, and answerability label. Each behavior and support
-check cites its catalog entries (source page, exact section/line, and pinned
-source digest) when answerable. Each unanswerable check records a deterministic
-no-match scan over all 19 entries in the pinned support catalog: catalog ID and
-digest, scanned count, normalized task intent, and `matching_example_ids=[]`.
+rationales. One hundred twenty evidence-bearing hand-check records cover every
+frozen task ID. Each record checks platform, behavior, acceptable support, and
+abstention (`not_applicable` for answerable tasks). Answerable behavior/support
+checks cite hand-audited catalog entries (source page, exact section/line, and
+pinned source digest). Each unanswerable check records a deterministic no-match
+scan over all 142 examples in the full-corpus catalog: catalog path/ID/digest,
+source manifest/content digests, scanned count, normalized task intent, and
+`matching_example_ids=[]`.
 Provenance records two independent review passes without fabricating a reviewer
 identity. Validation rejects mixed-family intents, unrelated support IDs, stale
 freeze identities, mutated/unresolved citations, inconsistent hand-check
-evidence, false/non-exhaustive abstention scans, and normalized prompt leakage
-between splits.
+evidence, missing task records, false/partial abstention scans, stale catalog
+digests, and normalized prompt leakage between splits.
 
-The separately pinned support catalog maps each accepted example ID to its
-source page, source line/position, exact source section, and hand-audited
-canonical behavior. Its method is an independent page/section review; the
-validator checks deterministic ID linkage, exact catalog linkage, and behavior
-labels. It does not infer semantic equivalence or claim automatic semantic
-truth beyond the explicitly hand-audited catalog. The macOS speech family
+The separately pinned 19-entry support catalog maps each accepted example ID
+to its source page, source line/position, exact source section, and
+hand-audited canonical behavior. The separately pinned full-corpus catalog
+indexes every 142 corpus examples with stable IDs, source commands/sections,
+and source-section classifications; it is an exhaustive citation inventory,
+not an expanded acceptability-label set. The validator checks deterministic ID
+linkage, exact catalog linkage, and behavior labels. It does not infer semantic
+equivalence or claim automatic semantic truth beyond the explicitly hand-audited
+support catalog. The macOS speech family
 accepts the plain phrase, custom voice/rate, and Polish-language `say` examples;
 this completeness is an explicit catalog adjudication, not automatic semantic
 inference. Absence is established only against this pinned, explicitly
-hand-audited catalog; the no-match scan is not a claim about examples outside
-that catalog.
+hand-audited support subset and the pinned 142-example source inventory; the
+no-match scan is not a claim about examples outside that corpus/catalog and its
+source-section classifications are not semantic equivalence judgments.
 
 The matching bundle is MIT-licensed tldr-pages content. Questions were
 authored before retrieval inspection. Labels and rationales were then

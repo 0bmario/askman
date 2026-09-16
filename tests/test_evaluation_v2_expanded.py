@@ -13,6 +13,7 @@ HOLDOUT_PATH = ROOT / "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json
 CORPUS_PATH = ROOT / "tests/fixtures/tldr-evaluation-v2/manifest.json"
 INTENTS_PATH = ROOT / "tests/fixtures/evaluation/task-intents-v2-expanded.json"
 CATALOG_PATH = ROOT / "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json"
+FULL_CATALOG_PATH = ROOT / "tests/fixtures/evaluation/evaluation-v2-corpus-catalog-expanded.json"
 REPORT_PATHS = {
     "dev": ROOT / "docs/reproducibility/artifacts/evaluation-v2-expanded-dev-baseline.json",
     "holdout": ROOT / "docs/reproducibility/artifacts/evaluation-v2-expanded-holdout-comparison.json",
@@ -44,6 +45,7 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         self.corpus = json.loads(CORPUS_PATH.read_text(encoding="utf-8"))
         self.intents = json.loads(INTENTS_PATH.read_text(encoding="utf-8"))
         self.catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+        self.full_catalog = json.loads(FULL_CATALOG_PATH.read_text(encoding="utf-8"))
 
     def test_versioned_expanded_freeze_validates(self):
         VALIDATOR.validate_manifest(MANIFEST_PATH)
@@ -53,6 +55,10 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         )
         self.assertEqual(self.development["freeze_id"], self.manifest["freeze_id"])
         self.assertEqual(self.holdout["freeze_id"], self.manifest["freeze_id"])
+        self.assertEqual(
+            self.manifest["full_corpus_catalog"]["catalog_id"],
+            self.full_catalog["catalog_id"],
+        )
 
     def test_dataset_freeze_identity_must_match_manifest(self):
         mutated = copy.deepcopy(self.development)
@@ -89,6 +95,12 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
             self.development,
             self.holdout,
             self.intents,
+            self.catalog,
+        )
+        VALIDATOR.validate_full_corpus_catalog(
+            self.full_catalog,
+            self.manifest,
+            self.corpus,
             self.catalog,
         )
         for dataset in (self.development, self.holdout):
@@ -242,6 +254,8 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.intents,
                 self.catalog,
                 self.manifest["support_catalog"],
+                self.full_catalog,
+                self.manifest["full_corpus_catalog"],
                 self.manifest["corpus"],
             )
 
@@ -265,6 +279,8 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.intents,
                 self.catalog,
                 self.manifest["support_catalog"],
+                self.full_catalog,
+                self.manifest["full_corpus_catalog"],
                 self.manifest["corpus"],
             )
 
@@ -291,6 +307,8 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.intents,
                 self.catalog,
                 self.manifest["support_catalog"],
+                self.full_catalog,
+                self.manifest["full_corpus_catalog"],
                 self.manifest["corpus"],
             )
 
@@ -317,6 +335,53 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.intents,
                 self.catalog,
                 self.manifest["support_catalog"],
+                self.full_catalog,
+                self.manifest["full_corpus_catalog"],
+                self.manifest["corpus"],
+            )
+
+    def test_hand_checks_reject_partial_catalog_abstention_scan(self):
+        mutated = copy.deepcopy(self.manifest["hand_checks"])
+        record = next(
+            record
+            for record in mutated
+            if not next(
+                task
+                for task in self.development["tasks"] + self.holdout["tasks"]
+                if task["id"] == record["task_id"]
+            )["answerable"]
+        )
+        record["evidence"]["behavior"]["no_match_scan"][
+            "scanned_example_count"
+        ] = len(self.catalog["entries"])
+        with self.assertRaisesRegex(ValueError, "no-match scan"):
+            VALIDATOR.validate_hand_checks(
+                mutated,
+                self.manifest["hand_check_provenance"],
+                self.development,
+                self.holdout,
+                self.intents,
+                self.catalog,
+                self.manifest["support_catalog"],
+                self.full_catalog,
+                self.manifest["full_corpus_catalog"],
+                self.manifest["corpus"],
+            )
+
+    def test_hand_checks_reject_missing_task_coverage(self):
+        mutated = copy.deepcopy(self.manifest["hand_checks"])
+        mutated.pop()
+        with self.assertRaisesRegex(ValueError, "exact task-ID coverage"):
+            VALIDATOR.validate_hand_checks(
+                mutated,
+                self.manifest["hand_check_provenance"],
+                self.development,
+                self.holdout,
+                self.intents,
+                self.catalog,
+                self.manifest["support_catalog"],
+                self.full_catalog,
+                self.manifest["full_corpus_catalog"],
                 self.manifest["corpus"],
             )
 
@@ -339,11 +404,13 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
             self.intents,
             self.catalog,
             self.manifest["support_catalog"],
+            self.full_catalog,
+            self.manifest["full_corpus_catalog"],
             self.manifest["corpus"],
         )
         self.assertEqual(
             len(self.manifest["hand_checks"]),
-            len({task["family"] for task in self.development["tasks"] + self.holdout["tasks"]}),
+            len(self.development["tasks"] + self.holdout["tasks"]),
         )
 
     def test_hand_checks_reject_inconsistent_platform_evidence(self):
@@ -358,6 +425,8 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.intents,
                 self.catalog,
                 self.manifest["support_catalog"],
+                self.full_catalog,
+                self.manifest["full_corpus_catalog"],
                 self.manifest["corpus"],
             )
 
@@ -370,6 +439,9 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 report["dataset_sha256"], VALIDATOR.RUNNER.sha256_file(dataset_path)
             )
             self.assertEqual(report["support_catalog"], self.manifest["support_catalog"])
+            self.assertEqual(
+                report["full_corpus_catalog"], self.manifest["full_corpus_catalog"]
+            )
             self.assertEqual(report["corpus"], self.manifest["corpus"])
             self.assertEqual(report["scorer"]["sha256"], self.manifest["scorer"]["sha256"])
             self.assertEqual(
