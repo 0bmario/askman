@@ -497,7 +497,7 @@ fn validate_complete_snapshot(manifest: &SubsetManifest, snapshot: &Path) -> Res
     );
     let mut discovered = HashSet::new();
     for platform in REQUIRED_PLATFORMS {
-        let platform_root = snapshot.join("pages").join(platform);
+        let platform_root = snapshot.join(&manifest.pages_root).join(platform);
         if !platform_root.is_dir() {
             bail!("complete matching snapshot is missing platform directory: {platform}");
         }
