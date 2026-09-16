@@ -307,6 +307,20 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "no-match scan"):
             self._validate_hand_checks(mutated)
 
+    def test_hand_checks_reject_empty_scan_when_catalog_matches_unanswerable_intent(self):
+        mutated = copy.deepcopy(self.manifest["hand_checks"])
+        record = self._unanswerable_hand_check(mutated)
+        task_id = record["task_id"]
+        expected_intent = next(
+            task["intent"] for task in self.intents["tasks"] if task["id"] == task_id
+        )
+        matching_example_id = next(iter(self.full_catalog["entries"]))
+        self.full_catalog["entries"][matching_example_id][
+            "behavior_classification"
+        ] = expected_intent
+        with self.assertRaisesRegex(ValueError, "no-match scan"):
+            self._validate_hand_checks(mutated)
+
     def test_hand_checks_reject_stale_no_match_scan(self):
         mutated = copy.deepcopy(self.manifest["hand_checks"])
         record = self._unanswerable_hand_check(mutated)
@@ -377,6 +391,50 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         holdout_report = json.loads(REPORT_PATHS["holdout"].read_text(encoding="utf-8"))
         self.assertTrue(holdout_report["holdout_access"]["authorized"])
         self.assertTrue(holdout_report["holdout_access"]["recorded"])
+
+    def test_published_reports_include_inconclusive_release_gate_evidence(self):
+        required_metrics = {
+            "candidate_recall",
+            "success_at_1",
+            "success_at_3",
+            "coverage",
+            "incorrect_answered_tasks",
+            "false_answers_on_unanswerable",
+        }
+        expected_platforms = {"common", "linux", "osx", "windows"}
+        for report_path in REPORT_PATHS.values():
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            breakdowns = report["breakdowns"]
+            self.assertEqual(breakdowns["overall"], report["summary"])
+            self.assertEqual(set(breakdowns["platform"]), expected_platforms)
+            self.assertEqual(len(breakdowns["family"]), 12)
+            for breakdown in (
+                breakdowns["overall"],
+                *breakdowns["platform"].values(),
+                *breakdowns["family"].values(),
+            ):
+                self.assertTrue(
+                    required_metrics <= set(breakdown),
+                    msg=f"missing report metrics: {breakdown}",
+                )
+                for metric in required_metrics:
+                    self.assertEqual(
+                        set(breakdown[metric]), {"count", "denominator"}
+                    )
+            failures = report["failure_examples"]
+            self.assertEqual(failures["metric"], "success_at_3")
+            self.assertEqual(
+                failures["count"],
+                report["summary"]["success_at_3"]["denominator"]
+                - report["summary"]["success_at_3"]["count"],
+            )
+            self.assertTrue(failures["examples"])
+            self.assertTrue(report["reproduction"]["commands"])
+            self.assertEqual(report["recommendation"]["result"], "inconclusive")
+            self.assertIn("paired", report["recommendation"]["reason"])
+            self.assertTrue(
+                any("bootstrap" in limitation for limitation in report["limitations"])
+            )
 
 
 if __name__ == "__main__":

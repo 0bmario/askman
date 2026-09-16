@@ -707,6 +707,21 @@ def validate_hand_check_citations(
         raise ValueError(f"hand-check {dimension} citations do not match support for {task_id}")
 
 
+def derive_matching_example_ids(
+    full_corpus_catalog: dict[str, Any], expected_intent: str
+) -> list[str]:
+    """Derive matches from the catalog's explicit behavior classifications."""
+    catalog_entries = full_corpus_catalog.get("entries")
+    if not isinstance(catalog_entries, dict):
+        raise ValueError("full-corpus catalog must declare example entries")
+    return sorted(
+        example_id
+        for example_id, entry in catalog_entries.items()
+        if isinstance(entry, dict)
+        and entry.get("behavior_classification") == expected_intent
+    )
+
+
 def validate_no_match_scan(
     scan: Any,
     expected_intent: str,
@@ -771,7 +786,13 @@ def validate_no_match_scan(
         and scan["scanned_example_count"] == EXPECTED_FULL_CORPUS_EXAMPLE_COUNT
     )
     normalized_intent_matches = scan["normalized_task_intent"] == expected_intent
-    matching_example_ids_are_empty = scan["matching_example_ids"] == []
+    derived_matching_example_ids = derive_matching_example_ids(
+        full_corpus_catalog, expected_intent
+    )
+    matching_example_ids_match_catalog = (
+        scan["matching_example_ids"] == derived_matching_example_ids
+    )
+    matching_example_ids_are_empty = not derived_matching_example_ids
     no_match_scan_is_valid = all(
         (
             catalog_digest_is_current,
@@ -782,6 +803,7 @@ def validate_no_match_scan(
             source_digest_is_consistent,
             scanned_count_matches_catalog,
             normalized_intent_matches,
+            matching_example_ids_match_catalog,
             matching_example_ids_are_empty,
         )
     )

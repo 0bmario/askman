@@ -68,15 +68,18 @@ hand-audited canonical behavior. The separately pinned full-corpus catalog
 indexes every 142 corpus examples with stable IDs, source commands/sections,
 and source-section classifications; it is an exhaustive citation inventory,
 not an expanded acceptability-label set. The validator checks deterministic ID
-linkage, exact catalog linkage, and behavior labels. It does not infer semantic
-equivalence or claim automatic semantic truth beyond the explicitly hand-audited
-support catalog. The macOS speech family
+linkage, exact catalog linkage, and behavior labels. For each unanswerable task,
+the no-match validator derives matching IDs from the full catalog's explicit
+`behavior_classification` mapping and requires the recorded scan to equal that
+derived list and be empty. It does not infer semantic equivalence or claim
+automatic semantic truth beyond the pinned catalog classifications and the
+explicitly hand-audited support catalog. The macOS speech family
 accepts the plain phrase, custom voice/rate, and Polish-language `say` examples;
 this completeness is an explicit catalog adjudication, not automatic semantic
 inference. Absence is established only against this pinned, explicitly
-hand-audited support subset and the pinned 142-example source inventory; the
-no-match scan is not a claim about examples outside that corpus/catalog and its
-source-section classifications are not semantic equivalence judgments.
+hand-audited support subset and the pinned 142-example catalog; the no-match
+scan is not a claim about examples outside that catalog and its source-section
+classifications are not semantic equivalence judgments.
 The generic common-platform `cat` concatenation family accepts both pinned
 forms: `>` writes the combined output and `>>` appends it; support is not
 narrowed to only one redirection form.
@@ -115,6 +118,42 @@ and Success@3 of 1/30 on both splits, coverage 1/60, and zero false answers
 on 30 unanswerable tasks. This is a keyword baseline, not a claim that the
 retrieval-v2 release is production-quality; dense/hybrid comparison remains
 follow-up work.
+
+## ADR-0001 release-gate evidence
+
+The two JSON reports contain exact count/denominator records under
+`breakdowns.overall`, `breakdowns.platform`, and `breakdowns.family`. Each
+split has 60 tasks: 30 answerable and 30 unanswerable. Overall results:
+
+| split | candidate recall | coverage | Success@1 | Success@3 | incorrect answered | false answers |
+| --- | --- | --- | --- | --- | --- | --- |
+| dev | 1/30 | 1/60 | 1/30 | 1/30 | 0/1 | 0/30 |
+| holdout | 1/30 | 1/60 | 1/30 | 1/30 | 0/1 | 0/30 |
+
+Platform task/answerable/unanswerable counts and metric denominators are:
+
+| split/platform | tasks | answerable | unanswerable | Success@1 | Success@3 | coverage | false answers |
+| --- | ---: | ---: | ---: | --- | --- | --- | --- |
+| dev/common | 15 | 10 | 5 | 0/10 | 0/10 | 0/15 | 0/5 |
+| dev/linux | 15 | 10 | 5 | 0/10 | 0/10 | 0/15 | 0/5 |
+| dev/osx | 15 | 5 | 10 | 0/5 | 0/5 | 0/15 | 0/10 |
+| dev/windows | 15 | 5 | 10 | 1/5 | 1/5 | 1/15 | 0/10 |
+| holdout/common | 15 | 10 | 5 | 1/10 | 1/10 | 1/15 | 0/5 |
+| holdout/linux | 15 | 5 | 10 | 0/5 | 0/5 | 0/15 | 0/10 |
+| holdout/osx | 15 | 10 | 5 | 0/10 | 0/10 | 0/15 | 0/5 |
+| holdout/windows | 15 | 5 | 10 | 0/5 | 0/5 | 0/15 | 0/10 |
+
+The reports include all 12 family rows per split, with exact task counts and
+all six metric count/denominator pairs. Concrete Success@3 failures include:
+
+- dev: `dev-v2r1-devcommon-file-content-01` (`show the contents of a file in a shell`), `-02` (`print a file's contents to the terminal`), `-03` (`read a file to standard output`); no candidates were returned.
+- holdout: `holdout-v2r1-holdoutcommon-file-content-01` (`concatenate several files into one output file`), `-02` (`join multiple files into a single output`), `-03` (`append the contents of several files into one result file`); no candidates were returned.
+
+This is not a paired `main`-versus-`retrieval-v2` release-gate run. No paired
+gain, bootstrap interval, warmed-query latency, or peak-memory comparison was
+collected. Recommendation: **inconclusive**. The keyword baseline documents
+the pinned fixture protocol only; it cannot establish the ADR promotion
+conditions without the paired evidence.
 
 Holdout access is explicit and recorded by the runner. The holdout file is
 committed for reproducibility, so this is access-gated evidence, not a secret
