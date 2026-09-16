@@ -3,9 +3,7 @@ use crate::dense::{
     MODEL_MAX_LENGTH, MODEL_REVISION, MODEL_RUNTIME, validate_dense_artifact_file,
     validate_model_cache,
 };
-use crate::tldr_subset::{
-    SourceMetadata, SubsetManifest, artifact_metadata, build_artifact, validate_artifact,
-};
+use crate::tldr_subset::{SourceMetadata, SubsetManifest, artifact_metadata, build_artifact};
 use anyhow::{Context, Result, anyhow, bail};
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
@@ -133,9 +131,7 @@ pub fn build_matching_bundle(options: BundleBuildOptions) -> Result<BundleBuildR
             options.model_cache.display()
         )
     })?;
-    if output.starts_with(&snapshot) || output.starts_with(&model_cache) {
-        bail!("bundle output must be outside its provisioned inputs");
-    }
+    validate_output_location(&output, &snapshot, &model_cache)?;
     validate_model_cache(&model_cache)?;
 
     let parent = output
@@ -307,8 +303,11 @@ pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
         manifest.dense_index.size_bytes,
         &manifest.dense_index.sha256,
     )?;
-    if database != lexical || database != dense {
-        bail!("bundle corpus and retrieval indexes must use one database");
+    if database != lexical {
+        bail!("bundle corpus and lexical index must use one database");
+    }
+    if database != dense {
+        bail!("bundle corpus and dense index must use one database");
     }
     let model_root = root.join(MODEL_DIRECTORY);
     validate_dense_artifact_file(&database, &model_root)?;
@@ -336,21 +335,7 @@ pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
             bail!("bundle source metadata does not match the matching database: {key}");
         }
     }
-    let expected_lexical_version = format!(
-        "fts5-{}-v1",
-        artifact_metadata(&connection, "lexical_index_tokenizer")?
-    );
-    let expected_corpus_version = format!(
-        "{}-corpus-v1",
-        artifact_metadata(&connection, "parser_version")?
-    );
-    if manifest.lexical_index.version != expected_lexical_version
-        || manifest.corpus.version != expected_corpus_version
-        || manifest.dense_index.recipe
-            != artifact_metadata(&connection, "dense_embedding_text_recipe")?
-    {
-        bail!("bundle component versions do not match the matching database");
-    }
+    validate_database_component_versions(&manifest, &connection)?;
     let platforms = connection
         .prepare("SELECT DISTINCT platform FROM pages")?
         .query_map([], |row| row.get::<_, String>(0))?
@@ -365,11 +350,14 @@ pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
 }
 
 fn validate_manifest_shape(manifest: &BundleManifest) -> Result<()> {
-    if manifest.schema_version != BUNDLE_SCHEMA_VERSION
-        || manifest.bundle_version != BUNDLE_VERSION
-        || manifest.artifact_kind != BUNDLE_KIND
-    {
-        bail!("unsupported matching bundle manifest version or kind");
+    if manifest.schema_version != BUNDLE_SCHEMA_VERSION {
+        bail!("unsupported matching bundle schema version");
+    }
+    if manifest.bundle_version != BUNDLE_VERSION {
+        bail!("unsupported matching bundle version");
+    }
+    if manifest.artifact_kind != BUNDLE_KIND {
+        bail!("unsupported matching bundle kind");
     }
     validate_cli_compatibility(&manifest.cli_compatibility)?;
     validate_platform_selection(&manifest.platform_selection)?;
@@ -391,12 +379,18 @@ fn checked_file(
     let path = root.join(relative);
     let canonical = fs::canonicalize(&path)
         .with_context(|| format!("bundle component is missing: {relative}"))?;
-    if !canonical.starts_with(root) || !canonical.is_file() {
+    if !canonical.starts_with(root) {
+        bail!("bundle component escapes bundle root: {relative}");
+    }
+    if !canonical.is_file() {
         bail!("bundle component is not a regular file: {relative}");
     }
     let size = fs::metadata(&canonical)?.len();
-    if size != expected_size || sha256_file(&canonical)? != expected_sha256 {
-        bail!("bundle component digest or size mismatch: {relative}");
+    if size != expected_size {
+        bail!("bundle component size mismatch: {relative}");
+    }
+    if sha256_file(&canonical)? != expected_sha256 {
+        bail!("bundle component digest mismatch: {relative}");
     }
     Ok(canonical)
 }
@@ -410,11 +404,17 @@ fn validate_model_manifest(root: &Path, model: &EmbeddingModel) -> Result<()> {
         }
         let path = root.join(&asset.path);
         let canonical = fs::canonicalize(&path)?;
-        if !canonical.starts_with(root)
-            || fs::metadata(&canonical)?.len() != asset.size_bytes
-            || sha256_file(&canonical)? != asset.sha256
-        {
-            bail!("bundle model asset digest or size mismatch: {}", asset.path);
+        if !canonical.starts_with(root) {
+            bail!("bundle model asset escapes bundle root: {}", asset.path);
+        }
+        if !canonical.is_file() {
+            bail!("bundle model asset is not a regular file: {}", asset.path);
+        }
+        if fs::metadata(&canonical)?.len() != asset.size_bytes {
+            bail!("bundle model asset size mismatch: {}", asset.path);
+        }
+        if sha256_file(&canonical)? != asset.sha256 {
+            bail!("bundle model asset digest mismatch: {}", asset.path);
         }
     }
     let expected_paths = std::iter::once(format!(
@@ -435,21 +435,37 @@ fn validate_platform_selection(selection: &PlatformSelection) -> Result<()> {
         .iter()
         .map(|value| value.to_string())
         .collect::<Vec<_>>();
-    if selection.platforms != expected || selection.filtering != "query-time" {
-        bail!("matching bundle platform selection is incompatible");
+    if selection.platforms != expected {
+        bail!("matching bundle platform list is incompatible");
+    }
+    if selection.filtering != "query-time" {
+        bail!("matching bundle platform filtering policy is incompatible");
     }
     Ok(())
 }
 
 fn validate_dense_model_metadata(manifest: &BundleManifest) -> Result<()> {
-    if manifest.dense_index.version != DENSE_INDEX_VERSION
-        || manifest.embedding_model.id != MODEL_ID
-        || manifest.embedding_model.revision != MODEL_REVISION
-        || manifest.embedding_model.runtime != MODEL_RUNTIME
-        || manifest.embedding_model.dimension != MODEL_DIMENSION
-        || manifest.embedding_model.max_length != MODEL_MAX_LENGTH
-    {
-        bail!("matching bundle dense/model compatibility metadata is invalid");
+    if manifest.dense_index.version != DENSE_INDEX_VERSION {
+        bail!("matching bundle dense index version is incompatible");
+    }
+    validate_embedding_model_metadata(&manifest.embedding_model)
+}
+
+fn validate_embedding_model_metadata(model: &EmbeddingModel) -> Result<()> {
+    if model.id != MODEL_ID {
+        bail!("matching bundle embedding model ID is incompatible");
+    }
+    if model.revision != MODEL_REVISION {
+        bail!("matching bundle embedding model revision is incompatible");
+    }
+    if model.runtime != MODEL_RUNTIME {
+        bail!("matching bundle embedding model runtime is incompatible");
+    }
+    if model.dimension != MODEL_DIMENSION {
+        bail!("matching bundle embedding model dimension is incompatible");
+    }
+    if model.max_length != MODEL_MAX_LENGTH {
+        bail!("matching bundle embedding model max length is incompatible");
     }
     Ok(())
 }
@@ -458,8 +474,11 @@ fn validate_cli_compatibility(value: &str) -> Result<()> {
     let Some(version) = value.strip_prefix("askman=") else {
         bail!("CLI compatibility must use the format askman=<version>");
     };
-    if version.is_empty() || version.chars().any(char::is_whitespace) {
-        bail!("CLI compatibility version must be non-empty and contain no whitespace");
+    if version.is_empty() {
+        bail!("CLI compatibility version must be non-empty");
+    }
+    if version.chars().any(char::is_whitespace) {
+        bail!("CLI compatibility version must contain no whitespace");
     }
     Ok(())
 }
@@ -527,9 +546,7 @@ fn collect_snapshot_pages(
             collect_snapshot_pages(&canonical, snapshot, discovered)?;
             continue;
         }
-        if canonical.is_file()
-            && canonical.extension().and_then(|value| value.to_str()) == Some("md")
-        {
+        if is_snapshot_page(&canonical) {
             let relative = canonical
                 .strip_prefix(snapshot)
                 .map_err(|_| anyhow!("snapshot page is outside snapshot root"))?
@@ -550,6 +567,10 @@ fn display_paths(paths: &[String]) -> String {
         paths.sort();
         paths.join(", ")
     }
+}
+
+fn is_snapshot_page(path: &Path) -> bool {
+    path.is_file() && path.extension().and_then(|value| value.to_str()) == Some("md")
 }
 
 fn model_manifest(model_root: &Path) -> Result<EmbeddingModel> {
@@ -613,11 +634,47 @@ fn copy_model_assets(source_cache: &Path, destination: &Path) -> Result<()> {
 
 fn source_metadata_from_artifact(path: &Path, declared: &SubsetManifest) -> Result<SourceMetadata> {
     let connection = Connection::open(path)?;
-    validate_artifact(&connection)?;
     let digest = artifact_metadata(&connection, "source_digest")?;
     let mut source = declared.source.clone();
     source.digest = digest;
     Ok(source)
+}
+
+fn validate_database_component_versions(
+    manifest: &BundleManifest,
+    connection: &Connection,
+) -> Result<()> {
+    let expected_lexical_version = format!(
+        "fts5-{}-v1",
+        artifact_metadata(connection, "lexical_index_tokenizer")?
+    );
+    if manifest.lexical_index.version != expected_lexical_version {
+        bail!("bundle lexical index version does not match the matching database");
+    }
+
+    let expected_corpus_version = format!(
+        "{}-corpus-v1",
+        artifact_metadata(connection, "parser_version")?
+    );
+    if manifest.corpus.version != expected_corpus_version {
+        bail!("bundle corpus version does not match the matching database");
+    }
+
+    let expected_dense_recipe = artifact_metadata(connection, "dense_embedding_text_recipe")?;
+    if manifest.dense_index.recipe != expected_dense_recipe {
+        bail!("bundle dense recipe does not match the matching database");
+    }
+    Ok(())
+}
+
+fn validate_output_location(output: &Path, snapshot: &Path, model_cache: &Path) -> Result<()> {
+    if output.starts_with(snapshot) {
+        bail!("bundle output must be outside the provisioned snapshot");
+    }
+    if output.starts_with(model_cache) {
+        bail!("bundle output must be outside the provisioned model cache");
+    }
+    Ok(())
 }
 
 fn artifact_metadata_from_file(path: &Path, key: &str) -> Result<String> {
@@ -658,25 +715,28 @@ fn bundle_id(manifest: &BundleManifest) -> Result<String> {
 
 fn validate_relative_path(path: &str) -> Result<()> {
     let candidate = Path::new(path);
-    if path.is_empty()
-        || candidate.is_absolute()
-        || candidate.components().any(|component| {
-            matches!(
-                component,
-                Component::CurDir
-                    | Component::ParentDir
-                    | Component::RootDir
-                    | Component::Prefix(_)
-            )
-        })
-    {
+    if path.is_empty() {
+        bail!("bundle path is not a safe relative path: {path}");
+    }
+    if candidate.is_absolute() {
+        bail!("bundle path is not a safe relative path: {path}");
+    }
+    if candidate.components().any(|component| {
+        matches!(
+            component,
+            Component::CurDir | Component::ParentDir | Component::RootDir | Component::Prefix(_)
+        )
+    }) {
         bail!("bundle path is not a safe relative path: {path}");
     }
     Ok(())
 }
 
 fn validate_sha256(value: &str) -> Result<()> {
-    if value.len() != 64 || !value.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+    if value.len() != 64 {
+        bail!("bundle SHA256 digest is invalid");
+    }
+    if !value.bytes().all(|byte| byte.is_ascii_hexdigit()) {
         bail!("bundle SHA256 digest is invalid");
     }
     Ok(())
