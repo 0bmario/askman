@@ -20,11 +20,11 @@ freeze `evaluation-v2-release-benchmark-v2`.
 - Corpus manifest digest:
   `b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8`
 - Expanded freeze manifest digest:
-  `a56789df8d4304035b07497bb1c1083cc68546971972a8db2f6e76d1d00e21d8`
+  `638877da6555224cc602817ce3cbb4f0769919f779f3d2a1ae17cda9fcbede15`
 - Dev dataset digest:
-  `5f3641bac5eca2472cec940b83bf2c4d8f490815efedf0859bd1b3474ba5b792`
+  `216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d`
 - Holdout dataset digest:
-  `8cf0faeeb7e339d1adc70195dc85f4aebdb83de5e720d65a4d6bc9714a9d68e9`
+  `bbcb51f825c17fa8b9cfdcc0ce3b7e9b873e01a22f82414d3208c373d0803865`
 - Intent provenance digest:
   `6f2b5c7a6b3a555aff538d6d85348d612828ff28b48db44c8a3f7610f40c2bfb`
 - Scorer digest:
@@ -40,9 +40,13 @@ Files:
 - Dev results: `docs/reproducibility/artifacts/evaluation-v2-expanded-dev-baseline.json`
 - Holdout results: `docs/reproducibility/artifacts/evaluation-v2-expanded-holdout-comparison.json`
 
-The manifest's executable `support_audit` binds each family's exact behavior,
-platform, label, and acceptable example IDs. Validation rejects mixed-family
-intents and any task label that deviates from its hand-audited support set.
+The manifest's executable `support_audit` v2 binds each family's exact
+behavior, platform, and label, plus task-level acceptable example IDs and
+rationales. Twenty-four evidence-bearing hand-check records cover every
+family, platform, split, and answerability label; their provenance records the
+independent review method without fabricating a reviewer identity. Validation
+rejects mixed-family intents, unrelated support IDs, stale freeze identities,
+and inconsistent hand-check evidence.
 
 The matching bundle is MIT-licensed tldr-pages content. Questions were
 authored before retrieval inspection. Labels and rationales were then

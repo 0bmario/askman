@@ -36,100 +36,643 @@
   "splits": {
     "dev": {
       "path": "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
-      "sha256": "5f3641bac5eca2472cec940b83bf2c4d8f490815efedf0859bd1b3474ba5b792",
+      "sha256": "216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d",
       "access": "development-default"
     },
     "holdout": {
       "path": "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json",
-      "sha256": "8cf0faeeb7e339d1adc70195dc85f4aebdb83de5e720d65a4d6bc9714a9d68e9",
+      "sha256": "bbcb51f825c17fa8b9cfdcc0ce3b7e9b873e01a22f82414d3208c373d0803865",
       "access": "requires --split holdout --allow-holdout; access is recorded in the evaluator report"
     }
   },
   "hand_checks": [
     {
+      "task_id": "dev-v2r1-devcommon-file-content-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "common",
+          "evidence": "Frozen task declares platform=common; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "display a file's contents in a shell",
+          "evidence": "Independent family review records the exact behavior: display a file's contents in a shell."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+          ],
+          "evidence": "The pinned cat example prints a file's contents to stdout."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
+    },
+    {
       "task_id": "dev-v2r1-devcommon-file-copy-01",
-      "checks": [
-        "platform",
-        "behavior",
-        "acceptable_support"
-      ]
-    },
-    {
-      "task_id": "dev-v2r1-devlinux-services-01",
-      "checks": [
-        "platform",
-        "behavior",
-        "acceptable_support"
-      ]
-    },
-    {
-      "task_id": "dev-v2r1-devosx-clipboard-01",
-      "checks": [
-        "platform",
-        "behavior",
-        "acceptable_support"
-      ]
-    },
-    {
-      "task_id": "dev-v2r1-devwindows-file-copy-01",
-      "checks": [
-        "platform",
-        "behavior",
-        "acceptable_support"
-      ]
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "common",
+          "evidence": "Frozen task declares platform=common; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "copy one common-platform file to another path",
+          "evidence": "Independent family review records the exact behavior: copy one common-platform file to another path."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+            "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+          ],
+          "evidence": "Both pinned cp examples copy one file to a destination."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
     },
     {
       "task_id": "dev-v2r1-devcommon-unsupported-01",
-      "checks": [
-        "platform",
-        "abstention"
-      ]
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "common",
+          "evidence": "Frozen task declares platform=common; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "create a password-protected archive with a common shell command",
+          "evidence": "Independent family review records the exact behavior: create a password-protected archive with a common shell command."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned common bundle has no password-protected archive example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devlinux-services-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "linux",
+          "evidence": "Frozen task declares platform=linux; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "restart a Linux systemd service",
+          "evidence": "Independent family review records the exact behavior: restart a Linux systemd service."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+          ],
+          "evidence": "The pinned systemctl example supports restarting a service."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devlinux-network-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "linux",
+          "evidence": "Frozen task declares platform=linux; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "list IPv4 addresses assigned to Linux network interfaces",
+          "evidence": "Independent family review records the exact behavior: list IPv4 addresses assigned to Linux network interfaces."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+            "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+          ],
+          "evidence": "The pinned ip pages provide detailed and brief interface-address examples."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devlinux-network-02",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "linux",
+          "evidence": "Frozen task declares platform=linux; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "configure a Linux firewall rule with nftables",
+          "evidence": "Independent family review records the exact behavior: configure a Linux firewall rule with nftables."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned Linux bundle has no nftables firewall configuration example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devosx-clipboard-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "osx",
+          "evidence": "Frozen task declares platform=osx; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "copy shell output to the macOS clipboard",
+          "evidence": "Independent family review records the exact behavior: copy shell output to the macOS clipboard."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+          ],
+          "evidence": "The pinned pbcopy output example copies command results to the clipboard."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devosx-unsupported-a-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "osx",
+          "evidence": "Frozen task declares platform=osx; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "read EXIF metadata from a photo on macOS",
+          "evidence": "Independent family review records the exact behavior: read EXIF metadata from a photo on macOS."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned macOS bundle has no EXIF inspection example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devosx-unsupported-b-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "osx",
+          "evidence": "Frozen task declares platform=osx; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "flush the macOS DNS cache from the terminal",
+          "evidence": "Independent family review records the exact behavior: flush the macOS DNS cache from the terminal."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned macOS bundle has no DNS-cache example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devwindows-file-copy-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "windows",
+          "evidence": "Frozen task declares platform=windows; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "copy one Windows file to another path",
+          "evidence": "Independent family review records the exact behavior: copy one Windows file to another path."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+            "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+          ],
+          "evidence": "The pinned copy examples support copying one Windows file to another location."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devwindows-unsupported-a-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "windows",
+          "evidence": "Frozen task declares platform=windows; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "query the Windows registry from a shell",
+          "evidence": "Independent family review records the exact behavior: query the Windows registry from a shell."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned Windows bundle has no registry-query example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "dev-v2r1-devwindows-unsupported-b-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "windows",
+          "evidence": "Frozen task declares platform=windows; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "view Windows event logs",
+          "evidence": "Independent family review records the exact behavior: view Windows event logs."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned Windows bundle has no event-log example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "holdout-v2r1-holdoutcommon-file-content-03",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "common",
+          "evidence": "Frozen task declares platform=common; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "concatenate multiple files into one output file",
+          "evidence": "Independent family review records the exact behavior: concatenate multiple files into one output file."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+          ],
+          "evidence": "The pinned cat append example uses >> to append several files to an output file."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
     },
     {
       "task_id": "holdout-v2r1-holdoutcommon-text-filter-01",
-      "checks": [
-        "platform",
-        "behavior",
-        "acceptable_support"
-      ]
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "common",
+          "evidence": "Frozen task declares platform=common; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "sort text lines in descending order",
+          "evidence": "Independent family review records the exact behavior: sort text lines in descending order."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+          ],
+          "evidence": "The pinned sort example orders lines in descending order."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
+    },
+    {
+      "task_id": "holdout-v2r1-holdoutcommon-unsupported-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "common",
+          "evidence": "Frozen task declares platform=common; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "resolve a DNS name from a common shell",
+          "evidence": "Independent family review records the exact behavior: resolve a DNS name from a common shell."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned common bundle has no DNS lookup example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
     },
     {
       "task_id": "holdout-v2r1-holdoutlinux-packages-01",
-      "checks": [
-        "platform",
-        "behavior",
-        "acceptable_support"
-      ]
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "linux",
+          "evidence": "Frozen task declares platform=linux; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "refresh the Debian package index with apt",
+          "evidence": "Independent family review records the exact behavior: refresh the Debian package index with apt."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+          ],
+          "evidence": "The pinned apt example updates the available package index."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
+    },
+    {
+      "task_id": "holdout-v2r1-holdoutlinux-packages-02",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "linux",
+          "evidence": "Frozen task declares platform=linux; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "install a package with pacman on Linux",
+          "evidence": "Independent family review records the exact behavior: install a package with pacman on Linux."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "holdout-v2r1-holdoutlinux-unsupported-b-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "linux",
+          "evidence": "Frozen task declares platform=linux; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "configure a Linux firewall rule with nftables",
+          "evidence": "Independent family review records the exact behavior: configure a Linux firewall rule with nftables."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned Linux bundle has no nftables firewall configuration example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "holdout-v2r1-holdoutosx-navigation-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "osx",
+          "evidence": "Frozen task declares platform=osx; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "open a file with its default macOS application",
+          "evidence": "Independent family review records the exact behavior: open a file with its default macOS application."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+          ],
+          "evidence": "The pinned open example launches a file with its associated application."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
     },
     {
       "task_id": "holdout-v2r1-holdoutosx-speech-01",
-      "checks": [
-        "platform",
-        "behavior",
-        "acceptable_support"
-      ]
-    },
-    {
-      "task_id": "holdout-v2r1-holdoutwindows-listing-01",
-      "checks": [
-        "platform",
-        "behavior",
-        "acceptable_support"
-      ]
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "osx",
+          "evidence": "Frozen task declares platform=osx; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "speak a phrase aloud with macOS say",
+          "evidence": "Independent family review records the exact behavior: speak a phrase aloud with macOS say."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+          ],
+          "evidence": "The pinned say example speaks a phrase aloud."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
     },
     {
       "task_id": "holdout-v2r1-holdoutosx-unsupported-01",
-      "checks": [
-        "platform",
-        "abstention"
-      ]
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "osx",
+          "evidence": "Frozen task declares platform=osx; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "send an SMS from a macOS terminal",
+          "evidence": "Independent family review records the exact behavior: send an SMS from a macOS terminal."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned macOS bundle has no SMS-sending example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "holdout-v2r1-holdoutwindows-listing-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "windows",
+          "evidence": "Frozen task declares platform=windows; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "list non-hidden entries in the current Windows directory",
+          "evidence": "Independent family review records the exact behavior: list non-hidden entries in the current Windows directory."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [
+            "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+            "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+          ],
+          "evidence": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+        },
+        "abstention": {
+          "result": "not_applicable",
+          "observed_answerable": true,
+          "evidence": "Task is answerable and has the recorded corpus support; abstention is not applicable."
+        }
+      }
     },
     {
       "task_id": "holdout-v2r1-holdoutwindows-unsupported-a-01",
-      "checks": [
-        "platform",
-        "abstention"
-      ]
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "windows",
+          "evidence": "Frozen task declares platform=windows; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "view Windows event logs",
+          "evidence": "Independent family review records the exact behavior: view Windows event logs."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned Windows bundle has no event-log example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
+    },
+    {
+      "task_id": "holdout-v2r1-holdoutwindows-unsupported-b-01",
+      "evidence": {
+        "platform": {
+          "result": "match",
+          "observed_platform": "windows",
+          "evidence": "Frozen task declares platform=windows; family platform record agrees."
+        },
+        "behavior": {
+          "result": "match",
+          "observed_intent": "configure a Windows firewall rule",
+          "evidence": "Independent family review records the exact behavior: configure a Windows firewall rule."
+        },
+        "acceptable_support": {
+          "result": "match",
+          "observed_example_ids": [],
+          "evidence": "The pinned Windows bundle has no firewall-configuration example."
+        },
+        "abstention": {
+          "result": "confirmed",
+          "observed_answerable": false,
+          "evidence": "Task is unanswerable and has no acceptable corpus example; abstention is confirmed."
+        }
+      }
     }
   ],
   "baseline_reports": {
@@ -137,180 +680,762 @@
     "holdout": "docs/reproducibility/artifacts/evaluation-v2-expanded-holdout-comparison.json"
   },
   "support_audit": {
-    "schema_version": 1,
+    "schema_version": 2,
     "families": {
       "dev39-common-file-content": {
         "platform": "common",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
-        ],
         "intent": "display a file's contents in a shell"
       },
       "dev39-common-file-copy": {
         "platform": "common",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
-          "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
-        ],
         "intent": "copy one common-platform file to another path"
       },
       "dev39-common-unsupported-file-encryption": {
         "platform": "common",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "create a password-protected archive with a common shell command"
       },
       "dev39-linux-systemd-restart": {
         "platform": "linux",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
-        ],
         "intent": "restart a Linux systemd service"
       },
       "dev39-linux-interface-address": {
         "platform": "linux",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
-          "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
-        ],
         "intent": "list IPv4 addresses assigned to Linux network interfaces"
       },
       "dev39-linux-firewall-unsupported": {
         "platform": "linux",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "configure a Linux firewall rule with nftables"
       },
       "dev39-osx-clipboard-output": {
         "platform": "osx",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
-        ],
         "intent": "copy shell output to the macOS clipboard"
       },
       "dev39-osx-unsupported-exif": {
         "platform": "osx",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "read EXIF metadata from a photo on macOS"
       },
       "dev39-osx-unsupported-dns": {
         "platform": "osx",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "flush the macOS DNS cache from the terminal"
       },
       "dev39-windows-file-copy-single": {
         "platform": "windows",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
-          "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
-        ],
         "intent": "copy one Windows file to another path"
       },
       "dev39-windows-unsupported-registry": {
         "platform": "windows",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "query the Windows registry from a shell"
       },
       "dev39-windows-unsupported-event-log": {
         "platform": "windows",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "view Windows event logs"
       },
       "holdout39-common-file-concatenation": {
         "platform": "common",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
-        ],
         "intent": "concatenate multiple files into one output file"
       },
       "holdout39-common-text-sort-descending": {
         "platform": "common",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
-        ],
         "intent": "sort text lines in descending order"
       },
       "holdout39-common-unsupported-dns": {
         "platform": "common",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "resolve a DNS name from a common shell"
       },
       "holdout39-linux-apt-update": {
         "platform": "linux",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
-        ],
         "intent": "refresh the Debian package index with apt"
       },
       "holdout39-linux-unsupported-pacman": {
         "platform": "linux",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "install a package with pacman on Linux"
       },
       "holdout39-linux-unsupported-firewall": {
         "platform": "linux",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "configure a Linux firewall rule with nftables"
       },
       "holdout39-osx-open-default": {
         "platform": "osx",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
-        ],
         "intent": "open a file with its default macOS application"
       },
       "holdout39-osx-speech-phrase": {
         "platform": "osx",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
-        ],
         "intent": "speak a phrase aloud with macOS say"
       },
       "holdout39-osx-unsupported-sms": {
         "platform": "osx",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "send an SMS from a macOS terminal"
       },
       "holdout39-windows-list-current": {
         "platform": "windows",
         "answerable": true,
-        "acceptable_example_ids": [
-          "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
-          "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
-        ],
         "intent": "list non-hidden entries in the current Windows directory"
       },
       "holdout39-windows-unsupported-event-log": {
         "platform": "windows",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "view Windows event logs"
       },
       "holdout39-windows-unsupported-firewall": {
         "platform": "windows",
         "answerable": false,
-        "acceptable_example_ids": [],
         "intent": "configure a Windows firewall rule"
       }
+    },
+    "tasks": {
+      "dev-v2r1-devcommon-file-content-01": {
+        "acceptable_example_ids": [
+          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        ],
+        "rationale": "The pinned cat example prints a file's contents to stdout."
+      },
+      "dev-v2r1-devcommon-file-content-02": {
+        "acceptable_example_ids": [
+          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        ],
+        "rationale": "The pinned cat example prints a file's contents to stdout."
+      },
+      "dev-v2r1-devcommon-file-content-03": {
+        "acceptable_example_ids": [
+          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        ],
+        "rationale": "The pinned cat example prints a file's contents to stdout."
+      },
+      "dev-v2r1-devcommon-file-content-04": {
+        "acceptable_example_ids": [
+          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        ],
+        "rationale": "The pinned cat example prints a file's contents to stdout."
+      },
+      "dev-v2r1-devcommon-file-content-05": {
+        "acceptable_example_ids": [
+          "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+        ],
+        "rationale": "The pinned cat example prints a file's contents to stdout."
+      },
+      "dev-v2r1-devcommon-file-copy-01": {
+        "acceptable_example_ids": [
+          "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+        ],
+        "rationale": "Both pinned cp examples copy one file to a destination."
+      },
+      "dev-v2r1-devcommon-file-copy-02": {
+        "acceptable_example_ids": [
+          "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+        ],
+        "rationale": "Both pinned cp examples copy one file to a destination."
+      },
+      "dev-v2r1-devcommon-file-copy-03": {
+        "acceptable_example_ids": [
+          "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+        ],
+        "rationale": "Both pinned cp examples copy one file to a destination."
+      },
+      "dev-v2r1-devcommon-file-copy-04": {
+        "acceptable_example_ids": [
+          "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+        ],
+        "rationale": "Both pinned cp examples copy one file to a destination."
+      },
+      "dev-v2r1-devcommon-file-copy-05": {
+        "acceptable_example_ids": [
+          "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
+        ],
+        "rationale": "Both pinned cp examples copy one file to a destination."
+      },
+      "dev-v2r1-devcommon-unsupported-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no password-protected archive example."
+      },
+      "dev-v2r1-devcommon-unsupported-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no password-protected archive example."
+      },
+      "dev-v2r1-devcommon-unsupported-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no password-protected archive example."
+      },
+      "dev-v2r1-devcommon-unsupported-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no password-protected archive example."
+      },
+      "dev-v2r1-devcommon-unsupported-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no password-protected archive example."
+      },
+      "dev-v2r1-devlinux-services-01": {
+        "acceptable_example_ids": [
+          "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+        ],
+        "rationale": "The pinned systemctl example supports restarting a service."
+      },
+      "dev-v2r1-devlinux-services-02": {
+        "acceptable_example_ids": [
+          "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+        ],
+        "rationale": "The pinned systemctl example supports restarting a service."
+      },
+      "dev-v2r1-devlinux-services-03": {
+        "acceptable_example_ids": [
+          "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+        ],
+        "rationale": "The pinned systemctl example supports restarting a service."
+      },
+      "dev-v2r1-devlinux-services-04": {
+        "acceptable_example_ids": [
+          "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+        ],
+        "rationale": "The pinned systemctl example supports restarting a service."
+      },
+      "dev-v2r1-devlinux-services-05": {
+        "acceptable_example_ids": [
+          "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+        ],
+        "rationale": "The pinned systemctl example supports restarting a service."
+      },
+      "dev-v2r1-devlinux-network-01": {
+        "acceptable_example_ids": [
+          "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+          "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+        ],
+        "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+      },
+      "dev-v2r1-devlinux-network-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "dev-v2r1-devlinux-network-03": {
+        "acceptable_example_ids": [
+          "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+          "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+        ],
+        "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+      },
+      "dev-v2r1-devlinux-network-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "dev-v2r1-devlinux-network-05": {
+        "acceptable_example_ids": [
+          "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+          "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+        ],
+        "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+      },
+      "dev-v2r1-devlinux-unsupported-01": {
+        "acceptable_example_ids": [
+          "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+          "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+        ],
+        "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+      },
+      "dev-v2r1-devlinux-unsupported-02": {
+        "acceptable_example_ids": [
+          "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+          "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+        ],
+        "rationale": "The pinned ip pages provide detailed and brief interface-address examples."
+      },
+      "dev-v2r1-devlinux-unsupported-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "dev-v2r1-devlinux-unsupported-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "dev-v2r1-devlinux-unsupported-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "dev-v2r1-devosx-clipboard-01": {
+        "acceptable_example_ids": [
+          "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+        ],
+        "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+      },
+      "dev-v2r1-devosx-clipboard-02": {
+        "acceptable_example_ids": [
+          "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+        ],
+        "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+      },
+      "dev-v2r1-devosx-clipboard-03": {
+        "acceptable_example_ids": [
+          "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+        ],
+        "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+      },
+      "dev-v2r1-devosx-clipboard-04": {
+        "acceptable_example_ids": [
+          "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+        ],
+        "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+      },
+      "dev-v2r1-devosx-clipboard-05": {
+        "acceptable_example_ids": [
+          "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+        ],
+        "rationale": "The pinned pbcopy output example copies command results to the clipboard."
+      },
+      "dev-v2r1-devosx-unsupported-a-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no EXIF inspection example."
+      },
+      "dev-v2r1-devosx-unsupported-a-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no EXIF inspection example."
+      },
+      "dev-v2r1-devosx-unsupported-a-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no EXIF inspection example."
+      },
+      "dev-v2r1-devosx-unsupported-a-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no EXIF inspection example."
+      },
+      "dev-v2r1-devosx-unsupported-a-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no EXIF inspection example."
+      },
+      "dev-v2r1-devosx-unsupported-b-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no DNS-cache example."
+      },
+      "dev-v2r1-devosx-unsupported-b-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no DNS-cache example."
+      },
+      "dev-v2r1-devosx-unsupported-b-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no DNS-cache example."
+      },
+      "dev-v2r1-devosx-unsupported-b-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no DNS-cache example."
+      },
+      "dev-v2r1-devosx-unsupported-b-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no DNS-cache example."
+      },
+      "dev-v2r1-devwindows-file-copy-01": {
+        "acceptable_example_ids": [
+          "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+        ],
+        "rationale": "The pinned copy examples support copying one Windows file to another location."
+      },
+      "dev-v2r1-devwindows-file-copy-02": {
+        "acceptable_example_ids": [
+          "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+        ],
+        "rationale": "The pinned copy examples support copying one Windows file to another location."
+      },
+      "dev-v2r1-devwindows-file-copy-03": {
+        "acceptable_example_ids": [
+          "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+        ],
+        "rationale": "The pinned copy examples support copying one Windows file to another location."
+      },
+      "dev-v2r1-devwindows-file-copy-04": {
+        "acceptable_example_ids": [
+          "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+        ],
+        "rationale": "The pinned copy examples support copying one Windows file to another location."
+      },
+      "dev-v2r1-devwindows-file-copy-05": {
+        "acceptable_example_ids": [
+          "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+        ],
+        "rationale": "The pinned copy examples support copying one Windows file to another location."
+      },
+      "dev-v2r1-devwindows-unsupported-a-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no registry-query example."
+      },
+      "dev-v2r1-devwindows-unsupported-a-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no registry-query example."
+      },
+      "dev-v2r1-devwindows-unsupported-a-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no registry-query example."
+      },
+      "dev-v2r1-devwindows-unsupported-a-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no registry-query example."
+      },
+      "dev-v2r1-devwindows-unsupported-a-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no registry-query example."
+      },
+      "dev-v2r1-devwindows-unsupported-b-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "dev-v2r1-devwindows-unsupported-b-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "dev-v2r1-devwindows-unsupported-b-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "dev-v2r1-devwindows-unsupported-b-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "dev-v2r1-devwindows-unsupported-b-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "holdout-v2r1-holdoutcommon-file-content-01": {
+        "acceptable_example_ids": [
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        ],
+        "rationale": "The pinned cat example concatenates several files into one output."
+      },
+      "holdout-v2r1-holdoutcommon-file-content-02": {
+        "acceptable_example_ids": [
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        ],
+        "rationale": "The pinned cat example concatenates several files into one output."
+      },
+      "holdout-v2r1-holdoutcommon-file-content-03": {
+        "acceptable_example_ids": [
+          "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+        ],
+        "rationale": "The pinned cat append example uses >> to append several files to an output file."
+      },
+      "holdout-v2r1-holdoutcommon-file-content-04": {
+        "acceptable_example_ids": [
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        ],
+        "rationale": "The pinned cat example concatenates several files into one output."
+      },
+      "holdout-v2r1-holdoutcommon-file-content-05": {
+        "acceptable_example_ids": [
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        ],
+        "rationale": "The pinned cat example concatenates several files into one output."
+      },
+      "holdout-v2r1-holdoutcommon-text-filter-01": {
+        "acceptable_example_ids": [
+          "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+        ],
+        "rationale": "The pinned sort example orders lines in descending order."
+      },
+      "holdout-v2r1-holdoutcommon-text-filter-02": {
+        "acceptable_example_ids": [
+          "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+        ],
+        "rationale": "The pinned sort example orders lines in descending order."
+      },
+      "holdout-v2r1-holdoutcommon-text-filter-03": {
+        "acceptable_example_ids": [
+          "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+        ],
+        "rationale": "The pinned sort example orders lines in descending order."
+      },
+      "holdout-v2r1-holdoutcommon-text-filter-04": {
+        "acceptable_example_ids": [
+          "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+        ],
+        "rationale": "The pinned sort example orders lines in descending order."
+      },
+      "holdout-v2r1-holdoutcommon-text-filter-05": {
+        "acceptable_example_ids": [
+          "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
+        ],
+        "rationale": "The pinned sort example orders lines in descending order."
+      },
+      "holdout-v2r1-holdoutcommon-unsupported-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no DNS lookup example."
+      },
+      "holdout-v2r1-holdoutcommon-unsupported-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no DNS lookup example."
+      },
+      "holdout-v2r1-holdoutcommon-unsupported-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no DNS lookup example."
+      },
+      "holdout-v2r1-holdoutcommon-unsupported-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no DNS lookup example."
+      },
+      "holdout-v2r1-holdoutcommon-unsupported-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned common bundle has no DNS lookup example."
+      },
+      "holdout-v2r1-holdoutlinux-packages-01": {
+        "acceptable_example_ids": [
+          "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+        ],
+        "rationale": "The pinned apt example updates the available package index."
+      },
+      "holdout-v2r1-holdoutlinux-packages-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+      },
+      "holdout-v2r1-holdoutlinux-packages-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+      },
+      "holdout-v2r1-holdoutlinux-packages-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+      },
+      "holdout-v2r1-holdoutlinux-packages-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-a-01": {
+        "acceptable_example_ids": [
+          "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+        ],
+        "rationale": "The pinned apt example updates the available package index."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-a-02": {
+        "acceptable_example_ids": [
+          "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+        ],
+        "rationale": "The pinned apt example updates the available package index."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-a-03": {
+        "acceptable_example_ids": [
+          "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+        ],
+        "rationale": "The pinned apt example updates the available package index."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-a-04": {
+        "acceptable_example_ids": [
+          "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+        ],
+        "rationale": "The pinned apt example updates the available package index."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-a-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-b-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-b-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-b-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-b-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "holdout-v2r1-holdoutlinux-unsupported-b-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Linux bundle has no nftables firewall configuration example."
+      },
+      "holdout-v2r1-holdoutosx-navigation-01": {
+        "acceptable_example_ids": [
+          "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+        ],
+        "rationale": "The pinned open example launches a file with its associated application."
+      },
+      "holdout-v2r1-holdoutosx-navigation-02": {
+        "acceptable_example_ids": [
+          "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+        ],
+        "rationale": "The pinned open example launches a file with its associated application."
+      },
+      "holdout-v2r1-holdoutosx-navigation-03": {
+        "acceptable_example_ids": [
+          "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+        ],
+        "rationale": "The pinned open example launches a file with its associated application."
+      },
+      "holdout-v2r1-holdoutosx-navigation-04": {
+        "acceptable_example_ids": [
+          "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+        ],
+        "rationale": "The pinned open example launches a file with its associated application."
+      },
+      "holdout-v2r1-holdoutosx-navigation-05": {
+        "acceptable_example_ids": [
+          "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+        ],
+        "rationale": "The pinned open example launches a file with its associated application."
+      },
+      "holdout-v2r1-holdoutosx-speech-01": {
+        "acceptable_example_ids": [
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        ],
+        "rationale": "The pinned say example speaks a phrase aloud."
+      },
+      "holdout-v2r1-holdoutosx-speech-02": {
+        "acceptable_example_ids": [
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        ],
+        "rationale": "The pinned say example speaks a phrase aloud."
+      },
+      "holdout-v2r1-holdoutosx-speech-03": {
+        "acceptable_example_ids": [
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        ],
+        "rationale": "The pinned say example speaks a phrase aloud."
+      },
+      "holdout-v2r1-holdoutosx-speech-04": {
+        "acceptable_example_ids": [
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        ],
+        "rationale": "The pinned say example speaks a phrase aloud."
+      },
+      "holdout-v2r1-holdoutosx-speech-05": {
+        "acceptable_example_ids": [
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        ],
+        "rationale": "The pinned say example speaks a phrase aloud."
+      },
+      "holdout-v2r1-holdoutosx-unsupported-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no SMS-sending example."
+      },
+      "holdout-v2r1-holdoutosx-unsupported-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no SMS-sending example."
+      },
+      "holdout-v2r1-holdoutosx-unsupported-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no SMS-sending example."
+      },
+      "holdout-v2r1-holdoutosx-unsupported-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no SMS-sending example."
+      },
+      "holdout-v2r1-holdoutosx-unsupported-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned macOS bundle has no SMS-sending example."
+      },
+      "holdout-v2r1-holdoutwindows-listing-01": {
+        "acceptable_example_ids": [
+          "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+        ],
+        "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+      },
+      "holdout-v2r1-holdoutwindows-listing-02": {
+        "acceptable_example_ids": [
+          "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+        ],
+        "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+      },
+      "holdout-v2r1-holdoutwindows-listing-03": {
+        "acceptable_example_ids": [
+          "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+        ],
+        "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+      },
+      "holdout-v2r1-holdoutwindows-listing-04": {
+        "acceptable_example_ids": [
+          "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+        ],
+        "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+      },
+      "holdout-v2r1-holdoutwindows-listing-05": {
+        "acceptable_example_ids": [
+          "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+        ],
+        "rationale": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-a-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-a-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-a-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-a-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-a-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no event-log example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-b-01": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no firewall-configuration example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-b-02": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no firewall-configuration example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-b-03": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no firewall-configuration example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-b-04": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no firewall-configuration example."
+      },
+      "holdout-v2r1-holdoutwindows-unsupported-b-05": {
+        "acceptable_example_ids": [],
+        "rationale": "The pinned Windows bundle has no firewall-configuration example."
+      }
     }
+  },
+  "hand_check_provenance": {
+    "method": "Independent second-pass comparison of selected frozen tasks with the task-intent record, task-level support audit, and pinned corpus fixture.",
+    "independent": true,
+    "inputs": [
+      "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
+      "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json",
+      "tests/fixtures/evaluation/task-intents-v2-expanded.json",
+      "tests/fixtures/tldr-evaluation-v2/manifest.json"
+    ],
+    "reviewed_at": "2026-09-16",
+    "identity_recorded": false
   }
 }

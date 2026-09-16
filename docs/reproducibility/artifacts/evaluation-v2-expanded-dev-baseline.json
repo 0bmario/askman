@@ -4,14 +4,14 @@
   "freeze_id": "evaluation-v2-release-benchmark-v3",
   "freeze_manifest": {
     "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
-    "sha256": "a56789df8d4304035b07497bb1c1083cc68546971972a8db2f6e76d1d00e21d8"
+    "sha256": "638877da6555224cc602817ce3cbb4f0769919f779f3d2a1ae17cda9fcbede15"
   },
-  "recorded_at": "2026-09-16T19:20:55Z",
+  "recorded_at": "2026-09-16T19:43:53Z",
   "split": "dev",
   "split_id": "scenario-family-split-v2",
   "retriever": "keyword",
   "retriever_version": "keyword-fts5-v1",
-  "dataset_sha256": "5f3641bac5eca2472cec940b83bf2c4d8f490815efedf0859bd1b3474ba5b792",
+  "dataset_sha256": "216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d",
   "scorer": {
     "version": "task-scorer-v1",
     "implementation": "scripts/evaluate_retrieval.py",
@@ -37,15 +37,33 @@
     "utc": null
   },
   "summary": {
-    "tasks": 60,
     "answerable_tasks": 30,
-    "unanswerable_tasks": 30,
-    "candidate_recall": {"count": 1, "denominator": 30},
-    "success_at_1": {"count": 1, "denominator": 30},
-    "success_at_3": {"count": 1, "denominator": 30},
-    "coverage": {"count": 1, "denominator": 60},
-    "incorrect_answered_tasks": {"count": 0, "denominator": 1},
-    "false_answers_on_unanswerable": {"count": 0, "denominator": 30}
+    "candidate_recall": {
+      "count": 1,
+      "denominator": 30
+    },
+    "coverage": {
+      "count": 1,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 0,
+      "denominator": 30
+    },
+    "incorrect_answered_tasks": {
+      "count": 0,
+      "denominator": 1
+    },
+    "success_at_1": {
+      "count": 1,
+      "denominator": 30
+    },
+    "success_at_3": {
+      "count": 1,
+      "denominator": 30
+    },
+    "tasks": 60,
+    "unanswerable_tasks": 30
   },
   "note": "Keyword baseline is a protocol smoke on the expanded fixture; it is not a production-quality retrieval claim."
 }

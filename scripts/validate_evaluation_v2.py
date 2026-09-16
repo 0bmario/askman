@@ -21,6 +21,8 @@ EXPECTED_SCORER_VERSION = "task-scorer-v1"
 EXPECTED_SPLIT_ID = "scenario-family-split-v2"
 EXPECTED_CORPUS_MANIFEST = ROOT / "tests/fixtures/tldr-full-corpus/manifest.json"
 EXPECTED_INTENT_FIELDS = {"id", "split", "family", "source_category", "intent"}
+EXPECTED_SUPPORT_AUDIT_SCHEMA_VERSION = 2
+LEGACY_MANIFEST_FREEZE_ID = "evaluation-v2-release-benchmark-v1"
 EXAMPLE_ID = re.compile(r"example-[0-9a-f]{64}\Z")
 
 
@@ -139,6 +141,20 @@ def validate_family_intents(
         )
 
 
+def validate_dataset_freeze_id(
+    manifest: dict[str, Any], dataset: dict[str, Any], split: str
+) -> None:
+    if (
+        "freeze_id" not in dataset
+        and manifest.get("freeze_id") == LEGACY_MANIFEST_FREEZE_ID
+    ):
+        return
+    if dataset.get("freeze_id") != manifest.get("freeze_id"):
+        raise ValueError(
+            f"{split} dataset freeze ID mismatch with freeze manifest"
+        )
+
+
 def validate_support_audit(
     audit: dict[str, Any],
     development: dict[str, Any],
@@ -146,15 +162,21 @@ def validate_support_audit(
     intents: dict[str, Any] | None = None,
 ) -> None:
     """Verify every task label against its independently hand-audited support set."""
-    if audit.get("schema_version") != 1:
+    if audit.get("schema_version") != EXPECTED_SUPPORT_AUDIT_SCHEMA_VERSION:
         raise ValueError("unsupported support-audit schema")
     families = audit.get("families")
     if not isinstance(families, dict):
         raise ValueError("support audit must declare family rules")
+    task_support = audit.get("tasks")
+    if not isinstance(task_support, dict):
+        raise ValueError("support audit must declare task support records")
     tasks = development["tasks"] + holdout["tasks"]
     expected_families = {task["family"] for task in tasks}
     if set(families) != expected_families:
         raise ValueError("support audit families do not match the frozen tasks")
+    expected_task_ids = {task["id"] for task in tasks}
+    if set(task_support) != expected_task_ids:
+        raise ValueError("support audit task records do not match the frozen tasks")
     intent_by_id = (
         {task["id"]: task for task in intents["tasks"]}
         if intents is not None
@@ -164,22 +186,138 @@ def validate_support_audit(
         rule = families.get(task["family"])
         if not isinstance(rule, dict):
             raise ValueError(f"missing support audit rule for {task['family']}")
+        if "acceptable_example_ids" in rule:
+            raise ValueError(
+                "support audit family rules must not carry task-level example IDs"
+            )
         if task["platform"] != rule.get("platform"):
             raise ValueError(f"support audit platform mismatch for {task['id']}")
         if task["answerable"] != rule.get("answerable"):
             raise ValueError(f"support audit label mismatch for {task['id']}")
-        expected_ids = rule.get("acceptable_example_ids")
+        support = task_support[task["id"]]
+        if not isinstance(support, dict) or set(support) != {
+            "acceptable_example_ids",
+            "rationale",
+        }:
+            raise ValueError(f"support audit task record is incomplete for {task['id']}")
+        expected_ids = support["acceptable_example_ids"]
         if task["acceptable_example_ids"] != expected_ids:
             raise ValueError(
                 f"acceptable support mismatch for {task['id']}; "
                 "labels must equal the hand-audited support set"
             )
+        if task["rationale"] != support["rationale"]:
+            raise ValueError(f"support audit rationale mismatch for {task['id']}")
         if rule.get("intent") is None or not str(rule["intent"]).strip():
             raise ValueError(f"support audit is missing the behavior intent for {task['id']}")
         if intents is not None and rule["intent"] != intent_by_id[task["id"]]["intent"]:
             raise ValueError(f"support audit intent mismatch for {task['id']}")
+        if not isinstance(expected_ids, list):
+            raise ValueError(f"support audit IDs are not a list for {task['id']}")
+        if not isinstance(support["rationale"], str) or not support["rationale"].strip():
+            raise ValueError(f"support audit rationale is empty for {task['id']}")
         if any(not EXAMPLE_ID.fullmatch(example_id) for example_id in expected_ids):
             raise ValueError(f"support audit has an unstable example ID for {task['id']}")
+
+
+def validate_hand_checks(
+    hand_checks: Any,
+    provenance: Any,
+    development: dict[str, Any],
+    holdout: dict[str, Any],
+    intents: dict[str, Any],
+) -> None:
+    """Verify evidence-bearing independent checks against frozen task labels."""
+    if not isinstance(provenance, dict):
+        raise ValueError("hand-check provenance is required")
+    required_provenance = {"method", "independent", "inputs", "reviewed_at", "identity_recorded"}
+    if not required_provenance <= provenance.keys():
+        raise ValueError("hand-check provenance is incomplete")
+    if not isinstance(provenance["method"], str) or not provenance["method"].strip():
+        raise ValueError("hand-check provenance method is empty")
+    if provenance["independent"] is not True:
+        raise ValueError("hand-check provenance must identify an independent method")
+    if provenance["identity_recorded"] is not False:
+        raise ValueError("hand-check provenance must not fabricate an identity")
+    if not isinstance(provenance["reviewed_at"], str) or not provenance["reviewed_at"].strip():
+        raise ValueError("hand-check provenance date is empty")
+    if not isinstance(provenance["inputs"], list) or not provenance["inputs"]:
+        raise ValueError("hand-check provenance must list review inputs")
+    if any(not isinstance(item, str) or not item.strip() for item in provenance["inputs"]):
+        raise ValueError("hand-check provenance inputs must be non-empty strings")
+
+    if not isinstance(hand_checks, list) or not hand_checks:
+        raise ValueError("hand-check records are required")
+    tasks = development["tasks"] + holdout["tasks"]
+    task_by_id = {task["id"]: task for task in tasks}
+    intent_by_id = {task["id"]: task for task in intents["tasks"]}
+    expected_families = {task["family"] for task in tasks}
+    seen_task_ids: set[str] = set()
+    seen_families: set[str] = set()
+    seen_platforms: set[str] = set()
+    seen_splits: set[str] = set()
+    seen_labels: set[bool] = set()
+    required_evidence = {"platform", "behavior", "acceptable_support", "abstention"}
+    for record in hand_checks:
+        if not isinstance(record, dict) or set(record) != {"task_id", "evidence"}:
+            raise ValueError("hand-check record must contain only task_id and evidence")
+        task_id = record["task_id"]
+        if task_id in seen_task_ids or task_id not in task_by_id:
+            raise ValueError(f"hand-check task ID is duplicated or unknown: {task_id}")
+        seen_task_ids.add(task_id)
+        task = task_by_id[task_id]
+        seen_families.add(task["family"])
+        seen_platforms.add(task["platform"])
+        seen_splits.add(task["split"])
+        seen_labels.add(task["answerable"])
+        evidence = record["evidence"]
+        if not isinstance(evidence, dict) or set(evidence) != required_evidence:
+            raise ValueError(f"hand-check evidence is incomplete for {task_id}")
+        platform = evidence["platform"]
+        if (
+            not isinstance(platform, dict)
+            or platform.get("result") != "match"
+            or platform.get("observed_platform") != task["platform"]
+        ):
+            raise ValueError(f"hand-check platform evidence mismatch for {task_id}")
+        behavior = evidence["behavior"]
+        expected_intent = intent_by_id[task_id]["intent"]
+        if (
+            not isinstance(behavior, dict)
+            or behavior.get("result") != "match"
+            or behavior.get("observed_intent") != expected_intent
+        ):
+            raise ValueError(f"hand-check behavior evidence mismatch for {task_id}")
+        support = evidence["acceptable_support"]
+        if (
+            not isinstance(support, dict)
+            or support.get("result") != "match"
+            or support.get("observed_example_ids") != task["acceptable_example_ids"]
+        ):
+            raise ValueError(f"hand-check acceptable support mismatch for {task_id}")
+        abstention = evidence["abstention"]
+        expected_abstention_result = "not_applicable" if task["answerable"] else "confirmed"
+        if (
+            not isinstance(abstention, dict)
+            or abstention.get("result") != expected_abstention_result
+            or abstention.get("observed_answerable") != task["answerable"]
+        ):
+            raise ValueError(f"hand-check abstention evidence mismatch for {task_id}")
+        for dimension in required_evidence:
+            item = evidence[dimension]
+            if (
+                not isinstance(item, dict)
+                or not isinstance(item.get("evidence"), str)
+                or not item["evidence"].strip()
+            ):
+                raise ValueError(f"hand-check {dimension} evidence is empty for {task_id}")
+
+    if seen_families != expected_families:
+        raise ValueError("hand-check records do not cover every scenario family")
+    if seen_platforms != {"common", "linux", "osx", "windows"}:
+        raise ValueError("hand-check records do not cover every platform")
+    if seen_splits != {"dev", "holdout"} or seen_labels != {True, False}:
+        raise ValueError("hand-check records do not cover both splits and labels")
 
 
 def validate_manifest(manifest_path: Path) -> None:
@@ -244,6 +382,7 @@ def validate_manifest(manifest_path: Path) -> None:
             raise ValueError(f"{split} dataset digest does not match the freeze manifest")
         dataset = RUNNER.load_json(path)
         RUNNER.validate_dataset(dataset, split)
+        validate_dataset_freeze_id(manifest, dataset, split)
         if dataset.get("split_policy") != manifest.get("split_policy"):
             raise ValueError(f"{split} dataset split policy differs from freeze manifest")
         if dataset.get("corpus") != corpus:
@@ -280,6 +419,15 @@ def validate_manifest(manifest_path: Path) -> None:
     if support_audit is not None:
         validate_support_audit(
             support_audit, datasets["dev"], datasets["holdout"], intents
+        )
+    hand_checks = manifest.get("hand_checks")
+    if hand_checks is not None:
+        validate_hand_checks(
+            hand_checks,
+            manifest.get("hand_check_provenance"),
+            datasets["dev"],
+            datasets["holdout"],
+            intents,
         )
 
 

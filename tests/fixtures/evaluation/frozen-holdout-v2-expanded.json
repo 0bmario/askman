@@ -8,7 +8,7 @@
   "task_count": 60,
   "answerable_task_count": 30,
   "unanswerable_task_count": 30,
-  "freeze_id": "evaluation-v2-release-benchmark-v2",
+  "freeze_id": "evaluation-v2-release-benchmark-v3",
   "provenance": {
     "intent_record": "tests/fixtures/evaluation/task-intents-v2-expanded.json",
     "intent_schema_version": 1,
@@ -57,9 +57,9 @@
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
       ],
-      "rationale": "The pinned cat example concatenates several files into one output."
+      "rationale": "The pinned cat append example uses >> to append several files to an output file."
     },
     {
       "id": "holdout-v2r1-holdoutcommon-file-content-04",

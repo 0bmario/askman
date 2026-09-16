@@ -8,7 +8,7 @@
   "task_count": 60,
   "answerable_task_count": 30,
   "unanswerable_task_count": 30,
-  "freeze_id": "evaluation-v2-release-benchmark-v2",
+  "freeze_id": "evaluation-v2-release-benchmark-v3",
   "provenance": {
     "intent_record": "tests/fixtures/evaluation/task-intents-v2-expanded.json",
     "intent_schema_version": 1,

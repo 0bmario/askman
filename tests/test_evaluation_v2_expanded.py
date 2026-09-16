@@ -45,9 +45,18 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
 
     def test_versioned_expanded_freeze_validates(self):
         VALIDATOR.validate_manifest(MANIFEST_PATH)
+        self.assertEqual(self.manifest["freeze_id"], "evaluation-v2-release-benchmark-v3")
         self.assertEqual(
             self.manifest["previous_freeze_id"], "evaluation-v2-release-benchmark-v2"
         )
+        self.assertEqual(self.development["freeze_id"], self.manifest["freeze_id"])
+        self.assertEqual(self.holdout["freeze_id"], self.manifest["freeze_id"])
+
+    def test_dataset_freeze_identity_must_match_manifest(self):
+        mutated = copy.deepcopy(self.development)
+        mutated["freeze_id"] = "evaluation-v2-release-benchmark-v2"
+        with self.assertRaisesRegex(ValueError, "freeze ID mismatch"):
+            VALIDATOR.validate_dataset_freeze_id(self.manifest, mutated, "dev")
 
     def test_corpus_is_broader_and_publicly_pinned(self):
         self.assertGreaterEqual(len(self.corpus["files"]), 24)
@@ -110,6 +119,24 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.manifest["support_audit"], mutated, self.holdout
             )
 
+    def test_holdout_append_task_uses_append_example(self):
+        task = next(
+            task
+            for task in self.holdout["tasks"]
+            if "append" in task["question"].lower()
+        )
+        append_example_id = (
+            "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+        )
+        self.assertEqual(task["acceptable_example_ids"], [append_example_id])
+        self.assertIn(">>", task["rationale"])
+        self.assertEqual(
+            self.manifest["support_audit"]["tasks"][task["id"]][
+                "acceptable_example_ids"
+            ],
+            [append_example_id],
+        )
+
     def test_intents_have_provenance_only_and_match_labels(self):
         VALIDATOR.validate_intents(self.intents, self.development, self.holdout)
         self.assertEqual(len(self.intents["tasks"]), 120)
@@ -121,17 +148,29 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         )
 
     def test_hand_checks_cover_platform_behavior_support_and_abstention(self):
-        task_ids = {
-            task["id"]
-            for task in self.development["tasks"] + self.holdout["tasks"]
-        }
-        checks = {
-            check
-            for item in self.manifest["hand_checks"]
-            for check in item["checks"]
-        }
-        self.assertTrue(all(item["task_id"] in task_ids for item in self.manifest["hand_checks"]))
-        self.assertTrue({"platform", "behavior", "acceptable_support", "abstention"} <= checks)
+        VALIDATOR.validate_hand_checks(
+            self.manifest["hand_checks"],
+            self.manifest["hand_check_provenance"],
+            self.development,
+            self.holdout,
+            self.intents,
+        )
+        self.assertEqual(
+            len(self.manifest["hand_checks"]),
+            len({task["family"] for task in self.development["tasks"] + self.holdout["tasks"]}),
+        )
+
+    def test_hand_checks_reject_inconsistent_platform_evidence(self):
+        mutated = copy.deepcopy(self.manifest["hand_checks"])
+        mutated[0]["evidence"]["platform"]["observed_platform"] = "linux"
+        with self.assertRaisesRegex(ValueError, "hand-check platform"):
+            VALIDATOR.validate_hand_checks(
+                mutated,
+                self.manifest["hand_check_provenance"],
+                self.development,
+                self.holdout,
+                self.intents,
+            )
 
     def test_published_reports_pin_all_release_digests(self):
         for split, report_path in REPORT_PATHS.items():
