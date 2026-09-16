@@ -66,6 +66,8 @@ See [the reproducible corpus instructions](docs/reproducibility/tldr-subset.md)
 and the [full-corpus build record](docs/reproducibility/tldr-full-corpus.md).
 The frozen evaluation dataset and offline baseline runner are documented in
 [the evaluation record](docs/reproducibility/evaluation-baseline.md).
+The public release benchmark is documented in
+[the evaluation-v2 freeze record](docs/reproducibility/evaluation-v2.md).
 The dense retrieval candidate is documented in the
 [dense retrieval instructions](docs/reproducibility/dense-retrieval.md).
 The hybrid comparison, bounded development tuning, and frozen operating point

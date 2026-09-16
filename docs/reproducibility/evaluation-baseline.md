@@ -5,6 +5,11 @@ It is preliminary engineering evidence, not user or production validation.
 
 ## Frozen inputs
 
+This document records `evaluation-v1`, the unchanged small regression fixture.
+It is preliminary engineering evidence, not release evidence. The public
+release benchmark is `evaluation-v2`; see
+[its freeze record](evaluation-v2.md).
+
 - Dataset: `askman-evaluation-v1`, 60 tasks across two label files.
 - Split: `scenario-family-split-v1`, 30 development and 30 holdout tasks.
 - Scenarios stay whole: six families per split, five tasks per family.
