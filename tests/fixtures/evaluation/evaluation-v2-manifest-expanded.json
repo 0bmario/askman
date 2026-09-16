@@ -41,7 +41,7 @@
     },
     "holdout": {
       "path": "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json",
-      "sha256": "b6cc7ddb34c03e7da460f351bf602a21c95af04a5a352d63da25d857841d5ce7",
+      "sha256": "3fe95900c7957218d540d657d816cc1486ad05430a0010059263f9cef803826d",
       "access": "requires --split holdout --allow-holdout; access is recorded in the evaluator report"
     }
   },
@@ -57,14 +57,32 @@
         "behavior": {
           "result": "match",
           "observed_intent": "display a file's contents in a shell",
-          "evidence": "Independent family review records the exact behavior: display a file's contents in a shell."
+          "evidence": "Independent family review records the exact behavior: display a file's contents in a shell.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+              "source_path": "pages/common/cat.md",
+              "source_line": 8,
+              "section": "Print the contents of a file to `stdout`:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
             "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
           ],
-          "evidence": "The pinned cat example prints a file's contents to stdout."
+          "evidence": "The pinned cat example prints a file's contents to stdout.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+              "source_path": "pages/common/cat.md",
+              "source_line": 8,
+              "section": "Print the contents of a file to `stdout`:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -84,7 +102,23 @@
         "behavior": {
           "result": "match",
           "observed_intent": "copy one common-platform file to another path",
-          "evidence": "Independent family review records the exact behavior: copy one common-platform file to another path."
+          "evidence": "Independent family review records the exact behavior: copy one common-platform file to another path.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+              "source_path": "pages/common/cp.md",
+              "source_line": 8,
+              "section": "Copy a file to another location:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153",
+              "source_path": "pages/common/cp.md",
+              "source_line": 12,
+              "section": "Copy a file into another directory, keeping the filename:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
@@ -92,7 +126,23 @@
             "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
             "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153"
           ],
-          "evidence": "Both pinned cp examples copy one file to a destination."
+          "evidence": "Both pinned cp examples copy one file to a destination.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+              "source_path": "pages/common/cp.md",
+              "source_line": 8,
+              "section": "Copy a file to another location:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153",
+              "source_path": "pages/common/cp.md",
+              "source_line": 12,
+              "section": "Copy a file into another directory, keeping the filename:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -112,12 +162,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "create a password-protected archive with a common shell command",
-          "evidence": "Independent family review records the exact behavior: create a password-protected archive with a common shell command."
+          "evidence": "Independent family review records the exact behavior: create a password-protected archive with a common shell command.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned common bundle has no password-protected archive example."
+          "evidence": "The pinned common bundle has no password-protected archive example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -137,14 +205,32 @@
         "behavior": {
           "result": "match",
           "observed_intent": "restart a Linux systemd service",
-          "evidence": "Independent family review records the exact behavior: restart a Linux systemd service."
+          "evidence": "Independent family review records the exact behavior: restart a Linux systemd service.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade",
+              "source_path": "pages/linux/systemctl.md",
+              "source_line": 17,
+              "section": "Start/Stop/Restart/Reload/Show the status of a service:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
             "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
           ],
-          "evidence": "The pinned systemctl example supports restarting a service."
+          "evidence": "The pinned systemctl example supports restarting a service.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade",
+              "source_path": "pages/linux/systemctl.md",
+              "source_line": 17,
+              "section": "Start/Stop/Restart/Reload/Show the status of a service:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -164,7 +250,23 @@
         "behavior": {
           "result": "match",
           "observed_intent": "list IPv4 addresses assigned to Linux network interfaces",
-          "evidence": "Independent family review records the exact behavior: list IPv4 addresses assigned to Linux network interfaces."
+          "evidence": "Independent family review records the exact behavior: list IPv4 addresses assigned to Linux network interfaces.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+              "source_path": "pages/linux/ip.md",
+              "source_line": 9,
+              "section": "List interfaces with detailed info:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e",
+              "source_path": "pages/linux/ip.md",
+              "source_line": 13,
+              "section": "List interfaces with brief network layer info:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
@@ -172,7 +274,23 @@
             "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
             "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
           ],
-          "evidence": "The pinned ip pages provide detailed and brief interface-address examples."
+          "evidence": "The pinned ip pages provide detailed and brief interface-address examples.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+              "source_path": "pages/linux/ip.md",
+              "source_line": 9,
+              "section": "List interfaces with detailed info:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e",
+              "source_path": "pages/linux/ip.md",
+              "source_line": 13,
+              "section": "List interfaces with brief network layer info:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -192,12 +310,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "configure a Linux firewall rule with nftables",
-          "evidence": "Independent family review records the exact behavior: configure a Linux firewall rule with nftables."
+          "evidence": "Independent family review records the exact behavior: configure a Linux firewall rule with nftables.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned Linux bundle has no nftables firewall configuration example."
+          "evidence": "The pinned Linux bundle has no nftables firewall configuration example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -217,14 +353,32 @@
         "behavior": {
           "result": "match",
           "observed_intent": "copy shell output to the macOS clipboard",
-          "evidence": "Independent family review records the exact behavior: copy shell output to the macOS clipboard."
+          "evidence": "Independent family review records the exact behavior: copy shell output to the macOS clipboard.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+              "source_path": "pages/osx/pbcopy.md",
+              "source_line": 13,
+              "section": "Place the results of a specific command in the clipboard:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
             "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
           ],
-          "evidence": "The pinned pbcopy output example copies command results to the clipboard."
+          "evidence": "The pinned pbcopy output example copies command results to the clipboard.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+              "source_path": "pages/osx/pbcopy.md",
+              "source_line": 13,
+              "section": "Place the results of a specific command in the clipboard:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -244,12 +398,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "read EXIF metadata from a photo on macOS",
-          "evidence": "Independent family review records the exact behavior: read EXIF metadata from a photo on macOS."
+          "evidence": "Independent family review records the exact behavior: read EXIF metadata from a photo on macOS.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned macOS bundle has no EXIF inspection example."
+          "evidence": "The pinned macOS bundle has no EXIF inspection example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -269,12 +441,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "flush the macOS DNS cache from the terminal",
-          "evidence": "Independent family review records the exact behavior: flush the macOS DNS cache from the terminal."
+          "evidence": "Independent family review records the exact behavior: flush the macOS DNS cache from the terminal.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned macOS bundle has no DNS-cache example."
+          "evidence": "The pinned macOS bundle has no DNS-cache example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -294,7 +484,23 @@
         "behavior": {
           "result": "match",
           "observed_intent": "copy one Windows file to another path",
-          "evidence": "Independent family review records the exact behavior: copy one Windows file to another path."
+          "evidence": "Independent family review records the exact behavior: copy one Windows file to another path.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+              "source_path": "pages/windows/copy.md",
+              "source_line": 9,
+              "section": "Copy a file to another location:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba",
+              "source_path": "pages/windows/copy.md",
+              "source_line": 13,
+              "section": "Copy a file into another directory, keeping the filename:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
@@ -302,7 +508,23 @@
             "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
             "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
           ],
-          "evidence": "The pinned copy examples support copying one Windows file to another location."
+          "evidence": "The pinned copy examples support copying one Windows file to another location.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+              "source_path": "pages/windows/copy.md",
+              "source_line": 9,
+              "section": "Copy a file to another location:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba",
+              "source_path": "pages/windows/copy.md",
+              "source_line": 13,
+              "section": "Copy a file into another directory, keeping the filename:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -322,12 +544,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "query the Windows registry from a shell",
-          "evidence": "Independent family review records the exact behavior: query the Windows registry from a shell."
+          "evidence": "Independent family review records the exact behavior: query the Windows registry from a shell.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned Windows bundle has no registry-query example."
+          "evidence": "The pinned Windows bundle has no registry-query example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -347,12 +587,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "view Windows event logs",
-          "evidence": "Independent family review records the exact behavior: view Windows event logs."
+          "evidence": "Independent family review records the exact behavior: view Windows event logs.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned Windows bundle has no event-log example."
+          "evidence": "The pinned Windows bundle has no event-log example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -372,14 +630,32 @@
         "behavior": {
           "result": "match",
           "observed_intent": "concatenate multiple files into one output file",
-          "evidence": "Independent family review records the exact behavior: concatenate multiple files into one output file."
+          "evidence": "Independent family review records the exact behavior: concatenate multiple files into one output file.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
             "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
           ],
-          "evidence": "The pinned cat append example uses >> to append several files to an output file."
+          "evidence": "The pinned cat append example uses >> to append several files to an output file.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -399,14 +675,32 @@
         "behavior": {
           "result": "match",
           "observed_intent": "sort text lines in descending order",
-          "evidence": "Independent family review records the exact behavior: sort text lines in descending order."
+          "evidence": "Independent family review records the exact behavior: sort text lines in descending order.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8",
+              "source_path": "pages/common/sort.md",
+              "source_line": 12,
+              "section": "Sort a file in descending order:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
             "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"
           ],
-          "evidence": "The pinned sort example orders lines in descending order."
+          "evidence": "The pinned sort example orders lines in descending order.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8",
+              "source_path": "pages/common/sort.md",
+              "source_line": 12,
+              "section": "Sort a file in descending order:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -426,12 +720,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "resolve a DNS name from a common shell",
-          "evidence": "Independent family review records the exact behavior: resolve a DNS name from a common shell."
+          "evidence": "Independent family review records the exact behavior: resolve a DNS name from a common shell.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned common bundle has no DNS lookup example."
+          "evidence": "The pinned common bundle has no DNS lookup example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -451,14 +763,32 @@
         "behavior": {
           "result": "match",
           "observed_intent": "refresh the Debian package index with apt",
-          "evidence": "Independent family review records the exact behavior: refresh the Debian package index with apt."
+          "evidence": "Independent family review records the exact behavior: refresh the Debian package index with apt.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d",
+              "source_path": "pages/linux/apt.md",
+              "source_line": 10,
+              "section": "Update the list of available packages and versions (recommended before running other `apt` commands):",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
             "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
           ],
-          "evidence": "The pinned apt example updates the available package index."
+          "evidence": "The pinned apt example updates the available package index.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d",
+              "source_path": "pages/linux/apt.md",
+              "source_line": 10,
+              "section": "Update the list of available packages and versions (recommended before running other `apt` commands):",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -478,12 +808,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "install a package with pacman on Linux",
-          "evidence": "Independent family review records the exact behavior: install a package with pacman on Linux."
+          "evidence": "Independent family review records the exact behavior: install a package with pacman on Linux.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned Linux bundle contains apt pages but no pacman package manager example."
+          "evidence": "The pinned Linux bundle contains apt pages but no pacman package manager example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -503,12 +851,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "configure a Linux firewall rule with nftables",
-          "evidence": "Independent family review records the exact behavior: configure a Linux firewall rule with nftables."
+          "evidence": "Independent family review records the exact behavior: configure a Linux firewall rule with nftables.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned Linux bundle has no nftables firewall configuration example."
+          "evidence": "The pinned Linux bundle has no nftables firewall configuration example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -528,14 +894,32 @@
         "behavior": {
           "result": "match",
           "observed_intent": "open a file with its default macOS application",
-          "evidence": "Independent family review records the exact behavior: open a file with its default macOS application."
+          "evidence": "Independent family review records the exact behavior: open a file with its default macOS application.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce",
+              "source_path": "pages/osx/open.md",
+              "source_line": 8,
+              "section": "Open a file with the associated application:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
             "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
           ],
-          "evidence": "The pinned open example launches a file with its associated application."
+          "evidence": "The pinned open example launches a file with its associated application.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce",
+              "source_path": "pages/osx/open.md",
+              "source_line": 8,
+              "section": "Open a file with the associated application:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -555,14 +939,62 @@
         "behavior": {
           "result": "match",
           "observed_intent": "speak a phrase aloud with macOS say",
-          "evidence": "Independent family review records the exact behavior: speak a phrase aloud with macOS say."
+          "evidence": "Independent family review records the exact behavior: speak a phrase aloud with macOS say.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+              "source_path": "pages/osx/say.md",
+              "source_line": 8,
+              "section": "Say a phrase aloud:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+              "source_path": "pages/osx/say.md",
+              "source_line": 16,
+              "section": "Say a phrase with a custom voice and speech rate:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24",
+              "source_path": "pages/osx/say.md",
+              "source_line": 24,
+              "section": "Say something in Polish:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
-            "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+            "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+            "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+            "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
           ],
-          "evidence": "The pinned say example speaks a phrase aloud."
+          "evidence": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+              "source_path": "pages/osx/say.md",
+              "source_line": 8,
+              "section": "Say a phrase aloud:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+              "source_path": "pages/osx/say.md",
+              "source_line": 16,
+              "section": "Say a phrase with a custom voice and speech rate:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24",
+              "source_path": "pages/osx/say.md",
+              "source_line": 24,
+              "section": "Say something in Polish:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -582,12 +1014,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "send an SMS from a macOS terminal",
-          "evidence": "Independent family review records the exact behavior: send an SMS from a macOS terminal."
+          "evidence": "Independent family review records the exact behavior: send an SMS from a macOS terminal.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned macOS bundle has no SMS-sending example."
+          "evidence": "The pinned macOS bundle has no SMS-sending example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -607,7 +1057,23 @@
         "behavior": {
           "result": "match",
           "observed_intent": "list non-hidden entries in the current Windows directory",
-          "evidence": "Independent family review records the exact behavior: list non-hidden entries in the current Windows directory."
+          "evidence": "Independent family review records the exact behavior: list non-hidden entries in the current Windows directory.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+              "source_path": "pages/windows/dir.md",
+              "source_line": 8,
+              "section": "Show the contents of the current directory:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+              "source_path": "pages/windows/get-childitem.md",
+              "source_line": 9,
+              "section": "List all non-hidden items in the current directory:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
@@ -615,7 +1081,23 @@
             "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
             "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
           ],
-          "evidence": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries."
+          "evidence": "The pinned dir and Get-ChildItem examples list non-hidden current-directory entries.",
+          "citations": [
+            {
+              "catalog_entry_id": "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+              "source_path": "pages/windows/dir.md",
+              "source_line": 8,
+              "section": "Show the contents of the current directory:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+              "source_path": "pages/windows/get-childitem.md",
+              "source_line": 9,
+              "section": "List all non-hidden items in the current directory:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "not_applicable",
@@ -635,12 +1117,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "view Windows event logs",
-          "evidence": "Independent family review records the exact behavior: view Windows event logs."
+          "evidence": "Independent family review records the exact behavior: view Windows event logs.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned Windows bundle has no event-log example."
+          "evidence": "The pinned Windows bundle has no event-log example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -660,12 +1160,30 @@
         "behavior": {
           "result": "match",
           "observed_intent": "configure a Windows firewall rule",
-          "evidence": "Independent family review records the exact behavior: configure a Windows firewall rule."
+          "evidence": "Independent family review records the exact behavior: configure a Windows firewall rule.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [],
-          "evidence": "The pinned Windows bundle has no firewall-configuration example."
+          "evidence": "The pinned Windows bundle has no firewall-configuration example.",
+          "citations": [
+            {
+              "catalog_entry_id": null,
+              "source_path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+              "source_line": null,
+              "section": "files",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            }
+          ]
         },
         "abstention": {
           "result": "confirmed",
@@ -1301,33 +1819,43 @@
       },
       "holdout-v2r1-holdoutosx-speech-01": {
         "acceptable_example_ids": [
-          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+          "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+          "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
         ],
-        "rationale": "The pinned say example speaks a phrase aloud."
+        "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
       },
       "holdout-v2r1-holdoutosx-speech-02": {
         "acceptable_example_ids": [
-          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+          "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+          "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
         ],
-        "rationale": "The pinned say example speaks a phrase aloud."
+        "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
       },
       "holdout-v2r1-holdoutosx-speech-03": {
         "acceptable_example_ids": [
-          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+          "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+          "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
         ],
-        "rationale": "The pinned say example speaks a phrase aloud."
+        "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
       },
       "holdout-v2r1-holdoutosx-speech-04": {
         "acceptable_example_ids": [
-          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+          "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+          "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
         ],
-        "rationale": "The pinned say example speaks a phrase aloud."
+        "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
       },
       "holdout-v2r1-holdoutosx-speech-05": {
         "acceptable_example_ids": [
-          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+          "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+          "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+          "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
         ],
-        "rationale": "The pinned say example speaks a phrase aloud."
+        "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
       },
       "holdout-v2r1-holdoutosx-unsupported-01": {
         "acceptable_example_ids": [],
@@ -1427,7 +1955,7 @@
     }
   },
   "hand_check_provenance": {
-    "method": "Independent second-pass comparison of selected frozen tasks with the task-intent record, task-level support audit, and pinned corpus fixture.",
+    "method": "Two-pass independent review: pass one audits task platform, behavior, and support against the pinned corpus; pass two independently rechecks each selected task and citation against the frozen labels, support catalog, and corpus manifest.",
     "independent": true,
     "inputs": [
       "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
@@ -1437,11 +1965,15 @@
       "tests/fixtures/tldr-evaluation-v2/manifest.json"
     ],
     "reviewed_at": "2026-09-16",
-    "identity_recorded": false
+    "identity_recorded": false,
+    "passes": [
+      "Pass 1: audit selected task labels and catalog support against the pinned corpus.",
+      "Pass 2: independently recheck every selected task and citation against the frozen artifacts."
+    ]
   },
   "support_catalog": {
     "path": "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json",
-    "sha256": "71f47833109c5066ca0d54dc67bb69f625cebc88dd60f8dd71a6c2c74555b53c",
+    "sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
     "catalog_id": "evaluation-v2-expanded-support-catalog-v1"
   }
 }

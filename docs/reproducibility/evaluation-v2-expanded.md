@@ -20,13 +20,13 @@ attempted expanded freeze `evaluation-v2-release-benchmark-v2`.
 - Corpus manifest digest:
   `b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8`
 - Expanded freeze manifest digest:
-  `49f94adeec52a70e02a9130ba004760492187969dc963e11c2eac2b1c6376a2c`
+  `dc9c707853d0de9acb77f0169907fa3de6fe2beb31904a2c5ee64a59f7642dd4`
 - Dev dataset digest:
   `216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d`
 - Holdout dataset digest:
-  `b6cc7ddb34c03e7da460f351bf602a21c95af04a5a352d63da25d857841d5ce7`
+  `3fe95900c7957218d540d657d816cc1486ad05430a0010059263f9cef803826d`
 - Support catalog digest:
-  `71f47833109c5066ca0d54dc67bb69f625cebc88dd60f8dd71a6c2c74555b53c`
+  `62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990`
 - Intent provenance digest:
   `6f2b5c7a6b3a555aff538d6d85348d612828ff28b48db44c8a3f7610f40c2bfb`
 - Scorer digest:
@@ -46,17 +46,23 @@ Files:
 The manifest's executable `support_audit` v2 binds each family's exact
 behavior, platform, and label, plus task-level acceptable example IDs and
 rationales. Twenty-four evidence-bearing hand-check records cover every
-family, platform, split, and answerability label; their provenance records the
-independent review method without fabricating a reviewer identity. Validation
-rejects mixed-family intents, unrelated support IDs, stale freeze identities,
-inconsistent hand-check evidence, and normalized prompt leakage between splits.
+family, platform, split, and answerability label. Each behavior and support
+check cites either its catalog entries (source page, exact section/line, and
+pinned source digest) or the pinned corpus-manifest inventory for an audited
+absence. Provenance records two independent review passes without fabricating a
+reviewer identity. Validation rejects mixed-family intents, unrelated support
+IDs, stale freeze identities, mutated/unresolved citations, inconsistent
+hand-check evidence, and normalized prompt leakage between splits.
 
 The separately pinned support catalog maps each accepted example ID to its
 source page, source line/position, exact source section, and hand-audited
 canonical behavior. Its method is an independent page/section review; the
 validator checks deterministic ID linkage, exact catalog linkage, and behavior
 labels. It does not infer semantic equivalence or claim automatic semantic
-truth beyond the catalog.
+truth beyond the explicitly hand-audited catalog. The macOS speech family
+accepts the plain phrase, custom voice/rate, and Polish-language `say` examples;
+this completeness is an explicit catalog adjudication, not automatic semantic
+inference.
 
 The matching bundle is MIT-licensed tldr-pages content. Questions were
 authored before retrieval inspection. Labels and rationales were then

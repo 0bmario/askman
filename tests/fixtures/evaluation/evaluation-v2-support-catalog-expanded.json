@@ -108,6 +108,13 @@
       "section": "Print the contents of a file to `stdout`:",
       "canonical_behavior": "display a file's contents in a shell"
     },
+    "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24": {
+      "source_path": "pages/osx/say.md",
+      "source_line": 24,
+      "source_position": 5,
+      "section": "Say something in Polish:",
+      "canonical_behavior": "speak a phrase aloud with macOS say"
+    },
     "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b": {
       "source_path": "pages/common/cp.md",
       "source_line": 8,
@@ -135,6 +142,13 @@
       "source_position": 1,
       "section": "Show the contents of the current directory:",
       "canonical_behavior": "list non-hidden entries in the current Windows directory"
+    },
+    "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d": {
+      "source_path": "pages/osx/say.md",
+      "source_line": 16,
+      "source_position": 3,
+      "section": "Say a phrase with a custom voice and speech rate:",
+      "canonical_behavior": "speak a phrase aloud with macOS say"
     },
     "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e": {
       "source_path": "pages/linux/ip.md",

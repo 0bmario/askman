@@ -423,9 +423,11 @@
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
       ],
-      "rationale": "The pinned say example speaks a phrase aloud."
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
     },
     {
       "id": "holdout-v2r1-holdoutosx-speech-02",
@@ -435,9 +437,11 @@
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
       ],
-      "rationale": "The pinned say example speaks a phrase aloud."
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
     },
     {
       "id": "holdout-v2r1-holdoutosx-speech-03",
@@ -447,9 +451,11 @@
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
       ],
-      "rationale": "The pinned say example speaks a phrase aloud."
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
     },
     {
       "id": "holdout-v2r1-holdoutosx-speech-04",
@@ -459,9 +465,11 @@
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
       ],
-      "rationale": "The pinned say example speaks a phrase aloud."
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
     },
     {
       "id": "holdout-v2r1-holdoutosx-speech-05",
@@ -471,9 +479,11 @@
       "platform": "osx",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf"
+        "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24"
       ],
-      "rationale": "The pinned say example speaks a phrase aloud."
+      "rationale": "The pinned say examples speak a phrase aloud: the plain, custom voice/rate, and Polish-language examples."
     },
     {
       "id": "holdout-v2r1-holdoutosx-unsupported-01",

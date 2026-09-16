@@ -189,6 +189,85 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
             [append_example_id],
         )
 
+    def test_speech_tasks_include_all_compatible_say_examples(self):
+        speech_intent = "speak a phrase aloud with macOS say"
+        expected_compatible_ids = {
+            "example-aa4471a722c72a121cbd4edb616ea9725e4541d1303864a8f74fc7a3a60222cf",
+            "example-b81c48d57981c4099a14be07cda1740b1ea1ab1e3a78c67694ebf3e2bfc9fd24",
+            "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+        }
+        catalog_compatible_ids = {
+            example_id
+            for example_id, entry in self.catalog["entries"].items()
+            if entry["source_path"] == "pages/osx/say.md"
+            and entry["canonical_behavior"] == speech_intent
+        }
+        self.assertEqual(catalog_compatible_ids, expected_compatible_ids)
+        speech_tasks = [
+            task
+            for task in self.holdout["tasks"]
+            if task["family"] == "holdout39-osx-speech-phrase"
+        ]
+        self.assertEqual(len(speech_tasks), 5)
+        for task in speech_tasks:
+            self.assertEqual(set(task["acceptable_example_ids"]), expected_compatible_ids)
+            self.assertEqual(
+                set(
+                    self.manifest["support_audit"]["tasks"][task["id"]][
+                        "acceptable_example_ids"
+                    ]
+                ),
+                expected_compatible_ids,
+            )
+
+    def test_hand_checks_reject_mutated_support_citation(self):
+        mutated = copy.deepcopy(self.manifest["hand_checks"])
+        mutated[0]["evidence"]["acceptable_support"]["citations"] = [
+            {
+                "catalog_entry_id": mutated[0]["evidence"]["acceptable_support"][
+                    "observed_example_ids"
+                ][0],
+                "source_path": "pages/common/cat.md",
+                "source_line": 999,
+                "section": "Print the contents of a file to `stdout`: ",
+                "source_digest": self.manifest["corpus"]["source_digest"],
+            }
+        ]
+        with self.assertRaisesRegex(ValueError, "citation"):
+            VALIDATOR.validate_hand_checks(
+                mutated,
+                self.manifest["hand_check_provenance"],
+                self.development,
+                self.holdout,
+                self.intents,
+                self.catalog,
+                self.manifest["corpus"],
+                self.manifest["corpus_manifest"],
+            )
+
+    def test_hand_checks_reject_unsupported_citation_id(self):
+        mutated = copy.deepcopy(self.manifest["hand_checks"])
+        mutated[0]["evidence"]["behavior"]["citations"] = [
+            {
+                "catalog_entry_id": "example-" + "0" * 64,
+                "source_path": "pages/common/cat.md",
+                "source_line": 8,
+                "section": "Print the contents of a file to `stdout`: ",
+                "source_digest": self.manifest["corpus"]["source_digest"],
+            }
+        ]
+        with self.assertRaisesRegex(ValueError, "citation"):
+            VALIDATOR.validate_hand_checks(
+                mutated,
+                self.manifest["hand_check_provenance"],
+                self.development,
+                self.holdout,
+                self.intents,
+                self.catalog,
+                self.manifest["corpus"],
+                self.manifest["corpus_manifest"],
+            )
+
     def test_intents_have_provenance_only_and_match_labels(self):
         VALIDATOR.validate_intents(self.intents, self.development, self.holdout)
         self.assertEqual(len(self.intents["tasks"]), 120)
@@ -206,6 +285,9 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
             self.development,
             self.holdout,
             self.intents,
+            self.catalog,
+            self.manifest["corpus"],
+            self.manifest["corpus_manifest"],
         )
         self.assertEqual(
             len(self.manifest["hand_checks"]),
@@ -222,6 +304,9 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.development,
                 self.holdout,
                 self.intents,
+                self.catalog,
+                self.manifest["corpus"],
+                self.manifest["corpus_manifest"],
             )
 
     def test_published_reports_pin_all_release_digests(self):

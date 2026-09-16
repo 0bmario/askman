@@ -477,17 +477,110 @@ def validate_support_audit(
                 )
 
 
+def validate_hand_check_citations(
+    citations: Any,
+    expected_example_ids: list[str],
+    support_catalog: dict[str, Any],
+    corpus: dict[str, Any],
+    corpus_manifest_path: str,
+    task_id: str,
+    dimension: str,
+) -> None:
+    """Require hand-check citations to resolve to the pinned catalog or corpus."""
+    required_citation_fields = {
+        "catalog_entry_id",
+        "source_path",
+        "source_line",
+        "section",
+        "source_digest",
+    }
+    citations_are_recorded = isinstance(citations, list) and bool(citations)
+    if not citations_are_recorded:
+        raise ValueError(f"hand-check {dimension} citations are required for {task_id}")
+    catalog_entries = support_catalog.get("entries")
+    if not isinstance(catalog_entries, dict):
+        raise ValueError("support catalog must declare example entries")
+    expected_source_digest = corpus.get("source_digest")
+    source_digest_is_pinned = (
+        isinstance(expected_source_digest, str) and bool(expected_source_digest.strip())
+    )
+    if not source_digest_is_pinned:
+        raise ValueError("hand-check citations require a pinned corpus source digest")
+    expected_manifest_path = corpus_manifest_path
+    catalog_citation_ids: list[str] = []
+    manifest_citation_count = 0
+    for citation in citations:
+        citation_shape_is_valid = (
+            isinstance(citation, dict) and set(citation) == required_citation_fields
+        )
+        if not citation_shape_is_valid:
+            raise ValueError(f"hand-check {dimension} citation is incomplete for {task_id}")
+        source_digest_matches = citation["source_digest"] == expected_source_digest
+        if not source_digest_matches:
+            raise ValueError(f"hand-check {dimension} citation digest mismatch for {task_id}")
+        catalog_entry_id = citation["catalog_entry_id"]
+        if catalog_entry_id is None:
+            manifest_citation_is_valid = (
+                citation["source_path"] == expected_manifest_path
+                and citation["source_line"] is None
+                and citation["section"] == "files"
+                and resolve_path(expected_manifest_path).is_file()
+            )
+            if not manifest_citation_is_valid:
+                raise ValueError(f"hand-check {dimension} citation does not resolve for {task_id}")
+            manifest_citation_count += 1
+            continue
+        catalog_entry = catalog_entries.get(catalog_entry_id)
+        catalog_entry_is_supported = isinstance(catalog_entry, dict)
+        if not catalog_entry_is_supported:
+            raise ValueError(
+                f"hand-check {dimension} citation has unsupported catalog entry for {task_id}"
+            )
+        citation_matches_catalog = (
+            citation["source_path"] == catalog_entry["source_path"]
+            and citation["source_line"] == catalog_entry["source_line"]
+            and citation["section"] == catalog_entry["section"]
+        )
+        if not citation_matches_catalog:
+            raise ValueError(f"hand-check {dimension} citation does not match catalog for {task_id}")
+        catalog_citation_ids.append(catalog_entry_id)
+
+    citation_ids_are_unique = len(catalog_citation_ids) == len(set(catalog_citation_ids))
+    expected_ids_are_cited = set(catalog_citation_ids) == set(expected_example_ids)
+    manifest_citation_is_exclusive = (
+        not expected_example_ids and manifest_citation_count > 0 and not catalog_citation_ids
+    )
+    catalog_citations_are_exclusive = (
+        bool(expected_example_ids)
+        and manifest_citation_count == 0
+        and citation_ids_are_unique
+        and expected_ids_are_cited
+    )
+    if not (manifest_citation_is_exclusive or catalog_citations_are_exclusive):
+        raise ValueError(f"hand-check {dimension} citations do not match support for {task_id}")
+
+
 def validate_hand_checks(
     hand_checks: Any,
     provenance: Any,
     development: dict[str, Any],
     holdout: dict[str, Any],
     intents: dict[str, Any],
+    support_catalog: dict[str, Any],
+    corpus: dict[str, Any],
+    corpus_manifest_path: str,
 ) -> None:
     """Verify evidence-bearing independent checks against frozen task labels."""
     if not isinstance(provenance, dict):
         raise ValueError("hand-check provenance is required")
-    required_provenance = {"method", "independent", "inputs", "reviewed_at", "identity_recorded"}
+    required_provenance = {
+        "method",
+        "passes",
+        "independent",
+        "inputs",
+        "reviewed_at",
+        "identity_recorded",
+    }
     provenance_fields_are_complete = required_provenance <= provenance.keys()
     if not provenance_fields_are_complete:
         raise ValueError("hand-check provenance is incomplete")
@@ -496,6 +589,13 @@ def validate_hand_checks(
     )
     if not method_is_recorded:
         raise ValueError("hand-check provenance method is empty")
+    review_passes_are_recorded = (
+        isinstance(provenance["passes"], list)
+        and len(provenance["passes"]) == 2
+        and all(isinstance(item, str) and item.strip() for item in provenance["passes"])
+    )
+    if not review_passes_are_recorded:
+        raise ValueError("hand-check provenance must record two independent review passes")
     independent_method_is_declared = provenance["independent"] is True
     if not independent_method_is_declared:
         raise ValueError("hand-check provenance must identify an independent method")
@@ -580,6 +680,24 @@ def validate_hand_checks(
         )
         if support_evidence_is_inconsistent:
             raise ValueError(f"hand-check acceptable support mismatch for {task_id}")
+        validate_hand_check_citations(
+            behavior.get("citations"),
+            task["acceptable_example_ids"],
+            support_catalog,
+            corpus,
+            corpus_manifest_path,
+            task_id,
+            "behavior",
+        )
+        validate_hand_check_citations(
+            support.get("citations"),
+            task["acceptable_example_ids"],
+            support_catalog,
+            corpus,
+            corpus_manifest_path,
+            task_id,
+            "acceptable support",
+        )
         abstention = evidence["abstention"]
         expected_abstention_result = "not_applicable" if task["answerable"] else "confirmed"
         abstention_evidence_is_inconsistent = (
@@ -703,6 +821,7 @@ def validate_manifest(manifest_path: Path) -> None:
     validate_intents(intents, datasets["dev"], datasets["holdout"])
     validate_family_intents(intents, datasets["dev"], datasets["holdout"])
     support_audit = manifest.get("support_audit")
+    support_catalog = None
     if support_audit is not None:
         validate_split_question_disjointness(
             datasets["dev"], datasets["holdout"]
@@ -737,12 +856,17 @@ def validate_manifest(manifest_path: Path) -> None:
         )
     hand_checks = manifest.get("hand_checks")
     if hand_checks is not None:
+        if support_catalog is None:
+            raise ValueError("hand checks require a support catalog")
         validate_hand_checks(
             hand_checks,
             manifest.get("hand_check_provenance"),
             datasets["dev"],
             datasets["holdout"],
             intents,
+            support_catalog,
+            corpus,
+            corpus_manifest_value or str(corpus_manifest_path.relative_to(ROOT)),
         )
 
 

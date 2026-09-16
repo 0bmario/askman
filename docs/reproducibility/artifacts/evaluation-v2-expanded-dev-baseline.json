@@ -4,9 +4,9 @@
   "freeze_id": "evaluation-v2-release-benchmark-v3",
   "freeze_manifest": {
     "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
-    "sha256": "49f94adeec52a70e02a9130ba004760492187969dc963e11c2eac2b1c6376a2c"
+    "sha256": "dc9c707853d0de9acb77f0169907fa3de6fe2beb31904a2c5ee64a59f7642dd4"
   },
-  "recorded_at": "2026-09-16T20:11:54Z",
+  "recorded_at": "2026-09-16T20:40:37Z",
   "split": "dev",
   "split_id": "scenario-family-split-v2",
   "retriever": "keyword",
@@ -68,7 +68,7 @@
   "note": "Keyword baseline is a protocol smoke on the expanded fixture; it is not a production-quality retrieval claim.",
   "support_catalog": {
     "path": "tests/fixtures/evaluation/evaluation-v2-support-catalog-expanded.json",
-    "sha256": "71f47833109c5066ca0d54dc67bb69f625cebc88dd60f8dd71a6c2c74555b53c",
+    "sha256": "62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990",
     "catalog_id": "evaluation-v2-expanded-support-catalog-v1"
   }
 }
