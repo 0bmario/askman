@@ -19,7 +19,7 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 pub const MODEL_ID: &str = "Qdrant/all-MiniLM-L6-v2-onnx";
-const MODEL_CACHE_FOLDER: &str = "models--Qdrant--all-MiniLM-L6-v2-onnx";
+pub const MODEL_CACHE_FOLDER: &str = "models--Qdrant--all-MiniLM-L6-v2-onnx";
 pub const MODEL_REVISION: &str = "5f1b8cd78bc4fb444dd171e59b18f3a3af89a079";
 pub const MODEL_DIMENSION: usize = 384;
 pub const MODEL_MAX_LENGTH: usize = 512;
@@ -30,7 +30,7 @@ pub const DENSE_DISTANCE_METRIC: &str = "cosine";
 pub const DENSE_RECIPE_VERSION: &str = "dense-text-v1";
 pub const DEFAULT_BATCH_SIZE: usize = 32;
 
-const MODEL_FILES: [(&str, &str); 5] = [
+pub const MODEL_FILES: [(&str, &str); 5] = [
     (
         "config.json",
         "1b4d8e2a3988377ed8b519a31d8d31025a25f1c5f8606998e8014111438efcd7",
@@ -741,6 +741,17 @@ fn validate_model_assets(cache: &Path) -> Result<ModelAssets> {
 
 pub fn validate_model_cache(cache: &Path) -> Result<()> {
     validate_model_assets(cache).map(|_| ())
+}
+
+/// Validate a dense artifact and its model against the pinned offline assets.
+/// This is used by the matching-bundle builder before publication.
+pub fn validate_dense_artifact_file(artifact: &Path, model_cache: &Path) -> Result<()> {
+    register_sqlite_vec();
+    let assets = validate_model_assets(model_cache)?;
+    let connection = Connection::open(artifact)
+        .with_context(|| format!("failed to open dense artifact {}", artifact.display()))?;
+    validate_artifact(&connection)?;
+    validate_dense_artifact(&connection, &assets)
 }
 
 fn load_embedder(assets: &ModelAssets) -> Result<TextEmbedding> {
