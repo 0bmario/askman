@@ -47,6 +47,39 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         self.catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
         self.full_catalog = json.loads(FULL_CATALOG_PATH.read_text(encoding="utf-8"))
 
+    def _hand_check_context(self):
+        return VALIDATOR.HandCheckValidationContext(
+            development=self.development,
+            holdout=self.holdout,
+            intents=self.intents,
+            support_catalog=self.catalog,
+            support_catalog_pin=self.manifest["support_catalog"],
+            full_corpus_catalog=self.full_catalog,
+            full_corpus_catalog_pin=self.manifest["full_corpus_catalog"],
+            corpus=self.manifest["corpus"],
+        )
+
+    def _validate_hand_checks(self, hand_checks=None):
+        VALIDATOR.validate_hand_checks(
+            self.manifest["hand_checks"] if hand_checks is None else hand_checks,
+            self.manifest["hand_check_provenance"],
+            self._hand_check_context(),
+        )
+
+    def _task_by_id(self):
+        return {
+            task["id"]: task
+            for task in self.development["tasks"] + self.holdout["tasks"]
+        }
+
+    def _unanswerable_hand_check(self, hand_checks):
+        tasks_by_id = self._task_by_id()
+        return next(
+            record
+            for record in hand_checks
+            if not tasks_by_id[record["task_id"]]["answerable"]
+        )
+
     def test_versioned_expanded_freeze_validates(self):
         VALIDATOR.validate_manifest(MANIFEST_PATH)
         self.assertEqual(self.manifest["freeze_id"], "evaluation-v2-release-benchmark-v3")
@@ -183,23 +216,27 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
                 self.development, mutated
             )
 
-    def test_holdout_append_task_uses_append_example(self):
-        task = next(
+    def test_holdout_generic_concatenation_accepts_overwrite_and_append_examples(self):
+        expected_example_ids = [
+            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+            "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+        ]
+        tasks = [
             task
             for task in self.holdout["tasks"]
-            if "append" in task["question"].lower()
-        )
-        append_example_id = (
-            "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
-        )
-        self.assertEqual(task["acceptable_example_ids"], [append_example_id])
-        self.assertIn(">>", task["rationale"])
-        self.assertEqual(
-            self.manifest["support_audit"]["tasks"][task["id"]][
-                "acceptable_example_ids"
-            ],
-            [append_example_id],
-        )
+            if task["family"] == "holdout39-common-file-concatenation"
+        ]
+        self.assertEqual(len(tasks), 5)
+        for task in tasks:
+            self.assertEqual(task["acceptable_example_ids"], expected_example_ids)
+            self.assertIn(">", task["rationale"])
+            self.assertIn(">>", task["rationale"])
+            self.assertEqual(
+                self.manifest["support_audit"]["tasks"][task["id"]][
+                    "acceptable_example_ids"
+                ],
+                expected_example_ids,
+            )
 
     def test_speech_tasks_include_all_compatible_say_examples(self):
         speech_intent = "speak a phrase aloud with macOS say"
@@ -246,18 +283,7 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
             }
         ]
         with self.assertRaisesRegex(ValueError, "citation"):
-            VALIDATOR.validate_hand_checks(
-                mutated,
-                self.manifest["hand_check_provenance"],
-                self.development,
-                self.holdout,
-                self.intents,
-                self.catalog,
-                self.manifest["support_catalog"],
-                self.full_catalog,
-                self.manifest["full_corpus_catalog"],
-                self.manifest["corpus"],
-            )
+            self._validate_hand_checks(mutated)
 
     def test_hand_checks_reject_unsupported_citation_id(self):
         mutated = copy.deepcopy(self.manifest["hand_checks"])
@@ -271,119 +297,40 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
             }
         ]
         with self.assertRaisesRegex(ValueError, "citation"):
-            VALIDATOR.validate_hand_checks(
-                mutated,
-                self.manifest["hand_check_provenance"],
-                self.development,
-                self.holdout,
-                self.intents,
-                self.catalog,
-                self.manifest["support_catalog"],
-                self.full_catalog,
-                self.manifest["full_corpus_catalog"],
-                self.manifest["corpus"],
-            )
+            self._validate_hand_checks(mutated)
 
     def test_hand_checks_reject_false_abstention_scan(self):
         mutated = copy.deepcopy(self.manifest["hand_checks"])
-        record = next(
-            record
-            for record in mutated
-            if not next(
-                task
-                for task in self.development["tasks"] + self.holdout["tasks"]
-                if task["id"] == record["task_id"]
-            )["answerable"]
-        )
+        record = self._unanswerable_hand_check(mutated)
         record["evidence"]["behavior"]["no_match_scan"]["matching_example_ids"] = [
             next(iter(self.catalog["entries"]))
         ]
         with self.assertRaisesRegex(ValueError, "no-match scan"):
-            VALIDATOR.validate_hand_checks(
-                mutated,
-                self.manifest["hand_check_provenance"],
-                self.development,
-                self.holdout,
-                self.intents,
-                self.catalog,
-                self.manifest["support_catalog"],
-                self.full_catalog,
-                self.manifest["full_corpus_catalog"],
-                self.manifest["corpus"],
-            )
+            self._validate_hand_checks(mutated)
 
     def test_hand_checks_reject_stale_no_match_scan(self):
         mutated = copy.deepcopy(self.manifest["hand_checks"])
-        record = next(
-            record
-            for record in mutated
-            if not next(
-                task
-                for task in self.development["tasks"] + self.holdout["tasks"]
-                if task["id"] == record["task_id"]
-            )["answerable"]
-        )
+        record = self._unanswerable_hand_check(mutated)
         record["evidence"]["acceptable_support"]["no_match_scan"][
             "catalog_sha256"
         ] = "0" * 64
         with self.assertRaisesRegex(ValueError, "no-match scan"):
-            VALIDATOR.validate_hand_checks(
-                mutated,
-                self.manifest["hand_check_provenance"],
-                self.development,
-                self.holdout,
-                self.intents,
-                self.catalog,
-                self.manifest["support_catalog"],
-                self.full_catalog,
-                self.manifest["full_corpus_catalog"],
-                self.manifest["corpus"],
-            )
+            self._validate_hand_checks(mutated)
 
     def test_hand_checks_reject_partial_catalog_abstention_scan(self):
         mutated = copy.deepcopy(self.manifest["hand_checks"])
-        record = next(
-            record
-            for record in mutated
-            if not next(
-                task
-                for task in self.development["tasks"] + self.holdout["tasks"]
-                if task["id"] == record["task_id"]
-            )["answerable"]
-        )
+        record = self._unanswerable_hand_check(mutated)
         record["evidence"]["behavior"]["no_match_scan"][
             "scanned_example_count"
         ] = len(self.catalog["entries"])
         with self.assertRaisesRegex(ValueError, "no-match scan"):
-            VALIDATOR.validate_hand_checks(
-                mutated,
-                self.manifest["hand_check_provenance"],
-                self.development,
-                self.holdout,
-                self.intents,
-                self.catalog,
-                self.manifest["support_catalog"],
-                self.full_catalog,
-                self.manifest["full_corpus_catalog"],
-                self.manifest["corpus"],
-            )
+            self._validate_hand_checks(mutated)
 
     def test_hand_checks_reject_missing_task_coverage(self):
         mutated = copy.deepcopy(self.manifest["hand_checks"])
         mutated.pop()
         with self.assertRaisesRegex(ValueError, "exact task-ID coverage"):
-            VALIDATOR.validate_hand_checks(
-                mutated,
-                self.manifest["hand_check_provenance"],
-                self.development,
-                self.holdout,
-                self.intents,
-                self.catalog,
-                self.manifest["support_catalog"],
-                self.full_catalog,
-                self.manifest["full_corpus_catalog"],
-                self.manifest["corpus"],
-            )
+            self._validate_hand_checks(mutated)
 
     def test_intents_have_provenance_only_and_match_labels(self):
         VALIDATOR.validate_intents(self.intents, self.development, self.holdout)
@@ -396,18 +343,7 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         )
 
     def test_hand_checks_cover_platform_behavior_support_and_abstention(self):
-        VALIDATOR.validate_hand_checks(
-            self.manifest["hand_checks"],
-            self.manifest["hand_check_provenance"],
-            self.development,
-            self.holdout,
-            self.intents,
-            self.catalog,
-            self.manifest["support_catalog"],
-            self.full_catalog,
-            self.manifest["full_corpus_catalog"],
-            self.manifest["corpus"],
-        )
+        self._validate_hand_checks()
         self.assertEqual(
             len(self.manifest["hand_checks"]),
             len(self.development["tasks"] + self.holdout["tasks"]),
@@ -417,18 +353,7 @@ class ExpandedEvaluationV2Tests(unittest.TestCase):
         mutated = copy.deepcopy(self.manifest["hand_checks"])
         mutated[0]["evidence"]["platform"]["observed_platform"] = "linux"
         with self.assertRaisesRegex(ValueError, "hand-check platform"):
-            VALIDATOR.validate_hand_checks(
-                mutated,
-                self.manifest["hand_check_provenance"],
-                self.development,
-                self.holdout,
-                self.intents,
-                self.catalog,
-                self.manifest["support_catalog"],
-                self.full_catalog,
-                self.manifest["full_corpus_catalog"],
-                self.manifest["corpus"],
-            )
+            self._validate_hand_checks(mutated)
 
     def test_published_reports_pin_all_release_digests(self):
         for split, report_path in REPORT_PATHS.items():

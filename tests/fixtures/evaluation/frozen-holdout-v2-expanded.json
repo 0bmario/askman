@@ -33,9 +33,10 @@
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
       ],
-      "rationale": "The pinned cat example concatenates several files into one output."
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
     },
     {
       "id": "holdout-v2r1-holdoutcommon-file-content-02",
@@ -45,9 +46,10 @@
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
       ],
-      "rationale": "The pinned cat example concatenates several files into one output."
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
     },
     {
       "id": "holdout-v2r1-holdoutcommon-file-content-03",
@@ -57,9 +59,10 @@
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
         "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
       ],
-      "rationale": "The pinned cat append example uses >> to append several files to an output file."
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
     },
     {
       "id": "holdout-v2r1-holdoutcommon-file-content-04",
@@ -69,9 +72,10 @@
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
       ],
-      "rationale": "The pinned cat example concatenates several files into one output."
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
     },
     {
       "id": "holdout-v2r1-holdoutcommon-file-content-05",
@@ -81,9 +85,10 @@
       "platform": "common",
       "answerable": true,
       "acceptable_example_ids": [
-        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
       ],
-      "rationale": "The pinned cat example concatenates several files into one output."
+      "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
     },
     {
       "id": "holdout-v2r1-holdoutcommon-text-filter-01",

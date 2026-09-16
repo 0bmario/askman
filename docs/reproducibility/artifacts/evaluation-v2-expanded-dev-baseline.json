@@ -4,9 +4,9 @@
   "freeze_id": "evaluation-v2-release-benchmark-v3",
   "freeze_manifest": {
     "path": "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json",
-    "sha256": "06297787191f7f186fa20baf4a5a7e9d831871d72c68ec685c8a586455d172ec"
+    "sha256": "4f258311db08cad15c1473c77ff6d98e2fa3b0044990fcdfcbc8110f96fc46dc"
   },
-  "recorded_at": "2026-09-16T20:40:37Z",
+  "recorded_at": "2026-09-16T21:25:50Z",
   "split": "dev",
   "split_id": "scenario-family-split-v2",
   "retriever": "keyword",

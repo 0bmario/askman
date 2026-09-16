@@ -20,11 +20,11 @@ attempted expanded freeze `evaluation-v2-release-benchmark-v2`.
 - Corpus manifest digest:
   `b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8`
 - Expanded freeze manifest digest:
-  `06297787191f7f186fa20baf4a5a7e9d831871d72c68ec685c8a586455d172ec`
+  `4f258311db08cad15c1473c77ff6d98e2fa3b0044990fcdfcbc8110f96fc46dc`
 - Dev dataset digest:
   `216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d`
 - Holdout dataset digest:
-  `3fe95900c7957218d540d657d816cc1486ad05430a0010059263f9cef803826d`
+  `1aa1c0a8ec5c550b8a6699654bb5eb56928bd6845f0b3610bb7a8ee368813418`
 - Support catalog digest:
   `62cc22160acbe0daa397327fcf94dc5809d11a3c4c390be693f270d4d584f990`
 - Full-corpus catalog digest:
@@ -77,6 +77,9 @@ inference. Absence is established only against this pinned, explicitly
 hand-audited support subset and the pinned 142-example source inventory; the
 no-match scan is not a claim about examples outside that corpus/catalog and its
 source-section classifications are not semantic equivalence judgments.
+The generic common-platform `cat` concatenation family accepts both pinned
+forms: `>` writes the combined output and `>>` appends it; support is not
+narrowed to only one redirection form.
 
 The matching bundle is MIT-licensed tldr-pages content. Questions were
 authored before retrieval inspection. Labels and rationales were then

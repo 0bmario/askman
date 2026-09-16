@@ -41,7 +41,7 @@
     },
     "holdout": {
       "path": "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json",
-      "sha256": "3fe95900c7957218d540d657d816cc1486ad05430a0010059263f9cef803826d",
+      "sha256": "1aa1c0a8ec5c550b8a6699654bb5eb56928bd6845f0b3610bb7a8ee368813418",
       "access": "requires --split holdout --allow-holdout; access is recorded in the evaluator report"
     }
   },
@@ -2990,21 +2990,36 @@
               "source_line": 12,
               "section": "Concatenate several files into an output file:",
               "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
             }
           ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
-            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+            "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
           ],
-          "evidence": "The pinned cat example concatenates several files into one output.",
+          "evidence": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it.",
           "citations": [
             {
               "catalog_entry_id": "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
               "source_path": "pages/common/cat.md",
               "source_line": 12,
               "section": "Concatenate several files into an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
               "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
             }
           ]
@@ -3035,21 +3050,36 @@
               "source_line": 12,
               "section": "Concatenate several files into an output file:",
               "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
             }
           ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
-            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+            "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
           ],
-          "evidence": "The pinned cat example concatenates several files into one output.",
+          "evidence": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it.",
           "citations": [
             {
               "catalog_entry_id": "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
               "source_path": "pages/common/cat.md",
               "source_line": 12,
               "section": "Concatenate several files into an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
               "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
             }
           ]
@@ -3075,6 +3105,13 @@
           "evidence": "Two-pass review checked the normalized task intent: concatenate multiple files into one output file.",
           "citations": [
             {
+              "catalog_entry_id": "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+              "source_path": "pages/common/cat.md",
+              "source_line": 12,
+              "section": "Concatenate several files into an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
               "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
               "source_path": "pages/common/cat.md",
               "source_line": 16,
@@ -3086,10 +3123,18 @@
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
+            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
             "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
           ],
-          "evidence": "The pinned cat append example uses >> to append several files to an output file.",
+          "evidence": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it.",
           "citations": [
+            {
+              "catalog_entry_id": "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+              "source_path": "pages/common/cat.md",
+              "source_line": 12,
+              "section": "Concatenate several files into an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
             {
               "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
               "source_path": "pages/common/cat.md",
@@ -3125,21 +3170,36 @@
               "source_line": 12,
               "section": "Concatenate several files into an output file:",
               "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
             }
           ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
-            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+            "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
           ],
-          "evidence": "The pinned cat example concatenates several files into one output.",
+          "evidence": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it.",
           "citations": [
             {
               "catalog_entry_id": "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
               "source_path": "pages/common/cat.md",
               "source_line": 12,
               "section": "Concatenate several files into an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
               "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
             }
           ]
@@ -3170,21 +3230,36 @@
               "source_line": 12,
               "section": "Concatenate several files into an output file:",
               "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
             }
           ]
         },
         "acceptable_support": {
           "result": "match",
           "observed_example_ids": [
-            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+            "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+            "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
           ],
-          "evidence": "The pinned cat example concatenates several files into one output.",
+          "evidence": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it.",
           "citations": [
             {
               "catalog_entry_id": "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
               "source_path": "pages/common/cat.md",
               "source_line": 12,
               "section": "Concatenate several files into an output file:",
+              "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
+            },
+            {
+              "catalog_entry_id": "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69",
+              "source_path": "pages/common/cat.md",
+              "source_line": 16,
+              "section": "Append several files to an output file:",
               "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9"
             }
           ]
@@ -6343,33 +6418,38 @@
       },
       "holdout-v2r1-holdoutcommon-file-content-01": {
         "acceptable_example_ids": [
-          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+          "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
         ],
-        "rationale": "The pinned cat example concatenates several files into one output."
+        "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
       },
       "holdout-v2r1-holdoutcommon-file-content-02": {
         "acceptable_example_ids": [
-          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+          "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
         ],
-        "rationale": "The pinned cat example concatenates several files into one output."
+        "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
       },
       "holdout-v2r1-holdoutcommon-file-content-03": {
         "acceptable_example_ids": [
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
           "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
         ],
-        "rationale": "The pinned cat append example uses >> to append several files to an output file."
+        "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
       },
       "holdout-v2r1-holdoutcommon-file-content-04": {
         "acceptable_example_ids": [
-          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+          "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
         ],
-        "rationale": "The pinned cat example concatenates several files into one output."
+        "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
       },
       "holdout-v2r1-holdoutcommon-file-content-05": {
         "acceptable_example_ids": [
-          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+          "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc",
+          "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
         ],
-        "rationale": "The pinned cat example concatenates several files into one output."
+        "rationale": "Both pinned cat examples concatenate several files into one output: `>` writes the output and `>>` appends to it."
       },
       "holdout-v2r1-holdoutcommon-text-filter-01": {
         "acceptable_example_ids": [

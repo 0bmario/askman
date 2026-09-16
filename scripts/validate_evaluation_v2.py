@@ -9,6 +9,7 @@ import importlib.util
 import json
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,20 @@ EXPECTED_HAND_CHECK_TASK_COUNT = 120
 LEGACY_MANIFEST_FREEZE_ID = "evaluation-v2-release-benchmark-v1"
 EXAMPLE_ID = re.compile(r"example-[0-9a-f]{64}\Z")
 QUESTION_TOKEN = re.compile(r"[a-z0-9]+")
+
+
+@dataclass(frozen=True)
+class HandCheckValidationContext:
+    """Named inputs shared by expanded hand-check validation."""
+
+    development: dict[str, Any]
+    holdout: dict[str, Any]
+    intents: dict[str, Any]
+    support_catalog: dict[str, Any]
+    support_catalog_pin: dict[str, Any]
+    full_corpus_catalog: dict[str, Any]
+    full_corpus_catalog_pin: dict[str, Any]
+    corpus: dict[str, Any]
 
 
 SPEC = importlib.util.spec_from_file_location(
@@ -778,16 +793,19 @@ def validate_no_match_scan(
 def validate_hand_checks(
     hand_checks: Any,
     provenance: Any,
-    development: dict[str, Any],
-    holdout: dict[str, Any],
-    intents: dict[str, Any],
-    support_catalog: dict[str, Any],
-    support_catalog_pin: dict[str, Any],
-    full_corpus_catalog: dict[str, Any],
-    full_corpus_catalog_pin: dict[str, Any],
-    corpus: dict[str, Any],
+    context: HandCheckValidationContext,
 ) -> None:
     """Verify evidence-bearing independent checks against frozen task labels."""
+    if not isinstance(context, HandCheckValidationContext):
+        raise ValueError("hand-check validation context is required")
+    development = context.development
+    holdout = context.holdout
+    intents = context.intents
+    support_catalog = context.support_catalog
+    support_catalog_pin = context.support_catalog_pin
+    full_corpus_catalog = context.full_corpus_catalog
+    full_corpus_catalog_pin = context.full_corpus_catalog_pin
+    corpus = context.corpus
     if not isinstance(provenance, dict):
         raise ValueError("hand-check provenance is required")
     required_provenance = {
@@ -1149,14 +1167,16 @@ def validate_manifest(manifest_path: Path) -> None:
         validate_hand_checks(
             hand_checks,
             manifest.get("hand_check_provenance"),
-            datasets["dev"],
-            datasets["holdout"],
-            intents,
-            support_catalog,
-            support_catalog_pin,
-            full_corpus_catalog,
-            full_corpus_catalog_pin,
-            corpus,
+            HandCheckValidationContext(
+                development=datasets["dev"],
+                holdout=datasets["holdout"],
+                intents=intents,
+                support_catalog=support_catalog,
+                support_catalog_pin=support_catalog_pin,
+                full_corpus_catalog=full_corpus_catalog,
+                full_corpus_catalog_pin=full_corpus_catalog_pin,
+                corpus=corpus,
+            ),
         )
 
 
