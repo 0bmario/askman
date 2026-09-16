@@ -285,19 +285,19 @@ pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
         bail!("matching bundle identity does not match its manifest");
     }
 
-    let database = checked_file(
+    let database = validate_bundle_component_file(
         &root,
         &manifest.corpus.path,
         manifest.corpus.size_bytes,
         &manifest.corpus.sha256,
     )?;
-    let lexical = checked_file(
+    let lexical = validate_bundle_component_file(
         &root,
         &manifest.lexical_index.path,
         manifest.lexical_index.size_bytes,
         &manifest.lexical_index.sha256,
     )?;
-    let dense = checked_file(
+    let dense = validate_bundle_component_file(
         &root,
         &manifest.dense_index.path,
         manifest.dense_index.size_bytes,
@@ -368,7 +368,7 @@ fn validate_manifest_shape(manifest: &BundleManifest) -> Result<()> {
     Ok(())
 }
 
-fn checked_file(
+fn validate_bundle_component_file(
     root: &Path,
     relative: &str,
     expected_size: u64,
@@ -721,15 +721,19 @@ fn validate_relative_path(path: &str) -> Result<()> {
     if candidate.is_absolute() {
         bail!("bundle path is not a safe relative path: {path}");
     }
-    if candidate.components().any(|component| {
+    if contains_unsafe_path_component(candidate) {
+        bail!("bundle path is not a safe relative path: {path}");
+    }
+    Ok(())
+}
+
+fn contains_unsafe_path_component(path: &Path) -> bool {
+    path.components().any(|component| {
         matches!(
             component,
             Component::CurDir | Component::ParentDir | Component::RootDir | Component::Prefix(_)
         )
-    }) {
-        bail!("bundle path is not a safe relative path: {path}");
-    }
-    Ok(())
+    })
 }
 
 fn validate_sha256(value: &str) -> Result<()> {
