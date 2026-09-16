@@ -24,7 +24,14 @@ from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DATASET_SCHEMA_VERSION = 1
+SUPPORTED_DATASET_SCHEMA_VERSIONS = {1, 2}
+EVALUATION_V2_DATASET_ID = "askman-evaluation-v2"
+EVALUATION_V2_SCHEMA_VERSION = 2
+EVALUATION_V2_SPLIT_ID = "scenario-family-split-v2"
+EVALUATION_V2_SPLIT_POLICY = (
+    "twelve distinct scenario families per split; five independently phrased "
+    "tasks per family; no family crosses the dev/holdout split"
+)
 SCORER_VERSION = "task-scorer-v1"
 KEYWORD_RETRIEVER_VERSION = "keyword-fts5-v1"
 CURRENT_ADAPTER_VERSION = "current-askman-ranking-adapter-v1"
@@ -38,6 +45,20 @@ SUPPORTED_PLATFORMS = {"common", "linux", "osx", "windows"}
 MAX_DISPLAYED_RESULTS = 3
 EXPECTED_FAMILIES_PER_SPLIT = 6
 TASKS_PER_FAMILY = 5
+DATASET_PROFILES = {
+    1: {
+        "task_count": EXPECTED_FAMILIES_PER_SPLIT * TASKS_PER_FAMILY,
+        "family_count": EXPECTED_FAMILIES_PER_SPLIT,
+        "tasks_per_family": TASKS_PER_FAMILY,
+    },
+    EVALUATION_V2_SCHEMA_VERSION: {
+        "task_count": 60,
+        "family_count": 12,
+        "tasks_per_family": 5,
+        "answerable_task_count": 30,
+        "unanswerable_task_count": 30,
+    },
+}
 HYBRID_MAX_CANDIDATES = 12
 HYBRID_PLATFORM_POLICY = "artifact-selected-page-ids-v1"
 HYBRID_REFERENCE_POLICY = (
@@ -888,20 +909,35 @@ def summarize(tasks: list[dict[str, Any]], results: list[dict[str, Any]]) -> dic
 
 
 def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
-    if dataset.get("schema_version") != DATASET_SCHEMA_VERSION:
+    schema_version = dataset.get("schema_version")
+    if schema_version not in SUPPORTED_DATASET_SCHEMA_VERSIONS:
         raise ValueError("unsupported evaluation dataset schema")
     if dataset.get("scorer_version") != SCORER_VERSION:
         raise ValueError("unsupported scorer version")
+    is_evaluation_v2 = schema_version == EVALUATION_V2_SCHEMA_VERSION
+    if is_evaluation_v2 and dataset.get("dataset_id") != EVALUATION_V2_DATASET_ID:
+        raise ValueError("schema 2 datasets must use the evaluation-v2 dataset ID")
+    if is_evaluation_v2:
+        if dataset.get("split_id") != EVALUATION_V2_SPLIT_ID:
+            raise ValueError("evaluation-v2 dataset has the wrong split ID")
+        if dataset.get("split_policy") != EVALUATION_V2_SPLIT_POLICY:
+            raise ValueError("evaluation-v2 dataset has the wrong split policy")
+        provenance = dataset.get("provenance")
+        if not isinstance(provenance, dict) or not provenance.get("intent_record"):
+            raise ValueError("evaluation-v2 dataset is missing provenance metadata")
     if dataset.get("split") != expected_split:
         raise ValueError(f"dataset split must be {expected_split}")
+    profile = DATASET_PROFILES[schema_version]
     tasks = dataset.get("tasks")
-    if dataset.get("task_count") != EXPECTED_FAMILIES_PER_SPLIT * TASKS_PER_FAMILY:
-        raise ValueError("each frozen split must declare exactly 30 tasks")
-    has_wrong_task_list = not isinstance(tasks, list) or len(
-        tasks
-    ) != EXPECTED_FAMILIES_PER_SPLIT * TASKS_PER_FAMILY
+    if dataset.get("task_count") != profile["task_count"]:
+        raise ValueError(
+            f"each frozen split must declare exactly {profile['task_count']} tasks"
+        )
+    has_wrong_task_list = not isinstance(tasks, list) or len(tasks) != profile["task_count"]
     if has_wrong_task_list:
-        raise ValueError("each frozen split must contain exactly 30 tasks")
+        raise ValueError(
+            f"each frozen split must contain exactly {profile['task_count']} tasks"
+        )
     has_wrong_split = any(task.get("split") != expected_split for task in tasks)
     if has_wrong_split:
         raise ValueError(f"all tasks must belong to the {expected_split} split")
@@ -957,16 +993,52 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
             raise ValueError(f"answerable task {task['id']} has no acceptable IDs")
         families.setdefault(family, set()).add(task["split"])
         family_counts[family] = family_counts.get(family, 0) + 1
-    has_wrong_family_count = len(families) != EXPECTED_FAMILIES_PER_SPLIT
+    has_wrong_family_count = len(families) != profile["family_count"]
     if has_wrong_family_count:
-        raise ValueError("each frozen split must contain exactly six scenario families")
+        raise ValueError(
+            f"each frozen split must contain exactly {profile['family_count']} scenario families"
+        )
     has_wrong_tasks_per_family = any(
-        count != TASKS_PER_FAMILY for count in family_counts.values()
+        count != profile["tasks_per_family"] for count in family_counts.values()
     )
     if has_wrong_tasks_per_family:
-        raise ValueError("each scenario family must contain exactly five tasks")
+        raise ValueError(
+            f"each scenario family must contain exactly {profile['tasks_per_family']} tasks"
+        )
     has_cross_split_family = any(len(splits) != 1 for splits in families.values())
     if has_cross_split_family:
+        raise ValueError("scenario families must not cross the dev/holdout split")
+    if is_evaluation_v2:
+        answerable_count = sum(task["answerable"] for task in tasks)
+        unanswerable_count = len(tasks) - answerable_count
+        if dataset.get("answerable_task_count") != answerable_count:
+            raise ValueError("evaluation-v2 answerable task count is inconsistent")
+        if dataset.get("unanswerable_task_count") != unanswerable_count:
+            raise ValueError("evaluation-v2 unanswerable task count is inconsistent")
+        if answerable_count != profile["answerable_task_count"]:
+            raise ValueError("each evaluation-v2 split must contain exactly 30 answerable tasks")
+        if unanswerable_count != profile["unanswerable_task_count"]:
+            raise ValueError(
+                "each evaluation-v2 split must contain exactly 30 unanswerable tasks"
+            )
+
+
+def validate_dataset_pair(
+    development: dict[str, Any], holdout: dict[str, Any]
+) -> None:
+    """Validate the shared identity and split isolation of a benchmark pair."""
+    validate_dataset(development, "dev")
+    validate_dataset(holdout, "holdout")
+    for field in ("dataset_id", "split_id", "scorer_version", "corpus"):
+        if development.get(field) != holdout.get(field):
+            raise ValueError(f"development and holdout {field} must match")
+    development_ids = {task["id"] for task in development["tasks"]}
+    holdout_ids = {task["id"] for task in holdout["tasks"]}
+    if development_ids & holdout_ids:
+        raise ValueError("development and holdout task IDs must be disjoint")
+    development_families = {task["family"] for task in development["tasks"]}
+    holdout_families = {task["family"] for task in holdout["tasks"]}
+    if development_families & holdout_families:
         raise ValueError("scenario families must not cross the dev/holdout split")
 
 
@@ -1134,6 +1206,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "--hybrid-config and --hybrid-candidate are only valid with --retriever hybrid"
             )
     dataset_path = Path(args.dataset)
+    dataset_sha256 = sha256_file(dataset_path)
     dataset = load_json(dataset_path)
     validate_dataset(dataset, args.split)
     if hybrid_config is not None:
@@ -1214,6 +1287,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             resources = baseline_resources(baseline_query_times_ms)
     report = {
         "dataset_id": dataset["dataset_id"],
+        "dataset_sha256": dataset_sha256,
         "dataset_schema_version": dataset["schema_version"],
         "scorer_version": dataset["scorer_version"],
         "split_id": dataset["split_id"],
@@ -1226,6 +1300,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "hybrid": HYBRID_RETRIEVER_VERSION,
         }[args.retriever],
         "corpus": frozen_artifact,
+        "provenance": dataset.get("provenance"),
         "resources": resources,
         "hybrid": (
             {

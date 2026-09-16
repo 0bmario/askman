@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "askman-evaluation-v2",
+  "freeze_id": "evaluation-v2-release-benchmark-v1",
+  "frozen_at": "2026-09-16",
+  "dataset_schema_version": 2,
+  "scorer_version": "task-scorer-v1",
+  "scorer": {
+    "version": "task-scorer-v1",
+    "implementation": "scripts/evaluate_retrieval.py",
+    "sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
+  },
+  "split_id": "scenario-family-split-v2",
+  "split_policy": "twelve distinct scenario families per split; five independently phrased tasks per family; no family crosses the dev/holdout split",
+  "provenance": {
+    "intent_record": "tests/fixtures/evaluation/task-intents-v2.json",
+    "intent_schema_version": 1,
+    "intent_freeze_id": "evaluation-v2-intents-v1",
+    "labels_adjudicated_after_intent_freeze": true
+  },
+  "provenance_file": {
+    "path": "tests/fixtures/evaluation/task-intents-v2.json",
+    "sha256": "d29f296152632e7dda89f2927213408142a272a04b600f100577c3b366071920"
+  },
+  "corpus": {
+    "corpus_id": "fixture-tldr-full-corpus-v1:d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "fixture-tldr-full-corpus-v1",
+    "source_digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+    "manifest_sha256": "68ae06300afdaee1515ef7c6248f35056e871e73d07778f2e1c2f636589c8461"
+  },
+  "splits": {
+    "dev": {
+      "path": "tests/fixtures/evaluation/frozen-dev-v2.json",
+      "sha256": "0c82627a899c65bcfede704be04d4cabd8b424f7317fadbd2c30a44e03305d8d",
+      "access": "development-default"
+    },
+    "holdout": {
+      "path": "tests/fixtures/evaluation/frozen-holdout-v2.json",
+      "sha256": "c64b40aaca8476c2ea0019a8b6bd9b9e6d11a7865169bb7c5d934a6e3c8280ab",
+      "access": "requires --split holdout --allow-holdout; access is recorded in the evaluator report"
+    }
+  }
+}

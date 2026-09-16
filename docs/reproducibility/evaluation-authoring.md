@@ -1,5 +1,9 @@
 # Evaluation authoring record
 
+This file records the original `evaluation-v1` fixture. The frozen
+`evaluation-v2` release benchmark has a separate [freeze record](evaluation-v2.md)
+and provenance file.
+
 The task intentions below were written before inspecting the pinned corpus.
 After corpus inspection, the separate split files record whether each task is
 answerable, its acceptable example IDs and the correctness rationale.
