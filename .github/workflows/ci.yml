@@ -49,7 +49,7 @@ jobs:
         run: cargo fetch --locked
 
       - name: Prime native runtime and dev binaries (networked setup)
-        run: cargo build --locked --features dev --bin tldr_subset --bin askman_candidate
+        run: cargo build --locked --features dev --bin askman --bin tldr_subset --bin askman_candidate
 
       - name: Check formatting
         env:

@@ -403,15 +403,15 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
     bundle, manifest = build_and_validate_bundle(work_dir, report_dir, cargo)
     write_verification_evidence(report_dir, bundle, manifest, cargo, "lifecycle-running")
 
-    # CI already built the release binary; avoid a second full debug build.
-    askman = target_binary("askman", "release")
+    # CI primes the dev-enabled debug binary so the lifecycle can use its
+    # disposable loopback release server.
+    askman = target_binary("askman")
     if not askman.is_file():
         run_logged(
             "shipping-build",
             [cargo, "build", "--locked", "--offline", "--features", "dev", "--bin", "askman"],
             report_dir,
         )
-        askman = target_binary("askman")
     if not askman.is_file():
         raise VerificationError(f"shipping binary was not built: {askman}")
 
