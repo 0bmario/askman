@@ -69,8 +69,8 @@ python scripts/ci_offline.py verify \
 ```
 
 For a real network-denied verification, run the `verify` phase inside the
-platform's network sandbox after provisioning. Linux uses an unprivileged user
-and network namespace (`unshare --user --map-root-user --net`); the
+platform's network sandbox after provisioning. Linux uses temporary root
+firewall rules (`iptables`/`ip6tables`) that reject non-loopback egress; the
 macOS developer smoke harness uses `sandbox-exec`. The full release gate still
 requires separately provisioned `main` data and an authorized matching bundle;
 those inputs are intentionally not checked in or downloaded by this CI job.

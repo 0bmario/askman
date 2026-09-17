@@ -87,12 +87,14 @@ jobs:
       - name: Exercise clean install and explicit update (local release server)
         run: python scripts/ci_offline.py prepare --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report"
 
-      - name: Verify bundle and queries with Linux user/network isolation
+      - name: Verify bundle and queries with Linux firewall isolation
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          ASKMAN_CI_NETWORK_POLICY='unshare --user --map-root-user --net --mount-proc' \
-            unshare --user --map-root-user --net --mount-proc \
+          sudo iptables -w -I OUTPUT 1 ! -o lo -j REJECT
+          trap 'sudo iptables -w -D OUTPUT 1 ! -o lo -j REJECT || true; sudo ip6tables -w -D OUTPUT 1 ! -o lo -j REJECT || true' EXIT
+          sudo ip6tables -w -I OUTPUT 1 ! -o lo -j REJECT
+          ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
             python scripts/ci_offline.py verify \
               --work-dir "${{ runner.temp }}/askman-ci-work" \
               --report-dir "${{ runner.temp }}/askman-ci-report"
