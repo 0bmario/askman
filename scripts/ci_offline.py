@@ -191,9 +191,17 @@ def run_logged(
                 os.killpg(process.pid, signal.SIGKILL)
             except ProcessLookupError:
                 pass
-        output, _ = process.communicate()
-        if not output:
-            output = error.stdout or ""
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                pass
+        if process.stdout is not None:
+            process.stdout.close()
+        output = error.stdout or ""
         if isinstance(output, bytes):
             output = output.decode(errors="replace")
         log_path.write_text(f"$ {rendered}\n\n{output}", encoding="utf-8")
