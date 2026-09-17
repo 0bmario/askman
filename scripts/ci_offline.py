@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODEL_ID = "Qdrant/all-MiniLM-L6-v2-onnx"
 MODEL_CACHE_FOLDER = "models--Qdrant--all-MiniLM-L6-v2-onnx"
 MODEL_REVISION = "5f1b8cd78bc4fb444dd171e59b18f3a3af89a079"
+COMMAND_TIMEOUT_SECONDS = 300
 MODEL_FILES = {
     "config.json": "1b4d8e2a3988377ed8b519a31d8d31025a25f1c5f8606998e8014111438efcd7",
     "model.onnx": "bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5",
@@ -154,22 +155,33 @@ def run_logged(
     log_path = report_dir / "logs" / f"{label}.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     rendered = " ".join(shlex.quote(str(argument)) for argument in command)
-    print(f"$ {rendered}")
+    print(f"$ {rendered}", flush=True)
     process_environment = os.environ.copy()
     if environment:
         process_environment.update(environment)
-    completed = subprocess.run(
-        [str(argument) for argument in command],
-        cwd=ROOT,
-        env=process_environment,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
-    output = completed.stdout or ""
+    try:
+        completed = subprocess.run(
+            [str(argument) for argument in command],
+            cwd=ROOT,
+            env=process_environment,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=COMMAND_TIMEOUT_SECONDS,
+        )
+        output = completed.stdout or ""
+    except subprocess.TimeoutExpired as error:
+        output = error.stdout or ""
+        if isinstance(output, bytes):
+            output = output.decode(errors="replace")
+        log_path.write_text(f"$ {rendered}\n\n{output}", encoding="utf-8")
+        print(output, end="", flush=True)
+        raise VerificationError(
+            f"{label} timed out after {COMMAND_TIMEOUT_SECONDS} seconds; see {log_path}"
+        ) from error
     log_path.write_text(f"$ {rendered}\n\n{output}", encoding="utf-8")
-    print(output, end="")
+    print(output, end="", flush=True)
     if expect_failure and completed.returncode == 0:
         raise VerificationError(f"{label} unexpectedly succeeded; see {log_path}")
     if not expect_failure and completed.returncode != 0:
