@@ -1,5 +1,3 @@
-#![cfg(feature = "dev")]
-
 use crate::tldr_subset::{
     artifact_metadata, process_peak_memory_bytes, selected_page_ids, validate_artifact,
 };
@@ -132,6 +130,8 @@ struct DenseReady {
 pub struct DenseCandidate {
     pub example_id: String,
     pub page_id: String,
+    #[serde(skip_serializing)]
+    pub page_command: String,
     pub command: String,
     pub page_description: String,
     pub example_description: String,
@@ -157,7 +157,7 @@ struct ModelAssets {
     hashes: BTreeMap<String, String>,
 }
 
-struct DenseIndex {
+pub(crate) struct DenseIndex {
     connection: Connection,
     embedder: OfflineEmbedder,
 }
@@ -304,7 +304,7 @@ pub fn run_query_server(options: DenseServerOptions) -> Result<()> {
 }
 
 impl DenseIndex {
-    fn open(artifact: &Path, model_cache: &Path) -> Result<Self> {
+    pub(crate) fn open(artifact: &Path, model_cache: &Path) -> Result<Self> {
         register_sqlite_vec();
         let assets = validate_model_assets(model_cache)?;
         let connection = Connection::open(artifact)
@@ -318,7 +318,12 @@ impl DenseIndex {
         })
     }
 
-    fn query(&self, query: &str, platform: &str, limit: usize) -> Result<Vec<DenseCandidate>> {
+    pub(crate) fn query(
+        &self,
+        query: &str,
+        platform: &str,
+        limit: usize,
+    ) -> Result<Vec<DenseCandidate>> {
         if limit == 0 {
             bail!("dense query limit must be greater than zero");
         }
@@ -353,7 +358,7 @@ impl DenseIndex {
              LIMIT ?2",
         )?;
         let mut details = self.connection.prepare(
-            "SELECT e.example_id, e.page_id, e.command, p.description, e.description,
+            "SELECT e.example_id, e.page_id, p.command, e.command, p.description, e.description,
                     p.source_path, p.source_ref, p.source_revision, p.platform,
                     p.page_position, e.position
              FROM examples AS e
@@ -372,15 +377,16 @@ impl DenseIndex {
                 Ok(DenseCandidate {
                     example_id: row.get(0)?,
                     page_id: row.get(1)?,
-                    command: row.get(2)?,
-                    page_description: row.get(3)?,
-                    example_description: row.get(4)?,
-                    source_path: row.get(5)?,
-                    source_ref: row.get(6)?,
-                    source_revision: row.get(7)?,
-                    platform: row.get(8)?,
-                    page_position: row.get::<_, i64>(9)? as usize,
-                    example_position: row.get::<_, i64>(10)? as usize,
+                    page_command: row.get(2)?,
+                    command: row.get(3)?,
+                    page_description: row.get(4)?,
+                    example_description: row.get(5)?,
+                    source_path: row.get(6)?,
+                    source_ref: row.get(7)?,
+                    source_revision: row.get(8)?,
+                    platform: row.get(9)?,
+                    page_position: row.get::<_, i64>(10)? as usize,
+                    example_position: row.get::<_, i64>(11)? as usize,
                     ranking_score: distance,
                 })
             })?;

@@ -30,6 +30,7 @@ usage() {
         "Usage:" \
         "  $0 provision RUN_DIR" \
         "  $0 run RUN_DIR" \
+        "  $0 candidate RUN_DIR" \
         "  $0 evidence RUN_DIR"
 }
 
@@ -295,6 +296,109 @@ assert_smoke_result() {
     fi
 }
 
+assert_candidate_command() {
+    local output="$1"
+    local expected="$2"
+    if [[ "$(head -n 1 "$output")" != "$expected" ]]; then
+        printf 'Candidate query did not rank the expected command first: %s\n' "$expected" >&2
+        return 1
+    fi
+    if ! grep -Fxq "Examples:" "$output"; then
+        printf 'Candidate query did not render an example: %s\n' "$expected" >&2
+        return 1
+    fi
+}
+
+run_candidate_query() {
+    local run_dir="$1"
+    local candidate="$2"
+    local bundle="$3"
+    local name="$4"
+    local platform_flag="$5"
+    local query="$6"
+    local expected="$7"
+    local output="$run_dir/results/candidate-${name}.txt"
+    local status
+
+    if offline_run "$run_dir" "$candidate" --bundle "$bundle" "$platform_flag" "$query" > "$output" 2>&1; then
+        status=0
+    else
+        status=$?
+    fi
+    if [[ "$status" -ne 0 ]]; then
+        printf 'Candidate query failed (exit %s): %s\n' "$status" "$query" >&2
+        return "$status"
+    fi
+
+    if [[ "$expected" == "No good matches found." ]]; then
+        if ! grep -Fxq "$expected" "$output"; then
+            printf 'Candidate query did not abstain: %s\n' "$query" >&2
+            return 1
+        fi
+    else
+        assert_candidate_command "$output" "$expected"
+    fi
+}
+
+run_candidate() {
+    local run_dir="$1"
+    local data_dir="$run_dir/data"
+    local pinned_runtime_root
+    pinned_runtime_root="$(runtime_root "$run_dir")"
+    local target_dir="$run_dir/candidate-target"
+    local helper="$target_dir/debug/tldr_subset"
+    local candidate="$target_dir/debug/askman_candidate"
+    local bundle="$run_dir/matching-bundle"
+
+    verify_pinned_assets "$run_dir"
+    mkdir -p "$run_dir/results"
+    offline_run "$run_dir" env \
+        LIBONNXRUNTIME_NO_PKG_CONFIG=1 \
+        ORT_LIB_LOCATION="$pinned_runtime_root" \
+        ORT_PREFER_DYNAMIC_LINK=1 \
+        CARGO_TARGET_DIR="$target_dir" \
+        cargo build --locked --offline --features dev \
+        --bin tldr_subset --bin askman_candidate \
+        --manifest-path "$REPO_ROOT/Cargo.toml" \
+        > "$run_dir/candidate-build.txt"
+
+    if [[ ! -x "$helper" || ! -x "$candidate" ]]; then
+        printf 'Candidate binaries were not built.\n' >&2
+        return 1
+    fi
+    if ! otool -l "$helper" | awk -v expected="$pinned_runtime_root/lib" \
+        '$1 == "path" && $2 == expected { found = 1 } END { exit !found }'; then
+        install_name_tool -add_rpath "$pinned_runtime_root/lib" "$helper"
+    fi
+    if ! otool -l "$candidate" | awk -v expected="$pinned_runtime_root/lib" \
+        '$1 == "path" && $2 == expected { found = 1 } END { exit !found }'; then
+        install_name_tool -add_rpath "$pinned_runtime_root/lib" "$candidate"
+    fi
+
+    offline_run "$run_dir" "$helper" bundle-build \
+        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest.json" \
+        --snapshot "$REPO_ROOT/tests/fixtures/tldr-full-corpus" \
+        --model-cache "$data_dir/models" \
+        --output "$bundle" \
+        --cli-compatibility "askman=0.3.3" \
+        > "$run_dir/candidate-bundle-build.txt"
+
+    run_candidate_query "$run_dir" "$candidate" "$bundle" \
+        linux --linux "search patterns files" grep
+    run_candidate_query "$run_dir" "$candidate" "$bundle" \
+        osx --osx "copy text to clipboard" pbcopy
+    run_candidate_query "$run_dir" "$candidate" "$bundle" \
+        windows --windows "print formatted value" printf
+    run_candidate_query "$run_dir" "$candidate" "$bundle" \
+        ambiguous --linux "edit text" vim
+    run_candidate_query "$run_dir" "$candidate" "$bundle" \
+        unanswerable --linux "zzzz no-such-command" "No good matches found."
+
+    printf '%s\n' "All candidate offline queries exited successfully."
+    printf '%s\n' "Bundle: $bundle"
+    printf '%s\n' "Output: $run_dir/results/candidate-*.txt"
+}
+
 run_smoke() {
     local run_dir="$1"
     local binary="$run_dir/target/release/askman"
@@ -449,6 +553,9 @@ case "$1" in
         ;;
     run)
         run_smoke "$2"
+        ;;
+    candidate)
+        run_candidate "$2"
         ;;
     evidence)
         run_evidence "$2"

@@ -1,4 +1,5 @@
 use clap::Parser;
+use std::path::PathBuf;
 
 /// askman – offline CLI helper
 #[derive(Parser, Debug)]
@@ -30,4 +31,62 @@ pub struct Args {
     /// Force search for Windows commands
     #[arg(long, conflicts_with_all = ["linux", "osx"])]
     pub windows: bool,
+}
+
+/// Development-only candidate CLI backed by one validated matching bundle.
+#[derive(Parser, Debug)]
+#[command(
+    name = "askman_candidate",
+    version,
+    about = "Ask natural language questions using frozen hybrid retrieval."
+)]
+pub struct CandidateArgs {
+    #[arg(required = true)]
+    pub question: Vec<String>,
+
+    /// Validated matching bundle containing lexical, dense, and model assets
+    #[arg(long, required = true, value_name = "DIR")]
+    pub bundle: PathBuf,
+
+    /// Print the hybrid ranking score for diagnostics.
+    #[arg(long, short = 'v')]
+    pub verbose: bool,
+
+    /// Force search for Linux commands
+    #[arg(long, conflicts_with_all = ["osx", "windows"])]
+    pub linux: bool,
+
+    /// Force search for macOS commands
+    #[arg(long, conflicts_with_all = ["linux", "windows"])]
+    pub osx: bool,
+
+    /// Force search for Windows commands
+    #[arg(long, conflicts_with_all = ["linux", "osx"])]
+    pub windows: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn candidate_cli_requires_an_explicit_bundle_and_parses_platform_flags() {
+        let args = CandidateArgs::try_parse_from([
+            "askman_candidate",
+            "--bundle",
+            "/tmp/matching-bundle",
+            "--linux",
+            "search",
+            "files",
+        ])
+        .unwrap();
+
+        assert_eq!(args.bundle, PathBuf::from("/tmp/matching-bundle"));
+        assert_eq!(args.question, ["search", "files"]);
+        assert!(args.linux);
+        assert!(!args.osx);
+        assert!(!args.windows);
+        assert!(CandidateArgs::try_parse_from(["askman_candidate", "search"]).is_err());
+        assert!(CandidateArgs::try_parse_from(["askman_candidate", "search", "files"]).is_err());
+    }
 }

@@ -70,6 +70,7 @@ fn builds_and_queries_a_traceable_source_artifact() {
     .unwrap();
 
     let result = &results[0];
+    assert_eq!(result.page_command, "cp");
     assert_eq!(
         result.command,
         "cp {{path/to/source}} {{path/to/destination}}"
