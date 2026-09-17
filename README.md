@@ -89,5 +89,7 @@ The held-out evidence protocol and machine-readable report are documented in
 the [held-out evidence instructions](docs/reproducibility/heldout-evidence.md).
 The immutable matching bundle build and validation are documented in the
 [matching bundle instructions](docs/reproducibility/matching-bundle.md).
+The main-versus-retrieval-v2 release gate is documented in the
+[release gate instructions](docs/reproducibility/release-gate.md).
 The Better Askman terminology is defined in the [context glossary](docs/CONTEXT.md),
 and release decisions are recorded in the [ADRs](docs/adr/).
