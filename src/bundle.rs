@@ -1376,6 +1376,7 @@ impl BundleStore {
             bytes.push(b'\n');
             file.write_all(&bytes)?;
             file.sync_all()?;
+            drop(file);
             atomic_replace(&temporary, &self.active_state)?;
             Ok(())
         })();
