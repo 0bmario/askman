@@ -10,7 +10,7 @@ use std::time::Instant;
 
 const ARTIFACT_KIND: &str = "askman.tldr-subset";
 const SCHEMA_VERSION: u32 = 3;
-const PARSER_VERSION: &str = "tldr-subset-v3";
+pub const PARSER_VERSION: &str = "tldr-subset-v3";
 const SUPPORTED_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
 const LEXICAL_INDEX_TOKENIZER: &str = "unicode61";
 const LEXICAL_QUERY_NORMALIZATION: &str = "split non-alphanumeric except underscore; lowercase ASCII; quote and AND-join unique sorted tokens";
@@ -779,7 +779,7 @@ fn read_manifest(path: &Path) -> Result<SubsetManifest> {
         .with_context(|| format!("failed to parse manifest {}", path.display()))
 }
 
-fn validate_manifest(manifest: &SubsetManifest) -> Result<()> {
+pub(crate) fn validate_manifest(manifest: &SubsetManifest) -> Result<()> {
     if manifest.schema_version != SCHEMA_VERSION {
         bail!(
             "unsupported manifest schema version {}, expected {}",

@@ -3,7 +3,9 @@ use crate::dense::{
     MODEL_MAX_LENGTH, MODEL_REVISION, MODEL_RUNTIME, validate_dense_artifact_file,
     validate_model_cache,
 };
-use crate::tldr_subset::{SourceMetadata, SubsetManifest, artifact_metadata, build_artifact};
+use crate::tldr_subset::{
+    PARSER_VERSION, SourceMetadata, SubsetManifest, artifact_metadata, build_artifact,
+};
 use anyhow::{Context, Result, anyhow, bail};
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
@@ -12,8 +14,8 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 
-const BUNDLE_SCHEMA_VERSION: u32 = 1;
-const BUNDLE_VERSION: &str = "matching-bundle-v1";
+const BUNDLE_SCHEMA_VERSION: u32 = 2;
+const BUNDLE_VERSION: &str = "matching-bundle-v2";
 const BUNDLE_KIND: &str = "askman.matching-bundle";
 const MATCHING_DATABASE: &str = "matching.db";
 const BUNDLE_MANIFEST: &str = "manifest.json";
@@ -44,6 +46,7 @@ pub struct BundleManifest {
     pub bundle_id: String,
     pub bundle_version: String,
     pub artifact_kind: String,
+    pub parser_version: String,
     pub source: SourceMetadata,
     pub platform_selection: PlatformSelection,
     pub lexical_index: IndexComponent,
@@ -96,9 +99,11 @@ pub struct BundleAsset {
 #[derive(Debug, Serialize)]
 struct BundleIdentity<'a> {
     bundle_version: &'a str,
+    parser_version: &'a str,
     cli_compatibility: &'a str,
     source: &'a SourceMetadata,
     platforms: &'a [String],
+    platform_filtering: &'a str,
     lexical_index: &'a IndexComponent,
     dense_index: &'a DenseComponent,
     corpus: &'a IndexComponent,
@@ -111,8 +116,10 @@ pub fn build_matching_bundle(options: BundleBuildOptions) -> Result<BundleBuildR
     validate_cli_compatibility(&options.cli_compatibility)?;
 
     let source_manifest = read_subset_manifest(&options.manifest)?;
+    crate::tldr_subset::validate_manifest(&source_manifest)
+        .context("source manifest is not compatible with the bundle builder")?;
     let output = absolute_path(&options.output)?;
-    if output.exists() {
+    if path_entry_exists(&output) {
         bail!(
             "refusing to replace existing matching bundle output {}; choose a new versioned output path",
             output.display()
@@ -143,7 +150,7 @@ pub fn build_matching_bundle(options: BundleBuildOptions) -> Result<BundleBuildR
         .ok_or_else(|| anyhow!("bundle output has no file name: {}", output.display()))?
         .to_string_lossy();
     let temporary = parent.join(format!(".{name}.{}.part", std::process::id()));
-    if temporary.exists() {
+    if path_entry_exists(&temporary) {
         bail!(
             "temporary bundle output already exists: {}",
             temporary.display()
@@ -243,6 +250,7 @@ fn build_temporary_bundle(
         bundle_id: String::new(),
         bundle_version: BUNDLE_VERSION.to_string(),
         artifact_kind: BUNDLE_KIND.to_string(),
+        parser_version: artifact_metadata_from_file(&dense_output, "parser_version")?,
         source,
         platform_selection: PlatformSelection {
             platforms: REQUIRED_PLATFORMS
@@ -358,6 +366,9 @@ fn validate_manifest_shape(manifest: &BundleManifest) -> Result<()> {
     }
     if manifest.artifact_kind != BUNDLE_KIND {
         bail!("unsupported matching bundle kind");
+    }
+    if manifest.parser_version != PARSER_VERSION {
+        bail!("unsupported matching bundle parser version");
     }
     validate_cli_compatibility(&manifest.cli_compatibility)?;
     validate_platform_selection(&manifest.platform_selection)?;
@@ -652,6 +663,10 @@ fn validate_database_component_versions(
         bail!("bundle lexical index version does not match the matching database");
     }
 
+    if manifest.parser_version != artifact_metadata(connection, "parser_version")? {
+        bail!("bundle parser version does not match the matching database");
+    }
+
     let expected_corpus_version = format!(
         "{}-corpus-v1",
         artifact_metadata(connection, "parser_version")?
@@ -698,9 +713,11 @@ fn write_manifest(path: &Path, manifest: &BundleManifest) -> Result<()> {
 fn bundle_id(manifest: &BundleManifest) -> Result<String> {
     let identity = BundleIdentity {
         bundle_version: &manifest.bundle_version,
+        parser_version: &manifest.parser_version,
         cli_compatibility: &manifest.cli_compatibility,
         source: &manifest.source,
         platforms: &manifest.platform_selection.platforms,
+        platform_filtering: &manifest.platform_selection.filtering,
         lexical_index: &manifest.lexical_index,
         dense_index: &manifest.dense_index,
         corpus: &manifest.corpus,
@@ -747,7 +764,7 @@ fn validate_sha256(value: &str) -> Result<()> {
 }
 
 fn publish_directory(temporary: &Path, output: &Path) -> Result<()> {
-    if output.exists() {
+    if path_entry_exists(output) {
         bail!(
             "refusing to replace existing matching bundle output {}; choose a new versioned output path",
             output.display()
@@ -755,6 +772,11 @@ fn publish_directory(temporary: &Path, output: &Path) -> Result<()> {
     }
     fs::rename(temporary, output)
         .with_context(|| format!("failed to publish matching bundle {}", output.display()))
+}
+
+/// Detect any existing directory entry, including a dangling symlink.
+fn path_entry_exists(path: &Path) -> bool {
+    fs::symlink_metadata(path).is_ok()
 }
 
 fn absolute_path(path: &Path) -> Result<PathBuf> {
@@ -783,8 +805,7 @@ fn sha256_file(path: &Path) -> Result<String> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn bundle_identity_is_stable_for_unchanged_inputs() {
+    fn test_manifest(parser_version: &str) -> BundleManifest {
         let source = SourceMetadata {
             name: "tldr-pages".to_string(),
             revision: "snapshot-1".to_string(),
@@ -798,16 +819,17 @@ mod tests {
             },
         };
         let component = IndexComponent {
-            version: "component-v1".to_string(),
+            version: "fts5-unicode61-v1".to_string(),
             path: MATCHING_DATABASE.to_string(),
             size_bytes: 10,
             sha256: "b".repeat(64),
         };
-        let manifest = BundleManifest {
+        BundleManifest {
             schema_version: BUNDLE_SCHEMA_VERSION,
             bundle_id: String::new(),
             bundle_version: BUNDLE_VERSION.to_string(),
             artifact_kind: BUNDLE_KIND.to_string(),
+            parser_version: parser_version.to_string(),
             source,
             platform_selection: PlatformSelection {
                 platforms: REQUIRED_PLATFORMS
@@ -816,7 +838,7 @@ mod tests {
                     .collect(),
                 filtering: "query-time".to_string(),
             },
-            lexical_index: component.clone(),
+            lexical_index: component,
             dense_index: DenseComponent {
                 version: DENSE_INDEX_VERSION.to_string(),
                 recipe: "description".to_string(),
@@ -824,7 +846,12 @@ mod tests {
                 size_bytes: 10,
                 sha256: "b".repeat(64),
             },
-            corpus: component,
+            corpus: IndexComponent {
+                version: format!("{parser_version}-corpus-v1"),
+                path: MATCHING_DATABASE.to_string(),
+                size_bytes: 10,
+                sha256: "b".repeat(64),
+            },
             embedding_model: EmbeddingModel {
                 id: MODEL_ID.to_string(),
                 revision: MODEL_REVISION.to_string(),
@@ -834,7 +861,12 @@ mod tests {
                 assets: Vec::new(),
             },
             cli_compatibility: "askman=0.3.3".to_string(),
-        };
+        }
+    }
+
+    #[test]
+    fn bundle_identity_is_stable_for_unchanged_inputs() {
+        let manifest = test_manifest(PARSER_VERSION);
         let first = bundle_id(&manifest).unwrap();
         let second = bundle_id(&manifest.clone()).unwrap();
         assert_eq!(first, second);
@@ -842,6 +874,44 @@ mod tests {
         let mut changed_compatibility = manifest;
         changed_compatibility.cli_compatibility = "askman=0.3.4".to_string();
         assert_ne!(first, bundle_id(&changed_compatibility).unwrap());
+
+        let mut changed_filtering = changed_compatibility.clone();
+        changed_filtering.platform_selection.filtering = "build-time".to_string();
+        assert_ne!(
+            bundle_id(&changed_compatibility).unwrap(),
+            bundle_id(&changed_filtering).unwrap()
+        );
+
+        let mut changed_parser = changed_compatibility;
+        changed_parser.parser_version = "tldr-subset-v4".to_string();
+        assert_ne!(first, bundle_id(&changed_parser).unwrap());
+    }
+
+    #[test]
+    fn parser_version_must_match_manifest_and_database() {
+        let mut manifest = test_manifest(PARSER_VERSION);
+        manifest.parser_version = "tldr-subset-v4".to_string();
+        let error = validate_manifest_shape(&manifest).unwrap_err().to_string();
+        assert!(error.contains("unsupported matching bundle parser version"));
+
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE artifact_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+                 INSERT INTO artifact_metadata VALUES
+                   ('lexical_index_tokenizer', 'unicode61'),
+                   ('parser_version', 'tldr-subset-v3'),
+                   ('dense_embedding_text_recipe', 'description');",
+            )
+            .unwrap();
+        let mut manifest = test_manifest(PARSER_VERSION);
+        validate_database_component_versions(&manifest, &connection).unwrap();
+
+        manifest.parser_version = "tldr-subset-v4".to_string();
+        let error = validate_database_component_versions(&manifest, &connection)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("bundle parser version does not match"));
     }
 
     #[test]
@@ -879,6 +949,34 @@ mod tests {
 
         assert!(error.contains("refusing to replace existing matching bundle output"));
         assert_eq!(fs::read(&marker).unwrap(), b"previous bundle");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn dangling_bundle_output_is_refused_without_replacing_the_link() {
+        use std::os::unix::fs::symlink;
+
+        let directory = tempfile::tempdir().unwrap();
+        let output = directory.path().join("matching-bundle");
+        symlink("missing-target", &output).unwrap();
+
+        let error = build_matching_bundle(BundleBuildOptions {
+            manifest: "tests/fixtures/tldr-full-corpus/manifest.json".into(),
+            snapshot: "tests/fixtures/tldr-full-corpus".into(),
+            model_cache: directory.path().join("missing-model-cache"),
+            output: output.clone(),
+            cli_compatibility: "askman=0.3.3".to_string(),
+        })
+        .unwrap_err()
+        .to_string();
+
+        assert!(error.contains("refusing to replace existing matching bundle output"));
+        assert!(
+            fs::symlink_metadata(output)
+                .unwrap()
+                .file_type()
+                .is_symlink()
+        );
     }
 
     #[test]
