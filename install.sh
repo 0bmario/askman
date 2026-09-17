@@ -93,4 +93,4 @@ fi
 
 echo
 echo "Installed askman ${TAG} to $INSTALL_DIR/askman"
-echo "Run 'askman <query>' to get started."
+echo "Run 'askman setup' once while online, then 'askman <query>' to search offline."

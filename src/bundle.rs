@@ -7,21 +7,33 @@ use crate::tldr_subset::{
     PARSER_VERSION, SourceMetadata, SubsetManifest, artifact_metadata, build_artifact,
 };
 use anyhow::{Context, Result, anyhow, bail};
+use flate2::read::GzDecoder;
+use reqwest::blocking::Client;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashSet;
-use std::fs;
+use std::fs::{self, File, OpenOptions};
+use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
+use std::time::Duration;
+use tar::Archive;
 
-const BUNDLE_SCHEMA_VERSION: u32 = 2;
-const BUNDLE_VERSION: &str = "matching-bundle-v2";
-const BUNDLE_KIND: &str = "askman.matching-bundle";
-const MATCHING_DATABASE: &str = "matching.db";
-const BUNDLE_MANIFEST: &str = "manifest.json";
-const MODEL_DIRECTORY: &str = "model-cache";
-const MODEL_REFERENCE: &str = "refs/main";
-const REQUIRED_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
+pub const BUNDLE_SCHEMA_VERSION: u32 = 2;
+pub const BUNDLE_VERSION: &str = "matching-bundle-v2";
+pub const BUNDLE_KIND: &str = "askman.matching-bundle";
+pub const MATCHING_DATABASE: &str = "matching.db";
+pub const BUNDLE_MANIFEST: &str = "manifest.json";
+pub const MODEL_DIRECTORY: &str = "model-cache";
+pub const MODEL_REFERENCE: &str = "refs/main";
+pub const REQUIRED_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
+
+/// Release assets are deliberately fixed to the CLI's compatible release.
+/// `setup` and `update` never consult a mutable `latest` endpoint.
+pub const RELEASE_TAG: &str = concat!("v", env!("CARGO_PKG_VERSION"));
+pub const RELEASE_BASE_URL: &str = "https://github.com/0bmario/askman/releases/download";
+pub const RELEASE_MANIFEST_ASSET: &str = "matching-bundle-manifest.json";
+pub const RELEASE_ARCHIVE_ASSET: &str = "matching-bundle.tar.gz";
 
 #[derive(Debug, Clone)]
 pub struct BundleBuildOptions {
@@ -282,16 +294,16 @@ fn build_temporary_bundle(
 pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
     let root = fs::canonicalize(bundle)
         .with_context(|| format!("failed to resolve matching bundle {}", bundle.display()))?;
+    if !root.is_dir() {
+        bail!("matching bundle is not a directory: {}", bundle.display());
+    }
     let manifest_path = root.join(BUNDLE_MANIFEST);
     let manifest: BundleManifest =
         serde_json::from_slice(&fs::read(&manifest_path).with_context(|| {
             format!("failed to read bundle manifest {}", manifest_path.display())
         })?)
         .context("failed to parse matching bundle manifest")?;
-    validate_manifest_shape(&manifest)?;
-    if manifest.bundle_id != bundle_id(&manifest)? {
-        bail!("matching bundle identity does not match its manifest");
-    }
+    validate_bundle_manifest(&manifest)?;
 
     let database = validate_bundle_component_file(
         &root,
@@ -354,7 +366,20 @@ pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
         }
     }
     validate_model_manifest(&root, &manifest.embedding_model)?;
+    validate_bundle_file_inventory(&root, &manifest)?;
     Ok(manifest)
+}
+
+/// Validate the manifest identity and compatibility fields without reading its
+/// component files. The complete directory validator below must still run
+/// before activation.
+pub fn validate_bundle_manifest(manifest: &BundleManifest) -> Result<()> {
+    validate_manifest_shape(manifest)?;
+    validate_bundle_id(&manifest.bundle_id)?;
+    if manifest.bundle_id != bundle_id(manifest)? {
+        bail!("matching bundle identity does not match its manifest");
+    }
+    Ok(())
 }
 
 fn validate_manifest_shape(manifest: &BundleManifest) -> Result<()> {
@@ -371,12 +396,62 @@ fn validate_manifest_shape(manifest: &BundleManifest) -> Result<()> {
         bail!("unsupported matching bundle parser version");
     }
     validate_cli_compatibility(&manifest.cli_compatibility)?;
+    validate_source_metadata(&manifest.source)?;
+    validate_index_component(&manifest.lexical_index, "lexical index")?;
+    validate_index_component(&manifest.corpus, "corpus")?;
+    validate_dense_component(&manifest.dense_index)?;
     validate_platform_selection(&manifest.platform_selection)?;
     validate_dense_model_metadata(manifest)?;
     if manifest.embedding_model.assets.len() != MODEL_FILES.len() + 1 {
         bail!("matching bundle embedding model asset inventory is incomplete");
     }
     Ok(())
+}
+
+fn validate_source_metadata(source: &SourceMetadata) -> Result<()> {
+    if source.digest_algorithm != "sha256" {
+        bail!("matching bundle source digest algorithm is incompatible");
+    }
+    validate_sha256(&source.digest).context("matching bundle source digest is invalid")?;
+    for (name, value) in [
+        ("source name", source.name.as_str()),
+        ("source revision", source.revision.as_str()),
+        ("source URL", source.url.as_str()),
+        ("source attribution", source.attribution.as_str()),
+        ("license name", source.license.name.as_str()),
+        ("license URL", source.license.url.as_str()),
+    ] {
+        if value.is_empty() {
+            bail!("matching bundle {name} is empty");
+        }
+    }
+    Ok(())
+}
+
+fn validate_index_component(component: &IndexComponent, name: &str) -> Result<()> {
+    if component.version.is_empty() {
+        bail!("matching bundle {name} version is empty");
+    }
+    validate_relative_path(&component.path)?;
+    if component.size_bytes == 0 {
+        bail!("matching bundle {name} size is invalid");
+    }
+    validate_sha256(&component.sha256)
+        .with_context(|| format!("matching bundle {name} digest is invalid"))
+}
+
+fn validate_dense_component(component: &DenseComponent) -> Result<()> {
+    if component.version.is_empty() {
+        bail!("matching bundle dense index version is empty");
+    }
+    if component.recipe.is_empty() {
+        bail!("matching bundle dense index recipe is empty");
+    }
+    validate_relative_path(&component.path)?;
+    if component.size_bytes == 0 {
+        bail!("matching bundle dense index size is invalid");
+    }
+    validate_sha256(&component.sha256).context("matching bundle dense index digest is invalid")
 }
 
 fn validate_bundle_component_file(
@@ -413,8 +488,14 @@ fn validate_model_manifest(root: &Path, model: &EmbeddingModel) -> Result<()> {
         if !paths.insert(asset.path.clone()) {
             bail!("duplicate bundle model asset: {}", asset.path);
         }
+        if asset.size_bytes == 0 {
+            bail!("bundle model asset size is invalid: {}", asset.path);
+        }
+        validate_sha256(&asset.sha256)
+            .with_context(|| format!("bundle model asset digest is invalid: {}", asset.path))?;
         let path = root.join(&asset.path);
-        let canonical = fs::canonicalize(&path)?;
+        let canonical = fs::canonicalize(&path)
+            .with_context(|| format!("bundle model asset is missing: {}", asset.path))?;
         if !canonical.starts_with(root) {
             bail!("bundle model asset escapes bundle root: {}", asset.path);
         }
@@ -437,6 +518,71 @@ fn validate_model_manifest(root: &Path, model: &EmbeddingModel) -> Result<()> {
     .collect::<HashSet<_>>();
     if paths != expected_paths {
         bail!("matching bundle embedding model asset inventory is incompatible");
+    }
+    Ok(())
+}
+
+fn validate_bundle_file_inventory(root: &Path, manifest: &BundleManifest) -> Result<()> {
+    let mut actual = HashSet::new();
+    collect_bundle_files(root, root, &mut actual)?;
+
+    let mut expected = HashSet::from([BUNDLE_MANIFEST.to_string()]);
+    expected.insert(manifest.corpus.path.clone());
+    expected.insert(manifest.lexical_index.path.clone());
+    expected.insert(manifest.dense_index.path.clone());
+    expected.extend(
+        manifest
+            .embedding_model
+            .assets
+            .iter()
+            .map(|asset| asset.path.clone()),
+    );
+
+    if actual != expected {
+        let missing = expected.difference(&actual).cloned().collect::<Vec<_>>();
+        let unexpected = actual.difference(&expected).cloned().collect::<Vec<_>>();
+        bail!(
+            "matching bundle file inventory is incompatible; missing: {}; unexpected: {}",
+            display_paths(&missing),
+            display_paths(&unexpected)
+        );
+    }
+    Ok(())
+}
+
+fn collect_bundle_files(root: &Path, directory: &Path, files: &mut HashSet<String>) -> Result<()> {
+    let mut entries = fs::read_dir(directory)
+        .with_context(|| {
+            format!(
+                "failed to enumerate bundle directory {}",
+                directory.display()
+            )
+        })?
+        .collect::<std::io::Result<Vec<_>>>()?;
+    entries.sort_by_key(|entry| entry.file_name());
+
+    for entry in entries {
+        let path = entry.path();
+        let metadata = fs::symlink_metadata(&path)?;
+        if metadata.file_type().is_symlink() {
+            bail!("matching bundle contains a symlink: {}", path.display());
+        }
+        if metadata.is_dir() {
+            collect_bundle_files(root, &path, files)?;
+        } else if metadata.is_file() {
+            let relative = path
+                .strip_prefix(root)
+                .map_err(|_| anyhow!("bundle file is outside bundle root"))?
+                .to_str()
+                .ok_or_else(|| anyhow!("bundle file path is not UTF-8: {}", path.display()))?
+                .replace('\\', "/");
+            files.insert(relative);
+        } else {
+            bail!(
+                "matching bundle contains a non-regular file: {}",
+                path.display()
+            );
+        }
     }
     Ok(())
 }
@@ -801,6 +947,602 @@ fn sha256_file(path: &Path) -> Result<String> {
     Ok(format!("{:x}", Sha256::digest(fs::read(path)?)))
 }
 
+const ACTIVE_STATE_SCHEMA_VERSION: u32 = 1;
+const ACTIVE_STATE_FILE: &str = "active-bundle.json";
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ActiveBundleState {
+    pub schema_version: u32,
+    pub active_bundle_id: String,
+    pub previous_bundle_id: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct BundleStore {
+    root: PathBuf,
+    active_state: PathBuf,
+    release_base_url: String,
+}
+
+impl BundleStore {
+    /// Open the lifecycle store below the supplied Askman data directory.
+    /// Construction is read-only; setup/update create the store as needed.
+    pub fn new(app_dir: &Path) -> Self {
+        Self::with_release_base_url(app_dir, RELEASE_BASE_URL)
+    }
+
+    /// Construct a store against a release download root. This is useful for
+    /// offline integration tests; the release tag and asset names remain
+    /// fixed and are still checked by the downloader.
+    pub fn with_release_base_url(app_dir: &Path, release_base_url: impl Into<String>) -> Self {
+        Self {
+            root: app_dir.join("bundles"),
+            active_state: app_dir.join(ACTIVE_STATE_FILE),
+            release_base_url: release_base_url.into(),
+        }
+    }
+
+    /// Return and revalidate the active bundle. This path never performs I/O
+    /// outside the local store and never creates or downloads anything.
+    pub fn active_bundle(&self) -> Result<(PathBuf, BundleManifest)> {
+        let state = self
+            .read_state()?
+            .ok_or_else(|| anyhow!("no active matching bundle; run `askman setup` first"))?;
+        self.load_bundle(&state.active_bundle_id)
+    }
+
+    /// First-use setup. Existing valid setup is idempotent; an invalid active
+    /// state is reported instead of being repaired or replaced implicitly.
+    pub fn setup(&self) -> Result<BundleManifest> {
+        if self.read_state()?.is_some() {
+            return self.active_bundle().map(|(_, manifest)| manifest);
+        }
+        self.acquire_and_activate()
+    }
+
+    /// Explicitly acquire the release-pinned bundle and activate it after the
+    /// same full directory validation used by setup and query.
+    pub fn update(&self) -> Result<BundleManifest> {
+        if let Some(state) = self.read_state()? {
+            self.load_bundle(&state.active_bundle_id)?;
+        }
+        self.acquire_and_activate()
+    }
+
+    /// Atomically switch to the previous valid bundle. The current bundle is
+    /// retained as the next rollback target.
+    pub fn rollback(&self) -> Result<BundleManifest> {
+        self.rollback_with(validate_matching_bundle)
+    }
+
+    fn rollback_with<F>(&self, validator: F) -> Result<BundleManifest>
+    where
+        F: Fn(&Path) -> Result<BundleManifest> + Copy,
+    {
+        let state = self
+            .read_state()?
+            .ok_or_else(|| anyhow!("no active matching bundle; nothing to roll back"))?;
+        let previous = state
+            .previous_bundle_id
+            .as_deref()
+            .ok_or_else(|| anyhow!("no previous valid matching bundle is available"))?;
+        let (_, previous_manifest) =
+            self.load_bundle_with(previous, validator)
+                .with_context(|| {
+                    format!(
+                        "cannot roll back because previous matching bundle {previous} is invalid"
+                    )
+                })?;
+
+        self.write_state_atomic(&ActiveBundleState {
+            schema_version: ACTIVE_STATE_SCHEMA_VERSION,
+            active_bundle_id: previous.to_string(),
+            previous_bundle_id: Some(state.active_bundle_id),
+        })?;
+        Ok(previous_manifest)
+    }
+
+    /// Resolve the immutable on-disk path for a bundle ID. The path is not
+    /// created or replaced by this method.
+    pub fn bundle_path(&self, bundle_id: &str) -> Result<PathBuf> {
+        validate_bundle_id(bundle_id)?;
+        Ok(self.root.join(storage_name(bundle_id)))
+    }
+
+    fn acquire_and_activate(&self) -> Result<BundleManifest> {
+        self.ensure_store_root()?;
+        let (bundle_path, manifest, newly_published) = self.acquire_release_bundle()?;
+        if let Err(error) = self.activate_manifest(&manifest) {
+            if newly_published {
+                fs::remove_dir_all(&bundle_path).with_context(|| {
+                    format!(
+                        "activation failed and newly published matching bundle {} could not be removed",
+                        manifest.bundle_id
+                    )
+                })?;
+            }
+            return Err(error);
+        }
+        debug_assert!(bundle_path.is_dir());
+        Ok(manifest)
+    }
+
+    fn acquire_release_bundle(&self) -> Result<(PathBuf, BundleManifest, bool)> {
+        let staging = self.create_staging_directory()?;
+        let archive = self.temporary_archive_path()?;
+        let result = (|| -> Result<(PathBuf, BundleManifest, bool)> {
+            let manifest_bytes = self.download_asset(RELEASE_MANIFEST_ASSET, None)?;
+            let manifest: BundleManifest = serde_json::from_slice(&manifest_bytes)
+                .context("release matching-bundle manifest is not valid JSON")?;
+            validate_release_manifest(&manifest)?;
+
+            self.download_asset(RELEASE_ARCHIVE_ASSET, Some(&archive))?;
+            extract_bundle_archive(&archive, &staging)?;
+            let embedded = validate_matching_bundle(&staging)
+                .context("downloaded matching bundle failed validation")?;
+            if embedded != manifest {
+                bail!("release matching-bundle manifest does not match the bundle archive");
+            }
+
+            let (destination, newly_published) =
+                self.publish_validated_bundle(&staging, &manifest)?;
+            Ok((destination, manifest, newly_published))
+        })();
+
+        let _ = fs::remove_file(&archive);
+        let _ = fs::remove_dir_all(&staging);
+        result
+    }
+
+    fn download_asset(&self, asset: &str, destination: Option<&Path>) -> Result<Vec<u8>> {
+        let url = release_asset_url(&self.release_base_url, asset)?;
+        let client = Client::builder()
+            .timeout(Duration::from_secs(120))
+            .user_agent(format!("askman/{}", env!("CARGO_PKG_VERSION")))
+            .build()
+            .context("failed to create release download client")?;
+        let mut response = client
+            .get(&url)
+            .send()
+            .with_context(|| format!("failed to download release asset {url}"))?
+            .error_for_status()
+            .with_context(|| format!("release asset is unavailable: {url}"))?;
+
+        if let Some(destination) = destination {
+            let mut file = OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(destination)
+                .with_context(|| {
+                    format!(
+                        "failed to create temporary release asset {}",
+                        destination.display()
+                    )
+                })?;
+            response.copy_to(&mut file)?;
+            file.sync_all()?;
+            Ok(Vec::new())
+        } else {
+            let mut bytes = Vec::new();
+            response.read_to_end(&mut bytes)?;
+            Ok(bytes)
+        }
+    }
+
+    fn publish_validated_bundle(
+        &self,
+        staging: &Path,
+        manifest: &BundleManifest,
+    ) -> Result<(PathBuf, bool)> {
+        self.publish_validated_bundle_checked(staging, manifest, validate_matching_bundle)
+    }
+
+    #[cfg(test)]
+    fn publish_validated_bundle_with<F>(
+        &self,
+        staging: &Path,
+        manifest: &BundleManifest,
+        validator: F,
+    ) -> Result<PathBuf>
+    where
+        F: Fn(&Path) -> Result<BundleManifest> + Copy,
+    {
+        Ok(self
+            .publish_validated_bundle_checked(staging, manifest, validator)?
+            .0)
+    }
+
+    fn publish_validated_bundle_checked<F>(
+        &self,
+        staging: &Path,
+        manifest: &BundleManifest,
+        validator: F,
+    ) -> Result<(PathBuf, bool)>
+    where
+        F: Fn(&Path) -> Result<BundleManifest> + Copy,
+    {
+        let validated = validator(staging)
+            .context("matching bundle failed validation before immutable publication")?;
+        if validated != *manifest {
+            bail!("matching bundle manifest changed during validation");
+        }
+        let destination = self.bundle_path(&manifest.bundle_id)?;
+        if path_entry_exists(&destination) {
+            let existing = self
+                .load_bundle_with(&manifest.bundle_id, validator)
+                .with_context(|| {
+                format!(
+                    "immutable bundle ID {} already exists but is invalid; refusing to replace it",
+                    manifest.bundle_id
+                )
+            })?;
+            if existing.1 != *manifest {
+                bail!(
+                    "immutable bundle ID {} is already stored with different manifest metadata",
+                    manifest.bundle_id
+                );
+            }
+            return Ok((existing.0, false));
+        }
+
+        atomic_replace(staging, &destination).with_context(|| {
+            format!(
+                "failed to publish validated matching bundle {}",
+                manifest.bundle_id
+            )
+        })?;
+        Ok((destination, true))
+    }
+
+    fn activate_manifest(&self, manifest: &BundleManifest) -> Result<()> {
+        let state = self.read_state()?;
+        if state
+            .as_ref()
+            .is_some_and(|state| state.active_bundle_id == manifest.bundle_id)
+        {
+            return Ok(());
+        }
+        self.write_state_atomic(&ActiveBundleState {
+            schema_version: ACTIVE_STATE_SCHEMA_VERSION,
+            active_bundle_id: manifest.bundle_id.clone(),
+            previous_bundle_id: state.map(|state| state.active_bundle_id),
+        })
+    }
+
+    fn load_bundle(&self, bundle_id: &str) -> Result<(PathBuf, BundleManifest)> {
+        self.load_bundle_with(bundle_id, validate_matching_bundle)
+    }
+
+    fn load_bundle_with<F>(
+        &self,
+        bundle_id: &str,
+        validator: F,
+    ) -> Result<(PathBuf, BundleManifest)>
+    where
+        F: Fn(&Path) -> Result<BundleManifest>,
+    {
+        self.validate_store_root()?;
+        let path = self.bundle_path(bundle_id)?;
+        if !path_entry_exists(&path) {
+            bail!("matching bundle {bundle_id} is missing from local storage");
+        }
+        let metadata = fs::symlink_metadata(&path)?;
+        if metadata.file_type().is_symlink() {
+            bail!("matching bundle {bundle_id} is a symlink, not an immutable bundle directory");
+        }
+        if !metadata.is_dir() {
+            bail!("matching bundle {bundle_id} is not a directory");
+        }
+        let manifest = validator(&path)
+            .with_context(|| format!("matching bundle {bundle_id} failed validation"))?;
+        if manifest.bundle_id != bundle_id {
+            bail!("stored matching bundle ID does not match its directory identity");
+        }
+        Ok((path, manifest))
+    }
+
+    fn ensure_store_root(&self) -> Result<()> {
+        if path_entry_exists(&self.root) {
+            let metadata = fs::symlink_metadata(&self.root)?;
+            if metadata.file_type().is_symlink() || !metadata.is_dir() {
+                bail!(
+                    "matching bundle storage is not a regular directory: {}",
+                    self.root.display()
+                );
+            }
+        } else {
+            fs::create_dir_all(&self.root).with_context(|| {
+                format!(
+                    "failed to create matching bundle storage {}",
+                    self.root.display()
+                )
+            })?;
+        }
+        Ok(())
+    }
+
+    fn validate_store_root(&self) -> Result<()> {
+        if !path_entry_exists(&self.root) {
+            bail!("matching bundle storage is missing; run `askman setup` first");
+        }
+        let metadata = fs::symlink_metadata(&self.root)?;
+        if metadata.file_type().is_symlink() || !metadata.is_dir() {
+            bail!(
+                "matching bundle storage is not a regular directory: {}",
+                self.root.display()
+            );
+        }
+        Ok(())
+    }
+
+    fn create_staging_directory(&self) -> Result<PathBuf> {
+        let path = self.root.join(format!(".bundle-{}.part", unique_suffix()));
+        fs::create_dir(&path).with_context(|| {
+            format!(
+                "failed to create temporary matching bundle directory {}",
+                path.display()
+            )
+        })?;
+        Ok(path)
+    }
+
+    fn temporary_archive_path(&self) -> Result<PathBuf> {
+        let path = self
+            .root
+            .join(format!(".download-{}.tar.gz", unique_suffix()));
+        let _ = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .with_context(|| format!("failed to reserve temporary archive {}", path.display()))?;
+        let _ = fs::remove_file(&path);
+        Ok(path)
+    }
+
+    fn read_state(&self) -> Result<Option<ActiveBundleState>> {
+        if !path_entry_exists(&self.active_state) {
+            return Ok(None);
+        }
+        let metadata = fs::symlink_metadata(&self.active_state)?;
+        if metadata.file_type().is_symlink() || !metadata.is_file() {
+            bail!("active matching bundle state is not a regular file");
+        }
+        let contents = fs::read_to_string(&self.active_state)
+            .with_context(|| format!("failed to read {}", self.active_state.display()))?;
+        let nonempty_lines = contents
+            .lines()
+            .filter(|line| !line.trim().is_empty())
+            .collect::<Vec<_>>();
+        let mut latest = None;
+        for (index, line) in nonempty_lines.iter().enumerate() {
+            match serde_json::from_str::<ActiveBundleState>(line) {
+                Ok(state) => {
+                    validate_state(&state)?;
+                    latest = Some(state);
+                }
+                Err(error)
+                    if index + 1 == nonempty_lines.len() && !line.trim_end().ends_with('}') =>
+                {
+                    // A process interrupted during one append leaves an
+                    // incomplete final record. The previous complete record
+                    // remains the active state.
+                    let _ = error;
+                }
+                Err(error) => {
+                    return Err(error).context("active matching bundle state is not valid JSON");
+                }
+            }
+        }
+        Ok(latest)
+    }
+
+    fn write_state_atomic(&self, state: &ActiveBundleState) -> Result<()> {
+        validate_state(state)?;
+        self.ensure_store_root()?;
+        if path_entry_exists(&self.active_state) {
+            let metadata = fs::symlink_metadata(&self.active_state)?;
+            if metadata.file_type().is_symlink() || !metadata.is_file() {
+                bail!("active matching bundle state is not a replaceable regular file");
+            }
+        }
+
+        let temporary = self
+            .active_state
+            .with_file_name(format!(".active-bundle-{}.part", unique_suffix()));
+        let result = (|| -> Result<()> {
+            let mut file = OpenOptions::new()
+                .create_new(true)
+                .write(true)
+                .open(&temporary)
+                .with_context(|| {
+                    format!(
+                        "failed to create temporary active bundle state {}",
+                        temporary.display()
+                    )
+                })?;
+            let mut bytes = serde_json::to_vec(state)?;
+            bytes.push(b'\n');
+            file.write_all(&bytes)?;
+            file.sync_all()?;
+            atomic_replace(&temporary, &self.active_state)?;
+            Ok(())
+        })();
+        if result.is_err() {
+            let _ = fs::remove_file(&temporary);
+        }
+        result
+    }
+}
+
+fn validate_release_manifest(manifest: &BundleManifest) -> Result<()> {
+    validate_bundle_manifest(manifest)?;
+    let expected_cli = format!("askman={}", env!("CARGO_PKG_VERSION"));
+    if manifest.cli_compatibility != expected_cli {
+        bail!(
+            "release matching bundle is incompatible with this CLI: declared {}, expected {}",
+            manifest.cli_compatibility,
+            expected_cli
+        );
+    }
+    Ok(())
+}
+
+fn validate_state(state: &ActiveBundleState) -> Result<()> {
+    if state.schema_version != ACTIVE_STATE_SCHEMA_VERSION {
+        bail!("unsupported active matching bundle state version");
+    }
+    validate_bundle_id(&state.active_bundle_id)?;
+    if state
+        .previous_bundle_id
+        .as_ref()
+        .is_some_and(|previous| previous == &state.active_bundle_id)
+    {
+        bail!("active matching bundle state repeats the active bundle ID");
+    }
+    if let Some(previous) = &state.previous_bundle_id {
+        validate_bundle_id(previous)?;
+    }
+    Ok(())
+}
+
+fn validate_bundle_id(bundle_id: &str) -> Result<()> {
+    if !bundle_id.starts_with(&format!("{BUNDLE_VERSION}:"))
+        || bundle_id
+            .chars()
+            .any(|character| character == '/' || character == '\\' || character.is_control())
+    {
+        bail!("matching bundle ID is invalid: {bundle_id}");
+    }
+    Ok(())
+}
+
+fn storage_name(bundle_id: &str) -> String {
+    let mut name = String::new();
+    for byte in bundle_id.bytes() {
+        match byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'.' | b'-' | b'_' => name.push(byte as char),
+            _ => name.push_str(&format!("%{byte:02x}")),
+        }
+    }
+    name
+}
+
+fn release_asset_url(base_url: &str, asset: &str) -> Result<String> {
+    if asset != RELEASE_MANIFEST_ASSET && asset != RELEASE_ARCHIVE_ASSET {
+        bail!("unsupported release asset: {asset}");
+    }
+    if base_url.is_empty() || base_url.chars().any(char::is_whitespace) {
+        bail!("release base URL is invalid");
+    }
+    Ok(format!(
+        "{}/{}/{}",
+        base_url.trim_end_matches('/'),
+        RELEASE_TAG,
+        asset
+    ))
+}
+
+fn extract_bundle_archive(archive_path: &Path, destination: &Path) -> Result<()> {
+    let archive = File::open(archive_path).with_context(|| {
+        format!(
+            "failed to open downloaded bundle archive {}",
+            archive_path.display()
+        )
+    })?;
+    let decoder = GzDecoder::new(archive);
+    let mut archive = Archive::new(decoder);
+    let entries = archive
+        .entries()
+        .context("failed to read matching bundle archive")?;
+    for entry in entries {
+        let mut entry = entry.context("failed to read matching bundle archive entry")?;
+        let relative = entry
+            .path()
+            .context("matching bundle archive entry has no path")?
+            .into_owned();
+        let relative_text = relative
+            .to_str()
+            .ok_or_else(|| anyhow!("matching bundle archive entry path is not UTF-8"))?;
+        validate_relative_path(relative_text)?;
+        let output = destination.join(&relative);
+        ensure_no_symlink_parents(destination, &output)?;
+        if path_entry_exists(&output) {
+            bail!("matching bundle archive contains a duplicate path: {relative_text}");
+        }
+
+        if entry.header().entry_type().is_dir() {
+            fs::create_dir_all(&output)?;
+        } else if entry.header().entry_type().is_file() {
+            if let Some(parent) = output.parent() {
+                fs::create_dir_all(parent)?;
+            }
+            entry.unpack(&output).with_context(|| {
+                format!("failed to extract matching bundle file {relative_text}")
+            })?;
+        } else {
+            bail!("matching bundle archive contains unsupported entry: {relative_text}");
+        }
+    }
+    Ok(())
+}
+
+fn ensure_no_symlink_parents(root: &Path, path: &Path) -> Result<()> {
+    let relative = path
+        .strip_prefix(root)
+        .map_err(|_| anyhow!("archive output escaped staging directory"))?;
+    let mut current = root.to_path_buf();
+    for component in relative.components() {
+        current.push(component.as_os_str());
+        if current == path {
+            break;
+        }
+        if path_entry_exists(&current) {
+            let metadata = fs::symlink_metadata(&current)?;
+            if metadata.file_type().is_symlink() || !metadata.is_dir() {
+                bail!("matching bundle archive path crosses a non-directory entry");
+            }
+        }
+    }
+    Ok(())
+}
+
+fn unique_suffix() -> String {
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_nanos());
+    format!("{}-{nanos}", std::process::id())
+}
+
+#[cfg(not(windows))]
+fn atomic_replace(source: &Path, destination: &Path) -> std::io::Result<()> {
+    fs::rename(source, destination)
+}
+
+#[cfg(windows)]
+fn atomic_replace(source: &Path, destination: &Path) -> std::io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::{
+        MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH, MoveFileExW,
+    };
+
+    let source = source
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect::<Vec<_>>();
+    let destination = destination
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect::<Vec<_>>();
+    let flags = MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH;
+    if unsafe { MoveFileExW(source.as_ptr(), destination.as_ptr(), flags) } == 0 {
+        Err(std::io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1011,5 +1753,213 @@ mod tests {
             "{error}"
         );
         assert!(!directory.path().join("matching-bundle").exists());
+    }
+
+    fn lifecycle_manifest(revision: &str) -> BundleManifest {
+        let mut manifest = test_manifest(PARSER_VERSION);
+        manifest.source.revision = revision.to_string();
+        manifest.bundle_id = bundle_id(&manifest).unwrap();
+        manifest
+    }
+
+    fn test_bundle_validator(path: &Path) -> Result<BundleManifest> {
+        Ok(serde_json::from_slice(&fs::read(
+            path.join(BUNDLE_MANIFEST),
+        )?)?)
+    }
+
+    fn install_test_bundle(
+        store: &BundleStore,
+        manifest: &BundleManifest,
+        activate: bool,
+    ) -> PathBuf {
+        store.ensure_store_root().unwrap();
+        let staging = store.create_staging_directory().unwrap();
+        fs::write(
+            staging.join(BUNDLE_MANIFEST),
+            serde_json::to_vec(manifest).unwrap(),
+        )
+        .unwrap();
+        let destination = store
+            .publish_validated_bundle_with(&staging, manifest, test_bundle_validator)
+            .unwrap();
+        if activate {
+            store.activate_manifest(manifest).unwrap();
+        }
+        destination
+    }
+
+    #[test]
+    fn first_use_setup_state_has_one_active_immutable_bundle() {
+        let directory = tempfile::tempdir().unwrap();
+        let store = BundleStore::new(directory.path());
+        let error = store.active_bundle().unwrap_err().to_string();
+        assert!(error.contains("run `askman setup` first"));
+
+        let manifest = lifecycle_manifest("first-use");
+        let bundle_path = install_test_bundle(&store, &manifest, true);
+        let state = store.read_state().unwrap().unwrap();
+        assert_eq!(state.active_bundle_id, manifest.bundle_id);
+        assert_eq!(state.previous_bundle_id, None);
+        assert!(bundle_path.is_dir());
+        assert_eq!(store.bundle_path(&manifest.bundle_id).unwrap(), bundle_path);
+    }
+
+    #[test]
+    fn successful_update_preserves_previous_bundle_for_rollback() {
+        let directory = tempfile::tempdir().unwrap();
+        let store = BundleStore::new(directory.path());
+        let first = lifecycle_manifest("first");
+        let second = lifecycle_manifest("second");
+        let first_path = install_test_bundle(&store, &first, true);
+        let second_path = install_test_bundle(&store, &second, true);
+
+        let updated = store.read_state().unwrap().unwrap();
+        assert_eq!(updated.active_bundle_id, second.bundle_id);
+        assert_eq!(updated.previous_bundle_id, Some(first.bundle_id.clone()));
+        assert!(first_path.is_dir());
+        assert!(second_path.is_dir());
+
+        let rolled_back = store.rollback_with(test_bundle_validator).unwrap();
+        assert_eq!(rolled_back.bundle_id, first.bundle_id);
+        let rolled_state = store.read_state().unwrap().unwrap();
+        assert_eq!(rolled_state.active_bundle_id, first.bundle_id);
+        assert_eq!(rolled_state.previous_bundle_id, Some(second.bundle_id));
+        assert!(first_path.is_dir());
+        assert!(second_path.is_dir());
+    }
+
+    #[test]
+    fn interrupted_active_state_is_replaced_before_next_activation() {
+        let directory = tempfile::tempdir().unwrap();
+        let store = BundleStore::new(directory.path());
+        let first = lifecycle_manifest("first");
+        let second = lifecycle_manifest("second");
+        install_test_bundle(&store, &first, true);
+
+        let mut state = OpenOptions::new()
+            .append(true)
+            .open(&store.active_state)
+            .unwrap();
+        state.write_all(br#"{"#).unwrap();
+        state.sync_all().unwrap();
+
+        install_test_bundle(&store, &second, true);
+
+        let contents = fs::read_to_string(&store.active_state).unwrap();
+        assert_eq!(contents.lines().count(), 1);
+        assert_eq!(
+            store.read_state().unwrap().unwrap().active_bundle_id,
+            second.bundle_id
+        );
+    }
+
+    #[test]
+    fn failed_candidate_validation_preserves_active_state_and_assets() {
+        let directory = tempfile::tempdir().unwrap();
+        let store = BundleStore::new(directory.path());
+        let first = lifecycle_manifest("first");
+        let second = lifecycle_manifest("second");
+        install_test_bundle(&store, &first, true);
+        let second_path = install_test_bundle(&store, &second, true);
+        let before = store.read_state().unwrap().unwrap();
+
+        let failed = lifecycle_manifest("failed");
+        let staging = store.create_staging_directory().unwrap();
+        fs::write(
+            staging.join(BUNDLE_MANIFEST),
+            serde_json::to_vec(&failed).unwrap(),
+        )
+        .unwrap();
+        let error = store
+            .publish_validated_bundle_with(&staging, &failed, |_path| {
+                bail!("bundle component digest mismatch: matching.db")
+            })
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("failed validation"));
+        assert_eq!(store.read_state().unwrap().unwrap(), before);
+        assert!(second_path.is_dir());
+        assert!(!store.bundle_path(&failed.bundle_id).unwrap().exists());
+        fs::remove_dir_all(staging).unwrap();
+    }
+
+    #[test]
+    fn immutable_bundle_id_never_replaces_existing_directory() {
+        let directory = tempfile::tempdir().unwrap();
+        let store = BundleStore::new(directory.path());
+        let original = lifecycle_manifest("original");
+        let original_path = install_test_bundle(&store, &original, true);
+        let marker = original_path.join("marker");
+        fs::write(&marker, b"original").unwrap();
+
+        let mut replacement = lifecycle_manifest("replacement");
+        replacement.bundle_id = original.bundle_id.clone();
+        let staging = store.create_staging_directory().unwrap();
+        fs::write(
+            staging.join(BUNDLE_MANIFEST),
+            serde_json::to_vec(&replacement).unwrap(),
+        )
+        .unwrap();
+        let error = store
+            .publish_validated_bundle_with(&staging, &replacement, test_bundle_validator)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("already stored with different manifest metadata"));
+        assert_eq!(fs::read(marker).unwrap(), b"original");
+        fs::remove_dir_all(staging).unwrap();
+    }
+
+    #[test]
+    fn archive_extraction_rejects_path_traversal() {
+        use flate2::{Compression, write::GzEncoder};
+
+        let directory = tempfile::tempdir().unwrap();
+        let archive_path = directory.path().join("bundle.tar.gz");
+        let file = File::create(&archive_path).unwrap();
+        let encoder = GzEncoder::new(file, Compression::default());
+        let mut builder = tar::Builder::new(encoder);
+        let bytes = b"not allowed";
+        let mut header = tar::Header::new_gnu();
+        header.set_size(bytes.len() as u64);
+        header.set_mode(0o644);
+        header.set_cksum();
+        let name = b"../outside.txt";
+        header.as_mut_bytes()[..name.len()].copy_from_slice(name);
+        header.set_cksum();
+        builder.append(&header, &bytes[..]).unwrap();
+        builder
+            .into_inner()
+            .unwrap()
+            .finish()
+            .unwrap()
+            .sync_all()
+            .unwrap();
+
+        let destination = directory.path().join("staging");
+        fs::create_dir(&destination).unwrap();
+        let error = extract_bundle_archive(&archive_path, &destination)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("safe relative path"));
+        assert!(!directory.path().join("outside.txt").exists());
+    }
+
+    #[test]
+    fn active_bundle_lookup_does_not_contact_release_base_url() {
+        use std::net::TcpListener;
+
+        let directory = tempfile::tempdir().unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let address = listener.local_addr().unwrap();
+        let store =
+            BundleStore::with_release_base_url(directory.path(), format!("http://{address}"));
+
+        let error = store.active_bundle().unwrap_err().to_string();
+        assert!(error.contains("run `askman setup` first"));
+        assert!(
+            matches!(listener.accept(), Err(error) if error.kind() == std::io::ErrorKind::WouldBlock)
+        );
     }
 }

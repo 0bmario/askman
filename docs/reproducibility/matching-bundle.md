@@ -49,5 +49,37 @@ keeps a usable bundle intact if construction is malformed or interrupted.
 Existing page/example IDs, command syntax, source references, original
 content, and platform metadata are retained from the corpus builder.
 
-This ticket does not implement bundle update, release publishing, or shipping
-CLI integration.
+## Runtime lifecycle
+
+The shipping CLI consumes only the active validated bundle. First-use setup and
+explicit update fetch these fixed assets from the compatible release tag (the
+current CLI version, never a `latest` endpoint):
+
+- `matching-bundle-manifest.json`
+- `matching-bundle.tar.gz`
+
+The archive is unpacked into a private staging directory. The embedded manifest
+must exactly match the release manifest, and `bundle-validate`'s same
+`validate_matching_bundle` path verifies every component version, size,
+SHA-256 digest, source identity, four-platform database coverage, and pinned
+model asset before publication.
+
+Validated bundles are stored below the Askman data directory at
+`bundles/<immutable-bundle-id>`. Existing IDs are never replaced. The active
+state is written to a temporary file and atomically replaced only after the
+complete record is synced; an interrupted write leaves the previous selection
+active. A successful update records the former active ID as the rollback
+target. Failed downloads, extraction, validation, or activation leave that
+state and bundle untouched.
+
+Use the explicit lifecycle commands:
+
+```sh
+askman setup
+askman update
+askman rollback
+```
+
+Normal queries only read the active state and local bundle. If setup has not
+completed, the query exits non-zero with an actionable setup error; it never
+silently downloads, rebuilds, deletes, or mixes assets.

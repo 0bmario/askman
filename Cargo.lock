@@ -120,6 +120,7 @@ dependencies = [
  "colored",
  "dirs",
  "fastembed",
+ "flate2",
  "indicatif 0.18.4",
  "libc",
  "reqwest",
@@ -128,7 +129,9 @@ dependencies = [
  "serde_json",
  "sha2",
  "sqlite-vec",
+ "tar",
  "tempfile",
+ "windows-sys 0.59.0",
  "zerocopy",
  "zune-jpeg",
 ]

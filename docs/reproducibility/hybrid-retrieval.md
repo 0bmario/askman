@@ -40,8 +40,10 @@ cargo run --locked --offline --features dev --bin askman_candidate -- \
 
 Use `--osx` or `--windows` for another target platform. `--verbose` exposes a
 diagnostic normalized ranking score; it is not a confidence percentage. The
-shipping `askman` binary remains unchanged, while `tldr_subset query` and
-`dense-server` remain available for keyword-only and dense-only diagnostics.
+shipping `askman` binary now consumes the active validated bundle through the
+same frozen hybrid path. `askman_candidate` remains available for
+explicit-bundle comparison, while `tldr_subset query` and `dense-server`
+remain available for keyword-only and dense-only diagnostics.
 
 The provisioned offline harness builds the candidate and matching bundle, then
 checks answerable, unanswerable, ambiguous, and cross-platform queries without
