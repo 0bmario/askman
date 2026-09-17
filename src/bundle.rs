@@ -1855,6 +1855,7 @@ mod tests {
             .unwrap();
         state.write_all(br#"{"#).unwrap();
         state.sync_all().unwrap();
+        drop(state);
 
         install_test_bundle(&store, &second, true);
 
