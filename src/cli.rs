@@ -45,7 +45,7 @@ pub struct CandidateArgs {
     pub question: Vec<String>,
 
     /// Validated matching bundle containing lexical, dense, and model assets
-    #[arg(long, value_name = "DIR")]
+    #[arg(long, required = true, value_name = "DIR")]
     pub bundle: PathBuf,
 
     /// Print the hybrid ranking score for diagnostics.
@@ -87,5 +87,6 @@ mod tests {
         assert!(!args.osx);
         assert!(!args.windows);
         assert!(CandidateArgs::try_parse_from(["askman_candidate", "search"]).is_err());
+        assert!(CandidateArgs::try_parse_from(["askman_candidate", "search", "files"]).is_err());
     }
 }
