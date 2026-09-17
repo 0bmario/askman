@@ -91,5 +91,7 @@ The immutable matching bundle build and validation are documented in the
 [matching bundle instructions](docs/reproducibility/matching-bundle.md).
 The main-versus-retrieval-v2 release gate is documented in the
 [release gate instructions](docs/reproducibility/release-gate.md).
+Cross-platform CI and offline verification are documented in the
+[CI verification instructions](docs/reproducibility/ci.md).
 The Better Askman terminology is defined in the [context glossary](docs/CONTEXT.md),
 and release decisions are recorded in the [ADRs](docs/adr/).

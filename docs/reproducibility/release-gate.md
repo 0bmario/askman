@@ -41,6 +41,15 @@ five-point overall `Success@1` gain, positive gains in two families, no safety
 regression, and no more than 20% warmed-query p95 or peak-memory regression.
 A 95% interval that contains zero produces an **inconclusive** recommendation.
 
+Release publication requires a checked-in machine-readable report at
+`docs/reproducibility/artifacts/release-gate.json` with
+`recommendation: "better_askman"`, a passing `gate`, the frozen manifest
+digest, clean execution records, and an approved Linux or macOS query-time
+network wrapper. The tag workflow validates that report against the tagged
+candidate commit before building or publishing any release assets. No report
+is checked in until the authorized main-data and matching-bundle inputs are
+available.
+
 Fresh-process measurements cover every benchmark task. Warmed-query samples
 warm filesystem/model caches first, then run fresh CLI processes; this is the
 strongest measurement available without a persistent query-server mode in the

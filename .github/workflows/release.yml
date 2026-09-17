@@ -9,8 +9,36 @@ permissions:
   contents: write
 
 jobs:
+  ci:
+    name: Cross-platform CI
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  release-readiness:
+    name: Verify A/B release recommendation
+    needs: [ci]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Require passing release-gate evidence
+        run: |
+          python scripts/validate_release_gate.py \
+            --report docs/reproducibility/artifacts/release-gate.json \
+            --expected-candidate-commit "${GITHUB_SHA}"
+
   build-binaries:
     name: Build Binary (${{ matrix.artifact_name }})
+    needs: [ci, release-readiness]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -50,7 +78,7 @@ jobs:
 
   publish-release:
     name: Publish Release
-    needs: [build-binaries]
+    needs: [build-binaries, release-readiness]
     runs-on: ubuntu-latest
 
     steps:
