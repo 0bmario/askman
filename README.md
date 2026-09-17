@@ -21,7 +21,16 @@ curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.3.3/install.sh | 
 cargo install --git https://github.com/0bmario/askman
 ```
 
-On first run, `askman` downloads a small embedding model and the `commands.db` asset. After that, lookups run offline.
+After installing, provision the compatible matching bundle once while online:
+
+```bash
+askman setup
+```
+
+Setup downloads the bundle and manifest pinned to this CLI release, verifies
+all component metadata and digests, then activates it atomically. Searches do
+not access the network. Update explicitly with `askman update`; restore the
+previous valid bundle with `askman rollback`.
 
 ## Usage
 
@@ -41,7 +50,9 @@ askman --windows clear dns cache
 
 - `askman` uses semantic search to match your query to real command examples from [tldr-pages](https://github.com/tldr-pages/tldr).
 - Your query is embedded locally with [AllMiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), then matched against a SQLite database through [sqlite-vec](https://github.com/asg017/sqlite-vec).
-- After the initial model and database download, everything runs on your machine.
+- The active matching bundle contains the corpus, lexical index, dense index,
+  and pinned embedding assets. Everything after explicit setup/update runs on
+  your machine.
 
 ## Uninstall
 

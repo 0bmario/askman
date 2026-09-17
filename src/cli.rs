@@ -8,6 +8,8 @@ use std::path::PathBuf;
     about = "Ask natural language questions about Unix/Linux commands."
 )]
 pub struct Args {
+    /// A natural-language query, or one of the explicit lifecycle commands:
+    /// `setup`, `update`, or `rollback`.
     #[arg(required_unless_present = "clean")]
     pub question: Vec<String>,
 
@@ -31,6 +33,22 @@ pub struct Args {
     /// Force search for Windows commands
     #[arg(long, conflicts_with_all = ["linux", "osx"])]
     pub windows: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LifecycleCommand {
+    Setup,
+    Update,
+    Rollback,
+}
+
+pub fn lifecycle_command(question: &[String]) -> Option<LifecycleCommand> {
+    match question {
+        [command] if command == "setup" => Some(LifecycleCommand::Setup),
+        [command] if command == "update" => Some(LifecycleCommand::Update),
+        [command] if command == "rollback" => Some(LifecycleCommand::Rollback),
+        _ => None,
+    }
 }
 
 /// Development-only candidate CLI backed by one validated matching bundle.
@@ -88,5 +106,25 @@ mod tests {
         assert!(!args.windows);
         assert!(CandidateArgs::try_parse_from(["askman_candidate", "search"]).is_err());
         assert!(CandidateArgs::try_parse_from(["askman_candidate", "search", "files"]).is_err());
+    }
+
+    #[test]
+    fn lifecycle_commands_are_explicit_single_words() {
+        assert_eq!(
+            lifecycle_command(&["setup".to_string()]),
+            Some(LifecycleCommand::Setup)
+        );
+        assert_eq!(
+            lifecycle_command(&["update".to_string()]),
+            Some(LifecycleCommand::Update)
+        );
+        assert_eq!(
+            lifecycle_command(&["rollback".to_string()]),
+            Some(LifecycleCommand::Rollback)
+        );
+        assert_eq!(
+            lifecycle_command(&["update", "files"].map(str::to_string)),
+            None
+        );
     }
 }
