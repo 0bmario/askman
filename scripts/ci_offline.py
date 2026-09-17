@@ -275,6 +275,31 @@ def benchmark_digests() -> dict[str, object]:
     return result
 
 
+def dev_binary(name: str) -> Path:
+    binary = ROOT / "target" / "debug" / name
+    if os.name == "nt":
+        binary = binary.with_suffix(".exe")
+    return binary
+
+
+def bundle_tool_command(arguments: list[object], cargo: str) -> list[object]:
+    binary = dev_binary("tldr_subset")
+    if binary.is_file():
+        return [binary, *arguments]
+    return [
+        cargo,
+        "run",
+        "--locked",
+        "--offline",
+        "--features",
+        "dev",
+        "--bin",
+        "tldr_subset",
+        "--",
+        *arguments,
+    ]
+
+
 def network_sandbox_blocks_loopback_listener(policy: str) -> bool:
     return "sandbox-exec" in policy or "unshare --net" in policy
 
@@ -328,44 +353,30 @@ def build_and_validate_bundle(
     work_dir: Path, report_dir: Path, cargo: str
 ) -> tuple[Path, dict[str, object]]:
     bundle = work_dir / "matching-bundle"
-    cargo_common = [cargo, "--locked", "--offline", "--features", "dev"]
     if not bundle.exists():
         run_logged(
             "bundle-build",
-            [
+            bundle_tool_command(
+                [
+                    "bundle-build",
+                    "--manifest",
+                    ROOT / "tests/fixtures/tldr-full-corpus/manifest.json",
+                    "--snapshot",
+                    ROOT / "tests/fixtures/tldr-full-corpus",
+                    "--model-cache",
+                    model_cache_path(work_dir),
+                    "--output",
+                    bundle,
+                    "--cli-compatibility",
+                    f"askman={package_version()}",
+                ],
                 cargo,
-                "run",
-                *cargo_common[1:],
-                "--bin",
-                "tldr_subset",
-                "--",
-                "bundle-build",
-                "--manifest",
-                ROOT / "tests/fixtures/tldr-full-corpus/manifest.json",
-                "--snapshot",
-                ROOT / "tests/fixtures/tldr-full-corpus",
-                "--model-cache",
-                model_cache_path(work_dir),
-                "--output",
-                bundle,
-                "--cli-compatibility",
-                f"askman={package_version()}",
-            ],
+            ),
             report_dir,
         )
     run_logged(
         "bundle-validate",
-        [
-            cargo,
-            "run",
-            *cargo_common[1:],
-            "--bin",
-            "tldr_subset",
-            "--",
-            "bundle-validate",
-            "--bundle",
-            bundle,
-        ],
+        bundle_tool_command(["bundle-validate", "--bundle", bundle], cargo),
         report_dir,
     )
 
