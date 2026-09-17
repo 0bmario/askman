@@ -10,6 +10,7 @@ import http.server
 import json
 import os
 import platform
+import signal
 import shlex
 import subprocess
 import sys
@@ -159,20 +160,40 @@ def run_logged(
     process_environment = os.environ.copy()
     if environment:
         process_environment.update(environment)
+
+    process_options: dict[str, object] = {}
+    if os.name == "nt":
+        process_options["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+        process_options["start_new_session"] = True
+
+    process = subprocess.Popen(
+        [str(argument) for argument in command],
+        cwd=ROOT,
+        env=process_environment,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        **process_options,
+    )
     try:
-        completed = subprocess.run(
-            [str(argument) for argument in command],
-            cwd=ROOT,
-            env=process_environment,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            check=False,
-            timeout=COMMAND_TIMEOUT_SECONDS,
-        )
-        output = completed.stdout or ""
+        output, _ = process.communicate(timeout=COMMAND_TIMEOUT_SECONDS)
     except subprocess.TimeoutExpired as error:
-        output = error.stdout or ""
+        if os.name == "nt":
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=False,
+            )
+        else:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        output, _ = process.communicate()
+        if not output:
+            output = error.stdout or ""
         if isinstance(output, bytes):
             output = output.decode(errors="replace")
         log_path.write_text(f"$ {rendered}\n\n{output}", encoding="utf-8")
@@ -180,13 +201,14 @@ def run_logged(
         raise VerificationError(
             f"{label} timed out after {COMMAND_TIMEOUT_SECONDS} seconds; see {log_path}"
         ) from error
+    return_code = process.returncode
     log_path.write_text(f"$ {rendered}\n\n{output}", encoding="utf-8")
     print(output, end="", flush=True)
-    if expect_failure and completed.returncode == 0:
+    if expect_failure and return_code == 0:
         raise VerificationError(f"{label} unexpectedly succeeded; see {log_path}")
-    if not expect_failure and completed.returncode != 0:
+    if not expect_failure and return_code != 0:
         raise VerificationError(
-            f"{label} failed with exit status {completed.returncode}; see {log_path}"
+            f"{label} failed with exit status {return_code}; see {log_path}"
         )
     return output
 
