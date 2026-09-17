@@ -43,6 +43,14 @@ diagnostic normalized ranking score; it is not a confidence percentage. The
 shipping `askman` binary remains unchanged, while `tldr_subset query` and
 `dense-server` remain available for keyword-only and dense-only diagnostics.
 
+The provisioned offline harness builds the candidate and matching bundle, then
+checks answerable, unanswerable, ambiguous, and cross-platform queries without
+network access:
+
+```sh
+bash scripts/smoke_offline.sh candidate "$RUN_DIR"
+```
+
 ## Development tuning
 
 The bounded candidate set was run on the 30 development tasks before the
