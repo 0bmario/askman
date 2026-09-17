@@ -275,15 +275,15 @@ def benchmark_digests() -> dict[str, object]:
     return result
 
 
-def dev_binary(name: str) -> Path:
-    binary = ROOT / "target" / "debug" / name
+def target_binary(name: str, profile: str = "debug") -> Path:
+    binary = ROOT / "target" / profile / name
     if os.name == "nt":
         binary = binary.with_suffix(".exe")
     return binary
 
 
 def bundle_tool_command(arguments: list[object], cargo: str) -> list[object]:
-    binary = dev_binary("tldr_subset")
+    binary = target_binary("tldr_subset")
     if binary.is_file():
         return [binary, *arguments]
     return [
@@ -403,14 +403,15 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
     bundle, manifest = build_and_validate_bundle(work_dir, report_dir, cargo)
     write_verification_evidence(report_dir, bundle, manifest, cargo, "lifecycle-running")
 
-    run_logged(
-        "shipping-build",
-        [cargo, "build", "--locked", "--offline", "--features", "dev", "--bin", "askman"],
-        report_dir,
-    )
-    askman = ROOT / "target" / "debug" / "askman"
-    if os.name == "nt":
-        askman = askman.with_suffix(".exe")
+    # CI already built the release binary; avoid a second full debug build.
+    askman = target_binary("askman", "release")
+    if not askman.is_file():
+        run_logged(
+            "shipping-build",
+            [cargo, "build", "--locked", "--offline", "--features", "dev", "--bin", "askman"],
+            report_dir,
+        )
+        askman = target_binary("askman")
     if not askman.is_file():
         raise VerificationError(f"shipping binary was not built: {askman}")
 
@@ -552,9 +553,9 @@ def verify(work_dir: Path, report_dir: Path) -> None:
                 "output_sha256": hashlib.sha256(output.encode()).hexdigest(),
             }
         )
-    shipping = ROOT / "target" / "debug" / "askman"
-    if os.name == "nt":
-        shipping = shipping.with_suffix(".exe")
+    shipping = target_binary("askman", "release")
+    if not shipping.is_file():
+        shipping = target_binary("askman")
     if not shipping.is_file():
         raise VerificationError(f"shipping binary was not built: {shipping}")
     shipping_output = run_logged(
