@@ -15,6 +15,9 @@ pub const DENSE_CANDIDATE_BUDGET: usize = 8;
 pub const RRF_K: f64 = 60.0;
 pub const KEYWORD_WEIGHT: f64 = 1.0;
 pub const DENSE_WEIGHT: f64 = 1.0;
+// Expanded-dev tuning keeps strong semantic matches while rejecting the nearest
+// unanswerable matches before rank fusion.
+pub const DENSE_DISTANCE_CUTOFF: f64 = 0.55;
 pub const WEAK_MATCH_CUTOFF: f64 = 0.50;
 const FROZEN_DENSE_RECIPE: &str = "description";
 
@@ -32,6 +35,7 @@ pub struct Candidate {
     pub platform: String,
     pub page_position: usize,
     pub example_position: usize,
+    pub dense_distance: Option<f64>,
     pub ranking_score: f64,
 }
 
@@ -99,6 +103,7 @@ impl HybridIndex {
             .into_iter()
             .map(candidate_from_dense)
             .collect::<Vec<_>>();
+        let dense = filter_dense_candidates(dense);
 
         fuse_candidates(&keyword, &dense)
     }
@@ -137,6 +142,7 @@ fn candidate_from_keyword(result: QueryResult) -> Candidate {
         platform: result.platform,
         page_position: result.page_position,
         example_position: result.example_position,
+        dense_distance: None,
         ranking_score: result.rank as f64,
     }
 }
@@ -155,6 +161,7 @@ fn candidate_from_dense(result: DenseCandidate) -> Candidate {
         platform: result.platform,
         page_position: result.page_position,
         example_position: result.example_position,
+        dense_distance: Some(result.ranking_score),
         ranking_score: result.ranking_score,
     }
 }
@@ -221,8 +228,8 @@ pub fn fuse_candidates(
         .collect())
 }
 
-/// Keep only candidates above the frozen weak-match cutoff and cap output at
-/// three distinct destination pages.
+/// Keep only candidates above the fail-closed weak-match cutoff and cap output
+/// at three distinct destination pages.
 pub fn display_candidates(fused_candidates: &[Candidate]) -> Vec<Candidate> {
     let mut seen_pages = HashSet::new();
     fused_candidates
@@ -231,6 +238,17 @@ pub fn display_candidates(fused_candidates: &[Candidate]) -> Vec<Candidate> {
         .filter(|candidate| seen_pages.insert(candidate.page_id.as_str()))
         .take(MAX_DISPLAYED_RESULTS)
         .cloned()
+        .collect()
+}
+
+fn filter_dense_candidates(candidates: Vec<Candidate>) -> Vec<Candidate> {
+    candidates
+        .into_iter()
+        .filter(|candidate| {
+            candidate
+                .dense_distance
+                .is_some_and(|distance| distance <= DENSE_DISTANCE_CUTOFF)
+        })
         .collect()
 }
 
@@ -329,6 +347,7 @@ mod tests {
             platform: "common".to_string(),
             page_position: 1,
             example_position: 1,
+            dense_distance: None,
             ranking_score: 0.0,
         }
     }
@@ -393,6 +412,24 @@ mod tests {
     }
 
     #[test]
+    fn dense_distance_filter_rejects_weak_only_candidates() {
+        let mut strong = candidate("strong", "page-strong");
+        strong.dense_distance = Some(0.55);
+        let mut weak = candidate("weak", "page-weak");
+        weak.dense_distance = Some(0.56);
+
+        let filtered = filter_dense_candidates(vec![strong, weak]);
+
+        assert_eq!(
+            filtered
+                .iter()
+                .map(|candidate| candidate.example_id.as_str())
+                .collect::<Vec<_>>(),
+            vec!["strong"]
+        );
+    }
+
+    #[test]
     fn fusion_rejects_conflicting_source_identity_for_one_example_id() {
         let mut dense = candidate("shared", "page-other");
         dense.source_path = "pages/linux/page-other.md".to_string();
@@ -438,7 +475,7 @@ mod tests {
     }
 
     #[test]
-    fn policy_matches_the_recorded_frozen_hybrid_configuration() {
+    fn policy_keeps_frozen_rrf_parameters_and_expanded_dev_guard() {
         let config: serde_json::Value = serde_json::from_str(include_str!(
             "../tests/fixtures/evaluation/hybrid-config-v1.json"
         ))
@@ -461,6 +498,7 @@ mod tests {
             selected["candidate_budgets"]["dense"],
             DENSE_CANDIDATE_BUDGET
         );
-        assert_eq!(selected["weak_match_cutoff"], WEAK_MATCH_CUTOFF);
+        assert_eq!(DENSE_DISTANCE_CUTOFF, 0.55);
+        assert_eq!(WEAK_MATCH_CUTOFF, 0.50);
     }
 }
