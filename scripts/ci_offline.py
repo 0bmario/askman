@@ -10,6 +10,7 @@ import http.server
 import json
 import os
 import platform
+import queue
 import signal
 import shlex
 import subprocess
@@ -178,9 +179,45 @@ def run_logged(
         stderr=subprocess.STDOUT,
         **process_options,
     )
-    try:
-        output, _ = process.communicate(timeout=COMMAND_TIMEOUT_SECONDS)
-    except subprocess.TimeoutExpired as error:
+    output_queue: queue.Queue[str | None] = queue.Queue()
+
+    def drain_output() -> None:
+        assert process.stdout is not None
+        try:
+            while chunk := process.stdout.read(4096):
+                output_queue.put(chunk)
+        finally:
+            output_queue.put(None)
+
+    reader = threading.Thread(target=drain_output, daemon=True)
+    reader.start()
+    output_parts: list[str] = []
+    timed_out = False
+    deadline = time.monotonic() + COMMAND_TIMEOUT_SECONDS
+    log_stream = log_path.open("w", encoding="utf-8")
+    log_stream.write(f"$ {rendered}\n\n")
+    log_stream.flush()
+
+    def record_output(chunk: str) -> None:
+        output_parts.append(chunk)
+        log_stream.write(chunk)
+        log_stream.flush()
+        print(chunk, end="", flush=True)
+
+    while process.poll() is None:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            timed_out = True
+            break
+        try:
+            chunk = output_queue.get(timeout=min(1.0, remaining))
+        except queue.Empty:
+            continue
+        if chunk is None:
+            break
+        record_output(chunk)
+
+    if timed_out:
         if os.name == "nt":
             subprocess.run(
                 ["taskkill", "/PID", str(process.pid), "/T", "/F"],
@@ -201,19 +238,44 @@ def run_logged(
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 pass
-        if process.stdout is not None:
-            process.stdout.close()
-        output = error.stdout or ""
-        if isinstance(output, bytes):
-            output = output.decode(errors="replace")
-        log_path.write_text(f"$ {rendered}\n\n{output}", encoding="utf-8")
-        print(output, end="", flush=True)
+    elif process.returncode is None:
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            if os.name == "nt":
+                subprocess.run(
+                    ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+            else:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            process.wait(timeout=5)
+
+    reader.join(timeout=5)
+    while True:
+        try:
+            chunk = output_queue.get_nowait()
+        except queue.Empty:
+            break
+        if chunk is None:
+            continue
+        record_output(chunk)
+    if process.stdout is not None:
+        process.stdout.close()
+    log_stream.close()
+
+    if timed_out:
         raise VerificationError(
             f"{label} timed out after {COMMAND_TIMEOUT_SECONDS} seconds; see {log_path}"
-        ) from error
+        )
+
     return_code = process.returncode
-    log_path.write_text(f"$ {rendered}\n\n{output}", encoding="utf-8")
-    print(output, end="", flush=True)
     if expect_failure and return_code == 0:
         raise VerificationError(f"{label} unexpectedly succeeded; see {log_path}")
     if not expect_failure and return_code != 0:
@@ -221,7 +283,7 @@ def run_logged(
             f"{label} failed with exit status {return_code}; see {log_path}"
         )
     print(f"[ci-offline] {label} completed in {time.monotonic() - started_at:.1f}s", flush=True)
-    return output
+    return "".join(output_parts)
 
 
 def command_version(command: str) -> str:
