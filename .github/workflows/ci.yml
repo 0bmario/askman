@@ -106,6 +106,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          timeout --foreground --signal=TERM --kill-after=15s 10m \
+            bash -s -- \
+              "${{ runner.temp }}/askman-ci-work" \
+              "${{ runner.temp }}/askman-ci-report" <<'SCRIPT'
+          set -euo pipefail
+          work_dir="$1"
+          report_dir="$2"
           cleanup() {
             echo '[ci-linux] removing IPv4 firewall rule'
             sudo iptables -w 10 -D OUTPUT 1 ! -o lo -j REJECT || true
@@ -119,12 +126,12 @@ jobs:
           sudo ip6tables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
           echo '[ci-linux] firewall isolation active'
           taskset --cpu-list 0 \
-            timeout --foreground --signal=TERM --kill-after=15s 10m \
-              env OMP_NUM_THREADS=1 \
-                ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
-                python scripts/ci_offline.py verify \
-                  --work-dir "${{ runner.temp }}/askman-ci-work" \
-                  --report-dir "${{ runner.temp }}/askman-ci-report"
+            env OMP_NUM_THREADS=1 \
+              ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
+              python scripts/ci_offline.py verify \
+                --work-dir "$work_dir" \
+                --report-dir "$report_dir"
+          SCRIPT
 
       - name: Verify bundle and queries with macOS network isolation
         if: runner.os == 'macOS'

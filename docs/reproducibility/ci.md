@@ -84,9 +84,10 @@ before the network sandbox is entered; the verifier then rebuilds or reuses
 them with `--offline`.
 
 Each child command in the lifecycle and offline-verification phases has a
-five-minute timeout. Linux additionally wraps each multi-command phase in a
-ten-minute outer timeout. Subprocess output is streamed into the report while
-it runs, so a timeout identifies the last phase reached. Linux runs the dense
+five-minute timeout. Linux additionally wraps each multi-command phase,
+including firewall rule acquisition and cleanup, in a ten-minute outer
+timeout. Subprocess output is streamed into the report while it runs, so a
+timeout identifies the last phase reached. Linux runs the dense
 lifecycle/query processes with `OMP_NUM_THREADS=1` and one CPU in their
 inherited affinity mask; this makes `available_parallelism()` deterministic
 without changing the assertions or bundle inputs. Linux firewall rule
