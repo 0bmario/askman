@@ -94,8 +94,9 @@ jobs:
             --report-dir "${{ runner.temp }}/askman-ci-report"
           )
           if [[ "$RUNNER_OS" == "Linux" ]]; then
-            env OMP_NUM_THREADS=1 \
-              timeout --foreground --signal=TERM --kill-after=15s 10m "${prepare_command[@]}"
+            taskset --cpu-list 0 \
+              env OMP_NUM_THREADS=1 \
+                timeout --foreground --signal=TERM --kill-after=15s 10m "${prepare_command[@]}"
           else
             "${prepare_command[@]}"
           fi
@@ -117,12 +118,13 @@ jobs:
           echo '[ci-linux] acquiring IPv6 xtables lock'
           sudo ip6tables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
           echo '[ci-linux] firewall isolation active'
-          timeout --foreground --signal=TERM --kill-after=15s 10m \
-            env OMP_NUM_THREADS=1 \
-              ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
-              python scripts/ci_offline.py verify \
-                --work-dir "${{ runner.temp }}/askman-ci-work" \
-                --report-dir "${{ runner.temp }}/askman-ci-report"
+          taskset --cpu-list 0 \
+            timeout --foreground --signal=TERM --kill-after=15s 10m \
+              env OMP_NUM_THREADS=1 \
+                ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
+                python scripts/ci_offline.py verify \
+                  --work-dir "${{ runner.temp }}/askman-ci-work" \
+                  --report-dir "${{ runner.temp }}/askman-ci-report"
 
       - name: Verify bundle and queries with macOS network isolation
         if: runner.os == 'macOS'
