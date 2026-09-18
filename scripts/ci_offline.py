@@ -440,6 +440,9 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
 
     handler = functools.partial(QuietHandler, directory=str(work_dir / "release"))
     server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    # Handler threads serve disposable local test traffic; do not make
+    # server_close wait forever for a client that already abandoned a body.
+    server.block_on_close = False
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     print(f"[ci-offline] lifecycle server listening on {server.server_port}", flush=True)
