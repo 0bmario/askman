@@ -14,7 +14,6 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::io::{BufRead, Write};
 use std::path::{Path, PathBuf};
-use std::sync::OnceLock;
 use std::time::Instant;
 
 pub const MODEL_ID: &str = "Qdrant/all-MiniLM-L6-v2-onnx";
@@ -28,34 +27,6 @@ pub const DENSE_NORMALIZATION: &str = "l2";
 pub const DENSE_DISTANCE_METRIC: &str = "cosine";
 pub const DENSE_RECIPE_VERSION: &str = "dense-text-v1";
 pub const DEFAULT_BATCH_SIZE: usize = 32;
-
-const CI_ORT_THREADS_ENV: &str = "ASKMAN_CI_ORT_THREADS";
-
-fn configure_ci_onnx_runtime() -> Result<()> {
-    if std::env::var_os(CI_ORT_THREADS_ENV).is_none() {
-        return Ok(());
-    }
-
-    static CONFIGURATION: OnceLock<Result<(), String>> = OnceLock::new();
-    match CONFIGURATION.get_or_init(|| {
-        let thread_pool = ort::environment::GlobalThreadPoolOptions::default()
-            .with_intra_threads(1)
-            .map_err(|error| error.to_string())?
-            .with_inter_threads(1)
-            .map_err(|error| error.to_string())?
-            .with_spin_control(false)
-            .map_err(|error| error.to_string())?;
-        ort::init()
-            .with_telemetry(false)
-            .with_global_thread_pool(thread_pool)
-            .commit()
-            .map(|_| ())
-            .map_err(|error| error.to_string())
-    }) {
-        Ok(()) => Ok(()),
-        Err(error) => bail!("failed to configure CI ONNX Runtime: {error}"),
-    }
-}
 
 pub const MODEL_FILES: [(&str, &str); 5] = [
     (
@@ -790,7 +761,6 @@ pub fn validate_dense_artifact_file(artifact: &Path, model_cache: &Path) -> Resu
 }
 
 fn load_embedder(assets: &ModelAssets) -> Result<TextEmbedding> {
-    configure_ci_onnx_runtime()?;
     let model = UserDefinedEmbeddingModel::new(
         fs::read(assets.snapshot.join("model.onnx"))?,
         TokenizerFiles {

@@ -95,7 +95,7 @@ jobs:
           )
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             taskset --cpu-list 0 \
-              env OMP_NUM_THREADS=1 ASKMAN_CI_ORT_THREADS=1 \
+              env OMP_NUM_THREADS=1 \
                 timeout --foreground --signal=TERM --kill-after=15s 10m "${prepare_command[@]}"
           else
             "${prepare_command[@]}"
@@ -126,7 +126,7 @@ jobs:
           sudo ip6tables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
           echo '[ci-linux] firewall isolation active'
           taskset --cpu-list 0 \
-            env OMP_NUM_THREADS=1 ASKMAN_CI_ORT_THREADS=1 \
+            env OMP_NUM_THREADS=1 \
               ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
               python scripts/ci_offline.py verify \
                 --work-dir "$work_dir" \

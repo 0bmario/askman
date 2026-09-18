@@ -123,7 +123,6 @@ dependencies = [
  "flate2",
  "indicatif 0.18.4",
  "libc",
- "ort",
  "reqwest",
  "rusqlite",
  "serde",
