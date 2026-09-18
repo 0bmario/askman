@@ -428,13 +428,39 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
     print("[ci-offline] creating lifecycle release archive", flush=True)
     create_bundle_archive(bundle, archive_path)
     print("[ci-offline] lifecycle release archive ready", flush=True)
-    archive_bytes = archive_path.read_bytes()
 
     data_dir = work_dir / "lifecycle-data"
     if data_dir.exists():
         raise VerificationError(f"refusing to reuse lifecycle data directory: {data_dir}")
 
+    serve_truncated_archive = False
+
     class QuietHandler(http.server.SimpleHTTPRequestHandler):
+        def do_GET(self) -> None:
+            if (
+                serve_truncated_archive
+                and self.path.rsplit("/", 1)[-1] == "matching-bundle.tar.gz"
+            ):
+                archive_size = archive_path.stat().st_size
+                truncated_size = max(1, archive_size // 2)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/gzip")
+                self.send_header("Content-Length", str(truncated_size))
+                self.end_headers()
+                try:
+                    with archive_path.open("rb") as stream:
+                        remaining = truncated_size
+                        while remaining:
+                            chunk = stream.read(min(1024 * 1024, remaining))
+                            if not chunk:
+                                break
+                            self.wfile.write(chunk)
+                            remaining -= len(chunk)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
+                return
+            super().do_GET()
+
         def log_message(self, _format: str, *_args: object) -> None:
             return
 
@@ -462,7 +488,7 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
             raise VerificationError("askman setup did not create active-bundle.json")
         state_after_setup = state_path.read_bytes()
 
-        archive_path.write_bytes(archive_bytes[: max(1, len(archive_bytes) // 2)])
+        serve_truncated_archive = True
         run_logged(
             "lifecycle-failed-update",
             [askman, "update"],
@@ -472,7 +498,7 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
         )
         if state_path.read_bytes() != state_after_setup:
             raise VerificationError("failed update changed the active bundle state")
-        archive_path.write_bytes(archive_bytes)
+        serve_truncated_archive = False
         run_logged(
             "lifecycle-update", [askman, "update"], report_dir, environment=lifecycle_environment
         )
