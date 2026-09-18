@@ -475,9 +475,13 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
         )
     finally:
         print("[ci-offline] stopping lifecycle server", flush=True)
-        server.shutdown()
+        shutdown_thread = threading.Thread(target=server.shutdown, daemon=True)
+        shutdown_thread.start()
+        shutdown_thread.join(timeout=5)
         server.server_close()
         thread.join(timeout=5)
+        if shutdown_thread.is_alive() or thread.is_alive():
+            raise VerificationError("lifecycle server did not stop within 5 seconds")
 
     write_json(
         report_dir / "lifecycle.json",
