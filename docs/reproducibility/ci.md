@@ -86,7 +86,9 @@ them with `--offline`.
 Each child command in the lifecycle and offline-verification phases has a
 five-minute timeout. Linux additionally wraps each multi-command phase in a
 ten-minute outer timeout. Subprocess output is streamed into the report while
-it runs, so a timeout identifies the last phase reached. Linux firewall rule
+it runs, so a timeout identifies the last phase reached. Linux sets
+`OMP_NUM_THREADS=1` for the dense lifecycle/query processes to avoid
+runner-dependent OpenMP oversubscription. Linux firewall rule
 insertion waits at most ten seconds for the xtables lock and fails closed if
 isolation cannot be established; cleanup uses the same bounded wait. These
 bounds turn runner lock or teardown hangs into actionable CI failures without
