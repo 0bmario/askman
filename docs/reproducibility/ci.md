@@ -77,12 +77,11 @@ macOS developer smoke harness uses `sandbox-exec`. The full release gate still
 requires separately provisioned `main` data and an authorized matching bundle;
 those inputs are intentionally not checked in or downloaded by this CI job.
 
-The matrix sets `LIBONNXRUNTIME_NO_PKG_CONFIG=1`, so a host-installed ONNX
-Runtime cannot replace the build's pinned runtime. Ubuntu additionally sets
-`ORT_PREFER_DYNAMIC_LINK=0` to link the downloaded runtime statically; macOS
-and Windows retain dynamic linking. The setup phase primes the Rust debug
-binaries before the network sandbox is entered; the verifier then rebuilds or
-reuses them with `--offline`.
+The matrix sets `LIBONNXRUNTIME_NO_PKG_CONFIG=1` and
+`ORT_PREFER_DYNAMIC_LINK=1`, so a host-installed ONNX Runtime cannot replace
+the build's pinned runtime. The setup phase primes the Rust debug binaries
+before the network sandbox is entered; the verifier then rebuilds or reuses
+them with `--offline`.
 
 Each child command in the lifecycle and offline-verification phases has a
 five-minute timeout. Linux additionally wraps each multi-command phase,
