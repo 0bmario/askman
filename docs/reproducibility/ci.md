@@ -2,9 +2,7 @@
 
 Issue #34 runs the native Rust build, Rust and Python tests, frozen release
 benchmark validation, bundle validation, lifecycle tests, and disposable
-offline queries on Ubuntu 22.04, macOS, and Windows GitHub runners. The Linux
-runner is pinned to Ubuntu 22.04 so the checked-in ONNX Runtime toolchain is
-evaluated on a stable supported glibc baseline.
+offline queries on Ubuntu, macOS, and Windows GitHub runners.
 
 The CI job has two explicit phases:
 
