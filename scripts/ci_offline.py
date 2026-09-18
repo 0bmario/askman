@@ -579,10 +579,21 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
         shutdown_thread = threading.Thread(target=server.shutdown, daemon=True)
         shutdown_thread.start()
         shutdown_thread.join(timeout=5)
-        server.server_close()
+        if shutdown_thread.is_alive():
+            print(
+                "[ci-offline] lifecycle server shutdown did not return; closing listener",
+                flush=True,
+            )
+
+        close_thread = threading.Thread(target=server.server_close, daemon=True)
+        close_thread.start()
+        close_thread.join(timeout=5)
+        if close_thread.is_alive():
+            print("[ci-offline] lifecycle server close did not return", flush=True)
+
         thread.join(timeout=5)
-        if shutdown_thread.is_alive() or thread.is_alive():
-            raise VerificationError("lifecycle server did not stop within 5 seconds")
+        if shutdown_thread.is_alive() or close_thread.is_alive() or thread.is_alive():
+            raise VerificationError("lifecycle server teardown did not finish within 5 seconds")
 
     write_json(
         report_dir / "lifecycle.json",
