@@ -1689,7 +1689,8 @@ pub(crate) fn process_peak_memory_bytes() -> Option<u64> {
             .find_map(|line| line.strip_prefix("VmHWM:"))?
             .split_whitespace()
             .next()?
-            .parse::<u64>()?;
+            .parse::<u64>()
+            .ok()?;
         return Some(kilobytes.saturating_mul(1024));
     }
 

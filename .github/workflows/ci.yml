@@ -1,0 +1,242 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - retrieval-v2
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run the full cross-platform release verification
+        required: false
+        type: boolean
+        default: true
+  workflow_call:
+    inputs:
+      full:
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CLICOLOR_FORCE: "1"
+  LIBONNXRUNTIME_NO_PKG_CONFIG: "1"
+  ORT_PREFER_DYNAMIC_LINK: "1"
+  RUST_BACKTRACE: "1"
+
+jobs:
+  fast:
+    name: Fast checks (ubuntu-latest)
+    if: ${{ !inputs.full }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Cache Rust dependencies and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Fetch locked dependencies (networked setup)
+        run: cargo fetch --locked
+
+      - name: Check formatting
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo fmt --all -- --check
+
+      - name: Run Rust tests
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo test --locked --offline --all-targets --features dev
+
+      - name: Run Python tests
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Validate release benchmark freeze
+        run: python scripts/validate_evaluation_v2.py --manifest tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json
+
+      - name: Run portable smoke assertions
+        shell: bash
+        run: bash tests/smoke_offline.sh
+
+  verify:
+    name: Verify (${{ matrix.os }})
+    if: ${{ inputs.full }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Cache Rust dependencies and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
+      - name: Cache pinned model assets
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/askman-ci-work/model-cache
+          key: ${{ runner.os }}-askman-model-${{ hashFiles('src/dense.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-askman-model-
+
+      - name: Fetch locked dependencies (networked setup)
+        run: cargo fetch --locked
+
+      - name: Prime native runtime and dev binaries (networked setup)
+        run: cargo build --locked --features dev --bin askman --bin tldr_subset --bin askman_candidate
+
+      - name: Check formatting
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo fmt --all -- --check
+
+      - name: Check all targets
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo check --locked --offline --all-targets --features dev
+
+      - name: Build shipping CLI
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo build --locked --offline --release --bin askman
+
+      - name: Run Rust tests and lifecycle coverage
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo test --locked --offline --all-targets --features dev
+
+      - name: Run Python tests
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Validate release benchmark freeze
+        run: python scripts/validate_evaluation_v2.py --manifest tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json
+
+      - name: Run portable smoke assertions
+        shell: bash
+        run: bash tests/smoke_offline.sh
+
+      - name: Provision pinned bundle assets (networked setup)
+        run: python scripts/ci_offline.py provision --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report"
+
+      - name: Exercise clean install and explicit update (local release server)
+        shell: bash
+        run: |
+          set -euo pipefail
+          prepare_command=(
+            python scripts/ci_offline.py prepare
+            --work-dir "${{ runner.temp }}/askman-ci-work"
+            --report-dir "${{ runner.temp }}/askman-ci-report"
+          )
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            taskset --cpu-list 0 \
+              env OMP_NUM_THREADS=1 \
+                timeout --foreground --signal=TERM --kill-after=15s 10m "${prepare_command[@]}"
+          else
+            "${prepare_command[@]}"
+          fi
+
+      - name: Verify bundle and queries with Linux firewall isolation
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --foreground --signal=TERM --kill-after=15s 10m \
+            bash -s -- \
+              "${{ runner.temp }}/askman-ci-work" \
+              "${{ runner.temp }}/askman-ci-report" <<'SCRIPT'
+          set -euo pipefail
+          work_dir="$1"
+          report_dir="$2"
+          cleanup() {
+            echo '[ci-linux] removing IPv4 firewall rule'
+            sudo iptables -w 10 -D OUTPUT 1 ! -o lo -j REJECT || true
+            echo '[ci-linux] removing IPv6 firewall rule'
+            sudo ip6tables -w 10 -D OUTPUT 1 ! -o lo -j REJECT || true
+          }
+          trap cleanup EXIT
+          echo '[ci-linux] acquiring IPv4 xtables lock'
+          sudo iptables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
+          echo '[ci-linux] acquiring IPv6 xtables lock'
+          sudo ip6tables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
+          echo '[ci-linux] firewall isolation active'
+          taskset --cpu-list 0 \
+            env OMP_NUM_THREADS=1 \
+              ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
+              python scripts/ci_offline.py verify \
+                --work-dir "$work_dir" \
+                --report-dir "$report_dir"
+          SCRIPT
+
+      - name: Verify bundle and queries with macOS network isolation
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          ASKMAN_CI_NETWORK_POLICY='sandbox-exec deny network*' \
+            sandbox-exec -p '(version 1) (allow default) (deny network*)' \
+            python scripts/ci_offline.py verify \
+              --work-dir "${{ runner.temp }}/askman-ci-work" \
+              --report-dir "${{ runner.temp }}/askman-ci-report"
+
+      - name: Verify bundle and queries on Windows
+        if: runner.os == 'Windows'
+        env:
+          ASKMAN_CI_NETWORK_POLICY: "hosted Windows runner has no network namespace; local-bundle and no-network lifecycle checks enforced"
+        run: python scripts/ci_offline.py verify --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report"
+
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: askman-ci-${{ matrix.os }}
+          path: ${{ runner.temp }}/askman-ci-report
+          if-no-files-found: warn

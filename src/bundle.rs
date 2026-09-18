@@ -32,6 +32,8 @@ pub const REQUIRED_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
 /// `setup` and `update` never consult a mutable `latest` endpoint.
 pub const RELEASE_TAG: &str = concat!("v", env!("CARGO_PKG_VERSION"));
 pub const RELEASE_BASE_URL: &str = "https://github.com/0bmario/askman/releases/download";
+#[cfg(feature = "dev")]
+const RELEASE_BASE_URL_ENV: &str = "ASKMAN_RELEASE_BASE_URL";
 pub const RELEASE_MANIFEST_ASSET: &str = "matching-bundle-manifest.json";
 pub const RELEASE_ARCHIVE_ASSET: &str = "matching-bundle.tar.gz";
 
@@ -967,8 +969,18 @@ pub struct BundleStore {
 impl BundleStore {
     /// Open the lifecycle store below the supplied Askman data directory.
     /// Construction is read-only; setup/update create the store as needed.
+    /// Development builds may set `ASKMAN_RELEASE_BASE_URL` for a local
+    /// disposable release server; normal builds always use the fixed release
+    /// endpoint below.
     pub fn new(app_dir: &Path) -> Self {
-        Self::with_release_base_url(app_dir, RELEASE_BASE_URL)
+        #[cfg(feature = "dev")]
+        let release_base_url = std::env::var(RELEASE_BASE_URL_ENV)
+            .ok()
+            .filter(|value| !value.is_empty())
+            .unwrap_or_else(|| RELEASE_BASE_URL.to_string());
+        #[cfg(not(feature = "dev"))]
+        let release_base_url = RELEASE_BASE_URL;
+        Self::with_release_base_url(app_dir, release_base_url)
     }
 
     /// Construct a store against a release download root. This is useful for
@@ -1364,6 +1376,7 @@ impl BundleStore {
             bytes.push(b'\n');
             file.write_all(&bytes)?;
             file.sync_all()?;
+            drop(file);
             atomic_replace(&temporary, &self.active_state)?;
             Ok(())
         })();
@@ -1843,6 +1856,7 @@ mod tests {
             .unwrap();
         state.write_all(br#"{"#).unwrap();
         state.sync_all().unwrap();
+        drop(state);
 
         install_test_bundle(&store, &second, true);
 

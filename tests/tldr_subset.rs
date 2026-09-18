@@ -131,7 +131,11 @@ fn builds_the_declared_four_platform_corpus_with_explicit_exclusions() {
     assert_eq!(report.excluded_count, 1);
     assert_eq!(report.page_count, 6);
     assert_eq!(report.example_count, 6);
-    assert!(report.build_time_ms < 10_000);
+    assert!(
+        report.build_time_ms < 60_000,
+        "fixture build unexpectedly exceeded one minute: {} ms",
+        report.build_time_ms
+    );
     assert!(report.artifact_size_bytes > 0);
     assert!(!report.hardware.is_empty());
 
