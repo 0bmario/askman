@@ -1,8 +1,9 @@
 # Hybrid retrieval comparison
 
 Issue #19 adds a development-only hybrid candidate to the frozen retrieval
-evaluation. It fuses the existing keyword and dense candidate IDs; it does not
-change the shipping CLI, install flow, model assets, or database distribution.
+evaluation. It fuses the existing keyword and dense candidate IDs. The original
+v1 fixture remains immutable historical evidence; the current candidate policy
+is tuned separately against the expanded development split below.
 
 ## Frozen configuration
 
@@ -112,6 +113,24 @@ frozen config. Loading the config verifies every candidate and baseline,
 development-only task count/denominators, the false-answer guardrail, and the
 selected candidate produced by the rule. Holdout evaluation additionally
 requires the recorded frozen config SHA256 above.
+
+## Expanded development guard
+
+The shipping candidate currently applies this provisional guard before release
+evidence is rerun:
+
+- RRF `k=60`, equal keyword/dense weights, eight page candidates per side;
+- retain dense candidates only when cosine distance is at most `0.55`;
+- retain the fail-closed one-sided-match rule (`weak cutoff=0.50`);
+- display at most three distinct pages.
+
+The distance boundary is a provisional development hypothesis. The existing
+evaluator/configuration records the historical v1 hybrid policy and does not yet
+apply this boundary, so no expanded candidate score is recorded here. Add the
+guard to a separately versioned evaluator/configuration before recording
+candidate metrics. This does not open holdout access or establish a release
+recommendation; the paired release gate must be rerun after the policy and
+evaluator are frozen.
 
 ## Held-out check
 
