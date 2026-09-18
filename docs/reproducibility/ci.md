@@ -83,6 +83,12 @@ the build's pinned runtime. The setup phase primes the Rust debug binaries
 before the network sandbox is entered; the verifier then rebuilds or reuses
 them with `--offline`.
 
+The lifecycle and offline-verification steps have a ten-minute job-step bound.
+Linux firewall rule insertion waits at most ten seconds for the xtables lock and
+fails closed if isolation cannot be established; cleanup uses the same bounded
+wait. These bounds turn runner lock or teardown hangs into actionable CI
+failures without allowing an unisolated query run to pass.
+
 The hosted Windows runner has no supported network namespace equivalent in
 this workflow. Its job still uses `--offline`, a local validated bundle, and
 the lifecycle test that proves active-bundle lookup does not contact its

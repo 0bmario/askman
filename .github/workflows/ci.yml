@@ -85,15 +85,27 @@ jobs:
         run: python scripts/ci_offline.py provision --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report"
 
       - name: Exercise clean install and explicit update (local release server)
+        timeout-minutes: 10
         run: python scripts/ci_offline.py prepare --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report"
 
       - name: Verify bundle and queries with Linux firewall isolation
         if: runner.os == 'Linux'
+        timeout-minutes: 10
         shell: bash
         run: |
-          sudo iptables -w -I OUTPUT 1 ! -o lo -j REJECT
-          trap 'sudo iptables -w -D OUTPUT 1 ! -o lo -j REJECT || true; sudo ip6tables -w -D OUTPUT 1 ! -o lo -j REJECT || true' EXIT
-          sudo ip6tables -w -I OUTPUT 1 ! -o lo -j REJECT
+          set -euo pipefail
+          cleanup() {
+            echo '[ci-linux] removing IPv4 firewall rule'
+            sudo iptables -w 10 -D OUTPUT 1 ! -o lo -j REJECT || true
+            echo '[ci-linux] removing IPv6 firewall rule'
+            sudo ip6tables -w 10 -D OUTPUT 1 ! -o lo -j REJECT || true
+          }
+          trap cleanup EXIT
+          echo '[ci-linux] acquiring IPv4 xtables lock'
+          sudo iptables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
+          echo '[ci-linux] acquiring IPv6 xtables lock'
+          sudo ip6tables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
+          echo '[ci-linux] firewall isolation active'
           ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
             python scripts/ci_offline.py verify \
               --work-dir "${{ runner.temp }}/askman-ci-work" \
