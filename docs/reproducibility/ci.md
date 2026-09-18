@@ -1,10 +1,16 @@
 # Cross-platform CI and offline verification
 
-Issue #34 runs the native Rust build, Rust and Python tests, frozen release
-benchmark validation, bundle validation, lifecycle tests, and disposable
-offline queries on Ubuntu, macOS, and Windows GitHub runners.
+Normal pushes and pull requests run one cached Ubuntu job with formatting,
+Rust/Python tests, frozen benchmark validation, and portable smoke checks.
+The release workflow calls this reusable workflow with `full: true` to run the
+native Rust build, bundle validation, lifecycle tests, and disposable offline
+queries on Ubuntu, macOS, and Windows GitHub runners.
 
-The CI job has two explicit phases:
+Manual dispatch defaults to the full release verification. The full mode is
+the required cross-platform release gate; the fast mode deliberately does not
+download the ONNX model or build a matching bundle.
+
+Full mode has two explicit phases:
 
 1. `cargo fetch --locked`, native runtime priming, and pinned model downloads
    are the only networked setup steps.
@@ -13,7 +19,7 @@ The CI job has two explicit phases:
    live below the runner's temporary directory; user data and release assets
    are never read or changed.
 
-The verifier is `scripts/ci_offline.py`. It downloads the five model files at
+The full verifier is `scripts/ci_offline.py`. It downloads the five model files at
 the revision and SHA-256 values already pinned in `src/dense.rs`, builds a
 matching bundle from the checked-in full-corpus fixture, validates the complete
 bundle, and queries the candidate under all four logical target policies:
@@ -37,7 +43,7 @@ across native platforms. The development-only `ASKMAN_RELEASE_BASE_URL`
 override is used only for this disposable local server; normal builds keep the
 fixed GitHub release endpoint.
 
-Each matrix job uploads:
+Each full-mode matrix job uploads:
 
 - `bundle-manifest.json` with the immutable bundle ID and component digests;
 - `release-benchmark-inputs.json` with frozen input paths and SHA-256 values;
@@ -77,11 +83,13 @@ macOS developer smoke harness uses `sandbox-exec`. The full release gate still
 requires separately provisioned `main` data and an authorized matching bundle;
 those inputs are intentionally not checked in or downloaded by this CI job.
 
-The matrix sets `LIBONNXRUNTIME_NO_PKG_CONFIG=1` and
+The full matrix sets `LIBONNXRUNTIME_NO_PKG_CONFIG=1` and
 `ORT_PREFER_DYNAMIC_LINK=1`, so a host-installed ONNX Runtime cannot replace
 the build's pinned runtime. The setup phase primes the Rust debug binaries
 before the network sandbox is entered; the verifier then rebuilds or reuses
-them with `--offline`.
+them with `--offline`. Cargo and pinned model assets are cached by runner and
+content revision; cache hits are still checked by the existing hash and
+manifest validation.
 
 Each child command in the lifecycle and offline-verification phases has a
 five-minute timeout. Linux additionally wraps each multi-command phase,

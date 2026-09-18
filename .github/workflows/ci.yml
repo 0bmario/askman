@@ -7,7 +7,18 @@ on:
       - main
       - retrieval-v2
   workflow_dispatch:
+    inputs:
+      full:
+        description: Run the full cross-platform release verification
+        required: false
+        type: boolean
+        default: true
   workflow_call:
+    inputs:
+      full:
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -20,8 +31,62 @@ env:
   RUST_BACKTRACE: "1"
 
 jobs:
+  fast:
+    name: Fast checks (ubuntu-latest)
+    if: ${{ !inputs.full }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Cache Rust dependencies and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Fetch locked dependencies (networked setup)
+        run: cargo fetch --locked
+
+      - name: Check formatting
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo fmt --all -- --check
+
+      - name: Run Rust tests
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo test --locked --offline --all-targets --features dev
+
+      - name: Run Python tests
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Validate release benchmark freeze
+        run: python scripts/validate_evaluation_v2.py --manifest tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json
+
+      - name: Run portable smoke assertions
+        shell: bash
+        run: bash tests/smoke_offline.sh
+
   verify:
     name: Verify (${{ matrix.os }})
+    if: ${{ inputs.full }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -44,6 +109,25 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
+      - name: Cache Rust dependencies and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
+      - name: Cache pinned model assets
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/askman-ci-work/model-cache
+          key: ${{ runner.os }}-askman-model-${{ hashFiles('src/dense.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-askman-model-
 
       - name: Fetch locked dependencies (networked setup)
         run: cargo fetch --locked

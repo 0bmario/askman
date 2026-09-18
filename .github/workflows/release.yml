@@ -12,6 +12,8 @@ jobs:
   ci:
     name: Cross-platform CI
     uses: ./.github/workflows/ci.yml
+    with:
+      full: true
     permissions:
       contents: read
 
