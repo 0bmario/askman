@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tarfile
 import threading
+import time
 import tomllib
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -153,6 +154,7 @@ def run_logged(
     environment: dict[str, str] | None = None,
     expect_failure: bool = False,
 ) -> str:
+    started_at = time.monotonic()
     log_path = report_dir / "logs" / f"{label}.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     rendered = " ".join(shlex.quote(str(argument)) for argument in command)
@@ -218,6 +220,7 @@ def run_logged(
         raise VerificationError(
             f"{label} failed with exit status {return_code}; see {log_path}"
         )
+    print(f"[ci-offline] {label} completed in {time.monotonic() - started_at:.1f}s", flush=True)
     return output
 
 
@@ -388,7 +391,9 @@ def build_and_validate_bundle(
 
 def create_bundle_archive(bundle: Path, archive_path: Path) -> None:
     archive_path.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(archive_path, "w:gz") as archive:
+    # The lifecycle server only needs a valid gzip stream. Avoid spending
+    # runner CPU recompressing the already-compressed model asset.
+    with tarfile.open(archive_path, "w:gz", compresslevel=0) as archive:
         for path in sorted(bundle.rglob("*")):
             archive.add(
                 path,
@@ -420,7 +425,9 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
     manifest_bytes = (bundle / "manifest.json").read_bytes()
     (release_root / "matching-bundle-manifest.json").write_bytes(manifest_bytes)
     archive_path = release_root / "matching-bundle.tar.gz"
+    print("[ci-offline] creating lifecycle release archive", flush=True)
     create_bundle_archive(bundle, archive_path)
+    print("[ci-offline] lifecycle release archive ready", flush=True)
     archive_bytes = archive_path.read_bytes()
 
     data_dir = work_dir / "lifecycle-data"
@@ -435,6 +442,7 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
     server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
+    print(f"[ci-offline] lifecycle server listening on {server.server_port}", flush=True)
     release_base_url = f"http://127.0.0.1:{server.server_port}"
     lifecycle_environment = {
         "ASKMAN_DATA_DIR": str(data_dir),
@@ -466,6 +474,7 @@ def prepare_lifecycle(work_dir: Path, report_dir: Path) -> None:
             "lifecycle-update", [askman, "update"], report_dir, environment=lifecycle_environment
         )
     finally:
+        print("[ci-offline] stopping lifecycle server", flush=True)
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
