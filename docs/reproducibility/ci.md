@@ -89,8 +89,11 @@ including firewall rule acquisition and cleanup, in a ten-minute outer
 timeout. Subprocess output is streamed into the report while it runs, so a
 timeout identifies the last phase reached. Linux runs the dense
 lifecycle/query processes with `OMP_NUM_THREADS=1` and one CPU in their
-inherited affinity mask; this makes `available_parallelism()` deterministic
-without changing the assertions or bundle inputs. Linux firewall rule
+inherited affinity mask; this makes `available_parallelism()` deterministic.
+The CI-only `ASKMAN_CI_ORT_THREADS=1` setting also configures ONNX Runtime's
+global intra/inter-op pools to one thread and disables idle-thread spinning.
+These settings affect only the CI verifier and do not change normal Askman
+runtime behavior or the assertions/bundle inputs. Linux firewall rule
 insertion waits at most ten seconds for the xtables lock and fails closed if
 isolation cannot be established; cleanup uses the same bounded wait. These
 bounds turn runner lock or teardown hangs into actionable CI failures without
