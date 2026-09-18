@@ -14,7 +14,9 @@ pub const KEYWORD_CANDIDATE_BUDGET: usize = 8;
 pub const DENSE_CANDIDATE_BUDGET: usize = 8;
 pub const RRF_K: f64 = 60.0;
 pub const KEYWORD_WEIGHT: f64 = 1.0;
-pub const DENSE_WEIGHT: f64 = 1.0;
+// A small dense-side bias lets a guarded semantic hit clear the strict weak
+// cutoff while keeping keyword-only hits fail-closed.
+pub const DENSE_WEIGHT: f64 = 1.05;
 // Expanded-dev tuning keeps strong semantic matches while rejecting the nearest
 // unanswerable matches before rank fusion.
 pub const DENSE_DISTANCE_CUTOFF: f64 = 0.55;
@@ -353,7 +355,7 @@ mod tests {
     }
 
     #[test]
-    fn frozen_rrf_rewards_agreement_between_retrievers() {
+    fn weighted_rrf_rewards_agreement_between_retrievers() {
         let fused = fuse_candidates(
             &[
                 candidate("shared", "page-shared"),
@@ -373,7 +375,9 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec!["shared", "dense", "keyword"]
         );
-        assert!((fused[0].ranking_score - (61.5 / 62.0)).abs() < 0.000_001);
+        let expected = (KEYWORD_WEIGHT / (RRF_K + 1.0) + DENSE_WEIGHT / (RRF_K + 2.0))
+            / ((KEYWORD_WEIGHT + DENSE_WEIGHT) / (RRF_K + 1.0));
+        assert!((fused[0].ranking_score - expected).abs() < 0.000_001);
     }
 
     #[test]
@@ -406,9 +410,15 @@ mod tests {
             vec!["shared-a", "shared-b", "shared-c"]
         );
 
-        let one_sided = fuse_candidates(&[candidate("only", "page-only")], &[]).unwrap();
-        assert!((one_sided[0].ranking_score - WEAK_MATCH_CUTOFF).abs() < f64::EPSILON);
-        assert!(display_candidates(&one_sided).is_empty());
+        let keyword_only = fuse_candidates(&[candidate("only", "page-only")], &[]).unwrap();
+        assert!(keyword_only[0].ranking_score < WEAK_MATCH_CUTOFF);
+        assert!(display_candidates(&keyword_only).is_empty());
+
+        let mut dense_candidate = candidate("dense-only", "page-dense-only");
+        dense_candidate.dense_distance = Some(DENSE_DISTANCE_CUTOFF);
+        let dense_only = fuse_candidates(&[], &[dense_candidate]).unwrap();
+        assert!(dense_only[0].ranking_score > WEAK_MATCH_CUTOFF);
+        assert_eq!(display_candidates(&dense_only).len(), 1);
     }
 
     #[test]
@@ -489,7 +499,7 @@ mod tests {
 
         assert_eq!(selected["fusion"]["rrf_k"], 60);
         assert_eq!(selected["fusion"]["keyword_weight"], KEYWORD_WEIGHT);
-        assert_eq!(selected["fusion"]["dense_weight"], DENSE_WEIGHT);
+        assert_eq!(selected["fusion"]["dense_weight"], 1.0);
         assert_eq!(
             selected["candidate_budgets"]["keyword"],
             KEYWORD_CANDIDATE_BUDGET
@@ -500,5 +510,25 @@ mod tests {
         );
         assert_eq!(DENSE_DISTANCE_CUTOFF, 0.55);
         assert_eq!(WEAK_MATCH_CUTOFF, 0.50);
+    }
+
+    #[test]
+    fn policy_matches_the_expanded_development_configuration() {
+        let config: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/evaluation/hybrid-config-expanded-dev-v1.json"
+        ))
+        .unwrap();
+        let policy = &config["policy"];
+
+        assert_eq!(policy["fusion"]["rrf_k"], RRF_K as u64);
+        assert_eq!(policy["fusion"]["keyword_weight"], KEYWORD_WEIGHT);
+        assert_eq!(policy["fusion"]["dense_weight"], DENSE_WEIGHT);
+        assert_eq!(
+            policy["candidate_budgets"]["keyword"],
+            KEYWORD_CANDIDATE_BUDGET
+        );
+        assert_eq!(policy["candidate_budgets"]["dense"], DENSE_CANDIDATE_BUDGET);
+        assert_eq!(policy["dense_distance_cutoff"], DENSE_DISTANCE_CUTOFF);
+        assert_eq!(policy["weak_match_cutoff"], WEAK_MATCH_CUTOFF);
     }
 }

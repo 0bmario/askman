@@ -116,21 +116,53 @@ requires the recorded frozen config SHA256 above.
 
 ## Expanded development guard
 
-The shipping candidate currently applies this provisional guard before release
-evidence is rerun:
+PR #46's expanded-development guard is scored by the separately versioned
+configuration
+`tests/fixtures/evaluation/hybrid-config-expanded-dev-v1.json` and runner
+`scripts/evaluate_retrieval_expanded_dev.py`. The frozen v1 evaluator and
+`hybrid-config-v1.json` are not changed.
 
-- RRF `k=60`, equal keyword/dense weights, eight page candidates per side;
+The selected development-only policy is:
+
+- RRF `k=60`, keyword weight `1.0`, dense weight `1.05`, eight page candidates
+  per side;
 - retain dense candidates only when cosine distance is at most `0.55`;
 - retain the fail-closed one-sided-match rule (`weak cutoff=0.50`);
 - display at most three distinct pages.
 
-The distance boundary is a provisional development hypothesis. The existing
-evaluator/configuration records the historical v1 hybrid policy and does not yet
-apply this boundary, so no expanded candidate score is recorded here. Add the
-guard to a separately versioned evaluator/configuration before recording
-candidate metrics. This does not open holdout access or establish a release
-recommendation; the paired release gate must be rerun after the policy and
-evaluator are frozen.
+Reproduce against the expanded development split only after provisioning the
+pinned model/runtime and building the expanded bundle:
+
+```sh
+python3 scripts/evaluate_retrieval_expanded_dev.py \
+  --artifact /tmp/askman-expanded-bundle/matching.db \
+  --manifest tests/fixtures/tldr-evaluation-v2/manifest.json \
+  --dataset tests/fixtures/evaluation/frozen-dev-v2-expanded.json \
+  --config tests/fixtures/evaluation/hybrid-config-expanded-dev-v1.json \
+  --dense-helper /tmp/askman-run/target/debug/tldr_subset \
+  --model-cache /tmp/askman-run/data/models \
+  --output /tmp/evaluation-v2-expanded-dev-hybrid-v1.json
+```
+
+The scored local run used the pinned source digest and dataset/config/evaluator
+digests recorded by the runner. Results:
+
+| Retriever | Candidate recall | Success@1 | Success@3 | Coverage | Incorrect answered | False unanswerable |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| keyword baseline | 1/30 | 1/30 | 1/30 | 1/60 | 0/1 | 0/30 |
+| dense `description` | 26/30 | 18/30 | 26/30 | 60/60 | 4/30 | 30/30 |
+| expanded hybrid v1 | 26/30 | 19/30 | 26/30 | 30/60 | 4/30 | 0/30 |
+
+The machine-readable summary is
+`docs/reproducibility/artifacts/evaluation-v2-expanded-dev-hybrid-v1.json`.
+
+The dense-side bias is the smallest tested margin that lets the second-ranked
+guarded dense result clear the strict `0.50` cutoff; equal weights leave a
+dense-only result exactly at the cutoff and fail closed. The expanded hybrid
+run is development evidence only: it does not authorize holdout access, a
+main-versus-candidate A/B, or a release recommendation. Parent-description
+dense indexing was also tested and scored below the frozen `description`
+recipe (19/30 Success@3), so it was not selected.
 
 ## Held-out check
 

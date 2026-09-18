@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "config_id": "hybrid-expanded-dev-v1",
+  "frozen": true,
+  "frozen_at": "2026-09-19",
+  "dataset_id": "askman-evaluation-v2",
+  "split_id": "scenario-family-split-v2",
+  "dataset": {
+    "path": "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
+    "sha256": "216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d"
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "evaluator": {
+    "version": "expanded-dev-hybrid-v1",
+    "implementation": "scripts/evaluate_retrieval_expanded_dev.py",
+    "sha256": "2fb3c9e527e824ed617b34391e753705d6a1d78c3d52d2b88da9f369c48f5f1b"
+  },
+  "scorer": {
+    "version": "task-scorer-v1",
+    "implementation": "scripts/evaluate_retrieval.py",
+    "sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
+  },
+  "dense_recipe": "description",
+  "policy": {
+    "fusion": {
+      "method": "rrf",
+      "rrf_k": 60,
+      "keyword_weight": 1.0,
+      "dense_weight": 1.05
+    },
+    "candidate_budgets": {
+      "keyword": 8,
+      "dense": 8
+    },
+    "dense_distance_cutoff": 0.55,
+    "weak_match_cutoff": 0.5,
+    "max_displayed_results": 3
+  },
+  "selection": {
+    "scope": "development-only",
+    "primary_metric": "success_at_3",
+    "guardrails": [
+      "false_answers_on_unanswerable must remain 0/30",
+      "dense_distance_cutoff is applied before rank fusion",
+      "weak_match_cutoff remains strict and fail-closed"
+    ],
+    "sweep": "rrf k in {20,60}; equal budgets in {8,12}; dense distance cutoff in {0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55}; dense weight in {1.001,1.01,1.02,1.03,1.034,1.04,1.05}"
+  }
+}
