@@ -29,9 +29,11 @@ They cover first-use activation, explicit update, rollback, failed validation,
 partial state recovery, and immutable IDs. The release workflow must still run
 the live GitHub download path after the first compatible release assets exist.
 
-The loopback lifecycle run additionally verifies clean setup, a truncated
-update archive, preservation of the active state after that failure, and a
-successful explicit update. The development-only `ASKMAN_RELEASE_BASE_URL`
+The loopback lifecycle run additionally verifies clean setup, a deliberately
+partial update archive, preservation of the active state after that failure,
+and a successful explicit update. The failure archive is a valid gzip/tar
+stream missing required bundle components so failure behavior is deterministic
+across native platforms. The development-only `ASKMAN_RELEASE_BASE_URL`
 override is used only for this disposable local server; normal builds keep the
 fixed GitHub release endpoint.
 
