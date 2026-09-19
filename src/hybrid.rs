@@ -1,5 +1,5 @@
 use crate::bundle::{BundleManifest, validate_matching_bundle};
-use crate::dense::{DenseCandidate, DenseIndex};
+use crate::dense::{DenseCandidate, DenseIndex, DenseQueryMode};
 use crate::search::TargetOs;
 use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_platform};
 use anyhow::{Result, bail};
@@ -14,7 +14,12 @@ pub const KEYWORD_CANDIDATE_BUDGET: usize = 8;
 pub const DENSE_CANDIDATE_BUDGET: usize = 8;
 pub const RRF_K: f64 = 60.0;
 pub const KEYWORD_WEIGHT: f64 = 1.0;
-pub const DENSE_WEIGHT: f64 = 1.0;
+// A small dense-side bias lets a guarded semantic hit clear the strict weak
+// cutoff while keeping keyword-only hits fail-closed.
+pub const DENSE_WEIGHT: f64 = 1.05;
+// Expanded-dev tuning keeps strong semantic matches while rejecting the nearest
+// unanswerable matches before rank fusion.
+pub const DENSE_DISTANCE_CUTOFF: f64 = 0.55;
 pub const WEAK_MATCH_CUTOFF: f64 = 0.50;
 const FROZEN_DENSE_RECIPE: &str = "description";
 
@@ -32,6 +37,7 @@ pub struct Candidate {
     pub platform: String,
     pub page_position: usize,
     pub example_position: usize,
+    pub dense_distance: Option<f64>,
     pub ranking_score: f64,
 }
 
@@ -43,11 +49,24 @@ pub struct CandidateOptions {
     pub verbose: bool,
 }
 
-/// Run the candidate's single, frozen hybrid retrieval path.
+/// Run the shipping hybrid retrieval path with the raw user query.
 pub fn run_candidate(options: CandidateOptions) -> Result<()> {
+    run_candidate_with_query_mode(options, DenseQueryMode::Raw)
+}
+
+/// Run the development candidate with bounded dense-query expansion.
+#[cfg(feature = "dev")]
+pub fn run_expanded_dev_candidate(options: CandidateOptions) -> Result<()> {
+    run_candidate_with_query_mode(options, DenseQueryMode::ExpandedDev)
+}
+
+fn run_candidate_with_query_mode(
+    options: CandidateOptions,
+    query_mode: DenseQueryMode,
+) -> Result<()> {
     let index = HybridIndex::open(&options.bundle)?;
     let result = (|| -> Result<()> {
-        let fused = index.query(&options.query, options.target_os)?;
+        let fused = index.query(&options.query, options.target_os, query_mode)?;
         let displayed = display_candidates(&fused);
         print!("{}", render_results(&displayed, options.verbose));
         Ok(())
@@ -81,7 +100,12 @@ impl HybridIndex {
         Ok(Self { artifact, dense })
     }
 
-    fn query(&self, query: &str, target_os: TargetOs) -> Result<Vec<Candidate>> {
+    fn query(
+        &self,
+        query: &str,
+        target_os: TargetOs,
+        query_mode: DenseQueryMode,
+    ) -> Result<Vec<Candidate>> {
         let keyword = query_artifact_for_platform(
             QueryOptions {
                 artifact: self.artifact.clone(),
@@ -93,12 +117,20 @@ impl HybridIndex {
         .into_iter()
         .map(candidate_from_keyword)
         .collect::<Vec<_>>();
+        // The shipping entrypoint supplies Raw; only the dev entrypoint can
+        // supply the experimental expansion mode.
         let dense = self
             .dense
-            .query(query, target_os.as_str(), DENSE_CANDIDATE_BUDGET)?
+            .query_with_mode(
+                query,
+                target_os.as_str(),
+                DENSE_CANDIDATE_BUDGET,
+                query_mode,
+            )?
             .into_iter()
             .map(candidate_from_dense)
             .collect::<Vec<_>>();
+        let dense = filter_dense_candidates(dense);
 
         fuse_candidates(&keyword, &dense)
     }
@@ -137,6 +169,7 @@ fn candidate_from_keyword(result: QueryResult) -> Candidate {
         platform: result.platform,
         page_position: result.page_position,
         example_position: result.example_position,
+        dense_distance: None,
         ranking_score: result.rank as f64,
     }
 }
@@ -155,6 +188,7 @@ fn candidate_from_dense(result: DenseCandidate) -> Candidate {
         platform: result.platform,
         page_position: result.page_position,
         example_position: result.example_position,
+        dense_distance: Some(result.ranking_score),
         ranking_score: result.ranking_score,
     }
 }
@@ -221,8 +255,8 @@ pub fn fuse_candidates(
         .collect())
 }
 
-/// Keep only candidates above the frozen weak-match cutoff and cap output at
-/// three distinct destination pages.
+/// Keep only candidates above the fail-closed weak-match cutoff and cap output
+/// at three distinct destination pages.
 pub fn display_candidates(fused_candidates: &[Candidate]) -> Vec<Candidate> {
     let mut seen_pages = HashSet::new();
     fused_candidates
@@ -231,6 +265,17 @@ pub fn display_candidates(fused_candidates: &[Candidate]) -> Vec<Candidate> {
         .filter(|candidate| seen_pages.insert(candidate.page_id.as_str()))
         .take(MAX_DISPLAYED_RESULTS)
         .cloned()
+        .collect()
+}
+
+fn filter_dense_candidates(candidates: Vec<Candidate>) -> Vec<Candidate> {
+    candidates
+        .into_iter()
+        .filter(|candidate| {
+            candidate
+                .dense_distance
+                .is_some_and(|distance| distance <= DENSE_DISTANCE_CUTOFF)
+        })
         .collect()
 }
 
@@ -329,12 +374,13 @@ mod tests {
             platform: "common".to_string(),
             page_position: 1,
             example_position: 1,
+            dense_distance: None,
             ranking_score: 0.0,
         }
     }
 
     #[test]
-    fn frozen_rrf_rewards_agreement_between_retrievers() {
+    fn weighted_rrf_rewards_agreement_between_retrievers() {
         let fused = fuse_candidates(
             &[
                 candidate("shared", "page-shared"),
@@ -354,7 +400,9 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec!["shared", "dense", "keyword"]
         );
-        assert!((fused[0].ranking_score - (61.5 / 62.0)).abs() < 0.000_001);
+        let expected = (KEYWORD_WEIGHT / (RRF_K + 1.0) + DENSE_WEIGHT / (RRF_K + 2.0))
+            / ((KEYWORD_WEIGHT + DENSE_WEIGHT) / (RRF_K + 1.0));
+        assert!((fused[0].ranking_score - expected).abs() < 0.000_001);
     }
 
     #[test]
@@ -387,9 +435,33 @@ mod tests {
             vec!["shared-a", "shared-b", "shared-c"]
         );
 
-        let one_sided = fuse_candidates(&[candidate("only", "page-only")], &[]).unwrap();
-        assert!((one_sided[0].ranking_score - WEAK_MATCH_CUTOFF).abs() < f64::EPSILON);
-        assert!(display_candidates(&one_sided).is_empty());
+        let keyword_only = fuse_candidates(&[candidate("only", "page-only")], &[]).unwrap();
+        assert!(keyword_only[0].ranking_score < WEAK_MATCH_CUTOFF);
+        assert!(display_candidates(&keyword_only).is_empty());
+
+        let mut dense_candidate = candidate("dense-only", "page-dense-only");
+        dense_candidate.dense_distance = Some(DENSE_DISTANCE_CUTOFF);
+        let dense_only = fuse_candidates(&[], &[dense_candidate]).unwrap();
+        assert!(dense_only[0].ranking_score > WEAK_MATCH_CUTOFF);
+        assert_eq!(display_candidates(&dense_only).len(), 1);
+    }
+
+    #[test]
+    fn dense_distance_filter_rejects_weak_only_candidates() {
+        let mut strong = candidate("strong", "page-strong");
+        strong.dense_distance = Some(0.55);
+        let mut weak = candidate("weak", "page-weak");
+        weak.dense_distance = Some(0.56);
+
+        let filtered = filter_dense_candidates(vec![strong, weak]);
+
+        assert_eq!(
+            filtered
+                .iter()
+                .map(|candidate| candidate.example_id.as_str())
+                .collect::<Vec<_>>(),
+            vec!["strong"]
+        );
     }
 
     #[test]
@@ -438,7 +510,7 @@ mod tests {
     }
 
     #[test]
-    fn policy_matches_the_recorded_frozen_hybrid_configuration() {
+    fn policy_keeps_frozen_rrf_parameters_and_expanded_dev_guard() {
         let config: serde_json::Value = serde_json::from_str(include_str!(
             "../tests/fixtures/evaluation/hybrid-config-v1.json"
         ))
@@ -452,7 +524,7 @@ mod tests {
 
         assert_eq!(selected["fusion"]["rrf_k"], 60);
         assert_eq!(selected["fusion"]["keyword_weight"], KEYWORD_WEIGHT);
-        assert_eq!(selected["fusion"]["dense_weight"], DENSE_WEIGHT);
+        assert_eq!(selected["fusion"]["dense_weight"], 1.0);
         assert_eq!(
             selected["candidate_budgets"]["keyword"],
             KEYWORD_CANDIDATE_BUDGET
@@ -461,6 +533,27 @@ mod tests {
             selected["candidate_budgets"]["dense"],
             DENSE_CANDIDATE_BUDGET
         );
-        assert_eq!(selected["weak_match_cutoff"], WEAK_MATCH_CUTOFF);
+        assert_eq!(DENSE_DISTANCE_CUTOFF, 0.55);
+        assert_eq!(WEAK_MATCH_CUTOFF, 0.50);
+    }
+
+    #[test]
+    fn policy_matches_the_expanded_development_configuration() {
+        let config: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/evaluation/hybrid-config-expanded-dev-v1.json"
+        ))
+        .unwrap();
+        let policy = &config["policy"];
+
+        assert_eq!(policy["fusion"]["rrf_k"], RRF_K as u64);
+        assert_eq!(policy["fusion"]["keyword_weight"], KEYWORD_WEIGHT);
+        assert_eq!(policy["fusion"]["dense_weight"], DENSE_WEIGHT);
+        assert_eq!(
+            policy["candidate_budgets"]["keyword"],
+            KEYWORD_CANDIDATE_BUDGET
+        );
+        assert_eq!(policy["candidate_budgets"]["dense"], DENSE_CANDIDATE_BUDGET);
+        assert_eq!(policy["dense_distance_cutoff"], DENSE_DISTANCE_CUTOFF);
+        assert_eq!(policy["weak_match_cutoff"], WEAK_MATCH_CUTOFF);
     }
 }

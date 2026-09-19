@@ -2,6 +2,8 @@
 
 Normal pushes and pull requests run one cached Ubuntu job with formatting,
 Rust/Python tests, frozen benchmark validation, and portable smoke checks.
+The job primes the pinned ONNX runtime before switching Cargo offline and
+caches that runtime with its Rust build outputs under an OS/architecture key.
 The release workflow calls this reusable workflow with `full: true` to run the
 native Rust build, bundle validation, lifecycle tests, and disposable offline
 queries on Ubuntu, macOS, and Windows GitHub runners.

@@ -1,0 +1,124 @@
+{
+  "artifact_kind": "expanded-development-hybrid-query-expansion-summary",
+  "candidate": {
+    "version": "hybrid-rrf-expanded-dev-query-expansion-v1",
+    "implementation": [
+      {
+        "path": "src/dense.rs",
+        "sha256": "de0ea9be74ab21a4573d9757e8f24bbdd7cb5fb550c13ffac97b37644c31f0ef"
+      },
+      {
+        "path": "src/hybrid.rs",
+        "sha256": "2fd470096e197f0d5dfd05462bf5535a6fda9ff38dd12db181d97c94e20013d6"
+      },
+      {
+        "path": "src/bin/askman_candidate.rs",
+        "sha256": "7c00f1c60570fdd30aa46135b9fe968cd0d1d19fa767d806aa9c0b7d64cf0da6"
+      }
+    ],
+    "scope": "development-only dense-query canonicalization",
+    "query_mode": {
+      "default": "raw",
+      "candidate_cli": "expanded-dev",
+      "expanded_dev_evaluator_opt_in": "ASKMAN_DENSE_QUERY_MODE=expanded-dev"
+    },
+    "expansions": [
+      "file plus standard output/stdout, or observed file contents -> print contents file stdout",
+      "systemd/systemctl plus restart -> start stop restart reload show status service",
+      "Linux plus IPv4 plus interface observation -> list interfaces detailed info brief network layer"
+    ]
+  },
+  "evaluator": {
+    "version": "expanded-dev-hybrid-v1",
+    "path": "scripts/evaluate_retrieval_expanded_dev.py",
+    "sha256": "2fb3c9e527e824ed617b34391e753705d6a1d78c3d52d2b88da9f369c48f5f1b"
+  },
+  "config": {
+    "id": "hybrid-expanded-dev-v1",
+    "path": "tests/fixtures/evaluation/hybrid-config-expanded-dev-v1.json",
+    "sha256": "308be00b1bb23368247dc5a944149f00b88be32996e4596d930d97dc8eafb384"
+  },
+  "scorer": {
+    "version": "task-scorer-v1",
+    "path": "scripts/evaluate_retrieval.py",
+    "sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
+  },
+  "dataset": {
+    "path": "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
+    "sha256": "216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d",
+    "split": "dev",
+    "task_count": 60
+  },
+  "corpus": {
+    "matching_bundle_id": "matching-bundle-v2:f3e07052aa2673bc320a90d563b62ecddc8bc82fd4804166aad09a6641fb60f2",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "policy": {
+    "rrf_k": 60,
+    "keyword_weight": 1.0,
+    "dense_weight": 1.05,
+    "keyword_budget": 8,
+    "dense_budget": 8,
+    "dense_distance_cutoff": 0.55,
+    "weak_match_cutoff": 0.5,
+    "max_displayed_results": 3
+  },
+  "metrics": {
+    "prior_hybrid_v1": {
+      "candidate_recall": {"count": 26, "denominator": 30},
+      "success_at_1": {"count": 19, "denominator": 30},
+      "success_at_3": {"count": 26, "denominator": 30},
+      "coverage": {"count": 30, "denominator": 60},
+      "incorrect_answered_tasks": {"count": 4, "denominator": 30},
+      "false_answers_on_unanswerable": {"count": 0, "denominator": 30}
+    },
+    "query_expansion": {
+      "candidate_recall": {"count": 30, "denominator": 30},
+      "success_at_1": {"count": 23, "denominator": 30},
+      "success_at_3": {"count": 30, "denominator": 30},
+      "coverage": {"count": 30, "denominator": 60},
+      "incorrect_answered_tasks": {"count": 0, "denominator": 30},
+      "false_answers_on_unanswerable": {"count": 0, "denominator": 30}
+    }
+  },
+  "resources": {
+    "helper_startup_ms": 4033.408,
+    "model_load_ms": 3441,
+    "repeated_query_p50_ms": 4.284,
+    "repeated_query_p95_ms": 5.692,
+    "peak_memory_bytes": 346341376
+  },
+  "resolved_target_tasks": [
+    {
+      "task_id": "dev-v2r1-devcommon-file-content-03",
+      "displayed_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc"
+      ]
+    },
+    {
+      "task_id": "dev-v2r1-devlinux-services-03",
+      "displayed_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ]
+    },
+    {
+      "task_id": "dev-v2r1-devlinux-network-05",
+      "displayed_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ]
+    },
+    {
+      "task_id": "dev-v2r1-devlinux-unsupported-02",
+      "displayed_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ]
+    }
+  ],
+  "holdout_access": {
+    "authorized": false,
+    "run": false
+  }
+}

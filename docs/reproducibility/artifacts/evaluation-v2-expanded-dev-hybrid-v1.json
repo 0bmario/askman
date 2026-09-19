@@ -1,0 +1,81 @@
+{
+  "artifact_kind": "expanded-development-hybrid-summary",
+  "evaluator": {
+    "version": "expanded-dev-hybrid-v1",
+    "path": "scripts/evaluate_retrieval_expanded_dev.py",
+    "sha256": "2fb3c9e527e824ed617b34391e753705d6a1d78c3d52d2b88da9f369c48f5f1b"
+  },
+  "config": {
+    "id": "hybrid-expanded-dev-v1",
+    "path": "tests/fixtures/evaluation/hybrid-config-expanded-dev-v1.json",
+    "sha256": "308be00b1bb23368247dc5a944149f00b88be32996e4596d930d97dc8eafb384"
+  },
+  "scorer": {
+    "version": "task-scorer-v1",
+    "path": "scripts/evaluate_retrieval.py",
+    "sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
+  },
+  "dataset": {
+    "path": "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
+    "sha256": "216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d",
+    "split": "dev",
+    "task_count": 60
+  },
+  "corpus": {
+    "matching_bundle_id": "matching-bundle-v2:f3e07052aa2673bc320a90d563b62ecddc8bc82fd4804166aad09a6641fb60f2",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "policy": {
+    "rrf_k": 60,
+    "keyword_weight": 1.0,
+    "dense_weight": 1.05,
+    "keyword_budget": 8,
+    "dense_budget": 8,
+    "dense_distance_cutoff": 0.55,
+    "weak_match_cutoff": 0.5,
+    "max_displayed_results": 3
+  },
+  "metrics": {
+    "keyword": {
+      "candidate_recall": {"count": 1, "denominator": 30},
+      "success_at_1": {"count": 1, "denominator": 30},
+      "success_at_3": {"count": 1, "denominator": 30},
+      "coverage": {"count": 1, "denominator": 60},
+      "incorrect_answered_tasks": {"count": 0, "denominator": 1},
+      "false_answers_on_unanswerable": {"count": 0, "denominator": 30}
+    },
+    "dense_description": {
+      "candidate_recall": {"count": 26, "denominator": 30},
+      "success_at_1": {"count": 18, "denominator": 30},
+      "success_at_3": {"count": 26, "denominator": 30},
+      "coverage": {"count": 60, "denominator": 60},
+      "incorrect_answered_tasks": {"count": 4, "denominator": 30},
+      "false_answers_on_unanswerable": {"count": 30, "denominator": 30}
+    },
+    "hybrid": {
+      "candidate_recall": {"count": 26, "denominator": 30},
+      "success_at_1": {"count": 19, "denominator": 30},
+      "success_at_3": {"count": 26, "denominator": 30},
+      "coverage": {"count": 30, "denominator": 60},
+      "incorrect_answered_tasks": {"count": 4, "denominator": 30},
+      "false_answers_on_unanswerable": {"count": 0, "denominator": 30}
+    }
+  },
+  "hybrid_resources": {
+    "repeated_query_p50_ms": 4.154,
+    "repeated_query_p95_ms": 5.11,
+    "peak_memory_bytes": 345669632
+  },
+  "failed_answerable_tasks": [
+    "dev-v2r1-devcommon-file-content-03",
+    "dev-v2r1-devlinux-services-03",
+    "dev-v2r1-devlinux-network-05",
+    "dev-v2r1-devlinux-unsupported-02"
+  ],
+  "holdout_access": {
+    "authorized": false,
+    "run": false
+  }
+}
