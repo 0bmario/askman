@@ -1,5 +1,5 @@
 use crate::bundle::{BundleManifest, validate_matching_bundle};
-use crate::dense::{DenseCandidate, DenseIndex};
+use crate::dense::{DenseCandidate, DenseIndex, DenseQueryMode};
 use crate::search::TargetOs;
 use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_platform};
 use anyhow::{Result, bail};
@@ -49,11 +49,24 @@ pub struct CandidateOptions {
     pub verbose: bool,
 }
 
-/// Run the candidate's single, frozen hybrid retrieval path.
+/// Run the shipping hybrid retrieval path with the raw user query.
 pub fn run_candidate(options: CandidateOptions) -> Result<()> {
+    run_candidate_with_query_mode(options, DenseQueryMode::Raw)
+}
+
+/// Run the development candidate with bounded dense-query expansion.
+#[cfg(feature = "dev")]
+pub fn run_expanded_dev_candidate(options: CandidateOptions) -> Result<()> {
+    run_candidate_with_query_mode(options, DenseQueryMode::ExpandedDev)
+}
+
+fn run_candidate_with_query_mode(
+    options: CandidateOptions,
+    query_mode: DenseQueryMode,
+) -> Result<()> {
     let index = HybridIndex::open(&options.bundle)?;
     let result = (|| -> Result<()> {
-        let fused = index.query(&options.query, options.target_os)?;
+        let fused = index.query(&options.query, options.target_os, query_mode)?;
         let displayed = display_candidates(&fused);
         print!("{}", render_results(&displayed, options.verbose));
         Ok(())
@@ -87,7 +100,12 @@ impl HybridIndex {
         Ok(Self { artifact, dense })
     }
 
-    fn query(&self, query: &str, target_os: TargetOs) -> Result<Vec<Candidate>> {
+    fn query(
+        &self,
+        query: &str,
+        target_os: TargetOs,
+        query_mode: DenseQueryMode,
+    ) -> Result<Vec<Candidate>> {
         let keyword = query_artifact_for_platform(
             QueryOptions {
                 artifact: self.artifact.clone(),
@@ -99,9 +117,16 @@ impl HybridIndex {
         .into_iter()
         .map(candidate_from_keyword)
         .collect::<Vec<_>>();
+        // The shipping entrypoint supplies Raw; only the dev entrypoint can
+        // supply the experimental expansion mode.
         let dense = self
             .dense
-            .query(query, target_os.as_str(), DENSE_CANDIDATE_BUDGET)?
+            .query_with_mode(
+                query,
+                target_os.as_str(),
+                DENSE_CANDIDATE_BUDGET,
+                query_mode,
+            )?
             .into_iter()
             .map(candidate_from_dense)
             .collect::<Vec<_>>();

@@ -39,6 +39,8 @@ cargo run --locked --offline --features dev --bin askman_candidate -- \
   --linux search patterns files
 ```
 
+This development binary uses the expanded-dev dense query mode. The shipping
+`askman` binary uses the raw query even when built with the `dev` feature.
 Use `--osx` or `--windows` for another target platform. `--verbose` exposes a
 diagnostic normalized ranking score; it is not a confidence percentage. The
 shipping `askman` binary now consumes the active validated bundle through the
@@ -163,6 +165,52 @@ run is development evidence only: it does not authorize holdout access, a
 main-versus-candidate A/B, or a release recommendation. Parent-description
 dense indexing was also tested and scored below the frozen `description`
 recipe (19/30 Success@3), so it was not selected.
+
+### Expanded-dev query-expansion candidate
+
+The next development candidate keeps the frozen evaluator, config, scorer,
+bundle, distance guard, RRF policy, and page-level candidate budgets unchanged.
+It only expands dense query text for three narrow intent families: file
+contents sent to standard output, systemd restarts, and Linux IPv4 interface
+observation. Added terms come from the pinned indexed example descriptions;
+`address` is not added because it also occurs in add/delete descriptions and
+would broaden the observation intent.
+
+Query expansion is behind a development boundary. `askman_candidate` opts in
+directly. Shipping `askman` and `dense-server` use raw queries by default. The
+dense server accepts only the exact environment value below; any other value
+fails closed. Set it only for this expanded-development evaluator invocation:
+
+```sh
+ASKMAN_DENSE_QUERY_MODE=expanded-dev \
+DYLD_LIBRARY_PATH=/private/tmp/askman-issue31.Bco3g3/onnxruntime/onnxruntime-osx-arm64-1.20.0/lib \
+LIBONNXRUNTIME_NO_PKG_CONFIG=1 \
+ORT_LIB_LOCATION=/private/tmp/askman-issue31.Bco3g3/onnxruntime/onnxruntime-osx-arm64-1.20.0 \
+ORT_PREFER_DYNAMIC_LINK=1 \
+python3 scripts/evaluate_retrieval_expanded_dev.py \
+  --artifact /private/tmp/askman-release-gate.pwfOOH/matching-bundle-expanded/matching.db \
+  --manifest tests/fixtures/tldr-evaluation-v2/manifest.json \
+  --dataset tests/fixtures/evaluation/frozen-dev-v2-expanded.json \
+  --config tests/fixtures/evaluation/hybrid-config-expanded-dev-v1.json \
+  --dense-helper target/debug/tldr_subset \
+  --model-cache /private/tmp/askman-release-gate.pwfOOH/matching-bundle-expanded/model-cache \
+  --split dev \
+  --output /tmp/evaluation-v2-expanded-dev-hybrid-query-expansion-v1.json
+```
+
+Do not set the opt-in for holdout or release-gate runs.
+
+The versioned rerun is recorded in
+`docs/reproducibility/artifacts/evaluation-v2-expanded-dev-hybrid-query-expansion-v1.json`:
+
+| Candidate | Candidate recall | Success@1 | Success@3 | Coverage | Incorrect answered | False unanswerable |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| expanded hybrid v1 | 26/30 | 19/30 | 26/30 | 30/60 | 4/30 | 0/30 |
+| query expansion v1 | 30/30 | 23/30 | 30/30 | 30/60 | 0/30 | 0/30 |
+
+All four remaining answerable misses return an acceptable example. This is
+still development evidence only; holdout, release A/B, and remote CI remain
+out of scope.
 
 ## Held-out check
 
