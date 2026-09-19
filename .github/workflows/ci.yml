@@ -51,10 +51,11 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
+            ~/.cache/ort.pyke.io
             target
-          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-rust-ort-v1-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-rust-
+            ${{ runner.os }}-${{ runner.arch }}-rust-ort-v1-
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -63,6 +64,9 @@ jobs:
 
       - name: Fetch locked dependencies (networked setup)
         run: cargo fetch --locked
+
+      - name: Prime native runtime and dev binaries (networked setup)
+        run: cargo build --locked --features dev --bin askman --bin tldr_subset --bin askman_candidate
 
       - name: Check formatting
         env:
