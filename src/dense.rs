@@ -27,6 +27,8 @@ pub const DENSE_NORMALIZATION: &str = "l2";
 pub const DENSE_DISTANCE_METRIC: &str = "cosine";
 pub const DENSE_RECIPE_VERSION: &str = "dense-text-v1";
 pub const DEFAULT_BATCH_SIZE: usize = 32;
+const DENSE_QUERY_MODE_ENV: &str = "ASKMAN_DENSE_QUERY_MODE";
+const EXPANDED_DEV_QUERY_MODE: &str = "expanded-dev";
 
 pub const MODEL_FILES: [(&str, &str); 5] = [
     (
@@ -162,6 +164,12 @@ pub(crate) struct DenseIndex {
     embedder: OfflineEmbedder,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum DenseQueryMode {
+    Raw,
+    ExpandedDev,
+}
+
 /// The embedded ONNX runtime can abort during process teardown on this target.
 /// The dev builder/server are short-lived tools, so keep the runtime alive until
 /// process exit instead of invoking its unsafe native destructor.
@@ -265,6 +273,7 @@ pub fn build_dense_index(options: DenseBuildOptions) -> Result<DenseBuildReport>
 
 pub fn run_query_server(options: DenseServerOptions) -> Result<()> {
     register_sqlite_vec();
+    let query_mode = dense_server_query_mode()?;
     let started_at = Instant::now();
     let index = DenseIndex::open(&options.artifact, &options.model_cache)?;
     let result = (|| -> Result<()> {
@@ -283,7 +292,12 @@ pub fn run_query_server(options: DenseServerOptions) -> Result<()> {
             }
             let response = match serde_json::from_str::<DenseQueryRequest>(&line) {
                 Ok(request) => {
-                    match index.query(&request.query, &request.platform, request.limit) {
+                    match index.query_with_mode(
+                        &request.query,
+                        &request.platform,
+                        request.limit,
+                        query_mode,
+                    ) {
                         Ok(results) => serde_json::json!({"ok": true, "results": results}),
                         Err(error) => serde_json::json!({"ok": false, "error": error.to_string()}),
                     }
@@ -318,18 +332,20 @@ impl DenseIndex {
         })
     }
 
-    pub(crate) fn query(
+    pub(crate) fn query_with_mode(
         &self,
         query: &str,
         platform: &str,
         limit: usize,
+        query_mode: DenseQueryMode,
     ) -> Result<Vec<DenseCandidate>> {
         if limit == 0 {
             bail!("dense query limit must be greater than zero");
         }
+        let dense_query = dense_query_text(query, query_mode);
         let query_vector = self
             .embedder
-            .embed(vec![query.to_string()], Some(1))?
+            .embed(vec![dense_query], Some(1))?
             .pop()
             .ok_or_else(|| anyhow!("dense model returned no query vector"))?;
         validate_embedding(&query_vector, "query")?;
@@ -401,6 +417,74 @@ impl DenseIndex {
             }
         }
         Ok(results)
+    }
+}
+
+fn dense_server_query_mode() -> Result<DenseQueryMode> {
+    match std::env::var(DENSE_QUERY_MODE_ENV) {
+        Ok(value) if value == EXPANDED_DEV_QUERY_MODE => Ok(DenseQueryMode::ExpandedDev),
+        Ok(value) => bail!(
+            "unsupported {DENSE_QUERY_MODE_ENV} value `{value}`; unset it for raw queries or use `{EXPANDED_DEV_QUERY_MODE}`"
+        ),
+        Err(std::env::VarError::NotPresent) => Ok(DenseQueryMode::Raw),
+        Err(std::env::VarError::NotUnicode(_)) => {
+            bail!("{DENSE_QUERY_MODE_ENV} must contain valid Unicode")
+        }
+    }
+}
+
+fn dense_query_text(query: &str, query_mode: DenseQueryMode) -> String {
+    if query_mode == DenseQueryMode::Raw {
+        return query.to_string();
+    }
+
+    let normalized = query.to_ascii_lowercase();
+    let query_words = normalized
+        .split(|character: char| !character.is_ascii_alphanumeric())
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    let mut additions = Vec::new();
+
+    let mentions_file = query_words.contains(&"file");
+    let mentions_standard_output = query_words
+        .windows(2)
+        .any(|words| words == ["standard", "output"]);
+    let names_file_contents = query_words.contains(&"contents");
+    let requests_file_observation = ["read", "print", "show", "display"]
+        .iter()
+        .any(|term| query_words.contains(term));
+    let requests_file_contents = mentions_standard_output
+        || query_words.contains(&"stdout")
+        || (names_file_contents && requests_file_observation);
+    // Requiring an explicit file keeps generic stdout intents, notably
+    // pasteboard piping, from being pulled toward `cat`.
+    if mentions_file && requests_file_contents {
+        additions.push("print contents file stdout");
+    }
+
+    let requests_restart = query_words.contains(&"restart");
+    let names_systemd_tooling =
+        query_words.contains(&"systemd") || query_words.contains(&"systemctl");
+    if requests_restart && names_systemd_tooling {
+        additions.push("start stop restart reload show status service");
+    }
+
+    let names_linux_ipv4_interfaces = query_words.contains(&"linux")
+        && query_words.contains(&"ipv4")
+        && (query_words.contains(&"interface") || query_words.contains(&"interfaces"));
+    let requests_interface_observation = ["display", "inspect", "show", "list"]
+        .iter()
+        .any(|term| query_words.contains(term));
+    if names_linux_ipv4_interfaces && requests_interface_observation {
+        // These terms occur in the pinned observation descriptions. `address`
+        // also occurs in add/delete descriptions, so it would broaden the intent.
+        additions.push("list interfaces detailed info brief network layer");
+    }
+
+    if additions.is_empty() {
+        query.to_string()
+    } else {
+        format!("{query} {}", additions.join(" "))
     }
 }
 
@@ -857,6 +941,72 @@ mod tests {
             DenseRecipe::DescriptionWithParent.text("parent", "example"),
             "parent\nexample"
         );
+    }
+
+    #[test]
+    fn expanded_dev_query_maps_file_output_to_cat_vocabulary() {
+        let query = "read a file to standard output";
+        assert_eq!(
+            dense_query_text(query, DenseQueryMode::ExpandedDev),
+            "read a file to standard output print contents file stdout"
+        );
+    }
+
+    #[test]
+    fn expanded_dev_query_maps_systemctl_restart_to_service_vocabulary() {
+        let query = "restart one Linux unit with systemctl";
+        assert_eq!(
+            dense_query_text(query, DenseQueryMode::ExpandedDev),
+            "restart one Linux unit with systemctl start stop restart reload show status service"
+        );
+    }
+
+    #[test]
+    fn expanded_dev_query_maps_displayed_linux_ipv4_interfaces_to_ip_vocabulary() {
+        let query = "display interface IPv4 addresses on Linux";
+        assert_eq!(
+            dense_query_text(query, DenseQueryMode::ExpandedDev),
+            "display interface IPv4 addresses on Linux list interfaces detailed info brief network layer"
+        );
+    }
+
+    #[test]
+    fn expanded_dev_query_maps_inspected_linux_ipv4_interfaces_to_ip_vocabulary() {
+        let query = "inspect assigned IPv4 addresses on Linux interfaces";
+        assert_eq!(
+            dense_query_text(query, DenseQueryMode::ExpandedDev),
+            "inspect assigned IPv4 addresses on Linux interfaces list interfaces detailed info brief network layer"
+        );
+    }
+
+    #[test]
+    fn expanded_dev_query_does_not_treat_pasteboard_output_as_file_contents() {
+        let query = "put standard output on the Mac pasteboard";
+        assert_eq!(dense_query_text(query, DenseQueryMode::ExpandedDev), query);
+    }
+
+    #[test]
+    fn expanded_dev_query_leaves_unrelated_stdout_intent_unchanged() {
+        let query = "show profile contents on standard output";
+        assert_eq!(dense_query_text(query, DenseQueryMode::ExpandedDev), query);
+    }
+
+    #[test]
+    fn expanded_dev_query_does_not_treat_destructive_file_contents_as_cat() {
+        let query = "delete a file's contents";
+        assert_eq!(dense_query_text(query, DenseQueryMode::ExpandedDev), query);
+    }
+
+    #[test]
+    fn expanded_dev_query_does_not_match_nonstandard_output() {
+        let query = "copy a file to nonstandard output";
+        assert_eq!(dense_query_text(query, DenseQueryMode::ExpandedDev), query);
+    }
+
+    #[test]
+    fn raw_query_mode_never_expands_a_known_intent() {
+        let query = "read a file to standard output";
+        assert_eq!(dense_query_text(query, DenseQueryMode::Raw), query);
     }
 
     #[test]
