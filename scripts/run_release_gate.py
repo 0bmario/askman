@@ -44,7 +44,12 @@ FROZEN_HOLDOUT_DATASET_SHA256 = (
     "1aa1c0a8ec5c550b8a6699654bb5eb56928bd6845f0b3610bb7a8ee368813418"
 )
 ANSI_ESCAPE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
+# Older macOS /usr/bin/time reports "maximum resident set size: <bytes>";
+# current macOS reports "<bytes> peak memory footprint". Both are bytes.
 PEAK_MEMORY_MAC = re.compile(r"maximum resident set size:\s*(\d+)")
+PEAK_MEMORY_MAC_FOOTPRINT = re.compile(
+    r"^\s*(\d+)\s+peak memory footprint\s*$", re.MULTILINE
+)
 PEAK_MEMORY_LINUX = re.compile(
     r"Maximum resident set size \(kbytes\):\s*(\d+)", re.IGNORECASE
 )
@@ -297,6 +302,9 @@ def peak_memory(stderr: str) -> int | None:
     match = PEAK_MEMORY_MAC.search(stderr)
     if match:
         return int(match.group(1))
+    footprint = PEAK_MEMORY_MAC_FOOTPRINT.search(stderr)
+    if footprint:
+        return int(footprint.group(1))
     match = PEAK_MEMORY_LINUX.search(stderr)
     if match:
         return int(match.group(1)) * 1024
