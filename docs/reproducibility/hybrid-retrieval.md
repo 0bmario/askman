@@ -212,6 +212,34 @@ All four remaining answerable misses return an acceptable example. This is
 still development evidence only; holdout, release A/B, and remote CI remain
 out of scope.
 
+### Query expansion v2 (dev-derived rules) and embedder/platform parity
+
+The dev split surfaced two rank-1 ordering classes: pasteboard direction
+(4/5 tasks ranked `pbpaste` above the acceptable `pbcopy` example) and
+Windows file-copy (3/5 ranked `cp` above the acceptable `copy` examples).
+The expansion rules gained two dev-derived cases (pasteboard write direction
+with an extraction guard, and file-copy-with-destination), the embedder now
+initializes through fastembed's named model path against the bundle model
+cache (matching main's memory profile; the user-defined path double-buffered
+the 90 MB model), and explicitly requested platforms order target-platform
+pages above common ones (the documented selection invariant, applied to
+ordering; host-default queries keep pure relevance ordering).
+
+The versioned rerun is recorded in
+`docs/reproducibility/artifacts/evaluation-v2-expanded-dev-hybrid-query-expansion-v2.json`:
+
+| Candidate | Candidate recall | Success@1 | Success@3 | Coverage | Incorrect answered | False unanswerable |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| query expansion v2 | 30/30 | 26/30 | 30/30 | 30/60 | 0/30 | 0/30 |
+
+The clipboard family improved 1/5 → 5/5 (all five tasks now rank the
+acceptable `pbcopy` example first). The Windows file-copy rank-1 ordering is
+fixed for explicitly requested platforms (`--windows`); the development
+evaluator's dense client does not pass the explicit-platform flag, so its
+recorded Windows rank-1 ordering is unchanged — the release gate drives the
+CLIs with the same explicit flags the benchmark specifies, where the ordering
+applies. Still development evidence only.
+
 ## Held-out check
 
 Only after the config and selection rule were frozen, the selected candidate

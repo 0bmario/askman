@@ -47,6 +47,9 @@ pub struct QueryOptions {
     pub artifact: PathBuf,
     pub query: String,
     pub limit: usize,
+    /// Enables target-platform-over-common result ordering; host-default
+    /// queries keep pure relevance ordering.
+    pub platform_explicit: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -323,7 +326,23 @@ pub fn query_artifact_for_platform(
     if selected_page_ids.is_empty() {
         return Ok(Vec::new());
     }
-    let page_placeholders = std::iter::repeat_n("?", selected_page_ids.len())
+    let (order_by, head_params): (String, Vec<&str>) = if options.platform_explicit {
+        (
+            "CASE WHEN p.platform = ?2 THEN 0 ELSE 1 END, bm25(example_lexical), e.example_id"
+                .to_string(),
+            vec![fts_query.as_str(), platform],
+        )
+    } else {
+        (
+            "bm25(example_lexical), e.example_id".to_string(),
+            vec![fts_query.as_str()],
+        )
+    };
+    let placeholder_base = if options.platform_explicit { 3 } else { 2 };
+    let page_placeholders = selected_page_ids
+        .iter()
+        .enumerate()
+        .map(|(index, _)| format!("?{}", index + placeholder_base))
         .collect::<Vec<_>>()
         .join(", ");
 
@@ -347,11 +366,13 @@ pub fn query_artifact_for_platform(
          JOIN pages AS p ON p.page_id = e.page_id
          WHERE example_lexical MATCH ?1
            AND p.page_id IN ({page_placeholders})
-         ORDER BY bm25(example_lexical), e.example_id",
+         ORDER BY {order_by}",
     );
     let mut statement = conn.prepare(&query)?;
     let query_params = params_from_iter(
-        std::iter::once(fts_query.as_str()).chain(selected_page_ids.iter().map(String::as_str)),
+        head_params
+            .into_iter()
+            .chain(selected_page_ids.iter().map(String::as_str)),
     );
     let rows = statement.query_map(query_params, |row| {
         Ok(QueryResult {

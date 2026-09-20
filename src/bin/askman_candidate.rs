@@ -14,6 +14,7 @@ fn main() -> Result<()> {
         bundle: args.bundle,
         query: args.question.join(" "),
         target_os,
+        platform_explicit: args.linux || args.osx || args.windows,
         verbose: args.verbose,
     })
 }

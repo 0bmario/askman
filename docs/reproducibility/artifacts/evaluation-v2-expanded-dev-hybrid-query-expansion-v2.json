@@ -1,0 +1,3341 @@
+{
+  "config_id": "hybrid-expanded-dev-v1",
+  "config_sha256": "308be00b1bb23368247dc5a944149f00b88be32996e4596d930d97dc8eafb384",
+  "corpus": {
+    "artifact_kind": "askman.tldr-subset",
+    "parser_version": "tldr-subset-v3",
+    "schema_version": "3",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef"
+  },
+  "dataset_id": "askman-evaluation-v2",
+  "dataset_schema_version": 2,
+  "dataset_sha256": "216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d",
+  "evaluator_sha256": "2fb3c9e527e824ed617b34391e753705d6a1d78c3d52d2b88da9f369c48f5f1b",
+  "evaluator_version": "expanded-dev-hybrid-v1",
+  "holdout_access": {
+    "authorized": false,
+    "recorded": false,
+    "utc": null
+  },
+  "policy": {
+    "candidate_budgets": {
+      "dense": 8,
+      "keyword": 8
+    },
+    "dense_distance_cutoff": 0.55,
+    "fusion": {
+      "dense_weight": 1.05,
+      "keyword_weight": 1.0,
+      "method": "rrf",
+      "rrf_k": 60
+    },
+    "max_displayed_results": 3,
+    "weak_match_cutoff": 0.5
+  },
+  "resources": {
+    "helper_startup_ms": 336.819,
+    "model_load_ms": 326,
+    "peak_memory_bytes": 296566784,
+    "repeated_query_count": 60,
+    "repeated_query_p50_ms": 3.555,
+    "repeated_query_p95_ms": 6.208
+  },
+  "retriever": "hybrid",
+  "retriever_version": "hybrid-rrf-expanded-dev-v1",
+  "scorer_sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90",
+  "scorer_version": "task-scorer-v1",
+  "split": "dev",
+  "split_id": "scenario-family-split-v2",
+  "summary": {
+    "answerable_tasks": 30,
+    "candidate_recall": {
+      "count": 30,
+      "denominator": 30
+    },
+    "coverage": {
+      "count": 30,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 0,
+      "denominator": 30
+    },
+    "incorrect_answered_tasks": {
+      "count": 0,
+      "denominator": 30
+    },
+    "success_at_1": {
+      "count": 26,
+      "denominator": 30
+    },
+    "success_at_3": {
+      "count": 30,
+      "denominator": 30
+    },
+    "tasks": 60,
+    "unanswerable_tasks": 30
+  },
+  "tasks": [
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+        "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.150937,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": true
+        },
+        {
+          "distance": 0.390401,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": true
+        },
+        {
+          "distance": 0.435922,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": true
+        },
+        {
+          "distance": 0.568332,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.656351,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.726162,
+          "example_id": "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 3,
+      "displayed_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-content-01"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+        "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.120826,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": true
+        },
+        {
+          "distance": 0.37517,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": true
+        },
+        {
+          "distance": 0.421437,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": true
+        },
+        {
+          "distance": 0.56735,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.657771,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.685453,
+          "example_id": "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 3,
+      "displayed_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-content-02"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+        "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+        "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.177576,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": true
+        },
+        {
+          "distance": 0.374608,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": true
+        },
+        {
+          "distance": 0.42199,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": true
+        },
+        {
+          "distance": 0.490324,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": true
+        },
+        {
+          "distance": 0.652486,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.717829,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 4,
+      "displayed_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-content-03"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.457368,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": true
+        },
+        {
+          "distance": 0.549896,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": true
+        },
+        {
+          "distance": 0.595228,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.621189,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.695768,
+          "example_id": "example-df0e494352d457d0a19d99c8dd070346d43f2d17261a71c20a10620459028d62",
+          "kept": false
+        },
+        {
+          "distance": 0.697229,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-content-04"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+        "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.112595,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": true
+        },
+        {
+          "distance": 0.3707,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": true
+        },
+        {
+          "distance": 0.452457,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": true
+        },
+        {
+          "distance": 0.606817,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.640945,
+          "example_id": "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153",
+          "kept": false
+        },
+        {
+          "distance": 0.679146,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 3,
+      "displayed_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+        "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-content-05"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.1653,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.538492,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": true
+        },
+        {
+          "distance": 0.70557,
+          "example_id": "example-8ce4049b12e6fbdd8ddf55f64fe04680b35071710b29124b53a08b088e26429d",
+          "kept": false
+        },
+        {
+          "distance": 0.787132,
+          "example_id": "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de",
+          "kept": false
+        },
+        {
+          "distance": 0.834472,
+          "example_id": "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351",
+          "kept": false
+        },
+        {
+          "distance": 0.849349,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-copy-01"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.207793,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.530493,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": true
+        },
+        {
+          "distance": 0.670338,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.709562,
+          "example_id": "example-8ce4049b12e6fbdd8ddf55f64fe04680b35071710b29124b53a08b088e26429d",
+          "kept": false
+        },
+        {
+          "distance": 0.796092,
+          "example_id": "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43",
+          "kept": false
+        },
+        {
+          "distance": 0.848759,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-copy-02"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.203193,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.532167,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": true
+        },
+        {
+          "distance": 0.7725,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.776802,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.839192,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.855575,
+          "example_id": "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-copy-03"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.149958,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.477474,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": true
+        },
+        {
+          "distance": 0.732764,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.757956,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.809052,
+          "example_id": "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351",
+          "kept": false
+        },
+        {
+          "distance": 0.833148,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-copy-04"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.157999,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.514509,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": true
+        },
+        {
+          "distance": 0.718797,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.726037,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.83233,
+          "example_id": "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351",
+          "kept": false
+        },
+        {
+          "distance": 0.840689,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devcommon-file-copy-05"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.758773,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.776713,
+          "example_id": "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153",
+          "kept": false
+        },
+        {
+          "distance": 0.781008,
+          "example_id": "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1",
+          "kept": false
+        },
+        {
+          "distance": 0.784825,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.786809,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.856826,
+          "example_id": "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devcommon-unsupported-01"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.734774,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.768236,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.774262,
+          "example_id": "example-234cb44d418053d5b2c7b67e416745fc67d8860d980e2237179f13b052680153",
+          "kept": false
+        },
+        {
+          "distance": 0.809091,
+          "example_id": "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43",
+          "kept": false
+        },
+        {
+          "distance": 0.809394,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.860008,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devcommon-unsupported-02"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.712042,
+          "example_id": "example-13c8699b86f8979b78ad259f5ebcf17efb41517059d9ae59f9d4230b6b80b0e0",
+          "kept": false
+        },
+        {
+          "distance": 0.753821,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.775689,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.808517,
+          "example_id": "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43",
+          "kept": false
+        },
+        {
+          "distance": 0.812882,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.985674,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devcommon-unsupported-03"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.719696,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.800309,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.806939,
+          "example_id": "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1",
+          "kept": false
+        },
+        {
+          "distance": 0.810536,
+          "example_id": "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f",
+          "kept": false
+        },
+        {
+          "distance": 0.845208,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.896252,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devcommon-unsupported-04"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.850546,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.851965,
+          "example_id": "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1",
+          "kept": false
+        },
+        {
+          "distance": 0.862602,
+          "example_id": "example-6a895683594f0e1af4ba619ed22ae064a2f09ad3a4449f8c665780cfcbd44253",
+          "kept": false
+        },
+        {
+          "distance": 0.888507,
+          "example_id": "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43",
+          "kept": false
+        },
+        {
+          "distance": 0.892001,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.892435,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devcommon-unsupported-05"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.255907,
+          "example_id": "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade",
+          "kept": true
+        },
+        {
+          "distance": 0.735225,
+          "example_id": "example-de107995bedda7e289e93021973e10f02da017edd74ade823f66110a33c44072",
+          "kept": false
+        },
+        {
+          "distance": 0.743018,
+          "example_id": "example-a0b449d505106555f15ec7c8b99bdb6689bc18a1e9db862019a1c6bff8a2d16a",
+          "kept": false
+        },
+        {
+          "distance": 0.860173,
+          "example_id": "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+          "kept": false
+        },
+        {
+          "distance": 0.874429,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        },
+        {
+          "distance": 0.884044,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.896595,
+          "example_id": "example-26c2742f375015e84ac61f1c323bdde3641ebd0d34179fba484df7cffa8fb735",
+          "kept": false
+        },
+        {
+          "distance": 0.903337,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-services-01"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.269848,
+          "example_id": "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade",
+          "kept": true
+        },
+        {
+          "distance": 0.74918,
+          "example_id": "example-a0b449d505106555f15ec7c8b99bdb6689bc18a1e9db862019a1c6bff8a2d16a",
+          "kept": false
+        },
+        {
+          "distance": 0.760642,
+          "example_id": "example-de107995bedda7e289e93021973e10f02da017edd74ade823f66110a33c44072",
+          "kept": false
+        },
+        {
+          "distance": 0.865014,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        },
+        {
+          "distance": 0.865921,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.874888,
+          "example_id": "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+          "kept": false
+        },
+        {
+          "distance": 0.880215,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.883017,
+          "example_id": "example-26c2742f375015e84ac61f1c323bdde3641ebd0d34179fba484df7cffa8fb735",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-services-02"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.289198,
+          "example_id": "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade",
+          "kept": true
+        },
+        {
+          "distance": 0.720063,
+          "example_id": "example-a0b449d505106555f15ec7c8b99bdb6689bc18a1e9db862019a1c6bff8a2d16a",
+          "kept": false
+        },
+        {
+          "distance": 0.722586,
+          "example_id": "example-de107995bedda7e289e93021973e10f02da017edd74ade823f66110a33c44072",
+          "kept": false
+        },
+        {
+          "distance": 0.848847,
+          "example_id": "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+          "kept": false
+        },
+        {
+          "distance": 0.872002,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        },
+        {
+          "distance": 0.883495,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.899315,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.900365,
+          "example_id": "example-26c2742f375015e84ac61f1c323bdde3641ebd0d34179fba484df7cffa8fb735",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-services-03"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.244748,
+          "example_id": "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade",
+          "kept": true
+        },
+        {
+          "distance": 0.724598,
+          "example_id": "example-a0b449d505106555f15ec7c8b99bdb6689bc18a1e9db862019a1c6bff8a2d16a",
+          "kept": false
+        },
+        {
+          "distance": 0.727108,
+          "example_id": "example-de107995bedda7e289e93021973e10f02da017edd74ade823f66110a33c44072",
+          "kept": false
+        },
+        {
+          "distance": 0.859364,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.884798,
+          "example_id": "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+          "kept": false
+        },
+        {
+          "distance": 0.898706,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.89876,
+          "example_id": "example-26c2742f375015e84ac61f1c323bdde3641ebd0d34179fba484df7cffa8fb735",
+          "kept": false
+        },
+        {
+          "distance": 0.906249,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-services-04"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.213734,
+          "example_id": "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade",
+          "kept": true
+        },
+        {
+          "distance": 0.734855,
+          "example_id": "example-de107995bedda7e289e93021973e10f02da017edd74ade823f66110a33c44072",
+          "kept": false
+        },
+        {
+          "distance": 0.744532,
+          "example_id": "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52",
+          "kept": false
+        },
+        {
+          "distance": 0.844599,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.851939,
+          "example_id": "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+          "kept": false
+        },
+        {
+          "distance": 0.882106,
+          "example_id": "example-9c3f58af214e9a579b9f6943bc021cdb16a28ef87eba18ff5d7bde38affe3e85",
+          "kept": false
+        },
+        {
+          "distance": 0.883349,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.883687,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-services-05"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.232786,
+          "example_id": "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e",
+          "kept": true
+        },
+        {
+          "distance": 0.624028,
+          "example_id": "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376",
+          "kept": false
+        },
+        {
+          "distance": 0.720505,
+          "example_id": "example-c271943f3dad6797361b9e6b7fefb432da846eb2bf306addf579d49fab7474ba",
+          "kept": false
+        },
+        {
+          "distance": 0.728991,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        },
+        {
+          "distance": 0.793673,
+          "example_id": "example-f25a989decc5c357977fa4cbb2214c15cf15286f275b99850bb18c114f4fb73b",
+          "kept": false
+        },
+        {
+          "distance": 0.825368,
+          "example_id": "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1",
+          "kept": false
+        },
+        {
+          "distance": 0.830745,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.864762,
+          "example_id": "example-2abf38a4f04947106d31a574559f7e21ec43c8c60d7e042916b6e5f324cb91f4",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-network-01"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.746426,
+          "example_id": "example-ae1dbfa9e9e60412355997fc3c762fa5b6e4d14be3c5d7c01c9767059011ba05",
+          "kept": false
+        },
+        {
+          "distance": 0.852066,
+          "example_id": "example-797edc7a941bf8625877aabaafdd48201acad6518d471218f09c2683a350f31d",
+          "kept": false
+        },
+        {
+          "distance": 0.891575,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.904852,
+          "example_id": "example-df0e494352d457d0a19d99c8dd070346d43f2d17261a71c20a10620459028d62",
+          "kept": false
+        },
+        {
+          "distance": 0.91061,
+          "example_id": "example-c271943f3dad6797361b9e6b7fefb432da846eb2bf306addf579d49fab7474ba",
+          "kept": false
+        },
+        {
+          "distance": 0.921075,
+          "example_id": "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097",
+          "kept": false
+        },
+        {
+          "distance": 0.927007,
+          "example_id": "example-899be5423d13c42fe2a430cc06b8539e18124b979b0555ed71bd134c2f875375",
+          "kept": false
+        },
+        {
+          "distance": 0.938697,
+          "example_id": "example-18b8228973643cd6ddacd395575bcc764d5a30cf0eee12df9e0b74d406dbe5ef",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devlinux-network-02"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.251442,
+          "example_id": "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e",
+          "kept": true
+        },
+        {
+          "distance": 0.673756,
+          "example_id": "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb",
+          "kept": false
+        },
+        {
+          "distance": 0.715458,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        },
+        {
+          "distance": 0.745719,
+          "example_id": "example-64d2bca80b945d449e02a015e46da78ddbc1c31ae96c7aecd521b73a199b5ec6",
+          "kept": false
+        },
+        {
+          "distance": 0.786041,
+          "example_id": "example-f25a989decc5c357977fa4cbb2214c15cf15286f275b99850bb18c114f4fb73b",
+          "kept": false
+        },
+        {
+          "distance": 0.82371,
+          "example_id": "example-2abf38a4f04947106d31a574559f7e21ec43c8c60d7e042916b6e5f324cb91f4",
+          "kept": false
+        },
+        {
+          "distance": 0.832772,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.841152,
+          "example_id": "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-network-03"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.729577,
+          "example_id": "example-ae1dbfa9e9e60412355997fc3c762fa5b6e4d14be3c5d7c01c9767059011ba05",
+          "kept": false
+        },
+        {
+          "distance": 0.864582,
+          "example_id": "example-797edc7a941bf8625877aabaafdd48201acad6518d471218f09c2683a350f31d",
+          "kept": false
+        },
+        {
+          "distance": 0.885735,
+          "example_id": "example-c271943f3dad6797361b9e6b7fefb432da846eb2bf306addf579d49fab7474ba",
+          "kept": false
+        },
+        {
+          "distance": 0.896552,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.917858,
+          "example_id": "example-8c61537cc284fc35018aa7b58c7e910338579fbacceb15f175687f2734fea4f4",
+          "kept": false
+        },
+        {
+          "distance": 0.929161,
+          "example_id": "example-18b8228973643cd6ddacd395575bcc764d5a30cf0eee12df9e0b74d406dbe5ef",
+          "kept": false
+        },
+        {
+          "distance": 0.93333,
+          "example_id": "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097",
+          "kept": false
+        },
+        {
+          "distance": 0.950855,
+          "example_id": "example-899be5423d13c42fe2a430cc06b8539e18124b979b0555ed71bd134c2f875375",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devlinux-network-04"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.229261,
+          "example_id": "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e",
+          "kept": true
+        },
+        {
+          "distance": 0.712344,
+          "example_id": "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb",
+          "kept": false
+        },
+        {
+          "distance": 0.737114,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        },
+        {
+          "distance": 0.759703,
+          "example_id": "example-64d2bca80b945d449e02a015e46da78ddbc1c31ae96c7aecd521b73a199b5ec6",
+          "kept": false
+        },
+        {
+          "distance": 0.795308,
+          "example_id": "example-f25a989decc5c357977fa4cbb2214c15cf15286f275b99850bb18c114f4fb73b",
+          "kept": false
+        },
+        {
+          "distance": 0.800528,
+          "example_id": "example-2abf38a4f04947106d31a574559f7e21ec43c8c60d7e042916b6e5f324cb91f4",
+          "kept": false
+        },
+        {
+          "distance": 0.82114,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": false
+        },
+        {
+          "distance": 0.838988,
+          "example_id": "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-network-05"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.428537,
+          "example_id": "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344",
+          "kept": true
+        },
+        {
+          "distance": 0.613818,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": false
+        },
+        {
+          "distance": 0.631599,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.640384,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.696606,
+          "example_id": "example-218cad5dd34381708a69491c6060470eb2bf4d6ce10b57fd710a0122bedcca01",
+          "kept": false
+        },
+        {
+          "distance": 0.709808,
+          "example_id": "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb",
+          "kept": false
+        },
+        {
+          "distance": 0.734871,
+          "example_id": "example-2abf38a4f04947106d31a574559f7e21ec43c8c60d7e042916b6e5f324cb91f4",
+          "kept": false
+        },
+        {
+          "distance": 0.735383,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-6c4ebc23e74ec4a37555d57fe1018ceb369038ebdf6a3d2f6e9780f9c84d2344"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-unsupported-01"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.299049,
+          "example_id": "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e",
+          "kept": true
+        },
+        {
+          "distance": 0.713219,
+          "example_id": "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb",
+          "kept": false
+        },
+        {
+          "distance": 0.759221,
+          "example_id": "example-c271943f3dad6797361b9e6b7fefb432da846eb2bf306addf579d49fab7474ba",
+          "kept": false
+        },
+        {
+          "distance": 0.794047,
+          "example_id": "example-f25a989decc5c357977fa4cbb2214c15cf15286f275b99850bb18c114f4fb73b",
+          "kept": false
+        },
+        {
+          "distance": 0.795075,
+          "example_id": "example-fde36aeb068ae85eb35667e80ad9fc1f2b8f79313764a2e6f16ef046e9409b40",
+          "kept": false
+        },
+        {
+          "distance": 0.819432,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": false
+        },
+        {
+          "distance": 0.824798,
+          "example_id": "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1",
+          "kept": false
+        },
+        {
+          "distance": 0.87964,
+          "example_id": "example-2abf38a4f04947106d31a574559f7e21ec43c8c60d7e042916b6e5f324cb91f4",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 1,
+      "displayed_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devlinux-unsupported-02"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.74382,
+          "example_id": "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43",
+          "kept": false
+        },
+        {
+          "distance": 0.78058,
+          "example_id": "example-899be5423d13c42fe2a430cc06b8539e18124b979b0555ed71bd134c2f875375",
+          "kept": false
+        },
+        {
+          "distance": 0.793179,
+          "example_id": "example-18b8228973643cd6ddacd395575bcc764d5a30cf0eee12df9e0b74d406dbe5ef",
+          "kept": false
+        },
+        {
+          "distance": 0.808771,
+          "example_id": "example-797edc7a941bf8625877aabaafdd48201acad6518d471218f09c2683a350f31d",
+          "kept": false
+        },
+        {
+          "distance": 0.82669,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.827774,
+          "example_id": "example-d99ee371ddcfb0d3bacff56d1e85a15e77d4fd1ebf9c45c1db576f1a198978c1",
+          "kept": false
+        },
+        {
+          "distance": 0.852067,
+          "example_id": "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097",
+          "kept": false
+        },
+        {
+          "distance": 0.857859,
+          "example_id": "example-ae1dbfa9e9e60412355997fc3c762fa5b6e4d14be3c5d7c01c9767059011ba05",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devlinux-unsupported-03"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.699464,
+          "example_id": "example-ae1dbfa9e9e60412355997fc3c762fa5b6e4d14be3c5d7c01c9767059011ba05",
+          "kept": false
+        },
+        {
+          "distance": 0.845504,
+          "example_id": "example-797edc7a941bf8625877aabaafdd48201acad6518d471218f09c2683a350f31d",
+          "kept": false
+        },
+        {
+          "distance": 0.873693,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.878024,
+          "example_id": "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43",
+          "kept": false
+        },
+        {
+          "distance": 0.896341,
+          "example_id": "example-899be5423d13c42fe2a430cc06b8539e18124b979b0555ed71bd134c2f875375",
+          "kept": false
+        },
+        {
+          "distance": 0.903904,
+          "example_id": "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097",
+          "kept": false
+        },
+        {
+          "distance": 0.911076,
+          "example_id": "example-18b8228973643cd6ddacd395575bcc764d5a30cf0eee12df9e0b74d406dbe5ef",
+          "kept": false
+        },
+        {
+          "distance": 0.920466,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devlinux-unsupported-04"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.800499,
+          "example_id": "example-ae1dbfa9e9e60412355997fc3c762fa5b6e4d14be3c5d7c01c9767059011ba05",
+          "kept": false
+        },
+        {
+          "distance": 0.828938,
+          "example_id": "example-18b8228973643cd6ddacd395575bcc764d5a30cf0eee12df9e0b74d406dbe5ef",
+          "kept": false
+        },
+        {
+          "distance": 0.838908,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": false
+        },
+        {
+          "distance": 0.858881,
+          "example_id": "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+          "kept": false
+        },
+        {
+          "distance": 0.86045,
+          "example_id": "example-e749fca6b213fe21f43536cc5a1d83dc0397c5604015dc9f393bd2086dbcae84",
+          "kept": false
+        },
+        {
+          "distance": 0.872381,
+          "example_id": "example-c271943f3dad6797361b9e6b7fefb432da846eb2bf306addf579d49fab7474ba",
+          "kept": false
+        },
+        {
+          "distance": 0.888806,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.903462,
+          "example_id": "example-72069b7f688efc1ad6e2e48ba1a29800dffdc9c7644f6e8bb17f77864ebda5f2",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devlinux-unsupported-05"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.234317,
+          "example_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+          "kept": true
+        },
+        {
+          "distance": 0.279817,
+          "example_id": "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069",
+          "kept": true
+        },
+        {
+          "distance": 0.580536,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.587832,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.645274,
+          "example_id": "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f",
+          "kept": false
+        },
+        {
+          "distance": 0.719376,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.733944,
+          "example_id": "example-f02a9932c497bb41ff8bbddf727ddfc5d5407ddfcb187a58ec6fc43a068b6021",
+          "kept": false
+        },
+        {
+          "distance": 0.743939,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devosx-clipboard-01"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.244983,
+          "example_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+          "kept": true
+        },
+        {
+          "distance": 0.274432,
+          "example_id": "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069",
+          "kept": true
+        },
+        {
+          "distance": 0.610603,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.637342,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.70926,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": false
+        },
+        {
+          "distance": 0.720426,
+          "example_id": "example-f02a9932c497bb41ff8bbddf727ddfc5d5407ddfcb187a58ec6fc43a068b6021",
+          "kept": false
+        },
+        {
+          "distance": 0.733427,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.745797,
+          "example_id": "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devosx-clipboard-02"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.199859,
+          "example_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+          "kept": true
+        },
+        {
+          "distance": 0.29887,
+          "example_id": "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069",
+          "kept": true
+        },
+        {
+          "distance": 0.690843,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": false
+        },
+        {
+          "distance": 0.692238,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.714339,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.783543,
+          "example_id": "example-df0e494352d457d0a19d99c8dd070346d43f2d17261a71c20a10620459028d62",
+          "kept": false
+        },
+        {
+          "distance": 0.786507,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.78892,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devosx-clipboard-03"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.202232,
+          "example_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+          "kept": true
+        },
+        {
+          "distance": 0.267289,
+          "example_id": "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069",
+          "kept": true
+        },
+        {
+          "distance": 0.577036,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.645824,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": false
+        },
+        {
+          "distance": 0.692399,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": false
+        },
+        {
+          "distance": 0.700534,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.721998,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.737376,
+          "example_id": "example-13c8699b86f8979b78ad259f5ebcf17efb41517059d9ae59f9d4230b6b80b0e0",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devosx-clipboard-04"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.201724,
+          "example_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+          "kept": true
+        },
+        {
+          "distance": 0.256113,
+          "example_id": "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069",
+          "kept": true
+        },
+        {
+          "distance": 0.638778,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.654534,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.692405,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.712587,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.725179,
+          "example_id": "example-218cad5dd34381708a69491c6060470eb2bf4d6ce10b57fd710a0122bedcca01",
+          "kept": false
+        },
+        {
+          "distance": 0.730681,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 2,
+      "displayed_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devosx-clipboard-05"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.755901,
+          "example_id": "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167",
+          "kept": false
+        },
+        {
+          "distance": 0.762717,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.781697,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.786289,
+          "example_id": "example-453abcea6ea8baded3debf3c7dc4ded44ee04405706cd1c95f4eb11faaab182c",
+          "kept": false
+        },
+        {
+          "distance": 0.788215,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.873172,
+          "example_id": "example-37cdfdfe2d6c22084e82141bb12c6bbf98f22ec017b221c38c1939fa7bd5b201",
+          "kept": false
+        },
+        {
+          "distance": 0.891277,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.909111,
+          "example_id": "example-5d09c75a518514e31f768a34add321aa8ffd2802819fce2b3c674266bbe18640",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-a-01"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.642655,
+          "example_id": "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167",
+          "kept": false
+        },
+        {
+          "distance": 0.680308,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.739801,
+          "example_id": "example-453abcea6ea8baded3debf3c7dc4ded44ee04405706cd1c95f4eb11faaab182c",
+          "kept": false
+        },
+        {
+          "distance": 0.7782,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.797735,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.836084,
+          "example_id": "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069",
+          "kept": false
+        },
+        {
+          "distance": 0.871823,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.877249,
+          "example_id": "example-37cdfdfe2d6c22084e82141bb12c6bbf98f22ec017b221c38c1939fa7bd5b201",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-a-02"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.693798,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.72446,
+          "example_id": "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167",
+          "kept": false
+        },
+        {
+          "distance": 0.792798,
+          "example_id": "example-376799c4c44eb53e83e7abc95787b370bf11b82778628c98b5a369c61702957e",
+          "kept": false
+        },
+        {
+          "distance": 0.802293,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.808328,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.874431,
+          "example_id": "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069",
+          "kept": false
+        },
+        {
+          "distance": 0.888113,
+          "example_id": "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b",
+          "kept": false
+        },
+        {
+          "distance": 0.911364,
+          "example_id": "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-a-03"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.72063,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.732675,
+          "example_id": "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167",
+          "kept": false
+        },
+        {
+          "distance": 0.743558,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.754939,
+          "example_id": "example-453abcea6ea8baded3debf3c7dc4ded44ee04405706cd1c95f4eb11faaab182c",
+          "kept": false
+        },
+        {
+          "distance": 0.792895,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.848622,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.860516,
+          "example_id": "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b",
+          "kept": false
+        },
+        {
+          "distance": 0.869504,
+          "example_id": "example-5d09c75a518514e31f768a34add321aa8ffd2802819fce2b3c674266bbe18640",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-a-04"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.709865,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.728498,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        },
+        {
+          "distance": 0.737515,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.739852,
+          "example_id": "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167",
+          "kept": false
+        },
+        {
+          "distance": 0.769164,
+          "example_id": "example-453abcea6ea8baded3debf3c7dc4ded44ee04405706cd1c95f4eb11faaab182c",
+          "kept": false
+        },
+        {
+          "distance": 0.790601,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.802166,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": false
+        },
+        {
+          "distance": 0.837036,
+          "example_id": "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-a-05"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.6836,
+          "example_id": "example-f02a9932c497bb41ff8bbddf727ddfc5d5407ddfcb187a58ec6fc43a068b6021",
+          "kept": false
+        },
+        {
+          "distance": 0.807455,
+          "example_id": "example-25c6586273d26bc16764aa1e96f645b310b059f28268a939024d9e26ee748892",
+          "kept": false
+        },
+        {
+          "distance": 0.855933,
+          "example_id": "example-de64dda539bedf85793c294db045de42f64d51d1d8eb5caac45dd1d87aab70bf",
+          "kept": false
+        },
+        {
+          "distance": 0.892814,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.894767,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.91765,
+          "example_id": "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f",
+          "kept": false
+        },
+        {
+          "distance": 0.92357,
+          "example_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+          "kept": false
+        },
+        {
+          "distance": 0.93036,
+          "example_id": "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-b-01"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.726861,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.738857,
+          "example_id": "example-25c6586273d26bc16764aa1e96f645b310b059f28268a939024d9e26ee748892",
+          "kept": false
+        },
+        {
+          "distance": 0.894756,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.91208,
+          "example_id": "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5",
+          "kept": false
+        },
+        {
+          "distance": 0.915153,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.920494,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.94804,
+          "example_id": "example-376799c4c44eb53e83e7abc95787b370bf11b82778628c98b5a369c61702957e",
+          "kept": false
+        },
+        {
+          "distance": 0.950631,
+          "example_id": "example-de64dda539bedf85793c294db045de42f64d51d1d8eb5caac45dd1d87aab70bf",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-b-02"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.674942,
+          "example_id": "example-25c6586273d26bc16764aa1e96f645b310b059f28268a939024d9e26ee748892",
+          "kept": false
+        },
+        {
+          "distance": 0.736166,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.81766,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        },
+        {
+          "distance": 0.834808,
+          "example_id": "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651",
+          "kept": false
+        },
+        {
+          "distance": 0.837279,
+          "example_id": "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43",
+          "kept": false
+        },
+        {
+          "distance": 0.876683,
+          "example_id": "example-376799c4c44eb53e83e7abc95787b370bf11b82778628c98b5a369c61702957e",
+          "kept": false
+        },
+        {
+          "distance": 0.897539,
+          "example_id": "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f",
+          "kept": false
+        },
+        {
+          "distance": 0.918939,
+          "example_id": "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-b-03"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.799186,
+          "example_id": "example-f02a9932c497bb41ff8bbddf727ddfc5d5407ddfcb187a58ec6fc43a068b6021",
+          "kept": false
+        },
+        {
+          "distance": 0.874457,
+          "example_id": "example-25c6586273d26bc16764aa1e96f645b310b059f28268a939024d9e26ee748892",
+          "kept": false
+        },
+        {
+          "distance": 0.900657,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.930346,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.939528,
+          "example_id": "example-de64dda539bedf85793c294db045de42f64d51d1d8eb5caac45dd1d87aab70bf",
+          "kept": false
+        },
+        {
+          "distance": 0.965667,
+          "example_id": "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5",
+          "kept": false
+        },
+        {
+          "distance": 0.968355,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.983217,
+          "example_id": "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-b-04"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.730842,
+          "example_id": "example-25c6586273d26bc16764aa1e96f645b310b059f28268a939024d9e26ee748892",
+          "kept": false
+        },
+        {
+          "distance": 0.756067,
+          "example_id": "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0",
+          "kept": false
+        },
+        {
+          "distance": 0.866477,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.874681,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.897381,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": false
+        },
+        {
+          "distance": 0.900898,
+          "example_id": "example-376799c4c44eb53e83e7abc95787b370bf11b82778628c98b5a369c61702957e",
+          "kept": false
+        },
+        {
+          "distance": 0.912354,
+          "example_id": "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+          "kept": false
+        },
+        {
+          "distance": 0.937994,
+          "example_id": "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devosx-unsupported-b-05"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.217906,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.217906,
+          "example_id": "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "kept": true
+        },
+        {
+          "distance": 0.47365,
+          "example_id": "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26",
+          "kept": true
+        },
+        {
+          "distance": 0.699441,
+          "example_id": "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6",
+          "kept": false
+        },
+        {
+          "distance": 0.716613,
+          "example_id": "example-dd279d068c60ce4a0d37f9fc8e088ad12a84f4846efffc4142794bd184a3bdb1",
+          "kept": false
+        },
+        {
+          "distance": 0.750886,
+          "example_id": "example-8ce4049b12e6fbdd8ddf55f64fe04680b35071710b29124b53a08b088e26429d",
+          "kept": false
+        },
+        {
+          "distance": 0.856318,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.888678,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 3,
+      "displayed_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": true,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devwindows-file-copy-01"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-e82618df8cd0c15eaca3f9c921a14388eff84312d4abb315fd53b0be6da215b9"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.216248,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.216248,
+          "example_id": "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "kept": true
+        },
+        {
+          "distance": 0.438045,
+          "example_id": "example-e82618df8cd0c15eaca3f9c921a14388eff84312d4abb315fd53b0be6da215b9",
+          "kept": true
+        },
+        {
+          "distance": 0.693778,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.707737,
+          "example_id": "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6",
+          "kept": false
+        },
+        {
+          "distance": 0.715821,
+          "example_id": "example-dd279d068c60ce4a0d37f9fc8e088ad12a84f4846efffc4142794bd184a3bdb1",
+          "kept": false
+        },
+        {
+          "distance": 0.732208,
+          "example_id": "example-8ce4049b12e6fbdd8ddf55f64fe04680b35071710b29124b53a08b088e26429d",
+          "kept": false
+        },
+        {
+          "distance": 0.795738,
+          "example_id": "example-a057373ff643fe0023f9f7455b1119a1785629e82599e16c31fb91557733a8cb",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 3,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devwindows-file-copy-02"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-e82618df8cd0c15eaca3f9c921a14388eff84312d4abb315fd53b0be6da215b9"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.207118,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.207118,
+          "example_id": "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "kept": true
+        },
+        {
+          "distance": 0.45486,
+          "example_id": "example-e82618df8cd0c15eaca3f9c921a14388eff84312d4abb315fd53b0be6da215b9",
+          "kept": true
+        },
+        {
+          "distance": 0.681334,
+          "example_id": "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6",
+          "kept": false
+        },
+        {
+          "distance": 0.719681,
+          "example_id": "example-dd279d068c60ce4a0d37f9fc8e088ad12a84f4846efffc4142794bd184a3bdb1",
+          "kept": false
+        },
+        {
+          "distance": 0.734859,
+          "example_id": "example-8ce4049b12e6fbdd8ddf55f64fe04680b35071710b29124b53a08b088e26429d",
+          "kept": false
+        },
+        {
+          "distance": 0.814676,
+          "example_id": "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de",
+          "kept": false
+        },
+        {
+          "distance": 0.845382,
+          "example_id": "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 3,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devwindows-file-copy-03"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.227824,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.227824,
+          "example_id": "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "kept": true
+        },
+        {
+          "distance": 0.498432,
+          "example_id": "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26",
+          "kept": true
+        },
+        {
+          "distance": 0.7211,
+          "example_id": "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6",
+          "kept": false
+        },
+        {
+          "distance": 0.748214,
+          "example_id": "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "kept": false
+        },
+        {
+          "distance": 0.808017,
+          "example_id": "example-8ce4049b12e6fbdd8ddf55f64fe04680b35071710b29124b53a08b088e26429d",
+          "kept": false
+        },
+        {
+          "distance": 0.828303,
+          "example_id": "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24",
+          "kept": false
+        },
+        {
+          "distance": 0.895736,
+          "example_id": "example-a057373ff643fe0023f9f7455b1119a1785629e82599e16c31fb91557733a8cb",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 3,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devwindows-file-copy-04"
+    },
+    {
+      "answered": true,
+      "candidate_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "candidate_recall": true,
+      "dense_candidates": [
+        {
+          "distance": 0.234233,
+          "example_id": "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+          "kept": true
+        },
+        {
+          "distance": 0.234233,
+          "example_id": "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+          "kept": true
+        },
+        {
+          "distance": 0.454977,
+          "example_id": "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26",
+          "kept": true
+        },
+        {
+          "distance": 0.714446,
+          "example_id": "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6",
+          "kept": false
+        },
+        {
+          "distance": 0.736859,
+          "example_id": "example-dd279d068c60ce4a0d37f9fc8e088ad12a84f4846efffc4142794bd184a3bdb1",
+          "kept": false
+        },
+        {
+          "distance": 0.782613,
+          "example_id": "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85",
+          "kept": false
+        },
+        {
+          "distance": 0.797373,
+          "example_id": "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de",
+          "kept": false
+        },
+        {
+          "distance": 0.893976,
+          "example_id": "example-ce8d1ab16002f7cdda6ede7ad1a754f9e442cd1216b97d4346fed35e325aa730",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 3,
+      "displayed_example_ids": [
+        "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b",
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b"
+      ],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": true,
+      "task_id": "dev-v2r1-devwindows-file-copy-05"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.731271,
+          "example_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+          "kept": false
+        },
+        {
+          "distance": 0.746371,
+          "example_id": "example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322",
+          "kept": false
+        },
+        {
+          "distance": 0.746629,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.758872,
+          "example_id": "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351",
+          "kept": false
+        },
+        {
+          "distance": 0.783394,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.78686,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        },
+        {
+          "distance": 0.790635,
+          "example_id": "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "kept": false
+        },
+        {
+          "distance": 0.901812,
+          "example_id": "example-40787df1cf3b3fb9e70fd2f9272c026f8a24c6b0d2207b37cc37c449a674cf7a",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-a-01"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.787421,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.798122,
+          "example_id": "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351",
+          "kept": false
+        },
+        {
+          "distance": 0.815935,
+          "example_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+          "kept": false
+        },
+        {
+          "distance": 0.828755,
+          "example_id": "example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322",
+          "kept": false
+        },
+        {
+          "distance": 0.84633,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.850724,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        },
+        {
+          "distance": 0.854625,
+          "example_id": "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3",
+          "kept": false
+        },
+        {
+          "distance": 0.869538,
+          "example_id": "example-7053f2f0a3561ee0fa6c9251568d68be19a49dd6a3accf714ce4b102f716eaa9",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-a-02"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.754541,
+          "example_id": "example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322",
+          "kept": false
+        },
+        {
+          "distance": 0.80598,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": false
+        },
+        {
+          "distance": 0.820638,
+          "example_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+          "kept": false
+        },
+        {
+          "distance": 0.852846,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        },
+        {
+          "distance": 0.853069,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.859536,
+          "example_id": "example-dd279d068c60ce4a0d37f9fc8e088ad12a84f4846efffc4142794bd184a3bdb1",
+          "kept": false
+        },
+        {
+          "distance": 0.860322,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.917163,
+          "example_id": "example-7053f2f0a3561ee0fa6c9251568d68be19a49dd6a3accf714ce4b102f716eaa9",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-a-03"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.671385,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.73866,
+          "example_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+          "kept": false
+        },
+        {
+          "distance": 0.751108,
+          "example_id": "example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322",
+          "kept": false
+        },
+        {
+          "distance": 0.753669,
+          "example_id": "example-2e1ea6fc34202b3bef21fe52bfd7839f721d66f274dc0690210f2e4503a95351",
+          "kept": false
+        },
+        {
+          "distance": 0.7977,
+          "example_id": "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d",
+          "kept": false
+        },
+        {
+          "distance": 0.826009,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.839414,
+          "example_id": "example-6650aada822cf387a5574f42e02bc3b42ab84e2c4063c7a0c6366292bbb83d4b",
+          "kept": false
+        },
+        {
+          "distance": 0.933792,
+          "example_id": "example-7053f2f0a3561ee0fa6c9251568d68be19a49dd6a3accf714ce4b102f716eaa9",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-a-04"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.722152,
+          "example_id": "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5",
+          "kept": false
+        },
+        {
+          "distance": 0.747439,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.751604,
+          "example_id": "example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322",
+          "kept": false
+        },
+        {
+          "distance": 0.784623,
+          "example_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+          "kept": false
+        },
+        {
+          "distance": 0.792266,
+          "example_id": "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d",
+          "kept": false
+        },
+        {
+          "distance": 0.838926,
+          "example_id": "example-6650aada822cf387a5574f42e02bc3b42ab84e2c4063c7a0c6366292bbb83d4b",
+          "kept": false
+        },
+        {
+          "distance": 0.841212,
+          "example_id": "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39",
+          "kept": false
+        },
+        {
+          "distance": 0.95993,
+          "example_id": "example-7053f2f0a3561ee0fa6c9251568d68be19a49dd6a3accf714ce4b102f716eaa9",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-a-05"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.786825,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        },
+        {
+          "distance": 0.836827,
+          "example_id": "example-df0e494352d457d0a19d99c8dd070346d43f2d17261a71c20a10620459028d62",
+          "kept": false
+        },
+        {
+          "distance": 0.849022,
+          "example_id": "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "kept": false
+        },
+        {
+          "distance": 0.876372,
+          "example_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+          "kept": false
+        },
+        {
+          "distance": 0.881132,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.881601,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.886737,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.902175,
+          "example_id": "example-ef87c19e056c3915d0d682e5076e58ba59f94e405517ac83af9f4d9e5df5cfc0",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-b-01"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.699915,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.746913,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        },
+        {
+          "distance": 0.762914,
+          "example_id": "example-82cdd72543d3433fc292d57f20f47ade70befaa7497253651fd3ec01c34d1557",
+          "kept": false
+        },
+        {
+          "distance": 0.768927,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.770247,
+          "example_id": "example-db21481082390320e9d072617426d79b0f016a3678d57cce524c99ae93822703",
+          "kept": false
+        },
+        {
+          "distance": 0.775178,
+          "example_id": "example-7e0ef77624b6c4b3342b4759f64f80ebd361ef7c9b54c3068baa7051399c9e6e",
+          "kept": false
+        },
+        {
+          "distance": 0.803386,
+          "example_id": "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6",
+          "kept": false
+        },
+        {
+          "distance": 0.823119,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-b-02"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.784645,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        },
+        {
+          "distance": 0.814239,
+          "example_id": "example-df0e494352d457d0a19d99c8dd070346d43f2d17261a71c20a10620459028d62",
+          "kept": false
+        },
+        {
+          "distance": 0.851186,
+          "example_id": "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078",
+          "kept": false
+        },
+        {
+          "distance": 0.872226,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.872972,
+          "example_id": "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3",
+          "kept": false
+        },
+        {
+          "distance": 0.874747,
+          "example_id": "example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322",
+          "kept": false
+        },
+        {
+          "distance": 0.885018,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.904262,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-b-03"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.620527,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        },
+        {
+          "distance": 0.756581,
+          "example_id": "example-0bf2884bddad6e8bb2a68899d4e1487c2af856b4736e9922ab104889df1aa408",
+          "kept": false
+        },
+        {
+          "distance": 0.821886,
+          "example_id": "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6",
+          "kept": false
+        },
+        {
+          "distance": 0.868654,
+          "example_id": "example-ef87c19e056c3915d0d682e5076e58ba59f94e405517ac83af9f4d9e5df5cfc0",
+          "kept": false
+        },
+        {
+          "distance": 0.869131,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.872971,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.874557,
+          "example_id": "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842",
+          "kept": false
+        },
+        {
+          "distance": 0.884278,
+          "example_id": "example-685b2b026bc0abfb1dd0bc6a3b5e3c4d2240c0211662829dfb3c59d6b264e485",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-b-04"
+    },
+    {
+      "answered": false,
+      "candidate_example_ids": [],
+      "candidate_recall": null,
+      "dense_candidates": [
+        {
+          "distance": 0.738668,
+          "example_id": "example-d24b40047539cd36881d5704dbb39208b12c23f83ba2351ed2524321bd4aa357",
+          "kept": false
+        },
+        {
+          "distance": 0.825751,
+          "example_id": "example-0bf2884bddad6e8bb2a68899d4e1487c2af856b4736e9922ab104889df1aa408",
+          "kept": false
+        },
+        {
+          "distance": 0.842259,
+          "example_id": "example-df0e494352d457d0a19d99c8dd070346d43f2d17261a71c20a10620459028d62",
+          "kept": false
+        },
+        {
+          "distance": 0.864264,
+          "example_id": "example-ae4f910d5cfd59f296fca45910634363f67917aa7c7544710e7cee4ebec74cc6",
+          "kept": false
+        },
+        {
+          "distance": 0.870014,
+          "example_id": "example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322",
+          "kept": false
+        },
+        {
+          "distance": 0.8871,
+          "example_id": "example-fa32fab8bfbd5ce1162fa4c5deb2e4f974663e828dfb719bbda9e0498e688950",
+          "kept": false
+        },
+        {
+          "distance": 0.892903,
+          "example_id": "example-347ce66a0c235ac4af6eb14f94c5bd5bc61b1fbb3603460f2c2537bcb0c386cc",
+          "kept": false
+        },
+        {
+          "distance": 0.899942,
+          "example_id": "example-78126bf8914de541904d6bdad5a11e75e704ea53d4cd96c02196623b5dcbebfd",
+          "kept": false
+        }
+      ],
+      "dense_candidates_kept": 0,
+      "displayed_example_ids": [],
+      "false_answer": false,
+      "incorrect_answer": false,
+      "success_at_1": false,
+      "success_at_3": false,
+      "task_id": "dev-v2r1-devwindows-unsupported-b-05"
+    }
+  ]
+}
