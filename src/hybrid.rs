@@ -1,4 +1,4 @@
-use crate::bundle::{BundleManifest, validate_matching_bundle};
+use crate::bundle::{BundleManifest, load_validated_manifest};
 use crate::dense::{DenseCandidate, DenseIndex, DenseQueryMode};
 use crate::search::TargetOs;
 use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_platform};
@@ -96,12 +96,12 @@ impl HybridIndex {
                 bundle.display()
             )
         })?;
-        let manifest = validate_matching_bundle(&root)?;
+        let manifest = load_validated_manifest(&root)?;
         validate_frozen_bundle(&manifest)?;
 
         let artifact = root.join(&manifest.corpus.path);
         let model_cache = root.join("model-cache");
-        let dense = DenseIndex::open(&artifact, &model_cache)?;
+        let dense = DenseIndex::open_from_bundle(&artifact, &model_cache)?;
         Ok(Self { artifact, dense })
     }
 

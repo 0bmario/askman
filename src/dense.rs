@@ -321,6 +321,19 @@ impl DenseIndex {
     pub(crate) fn open(artifact: &Path, model_cache: &Path) -> Result<Self> {
         register_sqlite_vec();
         let assets = validate_model_assets(model_cache)?;
+        Self::open_index(artifact, assets)
+    }
+
+    /// Open a dense index whose model assets were already verified by the
+    /// matching-bundle validation. Digests come from the pinned constants and
+    /// no per-file hashing happens on this path.
+    pub(crate) fn open_from_bundle(artifact: &Path, model_cache: &Path) -> Result<Self> {
+        register_sqlite_vec();
+        let assets = pinned_model_assets(model_cache)?;
+        Self::open_index(artifact, assets)
+    }
+
+    fn open_index(artifact: &Path, assets: ModelAssets) -> Result<Self> {
         let connection = Connection::open(artifact)
             .with_context(|| format!("failed to open dense artifact {}", artifact.display()))?;
         validate_artifact(&connection)?;
@@ -794,6 +807,31 @@ fn embedding_blob(embedding: &[f32]) -> Vec<u8> {
         .iter()
         .flat_map(|value| value.to_le_bytes())
         .collect()
+}
+
+/// Digests come from the pinned constants and the matching bundle's own
+/// validation; no per-file hashing happens on this path.
+fn pinned_model_assets(model_cache: &Path) -> Result<ModelAssets> {
+    let model_root = model_cache.join(MODEL_CACHE_FOLDER);
+    let reference_path = model_root.join("refs/main");
+    let reference = fs::read_to_string(&reference_path).map_err(|error| {
+        anyhow!(
+            "dense model assets missing/incompatible: cannot read pinned reference {} ({error})",
+            reference_path.display()
+        )
+    })?;
+    if reference.trim() != MODEL_REVISION {
+        bail!(
+            "dense model assets missing/incompatible: expected revision {MODEL_REVISION}, got {}",
+            reference.trim()
+        );
+    }
+    let snapshot = model_root.join("snapshots").join(MODEL_REVISION);
+    let hashes = MODEL_FILES
+        .iter()
+        .map(|(file, expected)| (file.to_string(), expected.to_string()))
+        .collect();
+    Ok(ModelAssets { snapshot, hashes })
 }
 
 fn validate_model_assets(cache: &Path) -> Result<ModelAssets> {
