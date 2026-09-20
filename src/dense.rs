@@ -2,10 +2,7 @@ use crate::tldr_subset::{
     artifact_metadata, process_peak_memory_bytes, selected_page_ids, validate_artifact,
 };
 use anyhow::{Context, Result, anyhow, bail};
-use fastembed::{
-    InitOptionsUserDefined, Pooling, QuantizationMode, TextEmbedding, TokenizerFiles,
-    UserDefinedEmbeddingModel,
-};
+use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 use rusqlite::{Connection, params};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -155,6 +152,7 @@ struct DenseRow {
 
 #[derive(Debug)]
 struct ModelAssets {
+    cache_dir: PathBuf,
     snapshot: PathBuf,
     hashes: BTreeMap<String, String>,
 }
@@ -831,7 +829,11 @@ fn pinned_model_assets(model_cache: &Path) -> Result<ModelAssets> {
         .iter()
         .map(|(file, expected)| (file.to_string(), expected.to_string()))
         .collect();
-    Ok(ModelAssets { snapshot, hashes })
+    Ok(ModelAssets {
+        cache_dir: model_cache.to_path_buf(),
+        snapshot,
+        hashes,
+    })
 }
 
 fn validate_model_assets(cache: &Path) -> Result<ModelAssets> {
@@ -864,7 +866,11 @@ fn validate_model_assets(cache: &Path) -> Result<ModelAssets> {
         }
         hashes.insert(file.to_string(), actual_hash);
     }
-    Ok(ModelAssets { snapshot, hashes })
+    Ok(ModelAssets {
+        cache_dir: cache.to_path_buf(),
+        snapshot,
+        hashes,
+    })
 }
 
 pub fn validate_model_cache(cache: &Path) -> Result<()> {
@@ -883,20 +889,16 @@ pub fn validate_dense_artifact_file(artifact: &Path, model_cache: &Path) -> Resu
 }
 
 fn load_embedder(assets: &ModelAssets) -> Result<TextEmbedding> {
-    let model = UserDefinedEmbeddingModel::new(
-        fs::read(assets.snapshot.join("model.onnx"))?,
-        TokenizerFiles {
-            tokenizer_file: fs::read(assets.snapshot.join("tokenizer.json"))?,
-            config_file: fs::read(assets.snapshot.join("config.json"))?,
-            special_tokens_map_file: fs::read(assets.snapshot.join("special_tokens_map.json"))?,
-            tokenizer_config_file: fs::read(assets.snapshot.join("tokenizer_config.json"))?,
-        },
-    )
-    .with_pooling(Pooling::Mean)
-    .with_quantization(QuantizationMode::None);
-    TextEmbedding::try_new_from_user_defined(
-        model,
-        InitOptionsUserDefined::new().with_max_length(MODEL_MAX_LENGTH),
+    // Use fastembed's named-model path against the bundle's model cache.
+    // This matches main's embedding initialization and memory profile; the
+    // bundle validation has already pinned the files' content and revision,
+    // and fastembed resolves exactly the revision its AllMiniLML6V2 entry
+    // pins (the revision the bundle was built from).
+    TextEmbedding::try_new(
+        InitOptions::new(EmbeddingModel::AllMiniLML6V2)
+            .with_cache_dir(assets.cache_dir.clone())
+            .with_show_download_progress(false)
+            .with_max_length(MODEL_MAX_LENGTH),
     )
     .context("failed to initialize pinned MiniLM assets offline")
 }
