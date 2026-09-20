@@ -1330,7 +1330,10 @@ impl BundleStore {
     }
 
     fn load_bundle(&self, bundle_id: &str) -> Result<(PathBuf, BundleManifest)> {
-        self.load_bundle_with(bundle_id, validate_matching_bundle)
+        // Per-query read path: reuse the stat-based validation stamp instead
+        // of re-hashing the pinned model assets on every invocation. Lifecycle
+        // writes (update/rollback) keep the deep validator.
+        self.load_bundle_with(bundle_id, load_validated_manifest)
     }
 
     fn load_bundle_with<F>(
