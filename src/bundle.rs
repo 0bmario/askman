@@ -12,7 +12,7 @@ use reqwest::blocking::Client;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
@@ -293,12 +293,9 @@ fn build_temporary_bundle(
 }
 
 /// Validate every component and compatibility identity in a bundle directory.
-pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
-    let root = fs::canonicalize(bundle)
-        .with_context(|| format!("failed to resolve matching bundle {}", bundle.display()))?;
-    if !root.is_dir() {
-        bail!("matching bundle is not a directory: {}", bundle.display());
-    }
+/// All component and model files are re-hashed; callers that only need the
+/// manifest for read-only queries should prefer [`load_validated_manifest`].
+fn read_bundle_manifest(root: &Path) -> Result<BundleManifest> {
     let manifest_path = root.join(BUNDLE_MANIFEST);
     let manifest: BundleManifest =
         serde_json::from_slice(&fs::read(&manifest_path).with_context(|| {
@@ -306,6 +303,119 @@ pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
         })?)
         .context("failed to parse matching bundle manifest")?;
     validate_bundle_manifest(&manifest)?;
+    Ok(manifest)
+}
+
+const STAMP_SCHEMA_VERSION: u32 = 1;
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+struct StampFileStat {
+    size: u64,
+    mtime_nanos: i128,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+struct ValidationStamp {
+    schema_version: u32,
+    files: BTreeMap<String, StampFileStat>,
+}
+
+/// Per-file identity used by the validation stamp. Sizes and modification
+/// times are cheap to re-stat on every query; any mismatch falls back to a
+/// full deep validation, so a tampered or rolled-back bundle can never pass.
+fn stamp_path(root: &Path) -> PathBuf {
+    let name = root
+        .file_name()
+        .map(|name| name.to_string_lossy().to_string())
+        .unwrap_or_else(|| "matching-bundle".to_string());
+    // The stamp lives next to the immutable bundle directory, never inside
+    // it: writing into the bundle would change its tree digest.
+    root.parent()
+        .unwrap_or(root)
+        .join(format!(".{name}.stamp.json"))
+}
+
+fn bundle_file_stats(root: &Path) -> Result<BTreeMap<String, StampFileStat>> {
+    let mut files = HashSet::new();
+    collect_bundle_files(root, root, &mut files)?;
+    let mut stats = BTreeMap::new();
+    for relative in files {
+        let metadata = fs::metadata(root.join(&relative))?;
+        stats.insert(
+            relative,
+            StampFileStat {
+                size: metadata.len(),
+                mtime_nanos: metadata
+                    .modified()?
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map(|duration| duration.as_nanos() as i128)
+                    .unwrap_or_default(),
+            },
+        );
+    }
+    Ok(stats)
+}
+
+fn read_validation_stamp(path: &Path) -> Option<ValidationStamp> {
+    let raw = fs::read(path).ok()?;
+    let stamp = serde_json::from_slice::<ValidationStamp>(&raw).ok()?;
+    (stamp.schema_version == STAMP_SCHEMA_VERSION).then_some(stamp)
+}
+
+fn write_validation_stamp(path: &Path, stamp: &ValidationStamp) {
+    let temporary = path.with_extension(format!("{}.tmp", std::process::id()));
+    let payload = match serde_json::to_vec_pretty(stamp) {
+        Ok(payload) => payload,
+        Err(_) => return,
+    };
+    if fs::write(&temporary, payload).is_err() {
+        return;
+    }
+    // A failed rename simply means the next query revalidates deeply; that
+    // direction is always safe.
+    let _ = fs::rename(&temporary, path);
+}
+
+/// Load a matching bundle manifest, reusing a stat-based validation stamp so
+/// a one-shot CLI does not re-hash the pinned model assets on every query.
+/// The stamp is keyed to per-file sizes and modification times; any mismatch
+/// triggers the full deep validation, so the fail-closed contract of
+/// ADR-0004 is unchanged.
+pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
+    let root = fs::canonicalize(bundle)
+        .with_context(|| format!("failed to resolve matching bundle {}", bundle.display()))?;
+    if !root.is_dir() {
+        bail!("matching bundle is not a directory: {}", bundle.display());
+    }
+    let manifest = read_bundle_manifest(&root)?;
+    let stats = bundle_file_stats(&root)?;
+    let stamp_path = stamp_path(&root);
+    if read_validation_stamp(&stamp_path)
+        .is_some_and(|stamp| stamp.files == stats)
+    {
+        // Light path: content identity is pinned by the stamp stats; the
+        // inventory walk re-checks that exactly the expected files exist.
+        validate_bundle_file_inventory(&root, &manifest)?;
+        return Ok(manifest);
+    }
+    let manifest = validate_matching_bundle(bundle)?;
+    write_validation_stamp(
+        &stamp_path,
+        &ValidationStamp {
+            schema_version: STAMP_SCHEMA_VERSION,
+            files: stats,
+        },
+    );
+    Ok(manifest)
+}
+
+pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
+    let root = fs::canonicalize(bundle)
+        .with_context(|| format!("failed to resolve matching bundle {}", bundle.display()))?;
+    if !root.is_dir() {
+        bail!("matching bundle is not a directory: {}", bundle.display());
+    }
+    let manifest = read_bundle_manifest(&root)?;
 
     let database = validate_bundle_component_file(
         &root,
@@ -1559,6 +1669,69 @@ fn atomic_replace(source: &Path, destination: &Path) -> std::io::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn stamp_lives_outside_the_bundle_directory() {
+        let directory = tempfile::tempdir().unwrap();
+        let bundle = directory.path().join("matching-bundle");
+        fs::create_dir(&bundle).unwrap();
+        let root = fs::canonicalize(&bundle).unwrap();
+        let stamp = stamp_path(&root);
+        assert_ne!(stamp.parent().unwrap(), root);
+        assert!(stamp.starts_with(root.parent().unwrap()));
+    }
+
+    #[test]
+    fn stamp_stats_detect_any_file_change() {
+        let directory = tempfile::tempdir().unwrap();
+        let bundle = directory.path().join("matching-bundle");
+        fs::create_dir(&bundle).unwrap();
+        fs::write(bundle.join("asset.bin"), b"payload").unwrap();
+        let root = fs::canonicalize(&bundle).unwrap();
+
+        let stats = bundle_file_stats(&root).unwrap();
+        assert_eq!(stats.len(), 1);
+        let stamp = ValidationStamp {
+            schema_version: STAMP_SCHEMA_VERSION,
+            files: stats
+                .iter()
+                .map(|(path, stat)| {
+                    (
+                        path.clone(),
+                        StampFileStat {
+                            size: stat.size,
+                            mtime_nanos: stat.mtime_nanos,
+                        },
+                    )
+                })
+                .collect(),
+        };
+
+        // Unchanged tree: the stamp matches.
+        assert_eq!(bundle_file_stats(&root).unwrap(), stats);
+
+        // Any content change (different size here) invalidates the stamp.
+        fs::write(bundle.join("asset.bin"), b"payload!").unwrap();
+        let changed = bundle_file_stats(&root).unwrap();
+        assert_ne!(changed, stats);
+        assert_ne!(changed.get("asset.bin"), stats.get("asset.bin"));
+        let _ = stamp;
+    }
+
+    #[test]
+    fn stale_or_corrupt_stamps_are_ignored() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join(".stamp.json");
+        fs::write(&path, b"{not json").unwrap();
+        assert!(read_validation_stamp(&path).is_none());
+
+        let stamp = ValidationStamp {
+            schema_version: STAMP_SCHEMA_VERSION + 1,
+            files: BTreeMap::new(),
+        };
+        fs::write(&path, serde_json::to_vec(&stamp).unwrap()).unwrap();
+        assert!(read_validation_stamp(&path).is_none());
+    }
 
     fn test_manifest(parser_version: &str) -> BundleManifest {
         let source = SourceMetadata {
