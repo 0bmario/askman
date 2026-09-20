@@ -39,7 +39,10 @@ internal candidate details are secondary or diagnostic. The gate uses a fixed
 seed and 10,000 paired bootstrap resamples over answerable tasks, requires a
 five-point overall `Success@1` gain, positive gains in two families, no safety
 regression, and no more than 20% warmed-query p95 or peak-memory regression.
-A 95% interval that contains zero produces an **inconclusive** recommendation.
+Per the ADR-0001 amendment (2026-09-20, pre-registered before holdout access),
+the bootstrap condition is a one-sided 95% lower bound above zero; the
+two-sided interval is still reported and a two-sided interval containing zero
+still produces an **inconclusive** recommendation.
 
 Release publication requires a checked-in machine-readable report at
 `docs/reproducibility/artifacts/release-gate.json` with
@@ -54,3 +57,35 @@ Fresh-process measurements cover every benchmark task. Warmed-query samples
 warm filesystem/model caches first, then run fresh CLI processes; this is the
 strongest measurement available without a persistent query-server mode in the
 shipping CLIs, and the limitation is recorded in the machine report.
+
+## Recorded run (2026-09-20): inconclusive
+
+The first complete paired run: `main` @ `8bd9fa2` versus `retrieval-v2` @
+`8b19997`, both splits, sandboxed query phase, zero execution failures.
+Machine-readable report:
+[`artifacts/release-gate-comparison-v1.json`](artifacts/release-gate-comparison-v1.json)
+(kept off the publication path above because the recommendation is not
+`better_askman`).
+
+| Metric | main | retrieval-v2 |
+| --- | ---: | ---: |
+| Success@1 (combined) | 37/60 | 45/60 (+13.3pp) |
+| Success@3 (combined) | 48/60 | 52/60 |
+| Incorrect answered | 10/58 | 4/56 |
+| False answers | 7/60 | 0/60 |
+| Warmed p95 / peak memory | 93.5 ms / 237.9 MB | 107.9 ms / 331.7 MB |
+
+- Bootstrap (seed `33031`): two-sided 95% **[+3.3pp, +25pp]** — excludes zero;
+  one-sided 95% lower bound +3.3pp — **passes** the amended condition.
+- Latency +15.4% — inside the 20% allowance.
+- **Family regression**: `holdout39-osx-speech-phrase` (main 5/5, candidate
+  4/5) — on `holdout-v2r1-holdoutosx-speech-04` ("use macOS say to speak
+  text") the candidate displayed the `say --output-file` variant at rank 1
+  with the weak-match cutoff retaining one result.
+- **Peak memory +39.4%**: the candidate's user-defined embedding path holds
+  the 90 MB `model.onnx` bytes in Rust memory while the ONNX session keeps
+  its own copy; main's named-model path does not.
+
+Recommendation: **inconclusive**. Both gaps are product work (behavior-variant
+ranking for same-command pages; releasing the duplicate model buffer after
+session creation) and are queued as retrieval/bundle follow-ups.
