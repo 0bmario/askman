@@ -166,6 +166,40 @@ def source_lockfile_digest(repo: Path, ref: str) -> str:
     return hashlib.sha256(completed.stdout).hexdigest()
 
 
+def bake_ort_rpath(binary: Path) -> str | None:
+    """Embed the pinned ONNX Runtime directory as LC_RPATH.
+
+    sandbox-exec strips DYLD_* from the child environment, so dynamically
+    linked query binaries must carry the runtime directory in their own
+    rpath (the same mechanism scripts/smoke_offline.sh uses).
+    """
+    if platform.system() != "Darwin":
+        return None
+    ort_lib_location = os.environ.get("ORT_LIB_LOCATION")
+    if not ort_lib_location:
+        raise RuntimeError(
+            "macOS query binaries are dynamically linked against ONNX Runtime; "
+            "set ORT_LIB_LOCATION so the gate can bake its rpath"
+        )
+    rpath = str(Path(ort_lib_location) / "lib")
+    listed = subprocess.run(
+        ["otool", "-l", str(binary)], check=False, capture_output=True, text=True
+    )
+    for line in listed.stdout.splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[0] == "path" and parts[1] == rpath:
+            return rpath
+    install = subprocess.run(
+        ["install_name_tool", "-add_rpath", rpath, str(binary)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if install.returncode != 0:
+        raise RuntimeError(f"could not bake rpath into {binary}:\n{install.stderr}")
+    return rpath
+
+
 def build_binary(repo: Path, ref: str, label: str, root: Path) -> dict[str, Any]:
     """Build one ref in a disposable worktree and retain only its binary."""
     worktree = root / f"{label}-source"
@@ -176,6 +210,16 @@ def build_binary(repo: Path, ref: str, label: str, root: Path) -> dict[str, Any]
     try:
         environment = os.environ.copy()
         environment["CARGO_TARGET_DIR"] = str(target)
+        # Force the dynamic-link build configuration: a statically linked ONNX
+        # Runtime aborts at teardown on this host, and the sandboxed query
+        # phase resolves the pinned runtime through the baked rpath below.
+        environment["ORT_PREFER_DYNAMIC_LINK"] = "1"
+        environment["LIBONNXRUNTIME_NO_PKG_CONFIG"] = "1"
+        if platform.system() == "Darwin" and not environment.get("ORT_LIB_LOCATION"):
+            raise RuntimeError(
+                "ORT_LIB_LOCATION must be set so macOS query binaries can link "
+                "and resolve the pinned ONNX Runtime"
+            )
         completed = subprocess.run(
             ["cargo", "build", "--locked", "--offline", "--release", "--bin", "askman"],
             cwd=worktree,
@@ -191,6 +235,7 @@ def build_binary(repo: Path, ref: str, label: str, root: Path) -> dict[str, Any]
             )
         if not binary.is_file():
             raise RuntimeError(f"{label} build did not produce {binary}")
+        rpath = bake_ort_rpath(binary)
         return {
             "ref": ref,
             "commit": git_revision(worktree, "HEAD"),
@@ -198,6 +243,7 @@ def build_binary(repo: Path, ref: str, label: str, root: Path) -> dict[str, Any]
             "binary_sha256": sha256_file(binary),
             "binary_bytes": binary.stat().st_size,
             "binary": str(binary),
+            "ort_rpath": rpath,
             "build_elapsed_ms": round((time.perf_counter() - started) * 1000, 3),
             "command": [
                 "cargo",
@@ -278,6 +324,18 @@ def text_output(value: str | bytes | None, default: str = "") -> str:
     return value
 
 
+def normalize_command_text(value: str) -> str:
+    # Both CLI generations render example commands with tldr `{{placeholder}}`
+    # braces stripped; compare commands in that normalized space.
+    return value.replace("{{", "").replace("}}", "").strip()
+
+
+def normalize_description_text(value: str) -> str:
+    index = value.find(" More information:")
+    cleaned = value[:index] if index != -1 else value
+    return cleaned.strip()
+
+
 def parse_displayed_results(stdout: str) -> list[dict[str, str]]:
     """Extract every user-visible example description and command pair."""
     lines = dedent(clean_output(stdout)).splitlines()
@@ -314,7 +372,11 @@ def example_index(bundle: Path) -> dict[tuple[str, str], tuple[str, ...]]:
         ).fetchall()
     index: dict[tuple[str, str], list[str]] = {}
     for example_id, description, command in rows:
-        index.setdefault((description.strip(), command.strip()), []).append(example_id)
+        key = (
+            normalize_description_text(description),
+            normalize_command_text(command),
+        )
+        index.setdefault(key, []).append(example_id)
     return {key: tuple(value) for key, value in index.items()}
 
 
@@ -650,12 +712,23 @@ def map_output_to_ids(
     ids: list[str | None] = []
     unmapped: list[dict[str, str]] = []
     for result in parse_displayed_results(stdout):
-        matches = index.get((result["description"], result["command"]), ())
-        if matches:
-            ids.append(matches[0])
-        else:
+        key = (
+            normalize_description_text(result["description"]),
+            normalize_command_text(result["command"]),
+        )
+        matches = index.get(key, ())
+        if not matches:
             ids.append(None)
             unmapped.append(result)
+        elif len(matches) > 1:
+            # The pinned corpus guarantees unambiguous example identities;
+            # refuse to guess rather than scoring an arbitrary match.
+            raise ValueError(
+                "ambiguous example identity in pinned corpus: "
+                f"{key[0]!r} / {key[1]!r} -> {matches}"
+            )
+        else:
+            ids.append(matches[0])
     return tuple(ids), tuple(unmapped)
 
 
@@ -868,6 +941,7 @@ def markdown_report(report: dict[str, Any]) -> str:
         "## Inputs and builds",
         "",
         f"- Generated: `{report['generated_at_utc']}`",
+        f"- Evidence scope: `{report['protocol']['evidence_scope']}`",
         f"- Query network policy: `{report['protocol']['query_network_policy']}`",
         f"- Reproduction: `{report['reproduction_command']}`",
         f"- Freeze: `{report['inputs']['freeze_id']}`",
@@ -954,7 +1028,7 @@ def markdown_report(report: dict[str, Any]) -> str:
             "| --- | ---: | ---: | ---: | ---: |",
         ]
     )
-    for split_name in ("dev", "holdout"):
+    for split_name in sorted(set(report["performance"]["main"]) - {"warmed_query"}):
         main_fresh = report["performance"]["main"][split_name]["fresh_process"]
         candidate_fresh = report["performance"]["candidate"][split_name]["fresh_process"]
         lines.append(
@@ -1047,6 +1121,12 @@ def parser() -> argparse.ArgumentParser:
         help="authorize reading the frozen holdout split",
     )
     result.add_argument(
+        "--dev-only",
+        action="store_true",
+        help="dry-run the gate on the development split only; the report is "
+        "verification evidence, not a release-gate decision",
+    )
+    result.add_argument(
         "--holdout-dataset",
         type=Path,
         default=ROOT / "tests/fixtures/evaluation/frozen-holdout-v2-expanded.json",
@@ -1063,7 +1143,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     bundle = args.bundle.resolve()
     main_data_dir = args.main_data_dir.resolve()
     freeze_manifest = args.freeze_manifest.resolve()
-    if not args.allow_holdout:
+    if args.dev_only and args.allow_holdout:
+        raise ValueError("--dev-only excludes the holdout split; drop --allow-holdout")
+    if not args.dev_only and not args.allow_holdout:
         raise ValueError("--allow-holdout is required for the release gate")
     validate_frozen_inputs(freeze_manifest, args.dev_dataset.resolve(), args.holdout_dataset.resolve())
     if not bundle.is_dir() or not (bundle / "manifest.json").is_file():
@@ -1079,8 +1161,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
     freeze = load_json(freeze_manifest)
     dev = load_json(args.dev_dataset)
-    holdout = load_json(args.holdout_dataset)
-    evaluator.validate_dataset_pair(dev, holdout)
+    if args.dev_only:
+        # --dev-only must not read holdout labels at all; split identity is
+        # asserted from the freeze manifest instead.
+        holdout = None
+    else:
+        holdout = load_json(args.holdout_dataset)
+        evaluator.validate_dataset_pair(dev, holdout)
     if freeze.get("benchmark_id") != "askman-evaluation-v2":
         raise ValueError("freeze manifest is not the frozen evaluation-v2 manifest")
     if freeze.get("splits", {}).get("dev", {}).get("sha256") != FROZEN_DEV_DATASET_SHA256:
@@ -1110,7 +1197,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         all_tasks: list[dict[str, Any]] = []
         performance: dict[str, Any] = {"main": {}, "candidate": {}}
         execution: dict[str, list[dict[str, Any]]] = {"main": [], "candidate": []}
-        for split_name, dataset in (("dev", dev), ("holdout", holdout)):
+        splits: tuple[tuple[str, dict[str, Any]], ...] = (
+            (("dev", dev),) if args.dev_only else (("dev", dev), ("holdout", holdout))
+        )
+        for split_name, dataset in splits:
             tasks = dataset["tasks"]
             main_outcomes, main_runs = run_tasks(
                 Path(builds["main"]["binary"]),
@@ -1198,6 +1288,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "main_ref": args.main_ref,
                 "candidate_ref": args.candidate_ref,
                 "holdout_access_authorized": args.allow_holdout,
+                "evidence_scope": "dev-only-verification" if args.dev_only else "release-gate",
             },
             "inputs": {
                 "benchmark_id": freeze["benchmark_id"],
@@ -1208,7 +1299,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "main_data_file_sha256": file_digests(main_data_dir),
                 "bundle_file_sha256": file_digests(bundle),
                 "dev_dataset_sha256": sha256_file(args.dev_dataset),
-                "holdout_dataset_sha256": sha256_file(args.holdout_dataset),
+                # In dev-only mode the holdout labels are never read; the
+                # frozen digest from the freeze manifest is recorded instead.
+                "holdout_dataset_sha256": freeze["splits"]["holdout"]["sha256"]
+                if args.dev_only
+                else sha256_file(args.holdout_dataset),
                 "scorer_sha256": sha256_file(ROOT / "scripts/evaluate_retrieval.py"),
             },
             "builds": builds,
