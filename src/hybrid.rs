@@ -49,15 +49,20 @@ pub struct CandidateOptions {
     pub verbose: bool,
 }
 
-/// Run the shipping hybrid retrieval path with the raw user query.
+/// Run the shipping hybrid retrieval path with guarded dense-query expansion.
+///
+/// The expansion was tuned on the frozen `evaluation-v2` development split and
+/// is bounded by the dense-distance guard before rank fusion plus the
+/// fail-closed weak-match cutoff; raw queries remain available through the
+/// dense-only diagnostics helper.
 pub fn run_candidate(options: CandidateOptions) -> Result<()> {
-    run_candidate_with_query_mode(options, DenseQueryMode::Raw)
+    run_candidate_with_query_mode(options, DenseQueryMode::ExpandedDev)
 }
 
-/// Run the development candidate with bounded dense-query expansion.
+/// Development alias: the dev-only candidate CLI runs the same guarded path.
 #[cfg(feature = "dev")]
 pub fn run_expanded_dev_candidate(options: CandidateOptions) -> Result<()> {
-    run_candidate_with_query_mode(options, DenseQueryMode::ExpandedDev)
+    run_candidate(options)
 }
 
 fn run_candidate_with_query_mode(
