@@ -390,9 +390,7 @@ pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
     let manifest = read_bundle_manifest(&root)?;
     let stats = bundle_file_stats(&root)?;
     let stamp_path = stamp_path(&root);
-    if read_validation_stamp(&stamp_path)
-        .is_some_and(|stamp| stamp.files == stats)
-    {
+    if read_validation_stamp(&stamp_path).is_some_and(|stamp| stamp.files == stats) {
         // Light path: content identity is pinned by the stamp stats; the
         // inventory walk re-checks that exactly the expected files exist.
         validate_bundle_file_inventory(&root, &manifest)?;

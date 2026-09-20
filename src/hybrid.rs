@@ -1,4 +1,4 @@
-use crate::bundle::{load_validated_manifest, BundleManifest};
+use crate::bundle::{BundleManifest, load_validated_manifest};
 use crate::dense::{DenseCandidate, DenseIndex, DenseQueryMode};
 use crate::search::TargetOs;
 use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_platform};
