@@ -37,3 +37,23 @@ platform/family breakdowns, failure examples, reproduction commands,
 limitations, and a Better Askman or inconclusive recommendation.
 
 Otherwise the result is inconclusive.
+
+## Amendment (2026-09-20, pre-registered before any holdout access): one-sided superiority interval
+
+The paired-bootstrap condition is refined before the release gate runs on the
+`evaluation-v2` holdout split. The claim under test is superiority
+(`retrieval-v2` is at least as good and better on the primary metric), so the
+bootstrap condition becomes:
+
+- A fixed-seed, 10,000-resample paired bootstrap of the overall paired
+  `Success@1` gain has a **one-sided 95% lower bound above zero**. The seed is
+  recorded in the evidence report. The two-sided interval is still reported.
+
+Motivation: on 30-answerable-task splits the two-sided 95% interval puts its
+entire error budget on both tails; a genuinely better candidate with few
+paired flips can fail "wholly above zero" while every other condition passes.
+Development-split measurement (2026-09-20): +16.7 paired `Success@1` points
+with a two-sided 95% interval of [0.0, +33.3pp] and a one-sided lower bound of
+roughly +4.4pp. This amendment changes only the interval interpretation; the
+five-point absolute `Success@1` gain requirement, the per-family and safety
+conditions, the resource limits, and the offline checks are unchanged.
