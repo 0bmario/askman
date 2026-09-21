@@ -182,6 +182,7 @@ fn main() -> Result<()> {
                     artifact,
                     query,
                     limit,
+                    platform_explicit: false,
                 },
                 &platform,
             )?;

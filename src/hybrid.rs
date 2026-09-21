@@ -46,6 +46,10 @@ pub struct CandidateOptions {
     pub bundle: PathBuf,
     pub query: String,
     pub target_os: TargetOs,
+    /// True when the user passed an explicit --linux/--osx/--windows flag;
+    /// enables target-platform-over-common ordering. Host-default queries
+    /// keep pure relevance ordering.
+    pub platform_explicit: bool,
     pub verbose: bool,
 }
 
@@ -71,7 +75,12 @@ fn run_candidate_with_query_mode(
 ) -> Result<()> {
     let index = HybridIndex::open(&options.bundle)?;
     let result = (|| -> Result<()> {
-        let fused = index.query(&options.query, options.target_os, query_mode)?;
+        let fused = index.query(
+            &options.query,
+            options.target_os,
+            query_mode,
+            options.platform_explicit,
+        )?;
         let displayed = display_candidates(&fused);
         print!("{}", render_results(&displayed, options.verbose));
         Ok(())
@@ -110,12 +119,14 @@ impl HybridIndex {
         query: &str,
         target_os: TargetOs,
         query_mode: DenseQueryMode,
+        platform_explicit: bool,
     ) -> Result<Vec<Candidate>> {
         let keyword = query_artifact_for_platform(
             QueryOptions {
                 artifact: self.artifact.clone(),
                 query: query.to_string(),
                 limit: KEYWORD_CANDIDATE_BUDGET,
+                platform_explicit,
             },
             target_os.as_str(),
         )?
@@ -131,6 +142,7 @@ impl HybridIndex {
                 target_os.as_str(),
                 DENSE_CANDIDATE_BUDGET,
                 query_mode,
+                platform_explicit,
             )?
             .into_iter()
             .map(candidate_from_dense)
@@ -506,6 +518,7 @@ mod tests {
             bundle: root.path().join("missing-bundle"),
             query: "search files".to_string(),
             target_os: TargetOs::Linux,
+            platform_explicit: true,
             verbose: false,
         })
         .unwrap_err()

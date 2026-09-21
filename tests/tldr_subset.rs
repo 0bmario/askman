@@ -66,6 +66,7 @@ fn builds_and_queries_a_traceable_source_artifact() {
         artifact: output,
         query: "copy another location".to_string(),
         limit: 3,
+        platform_explicit: false,
     })
     .unwrap();
 
@@ -174,6 +175,7 @@ fn builds_the_declared_four_platform_corpus_with_explicit_exclusions() {
             artifact: output.clone(),
             query: "search patterns files".to_string(),
             limit: 10,
+            platform_explicit: false,
         },
         "linux",
     )
@@ -186,6 +188,7 @@ fn builds_the_declared_four_platform_corpus_with_explicit_exclusions() {
             artifact: output.clone(),
             query: "macOS clipboard".to_string(),
             limit: 10,
+            platform_explicit: false,
         },
         "osx",
     )
@@ -198,6 +201,7 @@ fn builds_the_declared_four_platform_corpus_with_explicit_exclusions() {
             artifact: output.clone(),
             query: "formatted Windows".to_string(),
             limit: 10,
+            platform_explicit: false,
         },
         "windows",
     )
@@ -339,6 +343,7 @@ fn selects_target_platform_before_retrieval() {
             artifact: output.clone(),
             query: "formatted Linux syntax".to_string(),
             limit: 10,
+            platform_explicit: false,
         },
         "linux",
     )
@@ -352,6 +357,7 @@ fn selects_target_platform_before_retrieval() {
             artifact: output.clone(),
             query: "formatted common syntax".to_string(),
             limit: 10,
+            platform_explicit: false,
         },
         "osx",
     )
@@ -364,6 +370,7 @@ fn selects_target_platform_before_retrieval() {
             artifact: output,
             query: "formatted Windows syntax".to_string(),
             limit: 10,
+            platform_explicit: false,
         },
         "linux",
     )
@@ -414,6 +421,7 @@ fn follows_aliases_and_moved_pages_without_rewriting_destination_commands() {
         artifact: output,
         query: "documentation original command".to_string(),
         limit: 10,
+        platform_explicit: false,
     })
     .unwrap();
     assert!(navigation_results.is_empty());
@@ -434,6 +442,7 @@ fn ordinary_tldr_token_is_searchable_and_not_a_reference() {
         artifact: output,
         query: "literal tldr token".to_string(),
         limit: 10,
+        platform_explicit: false,
     })
     .unwrap();
     assert_eq!(results.len(), 1);
@@ -457,6 +466,7 @@ fn mixed_pages_do_not_index_navigation_examples() {
         artifact: output.clone(),
         query: "documentation original".to_string(),
         limit: 10,
+        platform_explicit: false,
     })
     .unwrap();
     assert!(navigation_results.is_empty());
@@ -465,6 +475,7 @@ fn mixed_pages_do_not_index_navigation_examples() {
         artifact: output,
         query: "run operational".to_string(),
         limit: 10,
+        platform_explicit: false,
     })
     .unwrap();
     assert_eq!(operational_results.len(), 1);
@@ -504,6 +515,7 @@ fn disambiguation_lists_destinations_and_search_keeps_pages_distinct() {
             artifact: output,
             query: "run".to_string(),
             limit: 10,
+            platform_explicit: false,
         },
         "common",
     )

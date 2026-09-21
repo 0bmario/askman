@@ -59,6 +59,7 @@ fn main() -> Result<()> {
         bundle,
         query,
         target_os: search::get_target_os(args.linux, args.osx, args.windows),
+        platform_explicit: args.linux || args.osx || args.windows,
         verbose: args.verbose,
     })
 }

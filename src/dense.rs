@@ -116,6 +116,8 @@ struct DenseQueryRequest {
     query: String,
     platform: String,
     limit: usize,
+    #[serde(default)]
+    platform_explicit: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -153,7 +155,6 @@ struct DenseRow {
 #[derive(Debug)]
 struct ModelAssets {
     cache_dir: PathBuf,
-    snapshot: PathBuf,
     hashes: BTreeMap<String, String>,
 }
 
@@ -295,6 +296,7 @@ pub fn run_query_server(options: DenseServerOptions) -> Result<()> {
                         &request.platform,
                         request.limit,
                         query_mode,
+                        request.platform_explicit,
                     ) {
                         Ok(results) => serde_json::json!({"ok": true, "results": results}),
                         Err(error) => serde_json::json!({"ok": false, "error": error.to_string()}),
@@ -349,6 +351,7 @@ impl DenseIndex {
         platform: &str,
         limit: usize,
         query_mode: DenseQueryMode,
+        platform_explicit: bool,
     ) -> Result<Vec<DenseCandidate>> {
         if limit == 0 {
             bail!("dense query limit must be greater than zero");
@@ -427,6 +430,22 @@ impl DenseIndex {
                 break;
             }
         }
+
+        // Platform precedence for ordering as well as selection: when the
+        // user explicitly requested a platform, a target-platform page
+        // outranks an equally relevant common page (the documented selection
+        // invariant, applied to the candidate order; the stable sort keeps
+        // distance order within each group). Host-default queries keep pure
+        // relevance ordering.
+        if platform_explicit {
+            results.sort_by(|a, b| {
+                let a_target = a.platform == platform;
+                let b_target = b.platform == platform;
+                b_target
+                    .cmp(&a_target)
+                    .then_with(|| a.ranking_score.total_cmp(&b.ranking_score))
+            });
+        }
         Ok(results)
     }
 }
@@ -490,6 +509,37 @@ fn dense_query_text(query: &str, query_mode: DenseQueryMode) -> String {
         // These terms occur in the pinned observation descriptions. `address`
         // also occurs in add/delete descriptions, so it would broaden the intent.
         additions.push("list interfaces detailed info brief network layer");
+    }
+
+    // macOS pasteboard direction: place/copy/send/pipe/put something ONTO the
+    // clipboard is `pbcopy`; reading FROM it is not — queries with extraction
+    // phrasing ("from the clipboard") stay unexpanded.
+    let mentions_clipboard =
+        query_words.contains(&"clipboard") || query_words.contains(&"pasteboard");
+    let requests_clipboard_write = ["copy", "send", "place", "pipe", "put"]
+        .iter()
+        .any(|term| query_words.contains(term));
+    let names_extraction_source = query_words.contains(&"from");
+    if mentions_clipboard && requests_clipboard_write && !names_extraction_source {
+        additions.push("pbcopy place the results of a specific command in the clipboard");
+    }
+
+    // File copy with a destination: bias toward the copy command's
+    // file-to-path examples instead of adjacent same-verb pages (move, cp
+    // variants, directory-recursive examples). "make a second copy" is a
+    // duplicate intent without an explicit destination word.
+    let requests_file_copy = ["copy", "duplicate", "put"]
+        .iter()
+        .any(|term| query_words.contains(term));
+    let names_moved_object = query_words.contains(&"file");
+    let names_destination = ["another", "destination", "folder", "path", "directory"]
+        .iter()
+        .any(|term| query_words.contains(term))
+        || query_words
+            .windows(2)
+            .any(|words| words == ["second", "copy"]);
+    if requests_file_copy && names_moved_object && names_destination {
+        additions.push("copy file another location directory destination");
     }
 
     if additions.is_empty() {
@@ -824,14 +874,12 @@ fn pinned_model_assets(model_cache: &Path) -> Result<ModelAssets> {
             reference.trim()
         );
     }
-    let snapshot = model_root.join("snapshots").join(MODEL_REVISION);
     let hashes = MODEL_FILES
         .iter()
         .map(|(file, expected)| (file.to_string(), expected.to_string()))
         .collect();
     Ok(ModelAssets {
         cache_dir: model_cache.to_path_buf(),
-        snapshot,
         hashes,
     })
 }
@@ -868,7 +916,6 @@ fn validate_model_assets(cache: &Path) -> Result<ModelAssets> {
     }
     Ok(ModelAssets {
         cache_dir: cache.to_path_buf(),
-        snapshot,
         hashes,
     })
 }
@@ -993,6 +1040,52 @@ mod tests {
     }
 
     #[test]
+    fn expanded_dev_query_maps_pasteboard_write_intents_to_pbcopy() {
+        for query in [
+            "copy shell output to the macOS clipboard",
+            "send terminal output to the Mac pasteboard",
+            "place command results in the macOS clipboard",
+            "pipe command output into the Apple clipboard",
+            "put standard output on the Mac pasteboard",
+        ] {
+            assert!(
+                dense_query_text(query, DenseQueryMode::ExpandedDev)
+                    .contains("pbcopy place the results of a specific command in the clipboard"),
+                "query should expand toward pbcopy: {query}"
+            );
+        }
+    }
+
+    #[test]
+    fn expanded_dev_query_leaves_pasteboard_extraction_unexpanded() {
+        let query = "print the text from the clipboard";
+        assert_eq!(dense_query_text(query, DenseQueryMode::ExpandedDev), query);
+    }
+
+    #[test]
+    fn expanded_dev_query_maps_file_copy_with_destination_to_copy_vocabulary() {
+        for query in [
+            "copy one Windows file to another path",
+            "duplicate a single file in a Windows directory",
+            "copy one file into a different Windows folder",
+            "make a second copy of one Windows file",
+            "put one Windows file at a destination path",
+        ] {
+            assert!(
+                dense_query_text(query, DenseQueryMode::ExpandedDev)
+                    .contains("copy file another location directory destination"),
+                "query should expand toward the copy destination examples: {query}"
+            );
+        }
+    }
+
+    #[test]
+    fn expanded_dev_query_leaves_directory_recursive_copy_unexpanded() {
+        let query = "copy the directory recursively";
+        assert_eq!(dense_query_text(query, DenseQueryMode::ExpandedDev), query);
+    }
+
+    #[test]
     fn expanded_dev_query_maps_systemctl_restart_to_service_vocabulary() {
         let query = "restart one Linux unit with systemctl";
         assert_eq!(
@@ -1020,9 +1113,16 @@ mod tests {
     }
 
     #[test]
-    fn expanded_dev_query_does_not_treat_pasteboard_output_as_file_contents() {
+    fn expanded_dev_query_maps_pasteboard_output_to_pbcopy_direction() {
+        // #46 left pasteboard queries unexpanded to keep them away from
+        // `cat`; the dev-split evidence (4/5 rank-1 misses ranking `pbpaste`
+        // above `pbcopy`) now pins the write direction instead. Extraction
+        // phrasing stays unexpanded (see the "from the clipboard" guard).
         let query = "put standard output on the Mac pasteboard";
-        assert_eq!(dense_query_text(query, DenseQueryMode::ExpandedDev), query);
+        assert!(
+            dense_query_text(query, DenseQueryMode::ExpandedDev)
+                .contains("pbcopy place the results of a specific command in the clipboard")
+        );
     }
 
     #[test]
