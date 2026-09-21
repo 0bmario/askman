@@ -176,13 +176,13 @@ fn main() -> Result<()> {
             query,
             limit,
             platform,
-            platform_explicit: false,
         } => {
             let results = query_artifact_for_platform(
                 QueryOptions {
                     artifact,
                     query,
                     limit,
+                    platform_explicit: false,
                 },
                 &platform,
             )?;

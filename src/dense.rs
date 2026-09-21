@@ -155,7 +155,6 @@ struct DenseRow {
 #[derive(Debug)]
 struct ModelAssets {
     cache_dir: PathBuf,
-    snapshot: PathBuf,
     hashes: BTreeMap<String, String>,
 }
 
@@ -875,14 +874,12 @@ fn pinned_model_assets(model_cache: &Path) -> Result<ModelAssets> {
             reference.trim()
         );
     }
-    let snapshot = model_root.join("snapshots").join(MODEL_REVISION);
     let hashes = MODEL_FILES
         .iter()
         .map(|(file, expected)| (file.to_string(), expected.to_string()))
         .collect();
     Ok(ModelAssets {
         cache_dir: model_cache.to_path_buf(),
-        snapshot,
         hashes,
     })
 }
@@ -919,7 +916,6 @@ fn validate_model_assets(cache: &Path) -> Result<ModelAssets> {
     }
     Ok(ModelAssets {
         cache_dir: cache.to_path_buf(),
-        snapshot,
         hashes,
     })
 }
