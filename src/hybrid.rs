@@ -1,7 +1,7 @@
 use crate::bundle::{BundleManifest, load_validated_manifest};
 use crate::dense::{DenseCandidate, DenseIndex, DenseQueryMode};
 use crate::search::TargetOs;
-use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_platform};
+use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_validated_connection};
 use anyhow::{Result, bail};
 use colored::Colorize;
 use serde::Serialize;
@@ -302,7 +302,8 @@ impl HybridIndex {
         query_mode: DenseQueryMode,
         platform_explicit: bool,
     ) -> Result<Vec<Candidate>> {
-        let keyword = query_artifact_for_platform(
+        let keyword = query_artifact_for_validated_connection(
+            self.dense.connection(),
             QueryOptions {
                 artifact: self.artifact.clone(),
                 query: query.to_string(),
@@ -334,8 +335,7 @@ impl HybridIndex {
     }
 
     fn full_examples(&self, page_id: &str) -> Result<Vec<(String, String)>> {
-        let connection = rusqlite::Connection::open(&self.artifact)?;
-        let mut statement = connection.prepare(
+        let mut statement = self.dense.connection().prepare(
             "SELECT description, command FROM examples WHERE page_id = ?1 ORDER BY position",
         )?;
         let rows = statement.query_map([page_id], |row| Ok((row.get(0)?, row.get(1)?)))?;

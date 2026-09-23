@@ -314,15 +314,26 @@ pub fn query_artifact_for_platform(
     options: QueryOptions,
     platform: &str,
 ) -> Result<Vec<QueryResult>> {
+    let conn = Connection::open(&options.artifact)
+        .with_context(|| format!("failed to open artifact {}", options.artifact.display()))?;
+    validate_artifact(&conn)?;
+    query_artifact_for_validated_connection(&conn, options, platform)
+}
+
+/// Query an artifact through a connection that was validated at its activation
+/// boundary. The hybrid path shares its dense connection with lexical search,
+/// avoiding a second SQLite open and a second full artifact validation.
+pub(crate) fn query_artifact_for_validated_connection(
+    conn: &Connection,
+    options: QueryOptions,
+    platform: &str,
+) -> Result<Vec<QueryResult>> {
     if options.limit == 0 {
         bail!("query limit must be greater than zero");
     }
     validate_platform(platform)?;
     let fts_query = build_fts_query(&options.query)?;
-    let conn = Connection::open(&options.artifact)
-        .with_context(|| format!("failed to open artifact {}", options.artifact.display()))?;
-    validate_artifact(&conn)?;
-    let selected_page_ids = selected_page_ids(&conn, platform)?;
+    let selected_page_ids = selected_page_ids(conn, platform)?;
     if selected_page_ids.is_empty() {
         return Ok(Vec::new());
     }

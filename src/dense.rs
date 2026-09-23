@@ -31,10 +31,12 @@ pub const DENSE_RECIPE_VERSION: &str = "dense-text-v1";
 pub const DEFAULT_BATCH_SIZE: usize = 32;
 const DENSE_QUERY_MODE_ENV: &str = "ASKMAN_DENSE_QUERY_MODE";
 // sqlite-vec rejects KNN limits above this hard maximum. Each required
-// platform partition is queried independently with this bound. If the union
-// does not contain the requested number of unique pages, retrieval falls back
-// to SQL scalar distances over the selected pages.
+// platform partition is queried independently with a bounded multiple of the
+// requested page budget. If the union does not contain the requested number
+// of unique pages, retrieval falls back to SQL scalar distances over the
+// selected pages.
 const MAX_KNN_BATCH_SIZE: usize = 4096;
+const KNN_QUERY_MULTIPLIER: usize = 8;
 const EXPANDED_DEV_QUERY_MODE: &str = "expanded-dev";
 
 pub const MODEL_FILES: [(&str, &str); 5] = [
@@ -346,7 +348,7 @@ impl DenseIndex {
     pub(crate) fn open(artifact: &Path, model_cache: &Path) -> Result<Self> {
         register_sqlite_vec();
         let assets = validate_model_assets(model_cache)?;
-        Self::open_index(artifact, assets)
+        Self::open_index(artifact, assets, false)
     }
 
     /// Open a dense index whose model assets were already verified by the
@@ -355,19 +357,28 @@ impl DenseIndex {
     pub(crate) fn open_from_bundle(artifact: &Path, model_cache: &Path) -> Result<Self> {
         register_sqlite_vec();
         let assets = pinned_model_assets(model_cache)?;
-        Self::open_index(artifact, assets)
+        // Bundle activation performs the complete deep validation once. The
+        // query path trusts that activation evidence and only opens the
+        // already-pinned artifact/model assets.
+        Self::open_index(artifact, assets, true)
     }
 
-    fn open_index(artifact: &Path, assets: ModelAssets) -> Result<Self> {
+    fn open_index(artifact: &Path, assets: ModelAssets, validated_bundle: bool) -> Result<Self> {
         let connection = Connection::open(artifact)
             .with_context(|| format!("failed to open dense artifact {}", artifact.display()))?;
-        validate_artifact(&connection)?;
-        validate_dense_artifact(&connection, &assets)?;
+        if !validated_bundle {
+            validate_artifact(&connection)?;
+            validate_dense_artifact(&connection, &assets)?;
+        }
         let embedder = OfflineEmbedder::new(load_embedder(&assets)?);
         Ok(Self {
             connection,
             embedder,
         })
+    }
+
+    pub(crate) fn connection(&self) -> &Connection {
+        &self.connection
     }
 
     pub(crate) fn query_with_mode(
@@ -396,9 +407,15 @@ impl DenseIndex {
             return Ok(Vec::new());
         }
         let query_blob = embedding_blob(&query_vector);
+        let knn_limit = knn_query_limit(limit);
         let mut partition_results = Vec::new();
         for partition in required_dense_partitions(platform) {
-            partition_results.push(self.query_knn_partition(&query_blob, &selected, partition)?);
+            partition_results.push(self.query_knn_partition(
+                &query_blob,
+                &selected,
+                partition,
+                knn_limit,
+            )?);
         }
         let knn_candidates = partition_results
             .iter()
@@ -434,8 +451,9 @@ impl DenseIndex {
         query_blob: &[u8],
         selected: &HashSet<String>,
         partition: &str,
+        knn_limit: usize,
     ) -> Result<DensePartitionCandidates> {
-        query_knn_partition(&self.connection, query_blob, selected, partition)
+        query_knn_partition_with_limit(&self.connection, query_blob, selected, partition, knn_limit)
     }
 
     fn sql_distance_candidates(
@@ -457,11 +475,28 @@ impl DenseIndex {
     }
 }
 
+#[cfg(test)]
 fn query_knn_partition(
     connection: &Connection,
     query_blob: &[u8],
     selected: &HashSet<String>,
     partition: &str,
+) -> Result<DensePartitionCandidates> {
+    query_knn_partition_with_limit(
+        connection,
+        query_blob,
+        selected,
+        partition,
+        MAX_KNN_BATCH_SIZE,
+    )
+}
+
+fn query_knn_partition_with_limit(
+    connection: &Connection,
+    query_blob: &[u8],
+    selected: &HashSet<String>,
+    partition: &str,
+    knn_limit: usize,
 ) -> Result<DensePartitionCandidates> {
     let mut statement = connection.prepare(
         "SELECT dense.rowid, dense.example_id, dense.distance
@@ -472,16 +507,13 @@ fn query_knn_partition(
          ORDER BY dense.distance
          ",
     )?;
-    let rows = statement.query_map(
-        params![query_blob, MAX_KNN_BATCH_SIZE as i64, partition],
-        |row| {
-            Ok((
-                row.get::<_, i64>(0)?,
-                row.get::<_, String>(1)?,
-                row.get::<_, f64>(2)?,
-            ))
-        },
-    )?;
+    let rows = statement.query_map(params![query_blob, knn_limit as i64, partition], |row| {
+        Ok((
+            row.get::<_, i64>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, f64>(2)?,
+        ))
+    })?;
     let mut details = connection.prepare(
         "SELECT e.example_id, e.page_id, p.command, e.command,
                 p.description, e.description, p.source_path, p.source_ref,
@@ -517,10 +549,16 @@ fn query_knn_partition(
         stats: DensePartitionStats {
             raw_count,
             unique_page_count,
-            saturated: raw_count >= MAX_KNN_BATCH_SIZE,
+            saturated: raw_count >= knn_limit,
         },
         candidates,
     })
+}
+
+fn knn_query_limit(limit: usize) -> usize {
+    limit
+        .saturating_mul(KNN_QUERY_MULTIPLIER)
+        .clamp(limit, MAX_KNN_BATCH_SIZE)
 }
 
 fn sql_distance_candidates(
@@ -1594,6 +1632,13 @@ mod tests {
         validate_embedding(&vector, "test").unwrap();
         assert!(validate_embedding(&[0.0; MODEL_DIMENSION], "test").is_err());
         assert!(validate_embedding(&[0.0; MODEL_DIMENSION - 1], "test").is_err());
+    }
+
+    #[test]
+    fn query_knn_limit_bounds_partition_work_and_preserves_fallback_budget() {
+        assert_eq!(knn_query_limit(8), 64);
+        assert_eq!(knn_query_limit(512), MAX_KNN_BATCH_SIZE);
+        assert_eq!(knn_query_limit(MAX_KNN_BATCH_SIZE), MAX_KNN_BATCH_SIZE);
     }
 
     #[test]
