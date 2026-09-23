@@ -388,7 +388,8 @@ fn validate_license_notice_files(root: &Path, source_license: &str) -> Result<()
 
 /// Read and validate the manifest's structural identity. The full directory
 /// validator below re-hashes every component and model file; callers that need
-/// query-time evidence should prefer [`load_validated_manifest`].
+/// query-time evidence should prefer [`load_validated_bundle`], which returns
+/// the manifest together with reusable activation evidence.
 fn read_bundle_manifest(root: &Path) -> Result<BundleManifest> {
     let manifest_path = root.join(BUNDLE_MANIFEST);
     let manifest: BundleManifest =
@@ -421,9 +422,21 @@ struct ValidationStamp {
     binding_sha256: String,
 }
 
-// The sidecar is a performance cache, not an authentication boundary. Its
-// binding must match the validated manifest and exact query component hashes;
-// an invalid, stale, or forged sidecar always falls back to deep validation.
+// The sidecar is an activation-validation cache, not an authentication
+// boundary. Its binding matches the validated manifest and exact query
+// component hashes, so stale or accidental changes trigger deep validation.
+// A same-user writer who can rewrite both the bundle and this cache can
+// recompute it; signed external trust would be required to prevent that and
+// is outside this one-shot optimization's scope.
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum EvidenceKind {
+    /// The bundle was hashed by `validate_matching_bundle` in this invocation.
+    DeepValidated,
+    /// The bundle was previously validated and only mutation-aware stats were
+    /// checked in this invocation.
+    MetadataChecked,
+}
 
 #[derive(Debug, Clone)]
 pub(crate) struct BundleValidationEvidence {
@@ -431,6 +444,7 @@ pub(crate) struct BundleValidationEvidence {
     artifact: PathBuf,
     model_cache: PathBuf,
     stamp: ValidationStamp,
+    kind: EvidenceKind,
 }
 
 #[derive(Debug, Clone)]
@@ -440,8 +454,9 @@ pub(crate) struct ValidatedBundle {
 }
 
 /// Per-file identity used by the validation stamp. Sizes and modification
-/// times are cheap to re-stat on every query; any mismatch falls back to a
-/// full deep validation, so a tampered or rolled-back bundle can never pass.
+/// times are cheap to re-stat on every query; any mismatch falls back to deep
+/// validation, detecting stale or accidental mutation. This cache is not
+/// protection against a same-user writer that can rewrite both sides.
 fn stamp_path(root: &Path) -> PathBuf {
     let name = root
         .file_name()
@@ -616,11 +631,18 @@ impl BundleValidationEvidence {
             bail!("query assets do not match trusted matching-bundle activation evidence");
         }
 
-        if !fast_stamp_identity_available(&self.stamp.files) {
-            // Targets without a portable mutation generation counter cannot
-            // safely use metadata-only evidence, so re-hash the bundle here.
-            validate_matching_bundle(&self.root)?;
+        if self.kind == EvidenceKind::DeepValidated
+            && !fast_stamp_identity_available(&self.stamp.files)
+        {
+            // `load_validated_bundle` already performed the one required deep
+            // validation for this invocation. This is the non-Unix path where
+            // no portable mutation identity exists; repeating it would only
+            // duplicate startup work without improving same-invocation proof.
             return Ok(());
+        }
+
+        if !fast_stamp_identity_available(&self.stamp.files) {
+            unreachable!("metadata evidence requires mutation-aware file identity");
         }
 
         for relative in self.stamp.component_sha256.keys() {
@@ -659,13 +681,23 @@ pub(crate) fn load_validated_bundle(bundle: &Path) -> Result<ValidatedBundle> {
         // remains present before query code receives the evidence.
         validate_license_notice_files(&root, &manifest.source.license.name)?;
         validate_bundle_file_inventory(&root, &manifest)?;
-        return Ok(validated_bundle(&root, manifest, stamp));
+        return Ok(validated_bundle(
+            &root,
+            manifest,
+            stamp,
+            EvidenceKind::MetadataChecked,
+        ));
     }
     let manifest = validate_matching_bundle(&root)?;
     let stats = bundle_file_stats(&root)?;
     let stamp = build_validation_stamp(&root, &manifest, stats)?;
     write_validation_stamp(&stamp_path, &stamp);
-    Ok(validated_bundle(&root, manifest, stamp))
+    Ok(validated_bundle(
+        &root,
+        manifest,
+        stamp,
+        EvidenceKind::DeepValidated,
+    ))
 }
 
 pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
@@ -676,6 +708,7 @@ fn validated_bundle(
     root: &Path,
     manifest: BundleManifest,
     stamp: ValidationStamp,
+    kind: EvidenceKind,
 ) -> ValidatedBundle {
     let artifact = root.join(&manifest.corpus.path);
     ValidatedBundle {
@@ -685,6 +718,7 @@ fn validated_bundle(
             artifact,
             model_cache: root.join(MODEL_DIRECTORY),
             stamp,
+            kind,
         },
     }
 }
@@ -2229,6 +2263,44 @@ mod tests {
             "f".repeat(64),
         );
         assert!(!stamp_matches(&root, &manifest, &files, &stale).unwrap());
+    }
+
+    #[test]
+    fn deep_validated_evidence_does_not_repeat_validation_without_file_identity() {
+        let directory = tempfile::tempdir().unwrap();
+        let bundle = directory.path().join("matching-bundle");
+        fs::create_dir(&bundle).unwrap();
+        let artifact = bundle.join(MATCHING_DATABASE);
+        let model_cache = bundle.join(MODEL_DIRECTORY);
+        fs::write(&artifact, b"not a sqlite database").unwrap();
+        fs::create_dir(&model_cache).unwrap();
+        let root = fs::canonicalize(&bundle).unwrap();
+        let manifest = lifecycle_manifest("deep-evidence");
+        fs::write(
+            root.join(BUNDLE_MANIFEST),
+            serde_json::to_vec(&manifest).unwrap(),
+        )
+        .unwrap();
+
+        let mut stamp =
+            build_validation_stamp(&root, &manifest, bundle_file_stats(&root).unwrap()).unwrap();
+        // Model this evidence as coming from a platform without portable file
+        // identities. The bundle was already deeply validated before the
+        // evidence reached query opening, so a second deep pass is redundant.
+        for stat in stamp.files.values_mut() {
+            stat.identity = None;
+        }
+        let evidence = BundleValidationEvidence {
+            root: root.clone(),
+            artifact: root.join(MATCHING_DATABASE),
+            model_cache: root.join(MODEL_DIRECTORY),
+            stamp,
+            kind: EvidenceKind::DeepValidated,
+        };
+
+        evidence
+            .authorize_query_paths(&artifact, &model_cache)
+            .expect("deep validation evidence should be reusable once");
     }
 
     fn test_manifest(parser_version: &str) -> BundleManifest {

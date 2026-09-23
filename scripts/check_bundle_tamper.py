@@ -4,6 +4,10 @@
 The command primes a temporary bundle copy so its validation evidence exists,
 mutates one artifact byte while restoring its mtime, then requires the next
 public query to fail closed on the component digest.
+
+This covers stale/corrupt cache evidence and accidental same-size mutation. It
+does not claim resistance to a same-user writer that can rewrite both the
+bundle and cache; signed external trust is outside this scoped check.
 """
 
 from __future__ import annotations

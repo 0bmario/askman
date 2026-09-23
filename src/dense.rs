@@ -463,7 +463,13 @@ impl DenseIndex {
         partition: &str,
         knn_limit: usize,
     ) -> Result<DensePartitionCandidates> {
-        query_knn_partition_with_limit(&self.connection, query_blob, selected, partition, knn_limit)
+        query_knn_partition_with_adaptive_limit(
+            &self.connection,
+            query_blob,
+            selected,
+            partition,
+            knn_limit,
+        )
     }
 
     fn sql_distance_candidates(
@@ -492,13 +498,44 @@ fn query_knn_partition(
     selected: &HashSet<String>,
     partition: &str,
 ) -> Result<DensePartitionCandidates> {
-    query_knn_partition_with_limit(
+    query_knn_partition_with_adaptive_limit(
         connection,
         query_blob,
         selected,
         partition,
         MAX_KNN_BATCH_SIZE,
     )
+}
+
+fn query_knn_partition_with_adaptive_limit(
+    connection: &Connection,
+    query_blob: &[u8],
+    selected: &HashSet<String>,
+    partition: &str,
+    knn_limit: usize,
+) -> Result<DensePartitionCandidates> {
+    let mut current_limit = knn_limit.max(1).min(MAX_KNN_BATCH_SIZE);
+    loop {
+        let result = query_knn_partition_with_limit(
+            connection,
+            query_blob,
+            selected,
+            partition,
+            current_limit,
+        )?;
+        if !result.stats.boundary_tied || current_limit == MAX_KNN_BATCH_SIZE {
+            return Ok(result);
+        }
+
+        // Equal-distance rows at the probe boundary are not complete. Grow
+        // the probe until the tie is exhausted; only the hard sqlite-vec cap
+        // falls through to the exact scalar-distance path.
+        let next_limit = current_limit.saturating_mul(2).min(MAX_KNN_BATCH_SIZE);
+        if next_limit == current_limit {
+            return Ok(result);
+        }
+        current_limit = next_limit;
+    }
 }
 
 fn query_knn_partition_with_limit(
@@ -681,14 +718,13 @@ fn partition_union_proves_completeness(
     if limit == 0 {
         return true;
     }
-    // A tie at the probe boundary can hide a page needed to fill the requested
-    // page budget. Only the scalar-distance fallback can complete that tie;
-    // when the probe already contains enough unique pages, every returned page
-    // is sufficient for the requested budget and the normal deterministic rank
-    // ordering resolves the observed tie without scanning the whole corpus.
+    // Adaptive probing normally exhausts a boundary tie before reaching this
+    // point. A tie that survives probing can hide a page even when the
+    // observed page count already reaches the requested budget, so only the
+    // scalar-distance fallback can make the result exact.
     if partitions
         .iter()
-        .any(|partition| partition.stats.boundary_tied && partition.stats.unique_page_count < limit)
+        .any(|partition| partition.stats.boundary_tied)
     {
         return false;
     }
@@ -1711,6 +1747,49 @@ mod tests {
                 .map(|candidate| candidate.page_id.clone())
                 .collect::<Vec<_>>(),
             vec!["page-64".to_string()]
+        );
+    }
+
+    #[test]
+    fn adaptive_knn_probe_completes_tie_with_exactly_limit_unique_pages() {
+        let rows = (0..65)
+            .map(|index| {
+                (
+                    format!("example-{index}"),
+                    format!("page-{index}"),
+                    "linux".to_string(),
+                )
+            })
+            .collect::<Vec<_>>();
+        let (connection, selected, blob) = query_fixture(&rows);
+        let partition =
+            query_knn_partition_with_adaptive_limit(&connection, &blob, &selected, "linux", 64)
+                .unwrap();
+
+        // The first 64-row probe has a tied boundary. The adaptive extension
+        // must fetch the hidden 65th page before declaring the partition exact.
+        assert_eq!(partition.stats.raw_count, 65);
+        assert_eq!(partition.stats.unique_page_count, 65);
+        assert!(!partition.stats.boundary_tied);
+        assert!(partition_union_proves_completeness(
+            std::slice::from_ref(&partition),
+            "linux",
+            false,
+            64
+        ));
+
+        let observed = rank_dense_candidates(partition.candidates, &selected, "linux", false, 64);
+        let exact =
+            sql_distance_candidates(&connection, &blob, &selected, "linux", false, 64).unwrap();
+        assert_eq!(
+            observed
+                .iter()
+                .map(|candidate| candidate.example_id.as_str())
+                .collect::<Vec<_>>(),
+            exact
+                .iter()
+                .map(|candidate| candidate.example_id.as_str())
+                .collect::<Vec<_>>()
         );
     }
 
