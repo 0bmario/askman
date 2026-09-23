@@ -715,47 +715,45 @@ def write_verification_evidence(
             "candidate": candidate_binary,
         }
     )
+    runtime_evidence = {
+        "verification_status": status,
+        "code_revision": git_revision(),
+        "cargo": command_version(cargo),
+        "rustc": command_version("rustc"),
+        "python": sys.version,
+        "platform": platform.platform(),
+        "system": platform.system(),
+        "machine": platform.machine(),
+        "network_policy": os.environ.get(
+            "ASKMAN_CI_NETWORK_POLICY", "not-enforced-by-runner"
+        ),
+        "network_isolation_enforced": bool(
+            os.environ.get("ASKMAN_CI_NETWORK_POLICY")
+        ),
+        "network_probe": network_probe_evidence(required=False),
+        "native_runtime": native_runtime,
+        "onnx_runtime": native_runtime["onnx_runtime"],
+        "shipping_binary": native_runtime["binaries"].get("shipping"),
+        "bundle": {
+            "bundle_id": manifest["bundle_id"],
+            "manifest_sha256": sha256_file(manifest_path),
+            "components": {
+                key: {
+                    "path": manifest[key]["path"],
+                    "sha256": manifest[key]["sha256"],
+                    "size_bytes": manifest[key]["size_bytes"],
+                }
+                for key in ("corpus", "lexical_index", "dense_index")
+            },
+        },
+    }
+    write_json(report_dir / "runtime-metadata.json", runtime_evidence)
     if strict_runtime:
         require_runtime_identity(
             native_runtime,
             expected_version=os.environ.get("ORT_EXPECTED_VERSION")
             or os.environ.get("ORT_VERSION"),
         )
-    write_json(
-        report_dir / "runtime-metadata.json",
-        {
-            "verification_status": status,
-            "code_revision": git_revision(),
-            "cargo": command_version(cargo),
-            "rustc": command_version("rustc"),
-            "python": sys.version,
-            "platform": platform.platform(),
-            "system": platform.system(),
-            "machine": platform.machine(),
-            "network_policy": os.environ.get(
-                "ASKMAN_CI_NETWORK_POLICY", "not-enforced-by-runner"
-            ),
-            "network_isolation_enforced": bool(
-                os.environ.get("ASKMAN_CI_NETWORK_POLICY")
-            ),
-            "network_probe": network_probe_evidence(required=False),
-            "native_runtime": native_runtime,
-            "onnx_runtime": native_runtime["onnx_runtime"],
-            "shipping_binary": native_runtime["binaries"].get("shipping"),
-            "bundle": {
-                "bundle_id": manifest["bundle_id"],
-                "manifest_sha256": sha256_file(manifest_path),
-                "components": {
-                    key: {
-                        "path": manifest[key]["path"],
-                        "sha256": manifest[key]["sha256"],
-                        "size_bytes": manifest[key]["size_bytes"],
-                    }
-                    for key in ("corpus", "lexical_index", "dense_index")
-                },
-            },
-        },
-    )
 
 
 def build_and_validate_bundle(
