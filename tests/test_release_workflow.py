@@ -5,6 +5,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/release.yml"
+CI_WORKFLOW = ROOT / ".github/workflows/ci.yml"
 
 
 class ReleaseWorkflowTests(unittest.TestCase):
@@ -152,6 +153,71 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertIn("archive_runtime_environment", (ROOT / "scripts/verify_release_asset.py").read_text(encoding="utf-8"))
         self.assertIn("--require-release-binary", ROOT.joinpath(".github/workflows/ci.yml").read_text(encoding="utf-8"))
         self.assertIn("askman_lifecycle", ROOT.joinpath(".github/workflows/ci.yml").read_text(encoding="utf-8"))
+
+    def test_windows_firewall_probe_uses_external_baseline_and_strict_state(self):
+        windows_steps = (
+            (
+                "ci",
+                CI_WORKFLOW.read_text(encoding="utf-8"),
+                "      - name: Verify bundle and queries on Windows\n",
+            ),
+            (
+                "release",
+                WORKFLOW.read_text(encoding="utf-8"),
+                "      - name: Verify exact asset with Windows program firewall and probe\n",
+            ),
+        )
+        for name, workflow, marker in windows_steps:
+            with self.subTest(workflow=name):
+                step = workflow.split(marker, 1)[1].split("\n      - name:", 1)[0]
+                self.assertIn("Get-Command python -CommandType Application", step)
+                self.assertIn("https://github.com/", step)
+                self.assertIn("$baselineExitCode", step)
+                self.assertIn("$blockedExitCode", step)
+                self.assertIn("[guid]::NewGuid().ToString('D')", step)
+                self.assertIn("Remove-Item -LiteralPath $probeState", step)
+                self.assertIn("--baseline-succeeded", step)
+                self.assertIn("--nonce $probeNonce", step)
+                self.assertIn("--expected-url $externalUrl", step)
+                self.assertIn("--expected-nonce $probeNonce", step)
+                self.assertIn("Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule", step)
+                self.assertIn("$rule.Direction", step)
+                self.assertIn("$rule.Action", step)
+                self.assertIn("$rule.Enabled", step)
+                self.assertIn(".Program", step)
+                self.assertIn("$filters[0].Program", step)
+                self.assertIn("function Remove-FirewallRuleStrict", step)
+                self.assertIn("Remove-NetFirewallRule -DisplayName $DisplayName -ErrorAction Stop", step)
+                self.assertIn("Get-NetFirewallRule -ErrorAction Stop | Where-Object", step)
+                self.assertIn("$cleanupFailures += Remove-FirewallRuleStrict", step)
+                self.assertNotIn("Remove-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue", step)
+                self.assertNotIn("Start-Process python", step)
+                self.assertNotIn("127.0.0.1", step)
+
+        probe_source = (ROOT / "scripts/network_probe.py").read_text(encoding="utf-8")
+        for field in (
+            "mode",
+            "url",
+            "nonce",
+            "baseline_succeeded",
+            "denied",
+            "accepted",
+            "connections",
+            "error_classification",
+        ):
+            self.assertIn(f'"{field}"', probe_source)
+        ci_workflow = CI_WORKFLOW.read_text(encoding="utf-8")
+        self.assertGreaterEqual(ci_workflow.count("python scripts/network_probe.py server --state"), 2)
+        self.assertIn("sandbox-exec -p '(version 1) (allow default) (deny network*)'", ci_workflow)
+        self.assertIn("ASKMAN_CI_NETWORK_PROBE_NONCE", ci_workflow)
+        self.assertIn("--network-probe-nonce $probeNonce", WORKFLOW.read_text(encoding="utf-8"))
+
+    def test_ci_reproducibility_documents_platform_network_probe_contract(self):
+        documentation = (ROOT / "docs/reproducibility/ci.md").read_text(encoding="utf-8")
+        self.assertIn("Windows uses an external HTTPS baseline", documentation)
+        self.assertIn("Linux and macOS keep the local TCP probe", documentation)
+        self.assertIn("windows-firewall", documentation)
+        self.assertIn("per-step nonce", documentation)
 
     def test_ci_macos_linker_header_padding_precedes_matrix_builds(self):
         workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")

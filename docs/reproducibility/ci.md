@@ -117,16 +117,25 @@ python scripts/ci_offline.py prepare \
 
 For a real network-denied verification, run the `verify` phase inside the
 platform's network sandbox after provisioning. Linux uses temporary root
-firewall rules (`iptables`/`ip6tables`) that reject all outbound traffic;
-macOS requires `sandbox-exec` with `deny network*`; Windows requires a
-program-specific outbound `NetFirewallRule` for the exact release binary.
-Each native release verification also starts a local TCP server, attempts a
-connection under the isolation boundary, records zero accepted connections,
-and validates the installed rule/sandbox. Rule installation, probe validation,
-and cleanup are fail-closed: if isolation cannot be established, the job fails
-and produces no passing evidence. The full release gate still requires
-separately provisioned `main` data and an authorized matching bundle; those
-inputs are intentionally not checked in or downloaded by this CI job.
+firewall rules (`iptables`/`ip6tables`) that reject all outbound traffic and
+macOS requires `sandbox-exec` with `deny network*`; Linux and macOS keep the local TCP probe
+and require zero accepted connections. Windows uses an external HTTPS baseline
+and a per-step nonce,
+removes any stale state, verifies the exact shipping binary and exact Python
+executable in enabled outbound block rules, and first proves that the same
+Python executable can reach the external HTTPS URL `https://github.com/`.
+That identical URL is retried after the rules; only a Windows firewall-level
+`WinError 10013` (`windows-firewall`) refusal can produce passing denied state.
+HTTP responses, DNS/TLS/timeout/proxy failures, and other `OSError` values are
+recorded as failures and rejected by `assert-denied` and downstream validators.
+The state records the URL, per-step nonce, baseline result, error
+classification, and accepted/denied flags; Windows validators require the
+external mode, exact URL, and matching nonce, so legacy local state cannot
+satisfy a Windows policy. Rule installation, probe validation, and cleanup are
+fail-closed: if isolation cannot be established, the job fails and produces no
+passing evidence. The full release gate still requires separately provisioned
+`main` data and an authorized matching bundle; those inputs are intentionally
+not checked in or downloaded by this CI job.
 
 The full matrix sets `LIBONNXRUNTIME_NO_PKG_CONFIG=1` and
 `ORT_PREFER_DYNAMIC_LINK=1`, so a host-installed ONNX Runtime cannot replace

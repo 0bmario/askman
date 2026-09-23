@@ -431,45 +431,81 @@ jobs:
           if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) {
             throw "production shipping binary is missing: $binary"
           }
+          $python = (Get-Command python -CommandType Application -ErrorAction Stop).Source
+          $probeScript = Join-Path $env:GITHUB_WORKSPACE 'scripts/network_probe.py'
+          $offlineScript = Join-Path $env:GITHUB_WORKSPACE 'scripts/ci_offline.py'
+          $externalUrl = 'https://github.com/'
+          & $python $probeScript request --url $externalUrl --timeout 10
+          $baselineExitCode = $LASTEXITCODE
+          if ($baselineExitCode -ne 0) {
+            throw "external network baseline failed with exit code $baselineExitCode"
+          }
           $ruleName = "askman-ci-outbound-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
           $probeRuleName = "askman-ci-probe-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
           $probeState = Join-Path $env:RUNNER_TEMP 'askman-ci-network-probe.json'
-          $probe = Start-Process python -ArgumentList @('scripts/network_probe.py', 'server', '--state', $probeState) -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          $probeNonce = [guid]::NewGuid().ToString('D')
           $failure = $null
-          try {
-            for ($i = 0; $i -lt 50 -and -not (Test-Path -LiteralPath $probeState); $i++) { Start-Sleep -Milliseconds 100 }
-            if (-not (Test-Path -LiteralPath $probeState)) { throw "network probe server did not start" }
-            if ($probe.HasExited) { throw "network probe server exited before the denial probe" }
-            New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Program $binary -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
-            $python = (Get-Command python).Source
-            New-NetFirewallRule -DisplayName $probeRuleName -Direction Outbound -Program $python -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
-            $rule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction Stop
-            if (-not $rule) { throw "Windows outbound firewall rule was not installed" }
-            $programFilter = Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $rule -ErrorAction Stop
-            if (-not $programFilter -or $programFilter.Program -ine $binary) {
-              throw "Windows outbound firewall rule does not target the exact shipping binary path"
+          function Assert-FirewallRule {
+            param([string]$DisplayName, [string]$ExpectedProgram)
+            $rules = @(Get-NetFirewallRule -DisplayName $DisplayName -ErrorAction Stop)
+            if ($rules.Count -ne 1) { throw "Windows firewall rule is not unique: $DisplayName" }
+            $rule = $rules[0]
+            if ([string]$rule.Direction -ne 'Outbound' -or [string]$rule.Action -ne 'Block' -or [string]$rule.Enabled -ne 'True') {
+              throw "Windows firewall rule has unexpected action, direction, or enabled state: $DisplayName"
             }
-            if (-not (Get-NetFirewallRule -DisplayName $probeRuleName -ErrorAction Stop)) { throw "Windows probe firewall rule was not installed" }
-            $probeInfo = Get-Content -Raw -LiteralPath $probeState | ConvertFrom-Json
-            $probeUrl = "http://$($probeInfo.host):$($probeInfo.port)"
-            $probeResult = Start-Process $python -ArgumentList @('scripts/network_probe.py', 'request', '--url', $probeUrl) -WorkingDirectory $env:GITHUB_WORKSPACE -Wait -PassThru -WindowStyle Hidden
-            if ($probeResult.ExitCode -eq 0) { throw "network probe unexpectedly connected" }
-            python scripts/network_probe.py assert-denied --state $probeState
+            $filters = @(Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $rule -ErrorAction Stop)
+            if ($filters.Count -ne 1 -or [string]$filters[0].Program -ine $ExpectedProgram) {
+              throw "Windows firewall rule does not target the exact program path: $DisplayName"
+            }
+          }
+          function Remove-FirewallRuleStrict {
+            param([string]$DisplayName)
+            $errors = @()
+            try {
+              Remove-NetFirewallRule -DisplayName $DisplayName -ErrorAction Stop | Out-Null
+            } catch {
+              $errors += "remove $DisplayName failed: $($_.Exception.Message)"
+            }
+            try {
+              $remaining = @(Get-NetFirewallRule -ErrorAction Stop | Where-Object { $_.DisplayName -eq $DisplayName })
+              if ($remaining.Count -ne 0) {
+                $errors += "rule remains after removal: $DisplayName"
+              }
+            } catch {
+              $errors += "verify removal of $DisplayName failed: $($_.Exception.Message)"
+            }
+            return $errors
+          }
+          try {
+            New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Program $binary -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
+            New-NetFirewallRule -DisplayName $probeRuleName -Direction Outbound -Program $python -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
+            Assert-FirewallRule -DisplayName $ruleName -ExpectedProgram $binary
+            Assert-FirewallRule -DisplayName $probeRuleName -ExpectedProgram $python
+            if (Test-Path -LiteralPath $probeState) { Remove-Item -LiteralPath $probeState -Force -ErrorAction Stop }
+            & $python $probeScript request --url $externalUrl --timeout 10 --state $probeState --baseline-succeeded --nonce $probeNonce
+            $blockedExitCode = $LASTEXITCODE
+            if ($blockedExitCode -eq 0) { throw "external network probe unexpectedly connected" }
+            & $python $probeScript assert-denied --state $probeState --expected-url $externalUrl --expected-nonce $probeNonce
+            if ($LASTEXITCODE -ne 0) { throw "external network probe state was not denied" }
             $env:ASKMAN_CI_NETWORK_POLICY = "Windows program-specific outbound firewall: $binary"
             $env:ASKMAN_CI_NETWORK_PROBE_STATE = $probeState
-            python scripts/ci_offline.py verify --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report" --shipping-binary $binary --require-release-binary
+            $env:ASKMAN_CI_NETWORK_PROBE_NONCE = $probeNonce
+            & $python $offlineScript verify --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report" --shipping-binary $binary --require-release-binary
+            if ($LASTEXITCODE -ne 0) { throw "offline verification failed with exit code $LASTEXITCODE" }
           } catch {
             $failure = $_
           } finally {
-            Remove-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue
-            Remove-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue
-            if (Get-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue) {
-              if ($null -eq $failure) { $failure = "failed to remove Windows probe firewall rule $probeRuleName" }
+            $cleanupFailures = @()
+            $cleanupFailures += Remove-FirewallRuleStrict -DisplayName $probeRuleName
+            $cleanupFailures += Remove-FirewallRuleStrict -DisplayName $ruleName
+            if ($cleanupFailures.Count -ne 0) {
+              $cleanupFailure = "Windows firewall cleanup failed: $($cleanupFailures -join '; ')"
+              if ($null -eq $failure) {
+                $failure = $cleanupFailure
+              } else {
+                $failure = "$failure`n$cleanupFailure"
+              }
             }
-            if (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue) {
-              if ($null -eq $failure) { $failure = "failed to remove Windows outbound firewall rule $ruleName" }
-            }
-            if ($probe -and -not $probe.HasExited) { Stop-Process -Id $probe.Id -Force }
           }
           if ($null -ne $failure) { throw $failure }
 

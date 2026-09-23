@@ -21,10 +21,12 @@ if str(ROOT) not in sys.path:
 
 from scripts.ci_offline import (
     TARGET_QUERIES,
+    VerificationError,
     parse_shipping_json,
     require_runtime_identity,
     runtime_metadata,
     sha256_file,
+    validate_network_probe_payload,
     write_json,
 )
 
@@ -435,6 +437,7 @@ def main() -> int:
     parser.add_argument("--expected-model-revision", default="5f1b8cd78bc4fb444dd171e59b18f3a3af89a079")
     parser.add_argument("--network-probe-state", type=Path, required=True)
     parser.add_argument("--network-policy", required=True)
+    parser.add_argument("--network-probe-nonce")
     args = parser.parse_args()
 
     args.report_dir.mkdir(parents=True, exist_ok=True)
@@ -467,19 +470,41 @@ def main() -> int:
         )
         network_evidence: dict[str, object] = {"validated": False}
         if args.network_probe_state:
+            windows_policy = args.network_policy.startswith("Windows program-specific")
+            if windows_policy and not args.network_probe_nonce:
+                raise AssetVerificationError(
+                    "Windows network policy requires --network-probe-nonce"
+                )
             if not args.network_policy or not any(
                 args.network_policy.startswith(prefix)
                 for prefix in ("Linux iptables", "macOS sandbox-exec", "Windows program-specific")
             ):
                 raise AssetVerificationError("production verification requires a recognized OS network policy")
-            probe_payload = json.loads(args.network_probe_state.read_text(encoding="utf-8"))
-            if probe_payload.get("connections") != 0:
-                raise AssetVerificationError("network denial probe recorded an accepted connection")
+            try:
+                probe_payload = json.loads(args.network_probe_state.read_text(encoding="utf-8"))
+                validate_network_probe_payload(
+                    probe_payload,
+                    expected_nonce=args.network_probe_nonce,
+                    require_external=windows_policy,
+                )
+            except (OSError, ValueError, VerificationError) as error:
+                raise AssetVerificationError(str(error)) from error
             network_evidence = {
                 "validated": True,
                 "policy": args.network_policy,
                 "probe_connections": probe_payload.get("connections"),
             }
+            if probe_payload.get("mode") == "external":
+                network_evidence.update(
+                    {
+                        "probe_mode": "external",
+                        "probe_url": probe_payload["url"],
+                        "probe_nonce": probe_payload["nonce"],
+                        "probe_error_classification": probe_payload[
+                            "error_classification"
+                        ],
+                    }
+                )
         data_dir = root / "askman-data"
         manifest = stage_bundle(
             args.bundle_archive.resolve(),

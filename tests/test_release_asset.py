@@ -1,6 +1,8 @@
 import hashlib
 import json
 import os
+import socket
+import ssl
 import subprocess
 import sys
 import tarfile
@@ -8,7 +10,10 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+from urllib.error import HTTPError, URLError
 
+from scripts.network_probe import assert_denied, request as network_probe_request
 from scripts.verify_release_asset import (
     archive_runtime_environment,
     validate_existing_extraction,
@@ -153,6 +158,101 @@ class ReleaseAssetTests(unittest.TestCase):
             finally:
                 process.terminate()
                 process.wait(timeout=5)
+
+    def test_network_probe_records_external_denial_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "external.json"
+            firewall_error = PermissionError(13, "blocked")
+            firewall_error.winerror = 10013
+            with patch("scripts.network_probe.urlopen", side_effect=firewall_error):
+                result = network_probe_request(
+                    "https://github.com/",
+                    1.0,
+                    state=state,
+                    baseline_succeeded=True,
+                    nonce="nonce-1",
+                )
+            self.assertEqual(result, 1)
+            payload = json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(payload["mode"], "external")
+            self.assertEqual(payload["url"], "https://github.com/")
+            self.assertEqual(payload["nonce"], "nonce-1")
+            self.assertIs(payload["baseline_succeeded"], True)
+            self.assertIs(payload["denied"], True)
+            self.assertIs(payload["accepted"], False)
+            self.assertEqual(payload["connections"], 0)
+            self.assertEqual(payload["error_classification"], "windows-firewall")
+            self.assertEqual(assert_denied(state, 0, expected_nonce="nonce-1"), 0)
+
+    def test_network_probe_rejects_http_and_non_firewall_failures(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            http_state = root / "http.json"
+            http_error = HTTPError(
+                "https://github.com/",
+                503,
+                "service unavailable",
+                {},
+                None,
+            )
+            with patch("scripts.network_probe.urlopen", side_effect=http_error):
+                self.assertEqual(
+                    network_probe_request(
+                        "https://github.com/",
+                        1.0,
+                        state=http_state,
+                        baseline_succeeded=True,
+                        nonce="http-nonce",
+                    ),
+                    0,
+                )
+            http_payload = json.loads(http_state.read_text(encoding="utf-8"))
+            self.assertIs(http_payload["accepted"], True)
+            self.assertIs(http_payload["denied"], False)
+            self.assertEqual(http_payload["error_classification"], "http-response")
+            with self.assertRaises(SystemExit):
+                assert_denied(http_state, 0, expected_nonce="http-nonce")
+
+            failures = (
+                ("dns", socket.gaierror(-2, "name or service not known")),
+                ("tls", ssl.SSLError("certificate verify failed")),
+                ("timeout", TimeoutError("timed out")),
+                ("proxy", URLError("proxy unavailable")),
+                ("network-error", OSError("connection failed")),
+            )
+            for classification, error in failures:
+                state = root / f"{classification}.json"
+                with patch("scripts.network_probe.urlopen", side_effect=error):
+                    self.assertEqual(
+                        network_probe_request(
+                            "https://github.com/",
+                            1.0,
+                            state=state,
+                            baseline_succeeded=True,
+                            nonce=f"{classification}-nonce",
+                        ),
+                        1,
+                    )
+                payload = json.loads(state.read_text(encoding="utf-8"))
+                self.assertIs(payload["accepted"], False)
+                self.assertIs(payload["denied"], False)
+                self.assertEqual(payload["error_classification"], classification)
+                with self.assertRaises(SystemExit):
+                    assert_denied(
+                        state,
+                        0,
+                        expected_nonce=f"{classification}-nonce",
+                    )
+
+    def test_nonce_bound_assert_denied_rejects_legacy_local_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "local.json"
+            state.write_text(
+                json.dumps({"host": "127.0.0.1", "port": 1234, "connections": 0}),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(SystemExit, "requires external probe state"):
+                assert_denied(state, 0, expected_nonce="nonce-1")
 
 
 if __name__ == "__main__":

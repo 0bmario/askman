@@ -23,6 +23,7 @@ import threading
 import time
 import tomllib
 from pathlib import Path
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
@@ -682,6 +683,65 @@ def network_sandbox_blocks_loopback_listener(policy: str) -> bool:
     )
 
 
+EXPECTED_EXTERNAL_NETWORK_URL = "https://github.com/"
+WINDOWS_FIREWALL_ERROR_CLASSIFICATION = "windows-firewall"
+
+
+def validate_network_probe_payload(
+    payload: object,
+    *,
+    expected_nonce: str | None = None,
+    require_external: bool = False,
+) -> dict[str, object]:
+    if require_external and not expected_nonce:
+        raise VerificationError(
+            "Windows network policy requires an expected probe nonce"
+        )
+    if not isinstance(payload, dict):
+        raise VerificationError("network isolation probe state is not an object")
+    mode = payload.get("mode")
+    if mode == "external":
+        url = payload.get("url")
+        try:
+            parsed_url = urlparse(url) if isinstance(url, str) else None
+            hostname = parsed_url.hostname if parsed_url is not None else None
+        except ValueError as error:
+            raise VerificationError(
+                f"external network denial probe state is invalid: {payload}"
+            ) from error
+        if (
+            parsed_url is None
+            or parsed_url.scheme.lower() != "https"
+            or not parsed_url.netloc
+            or not hostname
+            or url != EXPECTED_EXTERNAL_NETWORK_URL
+            or not isinstance(payload.get("nonce"), str)
+            or not payload.get("nonce")
+            or (expected_nonce is not None and payload.get("nonce") != expected_nonce)
+            or payload.get("baseline_succeeded") is not True
+            or payload.get("denied") is not True
+            or payload.get("accepted") is not False
+            or type(payload.get("connections")) is not int
+            or payload.get("connections") != 0
+            or payload.get("error_classification") != WINDOWS_FIREWALL_ERROR_CLASSIFICATION
+        ):
+            raise VerificationError(
+                f"external network denial probe state is invalid: {payload}"
+            )
+        return payload
+    if require_external:
+        raise VerificationError(
+            "Windows network policy requires an external firewall probe state"
+        )
+    if mode not in (None, "local"):
+        raise VerificationError(f"unknown network probe state mode: {mode!r}")
+    if type(payload.get("connections")) is not int or payload.get("connections") != 0:
+        raise VerificationError(
+            f"network isolation probe recorded an accepted connection: {payload}"
+        )
+    return payload
+
+
 def network_probe_evidence(*, required: bool) -> dict[str, object]:
     state_value = os.environ.get("ASKMAN_CI_NETWORK_PROBE_STATE", "").strip()
     if not state_value:
@@ -695,14 +755,34 @@ def network_probe_evidence(*, required: bool) -> dict[str, object]:
         payload = json.loads(state_path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as error:
         raise VerificationError(f"network isolation probe state is invalid: {state_path}") from error
-    if payload.get("connections") != 0:
-        raise VerificationError(f"network isolation probe recorded an accepted connection: {payload}")
-    return {
+    network_policy = os.environ.get("ASKMAN_CI_NETWORK_POLICY", "").strip()
+    windows_policy = network_policy.startswith("Windows program-specific")
+    expected_nonce = os.environ.get("ASKMAN_CI_NETWORK_PROBE_NONCE", "").strip()
+    if windows_policy and not expected_nonce:
+        raise VerificationError(
+            "Windows network policy requires ASKMAN_CI_NETWORK_PROBE_NONCE"
+        )
+    validate_network_probe_payload(
+        payload,
+        expected_nonce=expected_nonce or None,
+        require_external=windows_policy,
+    )
+    evidence = {
         "validated": True,
         "state_path": str(state_path),
         "connections": payload.get("connections"),
-        "policy": os.environ.get("ASKMAN_CI_NETWORK_POLICY"),
+        "policy": network_policy or None,
     }
+    if payload.get("mode") == "external":
+        evidence.update(
+            {
+                "mode": "external",
+                "url": payload["url"],
+                "nonce": payload["nonce"],
+                "error_classification": payload["error_classification"],
+            }
+        )
+    return evidence
 
 
 def write_verification_evidence(

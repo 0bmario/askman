@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 import platform
 import tarfile
@@ -10,12 +11,15 @@ from unittest.mock import patch
 
 from scripts.ci_offline import (
     TARGET_QUERIES,
+    VerificationError,
     create_checksum_invalid_bundle_archive,
     create_partial_bundle_archive,
     parse_shipping_json,
     require_runtime_identity,
     runtime_metadata,
+    network_probe_evidence,
     storage_name,
+    validate_network_probe_payload,
     _runtime_linkage,
 )
 
@@ -68,6 +72,67 @@ class OfflineLifecycleFixtureTests(unittest.TestCase):
                 ("windows", "windows", "pages/windows/printf.md"),
             ],
         )
+
+    def test_network_probe_validator_rejects_malformed_external_state(self):
+        valid = {
+            "mode": "external",
+            "url": "https://github.com/",
+            "nonce": "nonce-1",
+            "baseline_succeeded": True,
+            "denied": True,
+            "accepted": False,
+            "connections": 0,
+            "error_classification": "windows-firewall",
+        }
+        self.assertIs(
+            validate_network_probe_payload(
+                valid,
+                expected_nonce="nonce-1",
+                require_external=True,
+            ),
+            valid,
+        )
+        for field, value in (
+            ("url", "http://github.com/"),
+            ("nonce", "wrong-nonce"),
+            ("baseline_succeeded", False),
+            ("denied", False),
+            ("accepted", True),
+            ("connections", False),
+            ("error_classification", "network-error"),
+        ):
+            malformed = valid.copy()
+            malformed[field] = value
+            with self.assertRaisesRegex(
+                VerificationError,
+                "external network denial probe state is invalid",
+            ):
+                validate_network_probe_payload(malformed, expected_nonce="nonce-1")
+        with self.assertRaisesRegex(VerificationError, "requires an external"):
+            validate_network_probe_payload(
+                {"connections": 0},
+                expected_nonce="nonce-1",
+                require_external=True,
+            )
+
+    def test_windows_network_policy_rejects_legacy_local_probe(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "local.json"
+            state.write_text(
+                json.dumps({"host": "127.0.0.1", "port": 1234, "connections": 0}),
+                encoding="utf-8",
+            )
+            with patch.dict(
+                os.environ,
+                {
+                    "ASKMAN_CI_NETWORK_PROBE_STATE": str(state),
+                    "ASKMAN_CI_NETWORK_POLICY": "Windows program-specific outbound firewall",
+                    "ASKMAN_CI_NETWORK_PROBE_NONCE": "nonce-1",
+                },
+                clear=False,
+            ):
+                with self.assertRaisesRegex(VerificationError, "requires an external"):
+                    network_probe_evidence(required=True)
 
     def test_runtime_metadata_records_binary_and_runtime_fields(self):
         with tempfile.TemporaryDirectory() as directory:

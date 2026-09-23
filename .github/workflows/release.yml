@@ -661,37 +661,76 @@ jobs:
           New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
           $reportDir = Join-Path $env:RUNNER_TEMP 'askman-production-verification'
           $probeState = Join-Path $env:RUNNER_TEMP 'askman-network-probe.json'
-          $probe = Start-Process python -ArgumentList @('scripts/network_probe.py', 'server', '--state', $probeState) -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          $python = (Get-Command python -CommandType Application -ErrorAction Stop).Source
+          $probeScript = Join-Path $env:GITHUB_WORKSPACE 'scripts/network_probe.py'
+          $assetScript = Join-Path $env:GITHUB_WORKSPACE 'scripts/verify_release_asset.py'
+          $externalUrl = 'https://github.com/'
+          & $python $probeScript request --url $externalUrl --timeout 10
+          $baselineExitCode = $LASTEXITCODE
+          if ($baselineExitCode -ne 0) { throw "external network baseline failed with exit code $baselineExitCode" }
           $ruleName = "askman-release-outbound-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
           $probeRuleName = "askman-release-probe-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          $probeNonce = [guid]::NewGuid().ToString('D')
           $failure = $null
+          function Assert-FirewallRule {
+            param([string]$DisplayName, [string]$ExpectedProgram)
+            $rules = @(Get-NetFirewallRule -DisplayName $DisplayName -ErrorAction Stop)
+            if ($rules.Count -ne 1) { throw "Windows firewall rule is not unique: $DisplayName" }
+            $rule = $rules[0]
+            if ([string]$rule.Direction -ne 'Outbound' -or [string]$rule.Action -ne 'Block' -or [string]$rule.Enabled -ne 'True') {
+              throw "Windows firewall rule has unexpected action, direction, or enabled state: $DisplayName"
+            }
+            $filters = @(Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $rule -ErrorAction Stop)
+            if ($filters.Count -ne 1 -or [string]$filters[0].Program -ine $ExpectedProgram) {
+              throw "Windows firewall rule does not target the exact program path: $DisplayName"
+            }
+          }
+          function Remove-FirewallRuleStrict {
+            param([string]$DisplayName)
+            $errors = @()
+            try {
+              Remove-NetFirewallRule -DisplayName $DisplayName -ErrorAction Stop | Out-Null
+            } catch {
+              $errors += "remove $DisplayName failed: $($_.Exception.Message)"
+            }
+            try {
+              $remaining = @(Get-NetFirewallRule -ErrorAction Stop | Where-Object { $_.DisplayName -eq $DisplayName })
+              if ($remaining.Count -ne 0) {
+                $errors += "rule remains after removal: $DisplayName"
+              }
+            } catch {
+              $errors += "verify removal of $DisplayName failed: $($_.Exception.Message)"
+            }
+            return $errors
+          }
           try {
-            for ($i = 0; $i -lt 50 -and -not (Test-Path -LiteralPath $probeState); $i++) { Start-Sleep -Milliseconds 100 }
-            if (-not (Test-Path -LiteralPath $probeState)) { throw 'network probe server did not start' }
-            if ($probe.HasExited) { throw 'network probe server exited before the denial probe' }
             tar -xzf $archive -C $extractDir
             $binary = Join-Path $extractDir '${{ matrix.binary_name }}'
-            $python = (Get-Command python).Source
             New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Program $binary -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
             New-NetFirewallRule -DisplayName $probeRuleName -Direction Outbound -Program $python -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
-            $rule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction Stop
-            if (-not $rule) { throw 'shipping program firewall rule missing' }
-            $programFilter = Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $rule -ErrorAction Stop
-            if (-not $programFilter -or $programFilter.Program -ine $binary) { throw 'shipping program firewall rule targets the wrong executable path' }
-            if (-not (Get-NetFirewallRule -DisplayName $probeRuleName -ErrorAction Stop)) { throw 'probe firewall rule missing' }
-            $probeUrl = (Get-Content -Raw -LiteralPath $probeState | ConvertFrom-Json)
-            $probeUrl = "http://$($probeUrl.host):$($probeUrl.port)"
-            $probeResult = Start-Process $python -ArgumentList @('scripts/network_probe.py', 'request', '--url', $probeUrl) -WorkingDirectory $env:GITHUB_WORKSPACE -Wait -PassThru -WindowStyle Hidden
-            if ($probeResult.ExitCode -eq 0) { throw 'network probe unexpectedly connected' }
-            python scripts/network_probe.py assert-denied --state $probeState
+            Assert-FirewallRule -DisplayName $ruleName -ExpectedProgram $binary
+            Assert-FirewallRule -DisplayName $probeRuleName -ExpectedProgram $python
+            if (Test-Path -LiteralPath $probeState) { Remove-Item -LiteralPath $probeState -Force -ErrorAction Stop }
+            & $python $probeScript request --url $externalUrl --timeout 10 --state $probeState --baseline-succeeded --nonce $probeNonce
+            $blockedExitCode = $LASTEXITCODE
+            if ($blockedExitCode -eq 0) { throw 'external network probe unexpectedly connected' }
+            & $python $probeScript assert-denied --state $probeState --expected-url $externalUrl --expected-nonce $probeNonce
+            if ($LASTEXITCODE -ne 0) { throw "external network probe state was not denied" }
             $env:ORT_EXPECTED_VERSION = '1.20.0'
-            python scripts/verify_release_asset.py --archive $archive --extract-dir $extractDir --runtime-report runtime-evidence/runtime-metadata.json --source-runtime-report runtime-evidence/source-runtime-metadata.json --runtime-provision-report runtime-evidence/runtime-provision.json --bundle-archive production-bundle/matching-bundle.tar.gz --bundle-manifest production-bundle/matching-bundle-manifest.json --bundle-report production-bundle/matching-bundle-provision.json --report-dir $reportDir --binary-name '${{ matrix.binary_name }}' --network-probe-state $probeState --network-policy "Windows program-specific outbound firewall: $binary"
+            & $python $assetScript --archive $archive --extract-dir $extractDir --runtime-report runtime-evidence/runtime-metadata.json --source-runtime-report runtime-evidence/source-runtime-metadata.json --runtime-provision-report runtime-evidence/runtime-provision.json --bundle-archive production-bundle/matching-bundle.tar.gz --bundle-manifest production-bundle/matching-bundle-manifest.json --bundle-report production-bundle/matching-bundle-provision.json --report-dir $reportDir --binary-name '${{ matrix.binary_name }}' --network-probe-state $probeState --network-probe-nonce $probeNonce --network-policy "Windows program-specific outbound firewall: $binary"
+            if ($LASTEXITCODE -ne 0) { throw "production asset verification failed with exit code $LASTEXITCODE" }
           } catch { $failure = $_ } finally {
-            Remove-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue
-            Remove-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue
-            if (Get-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue) { if ($null -eq $failure) { $failure = 'probe firewall cleanup failed' } }
-            if (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue) { if ($null -eq $failure) { $failure = 'shipping firewall cleanup failed' } }
-            if ($probe -and -not $probe.HasExited) { Stop-Process -Id $probe.Id -Force }
+            $cleanupFailures = @()
+            $cleanupFailures += Remove-FirewallRuleStrict -DisplayName $probeRuleName
+            $cleanupFailures += Remove-FirewallRuleStrict -DisplayName $ruleName
+            if ($cleanupFailures.Count -ne 0) {
+              $cleanupFailure = "Windows firewall cleanup failed: $($cleanupFailures -join '; ')"
+              if ($null -eq $failure) {
+                $failure = $cleanupFailure
+              } else {
+                $failure = "$failure`n$cleanupFailure"
+              }
+            }
           }
           if ($null -ne $failure) { throw $failure }
 
