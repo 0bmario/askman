@@ -458,6 +458,15 @@ def _runtime_linkage(binary: Path, library: Path | None) -> dict[str, object]:
     output = completed.stdout or ""
     library_names = {library.name, library.as_posix()} if library else set()
     contains_library = any(name and name in output for name in library_names)
+    if not contains_library and library is not None and platform.system() == "Linux":
+        canonical_library = library.resolve()
+        for match in re.finditer(r"=>\s+(/[^\s()]*onnxruntime[^\s()]*)", output, re.IGNORECASE):
+            try:
+                if Path(match.group(1).rstrip(",")).resolve() == canonical_library:
+                    contains_library = True
+                    break
+            except OSError:
+                continue
     unresolved = bool(re.search(r"=>\s+not found\b", output, re.IGNORECASE))
     return {
         "tool": tool,

@@ -8,6 +8,7 @@ and CLI compatibility pins are checked before the offline Rust builder runs.
 from __future__ import annotations
 
 import argparse
+import errno
 import gzip
 import io
 import hashlib
@@ -334,6 +335,36 @@ def _reject_symlink_components(path: Path) -> Path:
     return absolute
 
 
+def _directory_sync_unsupported(error: OSError) -> bool:
+    return error.errno in {
+        errno.EINVAL,
+        getattr(errno, "ENOTSUP", errno.EINVAL),
+        getattr(errno, "EOPNOTSUPP", errno.EINVAL),
+    }
+
+
+def _sync_directory(path: Path) -> None:
+    """Flush a published directory where the platform supports directory fsync."""
+
+    if os.name == "nt":
+        return
+    try:
+        directory_fd = os.open(path, os.O_RDONLY)
+    except OSError as error:
+        if _directory_sync_unsupported(error):
+            return
+        raise
+    try:
+        try:
+            os.fsync(directory_fd)
+        except OSError as error:
+            if _directory_sync_unsupported(error):
+                return
+            raise
+    finally:
+        os.close(directory_fd)
+
+
 def emit_detached_manifest(
     internal_manifest: Path, destination: Path, bundle_root: Path
 ) -> str:
@@ -380,11 +411,7 @@ def emit_detached_manifest(
             ) from error
         temporary.unlink()
         temporary = None
-        directory_fd = os.open(destination.parent, os.O_RDONLY)
-        try:
-            os.fsync(directory_fd)
-        finally:
-            os.close(directory_fd)
+        _sync_directory(destination.parent)
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
@@ -464,11 +491,7 @@ def create_deterministic_archive(root: Path, destination: Path) -> str:
             ) from error
         temporary.unlink()
         temporary = None
-        directory_fd = os.open(destination.parent, os.O_RDONLY)
-        try:
-            os.fsync(directory_fd)
-        finally:
-            os.close(directory_fd)
+        _sync_directory(destination.parent)
         destination_stat = destination.lstat()
         if destination_stat.st_mode & 0o170000 != 0o100000:
             raise ProvisionError("bundle archive publication produced a non-regular file")

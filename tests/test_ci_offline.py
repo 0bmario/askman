@@ -5,6 +5,8 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from scripts.ci_offline import (
     TARGET_QUERIES,
@@ -94,6 +96,32 @@ class OfflineLifecycleFixtureTests(unittest.TestCase):
                 evidence["binaries"]["shipping"]["sha256"],
                 hashlib.sha256(b"binary").hexdigest(),
             )
+
+    def test_runtime_identity_accepts_linux_runtime_soname_symlink(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            library = root / "libonnxruntime.so.1.20.0"
+            soname = root / "libonnxruntime.so.1"
+            binary = root / "askman"
+            library.write_bytes(b"runtime")
+            soname.symlink_to(library.name)
+            binary.write_bytes(b"binary")
+            ldd_output = f"libonnxruntime.so.1 => {soname} (0x00007f)\n"
+            completed = SimpleNamespace(stdout=ldd_output, returncode=0)
+            with (
+                patch.dict(os.environ, {"ORT_LIB_LOCATION": str(root)}, clear=False),
+                patch("scripts.ci_offline.platform.system", return_value="Linux"),
+                patch("scripts.ci_offline.shutil.which", return_value="/usr/bin/ldd"),
+                patch("scripts.ci_offline.subprocess.run", return_value=completed),
+            ):
+                evidence = runtime_metadata({"shipping": binary})
+                require_runtime_identity(evidence, expected_version="1.20.0")
+
+            runtime = evidence["onnx_runtime"]
+            linkage = evidence["binaries"]["shipping"]["linkage"]
+            self.assertEqual(Path(runtime["library_path"]), library.resolve())
+            self.assertEqual(runtime["library_sha256"], hashlib.sha256(b"runtime").hexdigest())
+            self.assertTrue(linkage["linkage_verified"])
 
     def test_runtime_identity_rejects_unverified_linkage(self):
         with tempfile.TemporaryDirectory() as directory:

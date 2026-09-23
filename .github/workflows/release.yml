@@ -80,6 +80,14 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Configure macOS linker header padding
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'RUSTFLAGS=%s\n' \
+            "${RUSTFLAGS:+$RUSTFLAGS }-C link-arg=-Wl,-headerpad_max_install_names" >> "$GITHUB_ENV"
+
       - name: Install Python
         uses: actions/setup-python@v5
         with:
@@ -315,6 +323,14 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+
+      - name: Configure macOS linker header padding
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'RUSTFLAGS=%s\n' \
+            "${RUSTFLAGS:+$RUSTFLAGS }-C link-arg=-Wl,-headerpad_max_install_names" >> "$GITHUB_ENV"
 
       - name: Install Python
         uses: actions/setup-python@v5

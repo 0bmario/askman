@@ -91,6 +91,14 @@ class ProvisionTldrBundleTests(unittest.TestCase):
             self.assertEqual(detached.read_bytes(), internal.read_bytes())
             self.assertEqual(digest, hashlib.sha256(internal.read_bytes()).hexdigest())
 
+    def test_directory_sync_is_noop_on_windows(self):
+        with (
+            patch.object(PROVISION.os, "name", "nt"),
+            patch.object(PROVISION.os, "open") as open_directory,
+        ):
+            PROVISION._sync_directory(Path("release"))
+        open_directory.assert_not_called()
+
     def test_detached_manifest_rejects_symlinks_and_bundle_destinations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

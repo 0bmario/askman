@@ -52,7 +52,7 @@ def validate_dev_variant_benchmark_schema_and_provenance() -> None:
     assert dataset["split"] == "dev"
     assert dataset["freeze_status"] == "NON-FROZEN"
     assert dataset["task_count"] == len(dataset["tasks"]) == 30
-    assert provenance["source_manifest"] == str(MANIFEST_PATH.relative_to(ROOT))
+    assert provenance["source_manifest"] == MANIFEST_PATH.relative_to(ROOT).as_posix()
     assert provenance["source_manifest_sha256"] == hashlib.sha256(
         manifest_bytes
     ).hexdigest()
@@ -158,7 +158,7 @@ def validate_dev_variant_hybrid_config_is_non_frozen_and_bound_to_inputs() -> No
     }
     assert config["corpus"] == dataset["corpus"]
     assert config["source_policy_config"] == {
-        "path": str(SOURCE_POLICY_CONFIG_PATH.relative_to(ROOT)),
+        "path": SOURCE_POLICY_CONFIG_PATH.relative_to(ROOT).as_posix(),
         "sha256": sha256_file(SOURCE_POLICY_CONFIG_PATH),
     }
     assert config["policy"] == source_policy["policy"]

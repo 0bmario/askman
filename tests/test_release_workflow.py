@@ -153,6 +153,35 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertIn("--require-release-binary", ROOT.joinpath(".github/workflows/ci.yml").read_text(encoding="utf-8"))
         self.assertIn("askman_lifecycle", ROOT.joinpath(".github/workflows/ci.yml").read_text(encoding="utf-8"))
 
+    def test_ci_macos_linker_header_padding_precedes_matrix_builds(self):
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        marker = "      - name: Configure macOS linker header padding\n"
+        self.assertEqual(workflow.count(marker), 1)
+        step = workflow.split(marker, 1)[1].split("\n      - name:", 1)[0]
+        self.assertIn("if: runner.os == 'macOS'", step)
+        self.assertIn("-C link-arg=-Wl,-headerpad_max_install_names", step)
+        self.assertIn('"$GITHUB_ENV"', step)
+        verify_job = workflow.split("  verify:\n", 1)[1]
+        self.assertLess(
+            verify_job.index(marker), verify_job.index("cargo build --locked --features dev")
+        )
+
+    def test_release_macos_linker_header_padding_precedes_all_cargo_builds(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        marker = "      - name: Configure macOS linker header padding\n"
+        self.assertEqual(workflow.count(marker), 2)
+        for job_name, next_job in (
+            ("  build-binaries:\n", "\n  production-bundle:\n"),
+            ("  production-bundle:\n", "\n  production-verification:\n"),
+        ):
+            job = workflow.split(job_name, 1)[1].split(next_job, 1)[0]
+            self.assertEqual(job.count(marker), 1)
+            step = job.split(marker, 1)[1].split("\n      - name:", 1)[0]
+            self.assertIn("if: runner.os == 'macOS'", step)
+            self.assertIn("-C link-arg=-Wl,-headerpad_max_install_names", step)
+            self.assertIn('"$GITHUB_ENV"', step)
+            self.assertLess(job.index(marker), job.index("cargo build"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -104,9 +104,8 @@ def load_config(
         raise ValueError("expanded-dev hybrid config is missing evaluator identity")
     if evaluator_identity.get("version") != EVALUATOR_VERSION:
         raise ValueError("expanded-dev hybrid config evaluator version does not match")
-    if evaluator_identity.get("implementation") != str(
-        Path(__file__).relative_to(ROOT)
-    ):
+    expected_evaluator_path = Path(__file__).relative_to(ROOT).as_posix()
+    if evaluator_identity.get("implementation") != expected_evaluator_path:
         raise ValueError("expanded-dev hybrid config evaluator path does not match")
     if evaluator_identity.get("sha256") != EVALUATOR.sha256_file(Path(__file__)):
         raise ValueError("expanded-dev hybrid config evaluator digest does not match")

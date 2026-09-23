@@ -78,9 +78,10 @@ def load_config(
         raise ValueError("dev-variant config is missing source manifest provenance")
     if file_sha256(source_manifest_path) != source_manifest_identity.get("sha256"):
         raise ValueError("source manifest digest does not match the config")
-    if source_manifest_identity.get("path") != str(
-        source_manifest_path.resolve().relative_to(ROOT)
-    ):
+    expected_source_manifest_path = (
+        source_manifest_path.resolve().relative_to(ROOT).as_posix()
+    )
+    if source_manifest_identity.get("path") != expected_source_manifest_path:
         raise ValueError("source manifest path does not match the config")
 
     bundle_identity = config.get("bundle")

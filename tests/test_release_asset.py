@@ -38,14 +38,16 @@ class ReleaseAssetTests(unittest.TestCase):
         try:
             for name in previous:
                 os.environ[name] = "/cache-backed-runtime"
-            environment = archive_runtime_environment(Path("/tmp/archive"), "1.20.0")
-            self.assertEqual(environment["ORT_LIB_LOCATION"], "/tmp/archive")
-            self.assertEqual(environment["ORT_LIBRARY_PATH"], "/tmp/archive")
-            self.assertEqual(environment["ORT_ROOT"], "/tmp/archive")
+            with tempfile.TemporaryDirectory() as directory:
+                archive = Path(directory) / "archive"
+                environment = archive_runtime_environment(archive, "1.20.0")
+            self.assertEqual(environment["ORT_LIB_LOCATION"], str(archive))
+            self.assertEqual(environment["ORT_LIBRARY_PATH"], str(archive))
+            self.assertEqual(environment["ORT_ROOT"], str(archive))
             for name in previous:
                 if name not in {"ORT_LIB_LOCATION", "ORT_LIBRARY_PATH", "ORT_ROOT", "PATH"}:
                     self.assertNotIn(name, environment)
-            self.assertTrue(environment["PATH"].split(os.pathsep)[0] == "/tmp/archive")
+            self.assertTrue(environment["PATH"].split(os.pathsep)[0] == str(archive))
             self.assertNotIn("cache-backed-runtime", environment["PATH"])
         finally:
             for name, value in previous.items():
