@@ -1,4 +1,4 @@
-use crate::bundle::{BundleManifest, load_validated_bundle};
+use crate::bundle::{BundleManifest, ValidatedBundle, load_validated_bundle};
 use crate::dense::{DenseCandidate, DenseIndex, DenseQueryMode};
 use crate::search::TargetOs;
 use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_validated_connection};
@@ -7,7 +7,6 @@ use colored::Colorize;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
-use std::fs;
 use std::path::{Path, PathBuf};
 
 pub const MAX_DISPLAYED_RESULTS: usize = 3;
@@ -64,6 +63,17 @@ pub fn run_candidate(options: CandidateOptions) -> Result<()> {
     run_candidate_with_query_mode(options, DenseQueryMode::ExpandedDev)
 }
 
+pub fn run_candidate_with_validated_bundle(
+    options: CandidateOptions,
+    validated: ValidatedBundle,
+) -> Result<()> {
+    run_candidate_with_query_mode_and_index(
+        options,
+        DenseQueryMode::ExpandedDev,
+        HybridIndex::open_validated(validated)?,
+    )
+}
+
 /// Return the same hybrid/dense results rendered by the shipping candidate
 /// path, without changing the human-facing CLI output. Development tooling
 /// uses this only for deterministic offline provisioning probes.
@@ -71,13 +81,40 @@ pub fn query_candidate_results(options: CandidateOptions) -> Result<Vec<Candidat
     query_candidate_results_with_query_mode(options, DenseQueryMode::ExpandedDev)
 }
 
+pub fn query_candidate_results_with_validated_bundle(
+    options: CandidateOptions,
+    validated: ValidatedBundle,
+) -> Result<Vec<Candidate>> {
+    query_candidate_results_with_query_mode_and_index(
+        options,
+        DenseQueryMode::ExpandedDev,
+        HybridIndex::open_validated(validated)?,
+    )
+}
+
 /// Render the historical `-j/--json` object contract used by existing
 /// consumers. CI uses the separate versioned array contract so this public
 /// response can evolve independently without changing its shape.
 pub fn query_legacy_json(options: CandidateOptions, verbose: bool) -> Result<serde_json::Value> {
+    let index = HybridIndex::open(&options.bundle)?;
+    query_legacy_json_with_index(options, verbose, index)
+}
+
+pub fn query_legacy_json_with_validated_bundle(
+    options: CandidateOptions,
+    verbose: bool,
+    validated: ValidatedBundle,
+) -> Result<serde_json::Value> {
+    query_legacy_json_with_index(options, verbose, HybridIndex::open_validated(validated)?)
+}
+
+fn query_legacy_json_with_index(
+    options: CandidateOptions,
+    verbose: bool,
+    index: HybridIndex,
+) -> Result<serde_json::Value> {
     let query = options.query.clone();
     let target_os = options.target_os.as_str();
-    let index = HybridIndex::open(&options.bundle)?;
     let result = (|| -> Result<serde_json::Value> {
         let fused = index.query(
             &options.query,
@@ -246,10 +283,23 @@ fn run_candidate_with_query_mode(
     options: CandidateOptions,
     query_mode: DenseQueryMode,
 ) -> Result<()> {
+    let index = HybridIndex::open(&options.bundle)?;
+    run_candidate_with_query_mode_and_index(options, query_mode, index)
+}
+
+fn run_candidate_with_query_mode_and_index(
+    options: CandidateOptions,
+    query_mode: DenseQueryMode,
+    index: HybridIndex,
+) -> Result<()> {
     let verbose = options.verbose;
-    let displayed = query_candidate_results_with_query_mode(options, query_mode)?;
-    print!("{}", render_results(&displayed, verbose));
-    Ok(())
+    let result = (|| -> Result<()> {
+        let displayed = query_candidate_results_with_index(options, query_mode, &index)?;
+        print!("{}", render_results(&displayed, verbose));
+        Ok(())
+    })();
+    std::mem::forget(index);
+    result
 }
 
 fn query_candidate_results_with_query_mode(
@@ -257,20 +307,39 @@ fn query_candidate_results_with_query_mode(
     query_mode: DenseQueryMode,
 ) -> Result<Vec<Candidate>> {
     let index = HybridIndex::open(&options.bundle)?;
-    let result = (|| -> Result<Vec<Candidate>> {
-        let fused = index.query(
-            &options.query,
-            options.target_os,
-            query_mode,
-            options.platform_explicit,
-        )?;
-        Ok(display_candidates(&fused))
-    })();
+    let result = query_candidate_results_with_index(options, query_mode, &index);
     // fastembed's native runtime can abort during teardown on hosts that
     // already loaded another ONNX Runtime. The candidate is a short-lived
     // process, so keep the runtime alive until process exit.
     std::mem::forget(index);
     result
+}
+
+fn query_candidate_results_with_query_mode_and_index(
+    options: CandidateOptions,
+    query_mode: DenseQueryMode,
+    index: HybridIndex,
+) -> Result<Vec<Candidate>> {
+    let result = query_candidate_results_with_index(options, query_mode, &index);
+    // fastembed's native runtime can abort during teardown on hosts that
+    // already loaded another ONNX Runtime. The candidate is a short-lived
+    // process, so keep the runtime alive until process exit.
+    std::mem::forget(index);
+    result
+}
+
+fn query_candidate_results_with_index(
+    options: CandidateOptions,
+    query_mode: DenseQueryMode,
+    index: &HybridIndex,
+) -> Result<Vec<Candidate>> {
+    let fused = index.query(
+        &options.query,
+        options.target_os,
+        query_mode,
+        options.platform_explicit,
+    )?;
+    Ok(display_candidates(&fused))
 }
 
 struct HybridIndex {
@@ -280,17 +349,15 @@ struct HybridIndex {
 
 impl HybridIndex {
     fn open(bundle: &Path) -> Result<Self> {
-        let root = fs::canonicalize(bundle).map_err(|error| {
-            anyhow::anyhow!(
-                "failed to resolve matching bundle {}: {error}",
-                bundle.display()
-            )
-        })?;
-        let validated = load_validated_bundle(&root)?;
+        let validated = load_validated_bundle(bundle)?;
+        Self::open_validated(validated)
+    }
+
+    fn open_validated(validated: ValidatedBundle) -> Result<Self> {
         validate_frozen_bundle(&validated.manifest)?;
 
-        let artifact = root.join(&validated.manifest.corpus.path);
-        let model_cache = root.join("model-cache");
+        let artifact = validated.artifact_path().to_path_buf();
+        let model_cache = validated.model_cache_path().to_path_buf();
         let dense = DenseIndex::open_from_bundle(&artifact, &model_cache, validated.evidence)?;
         Ok(Self { artifact, dense })
     }
@@ -598,6 +665,79 @@ mod tests {
             dense_distance: None,
             ranking_score: 0.0,
         }
+    }
+
+    fn query_manifest() -> BundleManifest {
+        let component = crate::bundle::IndexComponent {
+            version: "component-v1".to_string(),
+            path: crate::bundle::MATCHING_DATABASE.to_string(),
+            size_bytes: 0,
+            sha256: "0".repeat(64),
+        };
+        BundleManifest {
+            schema_version: crate::bundle::BUNDLE_SCHEMA_VERSION,
+            bundle_id: format!("{}:query-test", crate::bundle::BUNDLE_VERSION),
+            bundle_version: crate::bundle::BUNDLE_VERSION.to_string(),
+            artifact_kind: crate::bundle::BUNDLE_KIND.to_string(),
+            parser_version: crate::tldr_subset::PARSER_VERSION.to_string(),
+            source: crate::tldr_subset::SourceMetadata {
+                name: "test".to_string(),
+                revision: "test".to_string(),
+                digest_algorithm: "sha256".to_string(),
+                digest: "0".repeat(64),
+                url: "https://example.test".to_string(),
+                attribution: "test".to_string(),
+                license: crate::tldr_subset::LicenseMetadata {
+                    name: "MIT".to_string(),
+                    url: "https://example.test/license".to_string(),
+                },
+            },
+            platform_selection: crate::bundle::PlatformSelection {
+                platforms: crate::bundle::REQUIRED_PLATFORMS
+                    .iter()
+                    .map(|platform| platform.to_string())
+                    .collect(),
+                filtering: "query-time".to_string(),
+            },
+            lexical_index: component.clone(),
+            dense_index: crate::bundle::DenseComponent {
+                version: crate::dense::DENSE_INDEX_VERSION.to_string(),
+                recipe: FROZEN_DENSE_RECIPE.to_string(),
+                path: crate::bundle::MATCHING_DATABASE.to_string(),
+                size_bytes: 0,
+                sha256: "0".repeat(64),
+            },
+            corpus: component,
+            embedding_model: crate::bundle::EmbeddingModel {
+                id: crate::dense::MODEL_ID.to_string(),
+                revision: crate::dense::MODEL_REVISION.to_string(),
+                runtime: crate::dense::MODEL_RUNTIME.to_string(),
+                dimension: crate::dense::MODEL_DIMENSION,
+                max_length: crate::dense::MODEL_MAX_LENGTH,
+                assets: Vec::new(),
+            },
+            cli_compatibility: format!("askman={}", env!("CARGO_PKG_VERSION")),
+        }
+    }
+
+    #[test]
+    fn validated_query_open_uses_carried_evidence_without_reloading_bundle_path() {
+        let directory = tempfile::tempdir().unwrap();
+        let root = std::fs::canonicalize(directory.path()).unwrap();
+        let validated = ValidatedBundle::for_query_test(root, query_manifest());
+
+        let error = match HybridIndex::open_validated(validated) {
+            Ok(_) => panic!("query test bundle should not open without an artifact"),
+            Err(error) => error.to_string(),
+        };
+        assert!(
+            error.contains("failed to resolve query artifact"),
+            "{error}"
+        );
+        assert!(
+            !error.contains("failed to resolve matching bundle"),
+            "{error}"
+        );
     }
 
     #[test]

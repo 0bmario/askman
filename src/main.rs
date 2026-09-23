@@ -4,7 +4,10 @@ use askman::{
     bundle::BundleStore,
     cli::{self, LifecycleCommand},
     db,
-    hybrid::{CandidateOptions, query_candidate_results, query_legacy_json, run_candidate},
+    hybrid::{
+        CandidateOptions, query_candidate_results_with_validated_bundle,
+        query_legacy_json_with_validated_bundle, run_candidate_with_validated_bundle,
+    },
     search,
 };
 use clap::Parser;
@@ -54,7 +57,7 @@ fn main() -> Result<()> {
     }
 
     let query = args.question.join(" ");
-    let (bundle, _) = store.active_bundle()?;
+    let (bundle, validated) = store.active_validated_bundle()?;
     let options = CandidateOptions {
         bundle,
         query,
@@ -65,16 +68,22 @@ fn main() -> Result<()> {
     if args.ci_json_v1 {
         println!(
             "{}",
-            serde_json::to_string(&query_candidate_results(options)?)?
+            serde_json::to_string(&query_candidate_results_with_validated_bundle(
+                options, validated,
+            )?)?
         );
         Ok(())
     } else if args.json {
         println!(
             "{}",
-            serde_json::to_string_pretty(&query_legacy_json(options, args.verbose)?)?
+            serde_json::to_string_pretty(&query_legacy_json_with_validated_bundle(
+                options,
+                args.verbose,
+                validated,
+            )?)?
         );
         Ok(())
     } else {
-        run_candidate(options)
+        run_candidate_with_validated_bundle(options, validated)
     }
 }

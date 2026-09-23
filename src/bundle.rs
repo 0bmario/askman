@@ -447,10 +447,46 @@ pub(crate) struct BundleValidationEvidence {
     kind: EvidenceKind,
 }
 
+/// A bundle manifest together with the activation validation evidence that
+/// query opening can reuse without repeating deep component checks.
 #[derive(Debug, Clone)]
-pub(crate) struct ValidatedBundle {
+pub struct ValidatedBundle {
     pub(crate) manifest: BundleManifest,
     pub(crate) evidence: BundleValidationEvidence,
+}
+
+impl ValidatedBundle {
+    pub(crate) fn artifact_path(&self) -> &Path {
+        &self.evidence.artifact
+    }
+
+    pub(crate) fn model_cache_path(&self) -> &Path {
+        &self.evidence.model_cache
+    }
+
+    #[cfg(test)]
+    pub(crate) fn for_query_test(root: PathBuf, manifest: BundleManifest) -> Self {
+        let artifact = root.join(&manifest.corpus.path);
+        let model_cache = root.join(MODEL_DIRECTORY);
+        Self {
+            manifest,
+            evidence: BundleValidationEvidence {
+                root,
+                artifact,
+                model_cache,
+                stamp: ValidationStamp {
+                    schema_version: STAMP_SCHEMA_VERSION,
+                    bundle_id: String::new(),
+                    root: String::new(),
+                    manifest_sha256: String::new(),
+                    component_sha256: BTreeMap::new(),
+                    files: BTreeMap::new(),
+                    binding_sha256: String::new(),
+                },
+                kind: EvidenceKind::DeepValidated,
+            },
+        }
+    }
 }
 
 /// Per-file identity used by the validation stamp. Sizes and modification
@@ -1452,10 +1488,18 @@ impl BundleStore {
     /// Return and revalidate the active bundle. This path never performs I/O
     /// outside the local store and never creates or downloads anything.
     pub fn active_bundle(&self) -> Result<(PathBuf, BundleManifest)> {
+        let (path, validated) = self.active_validated_bundle()?;
+        Ok((path, validated.manifest))
+    }
+
+    /// Return the active bundle with the validation evidence already produced
+    /// for this query. The production CLI passes this value through to the
+    /// hybrid index so non-Unix targets do not repeat deep validation.
+    pub fn active_validated_bundle(&self) -> Result<(PathBuf, ValidatedBundle)> {
         let state = self
             .read_state()?
             .ok_or_else(|| anyhow!("no active matching bundle; run `askman setup` first"))?;
-        self.load_bundle(&state.active_bundle_id)
+        self.load_bundle_validated(&state.active_bundle_id)
     }
 
     /// First-use setup. Existing valid setup is idempotent; an invalid active
@@ -1692,6 +1736,16 @@ impl BundleStore {
         self.load_bundle_with(bundle_id, load_validated_manifest)
     }
 
+    fn load_bundle_validated(&self, bundle_id: &str) -> Result<(PathBuf, ValidatedBundle)> {
+        let path = self.load_bundle_path(bundle_id)?;
+        let validated = load_validated_bundle(&path)
+            .with_context(|| format!("matching bundle {bundle_id} failed validation"))?;
+        if validated.manifest.bundle_id != bundle_id {
+            bail!("stored matching bundle ID does not match its directory identity");
+        }
+        Ok((path, validated))
+    }
+
     fn load_bundle_with<F>(
         &self,
         bundle_id: &str,
@@ -1700,6 +1754,16 @@ impl BundleStore {
     where
         F: Fn(&Path) -> Result<BundleManifest>,
     {
+        let path = self.load_bundle_path(bundle_id)?;
+        let manifest = validator(&path)
+            .with_context(|| format!("matching bundle {bundle_id} failed validation"))?;
+        if manifest.bundle_id != bundle_id {
+            bail!("stored matching bundle ID does not match its directory identity");
+        }
+        Ok((path, manifest))
+    }
+
+    fn load_bundle_path(&self, bundle_id: &str) -> Result<PathBuf> {
         self.validate_store_root()?;
         let path = self.bundle_path(bundle_id)?;
         if !path_entry_exists(&path) {
@@ -1712,12 +1776,7 @@ impl BundleStore {
         if !metadata.is_dir() {
             bail!("matching bundle {bundle_id} is not a directory");
         }
-        let manifest = validator(&path)
-            .with_context(|| format!("matching bundle {bundle_id} failed validation"))?;
-        if manifest.bundle_id != bundle_id {
-            bail!("stored matching bundle ID does not match its directory identity");
-        }
-        Ok((path, manifest))
+        Ok(path)
     }
 
     fn ensure_store_root(&self) -> Result<()> {
