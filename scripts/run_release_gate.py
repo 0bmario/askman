@@ -83,6 +83,13 @@ class CommandRun:
     timed_out: bool
 
 
+@dataclass(frozen=True)
+class ExampleIdentity:
+    example_id: str
+    platform: str
+    source_path: str
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -371,20 +378,31 @@ def parse_displayed_results(stdout: str) -> list[dict[str, str]]:
     return results
 
 
-def example_index(bundle: Path) -> dict[tuple[str, str], tuple[str, ...]]:
+def example_index(
+    bundle: Path,
+) -> dict[tuple[str, str], tuple[ExampleIdentity, ...]]:
     database = bundle / "matching.db"
     with sqlite3.connect(database) as connection:
         rows = connection.execute(
-            """SELECT e.example_id, e.description, e.command
-               FROM examples AS e ORDER BY e.example_id"""
+            """SELECT e.example_id, e.description, e.command,
+                      p.platform, p.source_path
+               FROM examples AS e
+               JOIN pages AS p ON p.page_id = e.page_id
+               ORDER BY e.example_id"""
         ).fetchall()
-    index: dict[tuple[str, str], list[str]] = {}
-    for example_id, description, command in rows:
+    index: dict[tuple[str, str], list[ExampleIdentity]] = {}
+    for example_id, description, command, platform_name, source_path in rows:
         key = (
             normalize_description_text(description),
             normalize_command_text(command),
         )
-        index.setdefault(key, []).append(example_id)
+        index.setdefault(key, []).append(
+            ExampleIdentity(
+                example_id=example_id,
+                platform=platform_name,
+                source_path=source_path,
+            )
+        )
     return {key: tuple(value) for key, value in index.items()}
 
 
@@ -719,7 +737,10 @@ def stage_main_data(source: Path, scratch: Path) -> tuple[Path, dict[str, str]]:
 
 
 def map_output_to_ids(
-    stdout: str, index: dict[tuple[str, str], tuple[str, ...]]
+    stdout: str,
+    index: dict[tuple[str, str], tuple[ExampleIdentity, ...]],
+    *,
+    platform: str,
 ) -> tuple[tuple[str | None, ...], tuple[dict[str, str], ...]]:
     ids: list[str | None] = []
     unmapped: list[dict[str, str]] = []
@@ -729,18 +750,34 @@ def map_output_to_ids(
             normalize_command_text(result["command"]),
         )
         matches = index.get(key, ())
-        if not matches:
+        platform_matches = tuple(
+            match for match in matches if match.platform == platform
+        )
+        if not platform_matches and platform != "common":
+            platform_matches = tuple(
+                match for match in matches if match.platform == "common"
+            )
+        if not platform_matches:
             ids.append(None)
             unmapped.append(result)
-        elif len(matches) > 1:
-            # The pinned corpus guarantees unambiguous example identities;
-            # refuse to guess rather than scoring an arbitrary match.
+        elif len(platform_matches) > 1:
+            # Platform-qualified source identities are required; refuse to
+            # guess if the selected platform still has duplicate pairs.
+            candidates = tuple(
+                {
+                    "example_id": match.example_id,
+                    "platform": match.platform,
+                    "source_path": match.source_path,
+                }
+                for match in platform_matches
+            )
             raise ValueError(
                 "ambiguous example identity in pinned corpus: "
-                f"{key[0]!r} / {key[1]!r} -> {matches}"
+                f"{key[0]!r} / {key[1]!r} / platform={platform!r} -> "
+                f"{candidates}"
             )
         else:
-            ids.append(matches[0])
+            ids.append(platform_matches[0].example_id)
     return tuple(ids), tuple(unmapped)
 
 
@@ -751,7 +788,7 @@ def run_cli(
     network_prefix: Sequence[str],
     timing_prefix: Sequence[str],
     *,
-    index: dict[tuple[str, str], tuple[str, ...]],
+    index: dict[tuple[str, str], tuple[ExampleIdentity, ...]],
     runtime_environment: dict[str, str] | None = None,
 ) -> CommandRun:
     command = [str(binary), *platform_flag(task["platform"]), *task["question"].split()]
@@ -790,7 +827,9 @@ def run_cli(
         stdout = text_output(error.stdout)
         stderr = text_output(error.stderr, "timeout")
     elapsed_ms = (time.perf_counter() - started) * 1000
-    displayed_ids, unmapped = map_output_to_ids(stdout, index)
+    displayed_ids, unmapped = map_output_to_ids(
+        stdout, index, platform=task["platform"]
+    )
     return CommandRun(
         displayed_example_ids=displayed_ids,
         unmapped_results=unmapped,
@@ -810,7 +849,7 @@ def run_tasks(
     tasks: Sequence[dict[str, Any]],
     network_prefix: Sequence[str],
     timing_prefix: Sequence[str],
-    index: dict[tuple[str, str], tuple[str, ...]],
+    index: dict[tuple[str, str], tuple[ExampleIdentity, ...]],
     runtime_environment: dict[str, str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[CommandRun]]:
     outcomes: list[dict[str, Any]] = []
@@ -884,7 +923,7 @@ def warm_latency(
     tasks: Sequence[dict[str, Any]],
     network_prefix: Sequence[str],
     timing_prefix: Sequence[str],
-    index: dict[tuple[str, str], tuple[str, ...]],
+    index: dict[tuple[str, str], tuple[ExampleIdentity, ...]],
     warmup_count: int,
     measured_count: int,
     runtime_environment: dict[str, str] | None = None,

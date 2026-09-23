@@ -1,4 +1,6 @@
 import importlib.util
+import sqlite3
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -27,6 +29,70 @@ def task(task_id, family, platform, answerable=True):
 
 
 class ReleaseGateTests(unittest.TestCase):
+    def test_platform_qualified_index_maps_duplicate_cat_results(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory)
+            connection = sqlite3.connect(bundle / "matching.db")
+            connection.executescript(
+                """
+                CREATE TABLE pages (
+                    page_id TEXT PRIMARY KEY,
+                    source_path TEXT NOT NULL,
+                    platform TEXT NOT NULL
+                );
+                CREATE TABLE examples (
+                    example_id TEXT PRIMARY KEY,
+                    page_id TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    command TEXT NOT NULL
+                );
+                """
+            )
+            for platform_name in ("common", "linux", "osx"):
+                connection.execute(
+                    "INSERT INTO pages VALUES (?, ?, ?)",
+                    (
+                        f"cat-{platform_name}-page",
+                        f"docs/{platform_name}/cat.md",
+                        platform_name,
+                    ),
+                )
+                connection.execute(
+                    "INSERT INTO examples VALUES (?, ?, ?, ?)",
+                    (
+                        f"cat-{platform_name}",
+                        f"cat-{platform_name}-page",
+                        "Print the contents of a file to `stdout`:",
+                        "cat {{path/to/file}}",
+                    ),
+                )
+            connection.commit()
+            connection.close()
+
+            index = GATE.example_index(bundle)
+            output = (
+                "Examples:\n"
+                "  Print the contents of a file to `stdout`:\n"
+                "   cat path/to/file\n"
+            )
+
+            self.assertEqual(
+                GATE.map_output_to_ids(output, index, platform="common")[0],
+                ("cat-common",),
+            )
+            self.assertEqual(
+                GATE.map_output_to_ids(output, index, platform="linux")[0],
+                ("cat-linux",),
+            )
+            self.assertEqual(
+                GATE.map_output_to_ids(output, index, platform="osx")[0],
+                ("cat-osx",),
+            )
+            self.assertEqual(
+                GATE.map_output_to_ids(output, index, platform="windows")[0],
+                ("cat-common",),
+            )
+
     def test_parser_maps_user_visible_example_pairs(self):
         output = """
         \x1b[32mls\x1b[0m
