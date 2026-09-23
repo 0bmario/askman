@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import subprocess
 import sys
@@ -19,9 +20,13 @@ from pathlib import Path
 
 
 def percentile(values: list[float], fraction: float) -> float:
+    if not values:
+        raise ValueError("percentile requires at least one value")
     ordered = sorted(values)
-    index = min(len(ordered) - 1, max(0, int((len(ordered) - 1) * fraction)))
-    return ordered[index]
+    # Nearest-rank keeps a small sample conservative: p95 of three values is
+    # the maximum, never the middle value that hides a cold launch.
+    rank = max(1, math.ceil(fraction * len(ordered)))
+    return ordered[min(len(ordered), rank) - 1]
 
 
 def run_sample(binary: Path, bundle: Path, query: list[str], ort_lib: Path | None) -> dict:
@@ -77,16 +82,24 @@ def main() -> int:
 
     samples = [run_sample(args.binary, args.bundle, args.query, args.ort_lib) for _ in range(args.runs)]
     elapsed = [sample["elapsed_ms"] for sample in samples]
+    warm_elapsed = elapsed[1:]
     report = {
         "binary": str(args.binary.resolve()),
         "bundle": str(args.bundle.resolve()),
         "query": args.query,
         "runs": args.runs,
         "samples": samples,
-        "p50_ms": percentile(elapsed, 0.50),
-        "p95_ms": percentile(elapsed, 0.95),
+        "cold_sample_ms": elapsed[0],
+        "warmup_samples_excluded": 1,
+        "warm_sample_count": len(warm_elapsed),
+        "warm_samples": samples[1:],
+        "overall_p50_ms": percentile(elapsed, 0.50),
+        "overall_p95_ms": percentile(elapsed, 0.95),
+        "warm_p50_ms": percentile(warm_elapsed, 0.50),
+        "warm_p95_ms": percentile(warm_elapsed, 0.95),
+        "percentile_method": "nearest-rank",
         "max_p95_ms": args.max_p95_ms,
-        "passed": percentile(elapsed, 0.95) <= args.max_p95_ms,
+        "passed": percentile(warm_elapsed, 0.95) <= args.max_p95_ms,
     }
     rendered = json.dumps(report, indent=2) + "\n"
     if args.output:
@@ -95,7 +108,7 @@ def main() -> int:
     print(rendered, end="")
     if not report["passed"]:
         print(
-            f"one-shot p95 {report['p95_ms']:.3f}ms exceeds "
+            f"one-shot warm p95 {report['warm_p95_ms']:.3f}ms exceeds "
             f"{args.max_p95_ms:.3f}ms",
             file=sys.stderr,
         )

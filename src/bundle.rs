@@ -386,9 +386,9 @@ fn validate_license_notice_files(root: &Path, source_license: &str) -> Result<()
     Ok(())
 }
 
-/// Validate every component and compatibility identity in a bundle directory.
-/// All component and model files are re-hashed; callers that only need the
-/// manifest for read-only queries should prefer [`load_validated_manifest`].
+/// Read and validate the manifest's structural identity. The full directory
+/// validator below re-hashes every component and model file; callers that need
+/// query-time evidence should prefer [`load_validated_manifest`].
 fn read_bundle_manifest(root: &Path) -> Result<BundleManifest> {
     let manifest_path = root.join(BUNDLE_MANIFEST);
     let manifest: BundleManifest =
@@ -400,18 +400,43 @@ fn read_bundle_manifest(root: &Path) -> Result<BundleManifest> {
     Ok(manifest)
 }
 
-const STAMP_SCHEMA_VERSION: u32 = 1;
+const STAMP_SCHEMA_VERSION: u32 = 2;
+const STAMP_BINDING_DOMAIN: &str = "askman.matching-bundle.validation.v2";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 struct StampFileStat {
     size: u64,
     mtime_nanos: i128,
+    identity: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 struct ValidationStamp {
     schema_version: u32,
+    bundle_id: String,
+    root: String,
+    manifest_sha256: String,
+    component_sha256: BTreeMap<String, String>,
     files: BTreeMap<String, StampFileStat>,
+    binding_sha256: String,
+}
+
+// The sidecar is a performance cache, not an authentication boundary. Its
+// binding must match the validated manifest and exact query component hashes;
+// an invalid, stale, or forged sidecar always falls back to deep validation.
+
+#[derive(Debug, Clone)]
+pub(crate) struct BundleValidationEvidence {
+    root: PathBuf,
+    artifact: PathBuf,
+    model_cache: PathBuf,
+    stamp: ValidationStamp,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct ValidatedBundle {
+    pub(crate) manifest: BundleManifest,
+    pub(crate) evidence: BundleValidationEvidence,
 }
 
 /// Per-file identity used by the validation stamp. Sizes and modification
@@ -426,7 +451,7 @@ fn stamp_path(root: &Path) -> PathBuf {
     // it: writing into the bundle would change its tree digest.
     root.parent()
         .unwrap_or(root)
-        .join(format!(".{name}.stamp.json"))
+        .join(format!(".{name}.stamp-v{STAMP_SCHEMA_VERSION}.json"))
 }
 
 fn bundle_file_stats(root: &Path) -> Result<BTreeMap<String, StampFileStat>> {
@@ -434,26 +459,75 @@ fn bundle_file_stats(root: &Path) -> Result<BTreeMap<String, StampFileStat>> {
     collect_bundle_files(root, root, &mut files)?;
     let mut stats = BTreeMap::new();
     for relative in files {
-        let metadata = fs::metadata(root.join(&relative))?;
-        stats.insert(
-            relative,
-            StampFileStat {
-                size: metadata.len(),
-                mtime_nanos: metadata
-                    .modified()?
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .map(|duration| duration.as_nanos() as i128)
-                    .unwrap_or_default(),
-            },
-        );
+        stats.insert(relative.clone(), bundle_file_stat(root, &relative)?);
     }
     Ok(stats)
+}
+
+fn bundle_file_stat(root: &Path, relative: &str) -> Result<StampFileStat> {
+    let metadata = fs::metadata(root.join(relative))?;
+    Ok(StampFileStat {
+        size: metadata.len(),
+        mtime_nanos: metadata
+            .modified()?
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_nanos() as i128)
+            .unwrap_or_default(),
+        identity: file_identity(&metadata),
+    })
+}
+
+#[cfg(unix)]
+fn file_identity(metadata: &fs::Metadata) -> Option<String> {
+    use std::os::unix::fs::MetadataExt;
+
+    Some(format!(
+        "unix:{}:{}:{}:{}",
+        metadata.dev(),
+        metadata.ino(),
+        metadata.ctime(),
+        metadata.ctime_nsec()
+    ))
+}
+
+#[cfg(not(unix))]
+fn file_identity(_metadata: &fs::Metadata) -> Option<String> {
+    // Windows and other supported targets do not expose a portable mutation
+    // generation counter. Their stamps therefore never qualify for the
+    // content-free fast path and fall back to deep digest validation.
+    None
+}
+
+fn fast_stamp_identity_available(stats: &BTreeMap<String, StampFileStat>) -> bool {
+    cfg!(unix) && stats.values().all(|stat| stat.identity.is_some())
 }
 
 fn read_validation_stamp(path: &Path) -> Option<ValidationStamp> {
     let raw = fs::read(path).ok()?;
     let stamp = serde_json::from_slice::<ValidationStamp>(&raw).ok()?;
     (stamp.schema_version == STAMP_SCHEMA_VERSION).then_some(stamp)
+}
+
+fn manifest_sha256(manifest: &BundleManifest) -> Result<String> {
+    Ok(format!(
+        "{:x}",
+        Sha256::digest(serde_json::to_vec(manifest)?)
+    ))
+}
+
+fn query_component_sha256(manifest: &BundleManifest) -> BTreeMap<String, String> {
+    let mut components = BTreeMap::new();
+    for component in [&manifest.lexical_index, &manifest.corpus] {
+        components.insert(component.path.clone(), component.sha256.clone());
+    }
+    components.insert(
+        manifest.dense_index.path.clone(),
+        manifest.dense_index.sha256.clone(),
+    );
+    for asset in &manifest.embedding_model.assets {
+        components.insert(asset.path.clone(), asset.sha256.clone());
+    }
+    components
 }
 
 fn write_validation_stamp(path: &Path, stamp: &ValidationStamp) {
@@ -470,12 +544,105 @@ fn write_validation_stamp(path: &Path, stamp: &ValidationStamp) {
     let _ = fs::rename(&temporary, path);
 }
 
-/// Load a matching bundle manifest, reusing a stat-based validation stamp so
-/// a one-shot CLI does not re-hash the pinned model assets on every query.
-/// The stamp is keyed to per-file sizes and modification times; any mismatch
-/// triggers the full deep validation, so the fail-closed contract of
-/// ADR-0004 is unchanged.
-pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
+#[derive(Serialize)]
+struct ValidationBinding<'a> {
+    domain: &'static str,
+    bundle_id: &'a str,
+    root: &'a str,
+    manifest_sha256: &'a str,
+    component_sha256: &'a BTreeMap<String, String>,
+    files: &'a BTreeMap<String, StampFileStat>,
+}
+
+fn validation_binding(stamp: &ValidationStamp) -> Result<String> {
+    let payload = serde_json::to_vec(&ValidationBinding {
+        domain: STAMP_BINDING_DOMAIN,
+        bundle_id: &stamp.bundle_id,
+        root: &stamp.root,
+        manifest_sha256: &stamp.manifest_sha256,
+        component_sha256: &stamp.component_sha256,
+        files: &stamp.files,
+    })?;
+    Ok(format!("{:x}", Sha256::digest(payload)))
+}
+
+fn build_validation_stamp(
+    root: &Path,
+    manifest: &BundleManifest,
+    files: BTreeMap<String, StampFileStat>,
+) -> Result<ValidationStamp> {
+    let mut stamp = ValidationStamp {
+        schema_version: STAMP_SCHEMA_VERSION,
+        bundle_id: manifest.bundle_id.clone(),
+        root: root.to_string_lossy().into_owned(),
+        manifest_sha256: manifest_sha256(manifest)?,
+        component_sha256: query_component_sha256(manifest),
+        files,
+        binding_sha256: String::new(),
+    };
+    stamp.binding_sha256 = validation_binding(&stamp)?;
+    Ok(stamp)
+}
+
+fn stamp_matches(
+    root: &Path,
+    manifest: &BundleManifest,
+    files: &BTreeMap<String, StampFileStat>,
+    stamp: &ValidationStamp,
+) -> Result<bool> {
+    if !fast_stamp_identity_available(files)
+        || stamp.bundle_id != manifest.bundle_id
+        || stamp.root != root.to_string_lossy()
+        || stamp.manifest_sha256 != manifest_sha256(manifest)?
+        || stamp.component_sha256 != query_component_sha256(manifest)
+        || stamp.files != *files
+    {
+        return Ok(false);
+    }
+    Ok(stamp.binding_sha256 == validation_binding(stamp)?)
+}
+
+impl BundleValidationEvidence {
+    pub(crate) fn authorize_query_paths(&self, artifact: &Path, model_cache: &Path) -> Result<()> {
+        let artifact = fs::canonicalize(artifact)
+            .with_context(|| format!("failed to resolve query artifact {}", artifact.display()))?;
+        let model_cache = fs::canonicalize(model_cache).with_context(|| {
+            format!(
+                "failed to resolve query model cache {}",
+                model_cache.display()
+            )
+        })?;
+        if artifact != self.artifact || model_cache != self.model_cache {
+            bail!("query assets do not match trusted matching-bundle activation evidence");
+        }
+
+        if !fast_stamp_identity_available(&self.stamp.files) {
+            // Targets without a portable mutation generation counter cannot
+            // safely use metadata-only evidence, so re-hash the bundle here.
+            validate_matching_bundle(&self.root)?;
+            return Ok(());
+        }
+
+        for relative in self.stamp.component_sha256.keys() {
+            let current = bundle_file_stat(&self.root, relative)?;
+            let expected = self
+                .stamp
+                .files
+                .get(relative)
+                .ok_or_else(|| anyhow!("trusted evidence omits query asset: {relative}"))?;
+            if &current != expected {
+                bail!("query asset changed after matching-bundle validation: {relative}");
+            }
+        }
+        Ok(())
+    }
+}
+
+/// Load a matching bundle and trusted activation evidence without re-hashing
+/// pinned assets on every one-shot query. The evidence binds the manifest's
+/// component digests to the exact bundle path and mutation-aware file stats;
+/// any mismatch falls back to full deep validation.
+pub(crate) fn load_validated_bundle(bundle: &Path) -> Result<ValidatedBundle> {
     let root = fs::canonicalize(bundle)
         .with_context(|| format!("failed to resolve matching bundle {}", bundle.display()))?;
     if !root.is_dir() {
@@ -484,22 +651,42 @@ pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
     let manifest = read_bundle_manifest(&root)?;
     let stats = bundle_file_stats(&root)?;
     let stamp_path = stamp_path(&root);
-    if read_validation_stamp(&stamp_path).is_some_and(|stamp| stamp.files == stats) {
-        // Light path: content identity is pinned by the stamp stats; the
-        // inventory walk re-checks that exactly the expected files exist.
+    if let Some(stamp) = read_validation_stamp(&stamp_path)
+        && stamp_matches(&root, &manifest, &stats, &stamp)?
+    {
+        // Light path: activation already deep-validated the component
+        // digests. The inventory and license checks ensure the expected tree
+        // remains present before query code receives the evidence.
         validate_license_notice_files(&root, &manifest.source.license.name)?;
         validate_bundle_file_inventory(&root, &manifest)?;
-        return Ok(manifest);
+        return Ok(validated_bundle(&root, manifest, stamp));
     }
-    let manifest = validate_matching_bundle(bundle)?;
-    write_validation_stamp(
-        &stamp_path,
-        &ValidationStamp {
-            schema_version: STAMP_SCHEMA_VERSION,
-            files: stats,
+    let manifest = validate_matching_bundle(&root)?;
+    let stats = bundle_file_stats(&root)?;
+    let stamp = build_validation_stamp(&root, &manifest, stats)?;
+    write_validation_stamp(&stamp_path, &stamp);
+    Ok(validated_bundle(&root, manifest, stamp))
+}
+
+pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
+    Ok(load_validated_bundle(bundle)?.manifest)
+}
+
+fn validated_bundle(
+    root: &Path,
+    manifest: BundleManifest,
+    stamp: ValidationStamp,
+) -> ValidatedBundle {
+    let artifact = root.join(&manifest.corpus.path);
+    ValidatedBundle {
+        manifest,
+        evidence: BundleValidationEvidence {
+            root: root.to_path_buf(),
+            artifact,
+            model_cache: root.join(MODEL_DIRECTORY),
+            stamp,
         },
-    );
-    Ok(manifest)
+    }
 }
 
 pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
@@ -1933,21 +2120,6 @@ mod tests {
 
         let stats = bundle_file_stats(&root).unwrap();
         assert_eq!(stats.len(), 1);
-        let stamp = ValidationStamp {
-            schema_version: STAMP_SCHEMA_VERSION,
-            files: stats
-                .iter()
-                .map(|(path, stat)| {
-                    (
-                        path.clone(),
-                        StampFileStat {
-                            size: stat.size,
-                            mtime_nanos: stat.mtime_nanos,
-                        },
-                    )
-                })
-                .collect(),
-        };
 
         // Unchanged tree: the stamp matches.
         assert_eq!(bundle_file_stats(&root).unwrap(), stats);
@@ -1957,7 +2129,62 @@ mod tests {
         let changed = bundle_file_stats(&root).unwrap();
         assert_ne!(changed, stats);
         assert_ne!(changed.get("asset.bin"), stats.get("asset.bin"));
-        let _ = stamp;
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn stamp_stats_detect_same_size_mutation_after_mtime_restore() {
+        use std::io::{Seek, SeekFrom};
+        use std::os::fd::AsRawFd;
+        use std::os::unix::fs::MetadataExt;
+
+        let directory = tempfile::tempdir().unwrap();
+        let bundle = directory.path().join("matching-bundle");
+        fs::create_dir(&bundle).unwrap();
+        let asset = bundle.join("asset.bin");
+        fs::write(&asset, b"payload").unwrap();
+        let root = fs::canonicalize(&bundle).unwrap();
+        let before = fs::metadata(&asset).unwrap();
+        let original_mtime = (before.mtime(), before.mtime_nsec());
+        let original_atime = (before.atime(), before.atime_nsec());
+        let original_identity = file_identity(&before);
+
+        let mut file = OpenOptions::new().write(true).open(&asset).unwrap();
+        file.seek(SeekFrom::Start(0)).unwrap();
+        file.write_all(b"tamper!").unwrap();
+        let times = [
+            libc::timespec {
+                tv_sec: original_atime.0,
+                tv_nsec: original_atime.1,
+            },
+            libc::timespec {
+                tv_sec: original_mtime.0,
+                tv_nsec: original_mtime.1,
+            },
+        ];
+        assert_eq!(
+            unsafe { libc::futimens(file.as_raw_fd(), times.as_ptr()) },
+            0
+        );
+        drop(file);
+
+        let after = fs::metadata(&asset).unwrap();
+        assert_eq!(after.len(), before.len());
+        assert_eq!((after.mtime(), after.mtime_nsec()), original_mtime);
+        assert_ne!(file_identity(&after), original_identity.clone());
+        assert_ne!(
+            bundle_file_stats(&root).unwrap()["asset.bin"],
+            StampFileStat {
+                size: before.len(),
+                mtime_nanos: before
+                    .modified()
+                    .unwrap()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos() as i128,
+                identity: original_identity,
+            }
+        );
     }
 
     #[test]
@@ -1969,10 +2196,39 @@ mod tests {
 
         let stamp = ValidationStamp {
             schema_version: STAMP_SCHEMA_VERSION + 1,
+            bundle_id: String::new(),
+            root: String::new(),
+            manifest_sha256: String::new(),
+            component_sha256: BTreeMap::new(),
             files: BTreeMap::new(),
+            binding_sha256: String::new(),
         };
         fs::write(&path, serde_json::to_vec(&stamp).unwrap()).unwrap();
         assert!(read_validation_stamp(&path).is_none());
+    }
+
+    #[test]
+    fn validation_stamp_binds_manifest_components_and_rejects_forgery() {
+        let directory = tempfile::tempdir().unwrap();
+        let bundle = directory.path().join("matching-bundle");
+        fs::create_dir(&bundle).unwrap();
+        fs::write(bundle.join(MATCHING_DATABASE), b"matching-db").unwrap();
+        let root = fs::canonicalize(&bundle).unwrap();
+        let manifest = lifecycle_manifest("stamp-binding");
+        let files = bundle_file_stats(&root).unwrap();
+        let stamp = build_validation_stamp(&root, &manifest, files.clone()).unwrap();
+        assert!(stamp_matches(&root, &manifest, &files, &stamp).unwrap());
+
+        let mut forged = stamp.clone();
+        forged.binding_sha256 = "0".repeat(64);
+        assert!(!stamp_matches(&root, &manifest, &files, &forged).unwrap());
+
+        let mut stale = stamp;
+        stale.component_sha256.insert(
+            "model-cache/models--Qdrant--all-MiniLM-L6-v2-onnx/refs/main".to_string(),
+            "f".repeat(64),
+        );
+        assert!(!stamp_matches(&root, &manifest, &files, &stale).unwrap());
     }
 
     fn test_manifest(parser_version: &str) -> BundleManifest {

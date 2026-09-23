@@ -1,3 +1,4 @@
+use crate::bundle::BundleValidationEvidence;
 use crate::tldr_subset::{
     artifact_metadata, process_peak_memory_bytes, selected_page_ids, validate_artifact,
 };
@@ -170,6 +171,7 @@ struct DensePartitionStats {
     raw_count: usize,
     unique_page_count: usize,
     saturated: bool,
+    boundary_tied: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -183,6 +185,11 @@ struct DensePartitionCandidates {
 struct ModelAssets {
     cache_dir: PathBuf,
     hashes: BTreeMap<String, String>,
+}
+
+enum ArtifactOpenTrust {
+    DeepValidation,
+    Activated,
 }
 
 pub(crate) struct DenseIndex {
@@ -348,27 +355,30 @@ impl DenseIndex {
     pub(crate) fn open(artifact: &Path, model_cache: &Path) -> Result<Self> {
         register_sqlite_vec();
         let assets = validate_model_assets(model_cache)?;
-        Self::open_index(artifact, assets, false)
+        Self::open_index(artifact, assets, ArtifactOpenTrust::DeepValidation)
     }
 
-    /// Open a dense index whose model assets were already verified by the
-    /// matching-bundle validation. Digests come from the pinned constants and
-    /// no per-file hashing happens on this path.
-    pub(crate) fn open_from_bundle(artifact: &Path, model_cache: &Path) -> Result<Self> {
+    /// Open a dense index after bundle activation supplied trusted evidence.
+    pub(crate) fn open_from_bundle(
+        artifact: &Path,
+        model_cache: &Path,
+        evidence: BundleValidationEvidence,
+    ) -> Result<Self> {
         register_sqlite_vec();
+        evidence.authorize_query_paths(artifact, model_cache)?;
         let assets = pinned_model_assets(model_cache)?;
-        // Bundle activation performs the complete deep validation once. The
-        // query path trusts that activation evidence and only opens the
-        // already-pinned artifact/model assets.
-        Self::open_index(artifact, assets, true)
+        Self::open_index(artifact, assets, ArtifactOpenTrust::Activated)
     }
 
-    fn open_index(artifact: &Path, assets: ModelAssets, validated_bundle: bool) -> Result<Self> {
+    fn open_index(artifact: &Path, assets: ModelAssets, trust: ArtifactOpenTrust) -> Result<Self> {
         let connection = Connection::open(artifact)
             .with_context(|| format!("failed to open dense artifact {}", artifact.display()))?;
-        if !validated_bundle {
-            validate_artifact(&connection)?;
-            validate_dense_artifact(&connection, &assets)?;
+        match trust {
+            ArtifactOpenTrust::DeepValidation => {
+                validate_artifact(&connection)?;
+                validate_dense_artifact(&connection, &assets)?;
+            }
+            ArtifactOpenTrust::Activated => {}
         }
         let embedder = OfflineEmbedder::new(load_embedder(&assets)?);
         Ok(Self {
@@ -507,13 +517,25 @@ fn query_knn_partition_with_limit(
          ORDER BY dense.distance
          ",
     )?;
-    let rows = statement.query_map(params![query_blob, knn_limit as i64, partition], |row| {
-        Ok((
-            row.get::<_, i64>(0)?,
-            row.get::<_, String>(1)?,
-            row.get::<_, f64>(2)?,
-        ))
-    })?;
+    let probe_limit = knn_probe_limit(knn_limit);
+    let rows = statement
+        .query_map(params![query_blob, probe_limit as i64, partition], |row| {
+            Ok((
+                row.get::<_, i64>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, f64>(2)?,
+            ))
+        })?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+    let boundary_tied = if rows.len() > knn_limit {
+        rows[knn_limit - 1].2.total_cmp(&rows[knn_limit].2).is_eq()
+    } else {
+        // sqlite-vec cannot probe past its hard limit. Treat a full hard-limit
+        // result as ambiguous so exact fallback remains the safe choice.
+        knn_limit == MAX_KNN_BATCH_SIZE && rows.len() >= knn_limit
+    };
+    let saturated = rows.len() >= probe_limit;
+    let probed_count = rows.len();
     let mut details = connection.prepare(
         "SELECT e.example_id, e.page_id, p.command, e.command,
                 p.description, e.description, p.source_path, p.source_ref,
@@ -523,10 +545,7 @@ fn query_knn_partition_with_limit(
          WHERE e.example_id = ?1",
     )?;
     let mut candidates = Vec::new();
-    let mut raw_count = 0;
-    for row in rows {
-        raw_count += 1;
-        let (_rowid, example_id, distance) = row?;
+    for (_rowid, example_id, distance) in rows.into_iter().take(knn_limit) {
         let mut candidate =
             details.query_row(params![example_id], dense_candidate_details_from_row)?;
         candidate.ranking_score = distance;
@@ -547,12 +566,17 @@ fn query_knn_partition_with_limit(
     Ok(DensePartitionCandidates {
         partition: partition.to_string(),
         stats: DensePartitionStats {
-            raw_count,
+            raw_count: probed_count,
             unique_page_count,
-            saturated: raw_count >= knn_limit,
+            saturated,
+            boundary_tied,
         },
         candidates,
     })
+}
+
+fn knn_probe_limit(knn_limit: usize) -> usize {
+    knn_limit.saturating_add(1).min(MAX_KNN_BATCH_SIZE)
 }
 
 fn knn_query_limit(limit: usize) -> usize {
@@ -656,6 +680,17 @@ fn partition_union_proves_completeness(
 ) -> bool {
     if limit == 0 {
         return true;
+    }
+    // A tie at the probe boundary can hide a page needed to fill the requested
+    // page budget. Only the scalar-distance fallback can complete that tie;
+    // when the probe already contains enough unique pages, every returned page
+    // is sufficient for the requested budget and the normal deterministic rank
+    // ordering resolves the observed tie without scanning the whole corpus.
+    if partitions
+        .iter()
+        .any(|partition| partition.stats.boundary_tied && partition.stats.unique_page_count < limit)
+    {
+        return false;
     }
     if !platform_explicit {
         // Host-default ranking merges by distance. Every saturated partition
@@ -1639,6 +1674,44 @@ mod tests {
         assert_eq!(knn_query_limit(8), 64);
         assert_eq!(knn_query_limit(512), MAX_KNN_BATCH_SIZE);
         assert_eq!(knn_query_limit(MAX_KNN_BATCH_SIZE), MAX_KNN_BATCH_SIZE);
+        assert_eq!(knn_probe_limit(64), 65);
+        assert_eq!(knn_probe_limit(MAX_KNN_BATCH_SIZE), MAX_KNN_BATCH_SIZE);
+    }
+
+    #[test]
+    fn tied_knn_boundary_forces_exact_completion() {
+        let rows = (0..65)
+            .map(|index| {
+                (
+                    format!("example-{index}"),
+                    format!("page-{index}"),
+                    "linux".to_string(),
+                )
+            })
+            .collect::<Vec<_>>();
+        let (connection, _, blob) = query_fixture(&rows);
+        let selected = HashSet::from(["page-64".to_string()]);
+        let partition =
+            query_knn_partition_with_limit(&connection, &blob, &selected, "linux", 64).unwrap();
+
+        assert_eq!(partition.stats.raw_count, 65);
+        assert!(partition.stats.saturated);
+        assert!(partition.stats.boundary_tied);
+        assert!(!partition_union_proves_completeness(
+            &[partition],
+            "linux",
+            false,
+            8
+        ));
+        let exact =
+            sql_distance_candidates(&connection, &blob, &selected, "linux", false, 8).unwrap();
+        assert_eq!(
+            exact
+                .iter()
+                .map(|candidate| candidate.page_id.clone())
+                .collect::<Vec<_>>(),
+            vec!["page-64".to_string()]
+        );
     }
 
     #[test]
@@ -1913,6 +1986,7 @@ mod tests {
                 raw_count: MAX_KNN_BATCH_SIZE,
                 unique_page_count: 1,
                 saturated: true,
+                boundary_tied: false,
             },
             candidates: vec![candidate("linux", 0)],
         };
@@ -1922,6 +1996,7 @@ mod tests {
                 raw_count: 7,
                 unique_page_count: 7,
                 saturated: false,
+                boundary_tied: false,
             },
             candidates: (0..7).map(|index| candidate("common", index)).collect(),
         };
@@ -1945,6 +2020,7 @@ mod tests {
                 raw_count: MAX_KNN_BATCH_SIZE,
                 unique_page_count: 8,
                 saturated: true,
+                boundary_tied: false,
             },
             candidates: (0..8).map(|index| candidate("linux", index)).collect(),
         };
@@ -1954,6 +2030,7 @@ mod tests {
                 raw_count: MAX_KNN_BATCH_SIZE,
                 unique_page_count: 8,
                 saturated: true,
+                boundary_tied: false,
             },
             candidates: (0..8).map(|index| candidate("common", index)).collect(),
         };
@@ -1971,6 +2048,7 @@ mod tests {
                         raw_count: 1,
                         unique_page_count: 1,
                         saturated: false,
+                        boundary_tied: false,
                     },
                     candidates: vec![candidate("linux", 0)],
                 },
@@ -1988,6 +2066,7 @@ mod tests {
                         raw_count: 1,
                         unique_page_count: 1,
                         saturated: false,
+                        boundary_tied: false,
                     },
                     candidates: vec![candidate("linux", 0)],
                 },
