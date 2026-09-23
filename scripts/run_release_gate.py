@@ -382,7 +382,8 @@ def example_index(
     bundle: Path,
 ) -> dict[tuple[str, str], tuple[ExampleIdentity, ...]]:
     database = bundle / "matching.db"
-    with sqlite3.connect(database) as connection:
+    connection = sqlite3.connect(database)
+    try:
         rows = connection.execute(
             """SELECT e.example_id, e.description, e.command,
                       p.platform, p.source_path
@@ -390,6 +391,8 @@ def example_index(
                JOIN pages AS p ON p.page_id = e.page_id
                ORDER BY e.example_id"""
         ).fetchall()
+    finally:
+        connection.close()
     index: dict[tuple[str, str], list[ExampleIdentity]] = {}
     for example_id, description, command, platform_name, source_path in rows:
         key = (
