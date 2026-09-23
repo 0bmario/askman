@@ -182,6 +182,30 @@ class ReleaseWorkflowTests(unittest.TestCase):
             self.assertIn('"$GITHUB_ENV"', step)
             self.assertLess(job.index(marker), job.index("cargo build"))
 
+    def test_windows_ci_stages_verified_runtime_before_execution(self):
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        marker = "      - name: Stage pinned Windows runtime beside built binaries\n"
+        self.assertEqual(workflow.count(marker), 1)
+        verify_job = workflow.split("  verify:\n", 1)[1]
+        step = verify_job.split(marker, 1)[1].split("\n      - name:", 1)[0]
+        self.assertIn("if: runner.os == 'Windows'", step)
+        self.assertIn("shell: pwsh", step)
+        self.assertIn("ASKMAN_ORT_RUNTIME_ROOT", step)
+        self.assertIn("runtime-provision.json", step)
+        self.assertIn("Get-FileHash", step)
+        self.assertIn("target/debug/deps", step)
+        self.assertIn("target/release/deps", step)
+        self.assertGreater(
+            verify_job.index(marker), verify_job.index("Build release-mode lifecycle test CLI")
+        )
+        self.assertLess(
+            verify_job.index(marker), verify_job.index("Run Rust tests and lifecycle coverage")
+        )
+        self.assertLess(
+            verify_job.index(marker),
+            verify_job.index("Provision pinned bundle assets (networked setup)"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

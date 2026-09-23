@@ -209,6 +209,40 @@ jobs:
           cp "$shipping_binary.shipping" "$shipping_binary"
           rm -f "$shipping_binary.shipping"
 
+      - name: Stage pinned Windows runtime beside built binaries
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $runtime = Join-Path $env:ASKMAN_ORT_RUNTIME_ROOT 'lib/onnxruntime.dll'
+          $provisionReport = Join-Path $env:RUNNER_TEMP 'askman-onnxruntime/runtime-provision.json'
+          if (!(Test-Path -LiteralPath $runtime -PathType Leaf)) {
+            throw "provisioned ONNX Runtime DLL is missing: $runtime"
+          }
+          if (!(Test-Path -LiteralPath $provisionReport -PathType Leaf)) {
+            throw "runtime provision report is missing: $provisionReport"
+          }
+          $expectedSha256 = ((Get-Content -Raw -LiteralPath $provisionReport | ConvertFrom-Json).runtime.library_sha256).ToLowerInvariant()
+          $sourceSha256 = (Get-FileHash -LiteralPath $runtime -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($sourceSha256 -ne $expectedSha256) {
+            throw "provisioned ONNX Runtime DLL digest mismatch: expected=$expectedSha256 actual=$sourceSha256"
+          }
+          $destinations = @(
+            (Join-Path $env:GITHUB_WORKSPACE 'target/debug'),
+            (Join-Path $env:GITHUB_WORKSPACE 'target/debug/deps'),
+            (Join-Path $env:GITHUB_WORKSPACE 'target/release'),
+            (Join-Path $env:GITHUB_WORKSPACE 'target/release/deps')
+          )
+          foreach ($directory in $destinations) {
+            New-Item -ItemType Directory -Force -Path $directory | Out-Null
+            $destination = Join-Path $directory 'onnxruntime.dll'
+            Copy-Item -LiteralPath $runtime -Destination $destination -Force
+            $destinationSha256 = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($destinationSha256 -ne $sourceSha256) {
+              throw "staged ONNX Runtime DLL digest mismatch: $destination"
+            }
+          }
+
       - name: Embed provisioned runtime path for macOS sandbox
         if: runner.os == 'macOS'
         shell: bash
