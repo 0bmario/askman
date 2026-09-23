@@ -419,6 +419,17 @@ def _runtime_library_candidates(root: Path) -> list[Path]:
     return sorted(set(candidates), key=lambda path: (len(path.parts), str(path)))
 
 
+def _runtime_dependency_tokens(output: str) -> list[str]:
+    tokens: list[str] = []
+    for match in re.finditer(
+        r"(?:=>\s+|\s)([^\s()]*onnxruntime[^\s()]*)", output, re.IGNORECASE
+    ):
+        token = match.group(1).rstrip(",")
+        if token not in tokens:
+            tokens.append(token)
+    return tokens
+
+
 def _runtime_linkage(binary: Path, library: Path | None) -> dict[str, object]:
     if platform.system() == "Darwin":
         tool = shutil.which("otool")
@@ -443,6 +454,7 @@ def _runtime_linkage(binary: Path, library: Path | None) -> dict[str, object]:
             "tool": None,
             "command": None,
             "output": "",
+            "runtime_dependencies": [],
             "contains_library": False,
             "expected_library_path": str(library) if library else None,
             "linkage_verified": False,
@@ -457,6 +469,7 @@ def _runtime_linkage(binary: Path, library: Path | None) -> dict[str, object]:
         check=False,
     )
     output = completed.stdout or ""
+    runtime_dependencies = _runtime_dependency_tokens(output)
     library_names = {library.name, library.as_posix()} if library else set()
     contains_library = any(name and name in output for name in library_names)
     if not contains_library and library is not None and platform.system() == "Linux":
@@ -476,6 +489,7 @@ def _runtime_linkage(binary: Path, library: Path | None) -> dict[str, object]:
         "tool": tool,
         "command": [str(part) for part in command],
         "output": output[-12000:],
+        "runtime_dependencies": runtime_dependencies,
         "contains_library": contains_library,
         "expected_library_path": str(library) if library else None,
         "resolved": not unresolved,
@@ -499,12 +513,13 @@ def _linked_runtime_path(binary: Path | None) -> Path | None:
     if binary is None or not binary.is_file():
         return None
     linkage = _runtime_linkage(binary, None)
-    output = str(linkage.get("output", ""))
-    if re.search(r"=>\s+not found\b", output, re.IGNORECASE):
+    if linkage.get("resolved") is False:
         return None
     candidates: list[Path] = []
-    for match in re.finditer(r"(?:=>\s+|\s)([^\s()]*onnxruntime[^\s()]*)", output, re.IGNORECASE):
-        token = match.group(1).rstrip(",")
+    dependencies = linkage.get("runtime_dependencies", [])
+    for token in dependencies if isinstance(dependencies, list) else []:
+        if not isinstance(token, str):
+            continue
         candidate = Path(token)
         if candidate.is_absolute() and candidate.is_file():
             return candidate.resolve()

@@ -174,6 +174,47 @@ class OfflineLifecycleFixtureTests(unittest.TestCase):
             self.assertEqual(runtime["library_sha256"], hashlib.sha256(b"runtime").hexdigest())
             self.assertTrue(linkage["linkage_verified"])
 
+    def test_runtime_identity_keeps_windows_dependency_before_output_tail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            provisioned = root / "provisioned"
+            binary_directory = root / "target" / "release"
+            provisioned.mkdir()
+            binary_directory.mkdir(parents=True)
+            library = provisioned / "onnxruntime.dll"
+            colocated = binary_directory / "onnxruntime.dll"
+            binary = binary_directory / "askman.exe"
+            library.write_bytes(b"runtime")
+            colocated.write_bytes(b"runtime")
+            binary.write_bytes(b"binary")
+            completed = SimpleNamespace(
+                stdout="  DLL Name: onnxruntime.dll\n" + ("unrelated symbol\n" * 1000),
+                returncode=0,
+            )
+
+            def find_tool(name):
+                return "/usr/bin/llvm-objdump" if name == "llvm-objdump" else None
+
+            with (
+                patch.dict(
+                    os.environ,
+                    {
+                        "ORT_EXPECTED_VERSION": "1.20.0",
+                        "ORT_LIB_LOCATION": str(provisioned),
+                    },
+                    clear=False,
+                ),
+                patch("scripts.ci_offline.platform.system", return_value="Windows"),
+                patch("scripts.ci_offline.shutil.which", side_effect=find_tool),
+                patch("scripts.ci_offline.subprocess.run", return_value=completed),
+            ):
+                evidence = runtime_metadata({"shipping": binary})
+                require_runtime_identity(evidence, expected_version="1.20.0")
+
+            runtime = evidence["onnx_runtime"]
+            self.assertEqual(runtime["resolution"], "binary-linkage")
+            self.assertEqual(Path(runtime["library_path"]), colocated.resolve())
+
     def test_windows_linkage_tool_selection_prefers_dumpbin_then_llvm_objdump(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

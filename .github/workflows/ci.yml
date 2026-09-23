@@ -478,7 +478,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: askman-ci-${{ matrix.os }}
-          path: |
-            ${{ runner.temp }}/askman-ci-report
-            target/release/askman_lifecycle.exe
+          path: ${{ runner.temp }}/askman-ci-report
           if-no-files-found: warn
