@@ -171,6 +171,16 @@ class ReleaseWorkflowTests(unittest.TestCase):
             with self.subTest(workflow=name):
                 step = workflow.split(marker, 1)[1].split("\n      - name:", 1)[0]
                 self.assertIn("Get-Command python -CommandType Application", step)
+                self.assertIn(
+                    "Get-Command python -CommandType Application -ErrorAction Stop | Select-Object -First 1",
+                    step,
+                )
+                self.assertIn("if ($null -eq $pythonCommand", step)
+                self.assertIn("$python = $pythonCommand.Source", step)
+                self.assertNotIn(
+                    "(Get-Command python -CommandType Application -ErrorAction Stop).Source",
+                    step,
+                )
                 self.assertIn("https://github.com/", step)
                 self.assertIn("$baselineExitCode", step)
                 self.assertIn("$blockedExitCode", step)

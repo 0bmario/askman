@@ -431,7 +431,9 @@ jobs:
           if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) {
             throw "production shipping binary is missing: $binary"
           }
-          $python = (Get-Command python -CommandType Application -ErrorAction Stop).Source
+          $pythonCommand = Get-Command python -CommandType Application -ErrorAction Stop | Select-Object -First 1
+          if ($null -eq $pythonCommand -or -not $pythonCommand.Source) { throw 'Python application was not resolved' }
+          $python = $pythonCommand.Source
           $probeScript = Join-Path $env:GITHUB_WORKSPACE 'scripts/network_probe.py'
           $offlineScript = Join-Path $env:GITHUB_WORKSPACE 'scripts/ci_offline.py'
           $externalUrl = 'https://github.com/'

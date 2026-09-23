@@ -661,7 +661,9 @@ jobs:
           New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
           $reportDir = Join-Path $env:RUNNER_TEMP 'askman-production-verification'
           $probeState = Join-Path $env:RUNNER_TEMP 'askman-network-probe.json'
-          $python = (Get-Command python -CommandType Application -ErrorAction Stop).Source
+          $pythonCommand = Get-Command python -CommandType Application -ErrorAction Stop | Select-Object -First 1
+          if ($null -eq $pythonCommand -or -not $pythonCommand.Source) { throw 'Python application was not resolved' }
+          $python = $pythonCommand.Source
           $probeScript = Join-Path $env:GITHUB_WORKSPACE 'scripts/network_probe.py'
           $assetScript = Join-Path $env:GITHUB_WORKSPACE 'scripts/verify_release_asset.py'
           $externalUrl = 'https://github.com/'
