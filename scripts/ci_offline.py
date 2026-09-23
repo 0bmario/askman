@@ -460,9 +460,12 @@ def _runtime_linkage(binary: Path, library: Path | None) -> dict[str, object]:
     contains_library = any(name and name in output for name in library_names)
     if not contains_library and library is not None and platform.system() == "Linux":
         canonical_library = library.resolve()
-        for match in re.finditer(r"=>\s+(/[^\s()]*onnxruntime[^\s()]*)", output, re.IGNORECASE):
+        for match in re.finditer(r"=>\s+([^\s()]+)", output):
+            dependency = Path(match.group(1).rstrip(","))
+            if not dependency.is_absolute() or "onnxruntime" not in dependency.name.lower():
+                continue
             try:
-                if Path(match.group(1).rstrip(",")).resolve() == canonical_library:
+                if dependency.resolve() == canonical_library:
                     contains_library = True
                     break
             except OSError:
