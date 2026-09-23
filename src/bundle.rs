@@ -2310,7 +2310,13 @@ mod tests {
         let manifest = lifecycle_manifest("stamp-binding");
         let files = bundle_file_stats(&root).unwrap();
         let stamp = build_validation_stamp(&root, &manifest, files.clone()).unwrap();
-        assert!(stamp_matches(&root, &manifest, &files, &stamp).unwrap());
+        // Unix metadata identities make the stamp safe for the cheap
+        // mutation-aware path. Platforms without a portable identity must
+        // fail closed and deep-validate instead.
+        assert_eq!(
+            stamp_matches(&root, &manifest, &files, &stamp).unwrap(),
+            fast_stamp_identity_available(&files)
+        );
 
         let mut forged = stamp.clone();
         forged.binding_sha256 = "0".repeat(64);
