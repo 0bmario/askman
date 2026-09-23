@@ -427,10 +427,11 @@ def _runtime_linkage(binary: Path, library: Path | None) -> dict[str, object]:
         tool = shutil.which("ldd")
         command = [tool, str(binary)] if tool else []
     elif platform.system() == "Windows":
-        tool = shutil.which("dumpbin") or shutil.which("objdump")
+        dumpbin = shutil.which("dumpbin")
+        tool = dumpbin or shutil.which("llvm-objdump") or shutil.which("objdump")
         command = (
             [tool, "/DEPENDENTS", str(binary)]
-            if tool and "dumpbin" in Path(tool).name.lower()
+            if dumpbin
             else ([tool, "-p", str(binary)] if tool else [])
         )
     else:
@@ -505,9 +506,18 @@ def _linked_runtime_path(binary: Path | None) -> Path | None:
     for match in re.finditer(r"(?:=>\s+|\s)([^\s()]*onnxruntime[^\s()]*)", output, re.IGNORECASE):
         token = match.group(1).rstrip(",")
         candidate = Path(token)
-        if candidate.is_file():
+        if candidate.is_absolute() and candidate.is_file():
             return candidate.resolve()
-        candidates.append(Path(token).name)
+        candidates.append(candidate.name)
+    # Windows resolves a DLL basename beside the executable before PATH. Prefer
+    # that exact staged copy so evidence identifies the loaded file, not merely
+    # an equally named provisioned/cache candidate.
+    if platform.system() == "Windows":
+        for name in candidates:
+            colocated = binary.parent / name
+            if colocated.is_file():
+                return colocated.resolve()
+
     # macOS commonly reports @rpath/libonnxruntime... rather than the resolved
     # cache path. Resolve that basename only inside the pinned search roots.
     for name in candidates:

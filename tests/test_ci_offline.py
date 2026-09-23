@@ -16,6 +16,7 @@ from scripts.ci_offline import (
     require_runtime_identity,
     runtime_metadata,
     storage_name,
+    _runtime_linkage,
 )
 
 
@@ -122,6 +123,88 @@ class OfflineLifecycleFixtureTests(unittest.TestCase):
             self.assertEqual(Path(runtime["library_path"]), library.resolve())
             self.assertEqual(runtime["library_sha256"], hashlib.sha256(b"runtime").hexdigest())
             self.assertTrue(linkage["linkage_verified"])
+
+    def test_runtime_identity_prefers_windows_colocated_dependency(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            provisioned = root / "provisioned"
+            binary_directory = root / "target" / "release"
+            provisioned.mkdir()
+            binary_directory.mkdir(parents=True)
+            library = provisioned / "onnxruntime.dll"
+            colocated = binary_directory / "onnxruntime.dll"
+            binary = binary_directory / "askman.exe"
+            library.write_bytes(b"runtime")
+            colocated.write_bytes(b"runtime")
+            binary.write_bytes(b"binary")
+            completed = SimpleNamespace(stdout="  DLL Name: onnxruntime.dll\n", returncode=0)
+            conflicting = root / "cwd" / "onnxruntime.dll"
+            conflicting.parent.mkdir()
+            conflicting.write_bytes(b"wrong-runtime")
+
+            def find_tool(name):
+                return "/usr/bin/objdump" if name == "objdump" else None
+
+            previous_cwd = Path.cwd()
+            os.chdir(conflicting.parent)
+            try:
+                with (
+                    patch.dict(
+                        os.environ,
+                        {
+                            "ORT_EXPECTED_VERSION": "1.20.0",
+                            "ORT_LIB_LOCATION": str(provisioned),
+                        },
+                        clear=False,
+                    ),
+                    patch("scripts.ci_offline.platform.system", return_value="Windows"),
+                    patch("scripts.ci_offline.shutil.which", side_effect=find_tool),
+                    patch("scripts.ci_offline.subprocess.run", return_value=completed),
+                ):
+                    evidence = runtime_metadata({"shipping": binary})
+                    require_runtime_identity(evidence, expected_version="1.20.0")
+            finally:
+                os.chdir(previous_cwd)
+
+            runtime = evidence["onnx_runtime"]
+            linkage = evidence["binaries"]["shipping"]["linkage"]
+            self.assertEqual(runtime["resolution"], "binary-linkage")
+            self.assertEqual(Path(runtime["library_path"]), colocated.resolve())
+            self.assertNotEqual(Path(runtime["library_path"]), library.resolve())
+            self.assertEqual(runtime["library_sha256"], hashlib.sha256(b"runtime").hexdigest())
+            self.assertTrue(linkage["linkage_verified"])
+
+    def test_windows_linkage_tool_selection_prefers_dumpbin_then_llvm_objdump(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binary = root / "askman.exe"
+            library = root / "onnxruntime.dll"
+            binary.write_bytes(b"binary")
+            library.write_bytes(b"runtime")
+            completed = SimpleNamespace(stdout="onnxruntime.dll\n", returncode=0)
+
+            def find_dumpbin(name):
+                return "/usr/bin/dumpbin" if name == "dumpbin" else None
+
+            with (
+                patch("scripts.ci_offline.platform.system", return_value="Windows"),
+                patch("scripts.ci_offline.shutil.which", side_effect=find_dumpbin),
+                patch("scripts.ci_offline.subprocess.run", return_value=completed),
+            ):
+                dumpbin_linkage = _runtime_linkage(binary, library)
+
+            def find_llvm_objdump(name):
+                return "/usr/bin/llvm-objdump" if name == "llvm-objdump" else None
+
+            with (
+                patch("scripts.ci_offline.platform.system", return_value="Windows"),
+                patch("scripts.ci_offline.shutil.which", side_effect=find_llvm_objdump),
+                patch("scripts.ci_offline.subprocess.run", return_value=completed),
+            ):
+                llvm_objdump_linkage = _runtime_linkage(binary, library)
+
+            self.assertEqual(dumpbin_linkage["command"][1], "/DEPENDENTS")
+            self.assertEqual(llvm_objdump_linkage["command"][1], "-p")
 
     def test_runtime_identity_rejects_unverified_linkage(self):
         with tempfile.TemporaryDirectory() as directory:
