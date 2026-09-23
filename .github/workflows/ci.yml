@@ -28,6 +28,7 @@ env:
   CLICOLOR_FORCE: "1"
   LIBONNXRUNTIME_NO_PKG_CONFIG: "1"
   ORT_PREFER_DYNAMIC_LINK: "1"
+  ORT_EXPECTED_VERSION: "1.20.0"
   RUST_BACKTRACE: "1"
 
 jobs:
@@ -39,6 +40,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -51,16 +54,25 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            ~/.cache/ort.pyke.io
             target
-          key: ${{ runner.os }}-${{ runner.arch }}-rust-ort-v1-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-rust-build-v1-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-rust-ort-v1-
+            ${{ runner.os }}-${{ runner.arch }}-rust-build-v1-
 
       - name: Install Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
+      - name: Provision pinned ONNX Runtime shared runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/provision_onnxruntime.py \
+            --target x86_64-unknown-linux-gnu \
+            --work-dir "$RUNNER_TEMP/askman-onnxruntime" \
+            --report "$RUNNER_TEMP/askman-onnxruntime/runtime-provision.json" \
+            --github-env "$GITHUB_ENV"
 
       - name: Fetch locked dependencies (networked setup)
         run: cargo fetch --locked
@@ -95,14 +107,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+          - os: macos-15
+            target: aarch64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
 
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -114,6 +133,16 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Provision pinned ONNX Runtime shared runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/provision_onnxruntime.py \
+            --target '${{ matrix.target }}' \
+            --work-dir "$RUNNER_TEMP/askman-onnxruntime" \
+            --report "$RUNNER_TEMP/askman-onnxruntime/runtime-provision.json" \
+            --github-env "$GITHUB_ENV"
+
       - name: Cache Rust dependencies and build
         uses: actions/cache@v4
         with:
@@ -121,9 +150,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-rust-build-v1-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-rust-
+            ${{ runner.os }}-${{ runner.arch }}-rust-build-v1-
 
       - name: Cache pinned model assets
         uses: actions/cache@v4
@@ -154,6 +183,56 @@ jobs:
           CARGO_NET_OFFLINE: "true"
         run: cargo build --locked --offline --release --bin askman
 
+      - name: Build release-mode lifecycle test CLI
+        env:
+          CARGO_NET_OFFLINE: "true"
+        shell: bash
+        run: |
+          set -euo pipefail
+          shipping_binary="$GITHUB_WORKSPACE/target/release/askman"
+          lifecycle_binary="$GITHUB_WORKSPACE/target/release/askman_lifecycle"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            shipping_binary+=".exe"
+            lifecycle_binary+=".exe"
+          fi
+          cp "$shipping_binary" "$shipping_binary.shipping"
+          cargo build --locked --offline --release --features dev --bin askman
+          cp "$shipping_binary" "$lifecycle_binary"
+          cp "$shipping_binary.shipping" "$shipping_binary"
+          rm -f "$shipping_binary.shipping"
+
+      - name: Embed provisioned runtime path for macOS sandbox
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime_directory="$ASKMAN_ORT_RUNTIME_ROOT/lib"
+          test -f "$runtime_directory/libonnxruntime.1.20.0.dylib"
+          if ! otool -l "$GITHUB_WORKSPACE/target/release/askman" | grep -F "$runtime_directory" >/dev/null; then
+            install_name_tool -add_rpath "$runtime_directory" "$GITHUB_WORKSPACE/target/release/askman"
+          fi
+          otool -l "$GITHUB_WORKSPACE/target/release/askman" | grep -F "$runtime_directory"
+          otool -L "$GITHUB_WORKSPACE/target/release/askman" | grep -F 'libonnxruntime'
+          for binary in \
+            "$GITHUB_WORKSPACE/target/debug/tldr_subset" \
+            "$GITHUB_WORKSPACE/target/debug/askman_candidate" \
+            "$GITHUB_WORKSPACE/target/debug/askman" \
+            "$GITHUB_WORKSPACE/target/release/askman_lifecycle"; do
+            if [[ -x "$binary" ]] && otool -L "$binary" 2>/dev/null | grep -F 'libonnxruntime' >/dev/null; then
+              if ! otool -l "$binary" | grep -F "$runtime_directory" >/dev/null; then
+                install_name_tool -add_rpath "$runtime_directory" "$binary"
+              fi
+              otool -l "$binary" | grep -F "$runtime_directory"
+            fi
+          done
+          while IFS= read -r -d '' binary; do
+            if otool -L "$binary" 2>/dev/null | grep -F 'libonnxruntime' >/dev/null; then
+              if ! otool -l "$binary" | grep -F "$runtime_directory" >/dev/null; then
+                install_name_tool -add_rpath "$runtime_directory" "$binary"
+              fi
+            fi
+          done < <(find "$GITHUB_WORKSPACE/target/debug/deps" -type f -perm -111 -print0)
+
       - name: Run Rust tests and lifecycle coverage
         env:
           CARGO_NET_OFFLINE: "true"
@@ -176,10 +255,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          shipping_binary="$GITHUB_WORKSPACE/target/release/askman"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            shipping_binary="$GITHUB_WORKSPACE/target/release/askman_lifecycle.exe"
+          else
+            shipping_binary="$GITHUB_WORKSPACE/target/release/askman_lifecycle"
+          fi
           prepare_command=(
             python scripts/ci_offline.py prepare
             --work-dir "${{ runner.temp }}/askman-ci-work"
             --report-dir "${{ runner.temp }}/askman-ci-report"
+            --shipping-binary "$shipping_binary"
+            --require-release-binary
           )
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             taskset --cpu-list 0 \
@@ -201,41 +288,148 @@ jobs:
           set -euo pipefail
           work_dir="$1"
           report_dir="$2"
+          probe_state="${RUNNER_TEMP}/askman-ci-network-probe.json"
+          ipv4_chain="ASKMAN_CI4_${GITHUB_RUN_ID}"
+          ipv6_chain="ASKMAN_CI6_${GITHUB_RUN_ID}"
           cleanup() {
-            echo '[ci-linux] removing IPv4 firewall rule'
-            sudo iptables -w 10 -D OUTPUT 1 ! -o lo -j REJECT || true
-            echo '[ci-linux] removing IPv6 firewall rule'
-            sudo ip6tables -w 10 -D OUTPUT 1 ! -o lo -j REJECT || true
+            local status=$?
+            kill "${probe_pid:-}" 2>/dev/null || true
+            wait "${probe_pid:-}" 2>/dev/null || true
+            if [[ "${ipv4_inserted:-0}" == 1 ]]; then
+              echo '[ci-linux] removing IPv4 firewall rule'
+              sudo iptables -w 10 -D OUTPUT -j "$ipv4_chain" || status=1
+              sudo iptables -w 10 -F "$ipv4_chain" || status=1
+              sudo iptables -w 10 -X "$ipv4_chain" || status=1
+            fi
+            if [[ "${ipv6_inserted:-0}" == 1 ]]; then
+              echo '[ci-linux] removing IPv6 firewall rule'
+              sudo ip6tables -w 10 -D OUTPUT -j "$ipv6_chain" || status=1
+              sudo ip6tables -w 10 -F "$ipv6_chain" || status=1
+              sudo ip6tables -w 10 -X "$ipv6_chain" || status=1
+            fi
+            exit "$status"
           }
           trap cleanup EXIT
+          ipv4_inserted=0
+          ipv6_inserted=0
+          python scripts/network_probe.py server --state "$probe_state" &
+          probe_pid=$!
+          for _ in {1..50}; do [[ -f "$probe_state" ]] && break; sleep 0.1; done
+          test -f "$probe_state"
+          kill -0 "$probe_pid"
+          probe_url="http://$(python -c 'import json,sys; p=json.load(open(sys.argv[1])); print("{}:{}".format(p["host"],p["port"]))' "$probe_state")"
           echo '[ci-linux] acquiring IPv4 xtables lock'
-          sudo iptables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
+          sudo iptables -w 10 -N "$ipv4_chain"
+          ipv4_inserted=1
+          sudo iptables -w 10 -A "$ipv4_chain" -j REJECT
+          sudo iptables -w 10 -I OUTPUT 1 -j "$ipv4_chain"
           echo '[ci-linux] acquiring IPv6 xtables lock'
-          sudo ip6tables -w 10 -I OUTPUT 1 ! -o lo -j REJECT
+          sudo ip6tables -w 10 -N "$ipv6_chain"
+          ipv6_inserted=1
+          sudo ip6tables -w 10 -A "$ipv6_chain" -j REJECT
+          sudo ip6tables -w 10 -I OUTPUT 1 -j "$ipv6_chain"
+          sudo iptables -w 10 -C OUTPUT -j "$ipv4_chain"
+          sudo ip6tables -w 10 -C OUTPUT -j "$ipv6_chain"
+          set +e
+          python scripts/network_probe.py request --url "$probe_url"
+          probe_status=$?
+          set -e
+          test "$probe_status" -ne 0
+          python scripts/network_probe.py assert-denied --state "$probe_state"
           echo '[ci-linux] firewall isolation active'
           taskset --cpu-list 0 \
             env OMP_NUM_THREADS=1 \
-              ASKMAN_CI_NETWORK_POLICY='Linux iptables deny non-loopback' \
+              ASKMAN_CI_NETWORK_POLICY='Linux iptables deny all outbound' \
+              ASKMAN_CI_NETWORK_PROBE_STATE="$probe_state" \
               python scripts/ci_offline.py verify \
                 --work-dir "$work_dir" \
-                --report-dir "$report_dir"
+                --report-dir "$report_dir" \
+                --shipping-binary "$GITHUB_WORKSPACE/target/release/askman" \
+                --require-release-binary
           SCRIPT
 
       - name: Verify bundle and queries with macOS network isolation
         if: runner.os == 'macOS'
         shell: bash
         run: |
-          ASKMAN_CI_NETWORK_POLICY='sandbox-exec deny network*' \
+          set -euo pipefail
+          command -v sandbox-exec >/dev/null
+          test -x "$GITHUB_WORKSPACE/target/release/askman"
+          probe_state="$RUNNER_TEMP/askman-ci-network-probe.json"
+          python scripts/network_probe.py server --state "$probe_state" &
+          probe_pid=$!
+          cleanup() { local status=$?; kill "$probe_pid" 2>/dev/null || true; wait "$probe_pid" 2>/dev/null || true; exit "$status"; }
+          trap cleanup EXIT
+          for _ in {1..50}; do [[ -f "$probe_state" ]] && break; sleep 0.1; done
+          test -f "$probe_state"
+          kill -0 "$probe_pid"
+          probe_url="http://$(python -c 'import json,sys; p=json.load(open(sys.argv[1])); print("{}:{}".format(p["host"],p["port"]))' "$probe_state")"
+          set +e
+          sandbox-exec -p '(version 1) (allow default) (deny network*)' \
+            python scripts/network_probe.py request --url "$probe_url"
+          probe_status=$?
+          set -e
+          test "$probe_status" -ne 0
+          python scripts/network_probe.py assert-denied --state "$probe_state"
+          ASKMAN_CI_NETWORK_POLICY='macOS sandbox-exec deny network*' \
+            ASKMAN_CI_NETWORK_PROBE_STATE="$probe_state" \
             sandbox-exec -p '(version 1) (allow default) (deny network*)' \
             python scripts/ci_offline.py verify \
               --work-dir "${{ runner.temp }}/askman-ci-work" \
-              --report-dir "${{ runner.temp }}/askman-ci-report"
+              --report-dir "${{ runner.temp }}/askman-ci-report" \
+              --shipping-binary "$GITHUB_WORKSPACE/target/release/askman" \
+              --require-release-binary
 
       - name: Verify bundle and queries on Windows
         if: runner.os == 'Windows'
-        env:
-          ASKMAN_CI_NETWORK_POLICY: "hosted Windows runner has no network namespace; local-bundle and no-network lifecycle checks enforced"
-        run: python scripts/ci_offline.py verify --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report"
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $binary = Join-Path $env:GITHUB_WORKSPACE 'target/release/askman.exe'
+          if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) {
+            throw "production shipping binary is missing: $binary"
+          }
+          $ruleName = "askman-ci-outbound-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          $probeRuleName = "askman-ci-probe-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          $probeState = Join-Path $env:RUNNER_TEMP 'askman-ci-network-probe.json'
+          $probe = Start-Process python -ArgumentList @('scripts/network_probe.py', 'server', '--state', $probeState) -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          $failure = $null
+          try {
+            for ($i = 0; $i -lt 50 -and -not (Test-Path -LiteralPath $probeState); $i++) { Start-Sleep -Milliseconds 100 }
+            if (-not (Test-Path -LiteralPath $probeState)) { throw "network probe server did not start" }
+            if ($probe.HasExited) { throw "network probe server exited before the denial probe" }
+            New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Program $binary -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
+            $python = (Get-Command python).Source
+            New-NetFirewallRule -DisplayName $probeRuleName -Direction Outbound -Program $python -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
+            $rule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction Stop
+            if (-not $rule) { throw "Windows outbound firewall rule was not installed" }
+            $programFilter = Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $rule -ErrorAction Stop
+            if (-not $programFilter -or $programFilter.Program -ine $binary) {
+              throw "Windows outbound firewall rule does not target the exact shipping binary path"
+            }
+            if (-not (Get-NetFirewallRule -DisplayName $probeRuleName -ErrorAction Stop)) { throw "Windows probe firewall rule was not installed" }
+            $probeInfo = Get-Content -Raw -LiteralPath $probeState | ConvertFrom-Json
+            $probeUrl = "http://$($probeInfo.host):$($probeInfo.port)"
+            $probeResult = Start-Process $python -ArgumentList @('scripts/network_probe.py', 'request', '--url', $probeUrl) -WorkingDirectory $env:GITHUB_WORKSPACE -Wait -PassThru -WindowStyle Hidden
+            if ($probeResult.ExitCode -eq 0) { throw "network probe unexpectedly connected" }
+            python scripts/network_probe.py assert-denied --state $probeState
+            $env:ASKMAN_CI_NETWORK_POLICY = "Windows program-specific outbound firewall: $binary"
+            $env:ASKMAN_CI_NETWORK_PROBE_STATE = $probeState
+            python scripts/ci_offline.py verify --work-dir "${{ runner.temp }}/askman-ci-work" --report-dir "${{ runner.temp }}/askman-ci-report" --shipping-binary $binary --require-release-binary
+          } catch {
+            $failure = $_
+          } finally {
+            Remove-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue
+            Remove-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue
+            if (Get-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue) {
+              if ($null -eq $failure) { $failure = "failed to remove Windows probe firewall rule $probeRuleName" }
+            }
+            if (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue) {
+              if ($null -eq $failure) { $failure = "failed to remove Windows outbound firewall rule $ruleName" }
+            }
+            if ($probe -and -not $probe.HasExited) { Stop-Process -Id $probe.Id -Force }
+          }
+          if ($null -ne $failure) { throw $failure }
 
       - name: Upload verification evidence
         if: always()

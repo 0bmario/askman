@@ -380,7 +380,7 @@ run_candidate() {
         --snapshot "$REPO_ROOT/tests/fixtures/tldr-full-corpus" \
         --model-cache "$data_dir/models" \
         --output "$bundle" \
-        --cli-compatibility "askman=0.3.3" \
+        --cli-compatibility "askman=0.4.0" \
         > "$run_dir/candidate-bundle-build.txt"
 
     run_candidate_query "$run_dir" "$candidate" "$bundle" \

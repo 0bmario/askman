@@ -78,6 +78,18 @@ mkdir -p "$INSTALL_DIR"
 mv "${TEMP_DIR}/askman" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR/askman"
 
+# Release archives carry the exact pinned ONNX Runtime beside the executable.
+# Keep that layout after installation so `$ORIGIN`/`@loader_path` remains valid.
+for runtime_library in "${TEMP_DIR}"/libonnxruntime* "${TEMP_DIR}"/onnxruntime*.dll; do
+  if [ -f "$runtime_library" ]; then
+    mv "$runtime_library" "$INSTALL_DIR/"
+  fi
+done
+if [ -d "${TEMP_DIR}/licenses" ]; then
+  mkdir -p "$INSTALL_DIR/licenses"
+  cp -R "${TEMP_DIR}/licenses/." "$INSTALL_DIR/licenses/"
+fi
+
 if ! echo "$PATH" | tr ':' '\n' | grep -qx "$INSTALL_DIR"; then
   echo
   echo "WARNING: $INSTALL_DIR is not in your PATH."

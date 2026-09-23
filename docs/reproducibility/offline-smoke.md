@@ -1,8 +1,9 @@
 # Offline retrieval smoke run
 
-This is a macOS ARM64 developer verification for the current Askman retrieval path. It
-does not change the installed database or model cache, and it is separate from
-the future corpus and evaluation pipelines.
+This is a historical macOS ARM64 developer verification for the v0.3.3
+`commands.db` path. It does not change the installed database or model cache,
+and it is not 0.4.0 release evidence: 0.4.0 uses the separately published
+matching bundle described in [production-bundle.md](production-bundle.md).
 
 ## What is fixed
 
@@ -16,9 +17,8 @@ The provisioning step downloads and verifies:
   SHA256 `2bcfaafa9ff0a3a94f78e3af2f135ffde5bb2d79b08e83a50dbc450b0d20ddae`.
 
 The model files are individually checked before they are placed in the
-fastembed cache layout. The database and model are the public artifacts used
-by the current release; no generated binary, database or model file belongs in
-the repository.
+fastembed cache layout. The database and model are historical public artifacts;
+no generated binary, database or model file belongs in the repository.
 
 ## Reproduce
 

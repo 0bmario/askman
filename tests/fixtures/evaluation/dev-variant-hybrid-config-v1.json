@@ -1,0 +1,60 @@
+{
+  "config_id": "dev-variant-hybrid-v1",
+  "schema_version": 1,
+  "freeze_status": "NON-FROZEN",
+  "candidate_id": "hybrid",
+  "split": "dev",
+  "dataset": {
+    "dataset_id": "askman-dev-variant-benchmark-v1",
+    "sha256": "35716c51c4256825010224c27caeb705546e20deb2631cd96ca5c3516267810a"
+  },
+  "source_policy_config": {
+    "path": "tests/fixtures/evaluation/hybrid-config-expanded-dev-v1.json",
+    "sha256": "308be00b1bb23368247dc5a944149f00b88be32996e4596d930d97dc8eafb384"
+  },
+  "policy": {
+    "fusion": {
+      "method": "rrf",
+      "rrf_k": 60,
+      "keyword_weight": 1.0,
+      "dense_weight": 1.05
+    },
+    "candidate_budgets": {
+      "keyword": 8,
+      "dense": 8
+    },
+    "dense_distance_cutoff": 0.55,
+    "weak_match_cutoff": 0.5,
+    "max_displayed_results": 3
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "source_manifest": {
+    "path": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+    "sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "bundle": {
+    "id": "matching-bundle-v2:f3e07052aa2673bc320a90d563b62ecddc8bc82fd4804166aad09a6641fb60f2",
+    "manifest_sha256": "cde6315f61a0d251cb5d4ac86bd4327684a0393f4f6533230808095978536dfc",
+    "artifact_sha256": "e13c01ae5cc570ce7851915f90244d06bb0a836e345d5af0388e33714e5b1a2f"
+  },
+  "runtime": {
+    "dense_query_mode": "expanded-dev",
+    "onnxruntime_version": "1.20.0",
+    "onnxruntime_library_path": "/tmp/askman-release-gate-inputs-20260921/provision/onnxruntime/onnxruntime-osx-arm64-1.20.0/lib/libonnxruntime.1.20.0.dylib",
+    "onnxruntime_library_sha256": "d8be733cb8dd097cfe2b21e069a7462b5ff561625141d9c4b98d866f15bfb852"
+  },
+  "code": {
+    "evaluate_retrieval_sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90",
+    "evaluate_retrieval_expanded_dev_sha256": "2fb3c9e527e824ed617b34391e753705d6a1d78c3d52d2b88da9f369c48f5f1b",
+    "cargo_lock_sha256": "c7eb0288a893ce1f387118cb0fc7370465d2efdfe33de1518ec2715b81c94f76",
+    "dense_helper_sha256": "72ae4ab71defbbf736e495764a66c3896c1a76bced2ff3f53e9c51fed5fb45e5"
+  }
+}

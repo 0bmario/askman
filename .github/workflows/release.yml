@@ -3,14 +3,16 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "v0.4.0"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   ci:
-    name: Cross-platform CI
+    name: Full production verification (Linux/macOS/Windows)
+    # The reusable full matrix builds the release CLI before running the
+    # production-bundle lifecycle and network-denied query checks.
     uses: ./.github/workflows/ci.yml
     with:
       full: true
@@ -26,6 +28,9 @@ jobs:
     steps:
       - name: Check out release commit
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -36,56 +41,739 @@ jobs:
         run: |
           python scripts/validate_release_gate.py \
             --report docs/reproducibility/artifacts/release-gate.json \
-            --expected-candidate-commit "${GITHUB_SHA}"
+            --expected-release-commit "${GITHUB_SHA}"
 
   build-binaries:
     name: Build Binary (${{ matrix.artifact_name }})
     needs: [ci, release-readiness]
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact_name: askman-linux-x86_64
-          - os: macos-latest
+            binary_name: askman
+          - os: macos-15-intel
             target: x86_64-apple-darwin
             artifact_name: askman-macos-x86_64
-          - os: macos-latest
+            binary_name: askman
+          - os: macos-15
             target: aarch64-apple-darwin
             artifact_name: askman-macos-aarch64
+            binary_name: askman
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: askman-windows-x86_64
+            binary_name: askman.exe
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
-      - name: Build release binary
-        run: cargo build --release --target ${{ matrix.target }}
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
 
-      - name: Package release archive
+      - name: Cache Rust dependencies and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ matrix.target }}-rust-build-v1-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-rust-build-v1-
+
+      - name: Provision pinned ONNX Runtime shared runtime
+        shell: bash
         run: |
-          tar -czvf ${{ matrix.artifact_name }}.tar.gz -C target/${{ matrix.target }}/release askman
+          set -euo pipefail
+          python scripts/provision_onnxruntime.py \
+            --target '${{ matrix.target }}' \
+            --work-dir "$RUNNER_TEMP/askman-onnxruntime" \
+            --report "$RUNNER_TEMP/askman-onnxruntime/runtime-provision.json" \
+            --github-env "$GITHUB_ENV"
+
+      - name: Build release binary against provisioned runtime
+        env:
+          LIBONNXRUNTIME_NO_PKG_CONFIG: "1"
+          ORT_PREFER_DYNAMIC_LINK: "1"
+          ORT_EXPECTED_VERSION: "1.20.0"
+        run: |
+          cargo fetch --locked
+          cargo build --locked --release --target ${{ matrix.target }}
+
+      - name: Install Linux archive tooling
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --yes patchelf
+
+      - name: Record native runtime and release binary identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ORT_EXPECTED_VERSION=1.20.0
+          python scripts/ci_offline.py runtime \
+            --work-dir "$RUNNER_TEMP/askman-runtime" \
+            --report-dir "$RUNNER_TEMP/askman-runtime-report" \
+            --binary "target/${{ matrix.target }}/release/${{ matrix.binary_name }}"
+
+      - name: Package self-contained release archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$RUNNER_OS" in
+            Linux) archive_system=Linux ;;
+            macOS) archive_system=Darwin ;;
+            Windows) archive_system=Windows ;;
+            *) echo "unsupported runner OS: $RUNNER_OS" >&2; exit 1 ;;
+          esac
+          export ORT_EXPECTED_VERSION=1.20.0
+          python scripts/package_release_asset.py \
+            --binary "target/${{ matrix.target }}/release/${{ matrix.binary_name }}" \
+            --runtime-report "$RUNNER_TEMP/askman-runtime-report/runtime-metadata.json" \
+            --output "${{ matrix.artifact_name }}.tar.gz" \
+            --system "$archive_system" \
+            --provision-report "$RUNNER_TEMP/askman-onnxruntime/runtime-provision.json"
+
+      - name: Extracted archive smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_dir="$RUNNER_TEMP/askman-archive-smoke"
+          rm -rf "$smoke_dir"
+          mkdir -p "$smoke_dir"
+          tar -xzf "${{ matrix.artifact_name }}.tar.gz" -C "$smoke_dir"
+          test -f "$smoke_dir/${{ matrix.binary_name }}"
+          test -f "$smoke_dir/release-asset-manifest.json"
+          find "$smoke_dir/licenses" -type f -print -quit | grep .
+          runtime_home="$smoke_dir/empty-home"
+          mkdir -p "$runtime_home"
+          runtime_env=(
+            env
+            -u LD_LIBRARY_PATH
+            -u LD_PRELOAD
+            -u LD_AUDIT
+            -u DYLD_LIBRARY_PATH
+            -u DYLD_FALLBACK_LIBRARY_PATH
+            -u DYLD_FRAMEWORK_PATH
+            -u DYLD_FALLBACK_FRAMEWORK_PATH
+            -u DYLD_INSERT_LIBRARIES
+            -u DYLD_ROOT_PATH
+            -u ORT_LIBRARY_PATH
+            -u ORT_LIB_LOCATION
+            -u ORT_ROOT
+            -u ORT_VERSION
+            -u XDG_CACHE_HOME
+            -u LOCALAPPDATA
+            -u PROGRAMDATA
+            HOME="$runtime_home"
+            USERPROFILE="$runtime_home"
+          )
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            test -f "$smoke_dir"/onnxruntime*.dll
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            linkage_output=$("${runtime_env[@]}" otool -L "$smoke_dir/${{ matrix.binary_name }}")
+            grep -F 'onnxruntime' <<< "$linkage_output"
+            grep -F '@loader_path/' <<< "$linkage_output"
+          else
+            linkage_output=$("${runtime_env[@]}" ldd "$smoke_dir/${{ matrix.binary_name }}")
+            grep -F "$smoke_dir/" <<< "$linkage_output"
+          fi
+
+      - name: Record packaged runtime and binary identity
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_dir="$RUNNER_TEMP/askman-archive-smoke"
+          runtime_home="$smoke_dir/empty-home"
+          mkdir -p "$runtime_home"
+          env \
+            -u LD_LIBRARY_PATH \
+            -u LD_PRELOAD \
+            -u LD_AUDIT \
+            -u DYLD_LIBRARY_PATH \
+            -u DYLD_FALLBACK_LIBRARY_PATH \
+            -u DYLD_FRAMEWORK_PATH \
+            -u DYLD_FALLBACK_FRAMEWORK_PATH \
+            -u DYLD_INSERT_LIBRARIES \
+            -u DYLD_ROOT_PATH \
+            -u ORT_LIBRARY_PATH \
+            -u ORT_LIB_LOCATION \
+            -u ORT_ROOT \
+            -u ORT_VERSION \
+            -u XDG_CACHE_HOME \
+            -u LOCALAPPDATA \
+            -u PROGRAMDATA \
+            HOME="$runtime_home" \
+            USERPROFILE="$runtime_home" \
+            ORT_EXPECTED_VERSION=1.20.0 \
+            ORT_LIB_LOCATION="$smoke_dir" \
+            ORT_LIBRARY_PATH="$smoke_dir" \
+            ORT_ROOT="$smoke_dir" \
+            python scripts/ci_offline.py runtime \
+            --work-dir "$RUNNER_TEMP/askman-packaged-runtime" \
+            --report-dir "$RUNNER_TEMP/askman-packaged-runtime-report" \
+            --binary "$smoke_dir/${{ matrix.binary_name }}"
+
+      - name: Record packaged runtime and binary identity (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $smokeDir = Join-Path $env:RUNNER_TEMP 'askman-archive-smoke'
+          $workDir = Join-Path $env:RUNNER_TEMP 'askman-packaged-runtime'
+          $reportDir = Join-Path $env:RUNNER_TEMP 'askman-packaged-runtime-report'
+          $runtimeHome = Join-Path $smokeDir 'empty-home'
+          New-Item -ItemType Directory -Force -Path $runtimeHome | Out-Null
+          foreach ($name in @(
+              'LD_LIBRARY_PATH', 'LD_PRELOAD', 'LD_AUDIT',
+              'DYLD_LIBRARY_PATH', 'DYLD_FALLBACK_LIBRARY_PATH',
+              'DYLD_FRAMEWORK_PATH', 'DYLD_FALLBACK_FRAMEWORK_PATH',
+              'DYLD_INSERT_LIBRARIES', 'DYLD_ROOT_PATH',
+              'ORT_LIBRARY_PATH', 'ORT_LIB_LOCATION', 'ORT_ROOT', 'ORT_VERSION',
+              'XDG_CACHE_HOME', 'LOCALAPPDATA', 'PROGRAMDATA')) {
+            Remove-Item "Env:$name" -ErrorAction SilentlyContinue
+          }
+          $env:HOME = $runtimeHome
+          $env:USERPROFILE = $runtimeHome
+          $env:ORT_EXPECTED_VERSION = '1.20.0'
+          $env:ORT_LIB_LOCATION = $smokeDir
+          $env:ORT_LIBRARY_PATH = $smokeDir
+          $env:ORT_ROOT = $smokeDir
+          python scripts/ci_offline.py runtime --work-dir $workDir --report-dir $reportDir --binary (Join-Path $smokeDir '${{ matrix.binary_name }}')
+
+      - name: Assemble immutable runtime evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence_dir="$RUNNER_TEMP/askman-runtime-evidence"
+          rm -rf "$evidence_dir"
+          mkdir -p "$evidence_dir"
+          cp "$RUNNER_TEMP/askman-packaged-runtime-report/runtime-metadata.json" \
+            "$evidence_dir/runtime-metadata.json"
+          cp "$RUNNER_TEMP/askman-runtime-report/runtime-metadata.json" \
+            "$evidence_dir/source-runtime-metadata.json"
+          cp "$RUNNER_TEMP/askman-onnxruntime/runtime-provision.json" \
+            "$evidence_dir/runtime-provision.json"
+
+      - name: Upload runtime evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-runtime
+          path: |
+            ${{ runner.temp }}/askman-runtime-evidence/runtime-metadata.json
+            ${{ runner.temp }}/askman-runtime-evidence/source-runtime-metadata.json
+            ${{ runner.temp }}/askman-runtime-evidence/runtime-provision.json
+          if-no-files-found: error
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}
+          name: ${{ matrix.artifact_name }}-binary
           path: ${{ matrix.artifact_name }}.tar.gz
+          if-no-files-found: error
+
+  production-bundle:
+    name: Build production matching bundle (Darwin arm64)
+    needs: [ci, release-readiness]
+    runs-on: macos-15
+    permissions:
+      contents: read
+    env:
+      EXPECTED_RELEASE_VERSION: "0.4.0"
+      ORT_VERSION: "1.20.0"
+      ORT_ARCHIVE_NAME: onnxruntime-osx-arm64-1.20.0.tgz
+      ORT_ARCHIVE_SHA256: 2bcfaafa9ff0a3a94f78e3af2f135ffde5bb2d79b08e83a50dbc450b0d20ddae
+      ORT_LIBRARY_NAME: libonnxruntime.1.20.0.dylib
+      ORT_LIBRARY_SHA256: d8be733cb8dd097cfe2b21e069a7462b5ff561625141d9c4b98d866f15bfb852
+      TLDR_REVISION: e7186598dc466e69c2adf5d8f06037d5b186f08d
+      MODEL_REVISION: 5f1b8cd78bc4fb444dd171e59b18f3a3af89a079
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Assert release tag
+        run: test "$GITHUB_REF_NAME" = "v${EXPECTED_RELEASE_VERSION}"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Assert canonical Darwin arm64 host
+        run: |
+          test "$(uname -s)" = "Darwin"
+          test "$(uname -m)" = "arm64"
+
+      - name: Download and verify pinned ONNX Runtime
+        run: |
+          set -euo pipefail
+          run_dir="$RUNNER_TEMP/askman-production"
+          echo "RUN_DIR=$run_dir" >> "$GITHUB_ENV"
+          mkdir -p "$run_dir"
+          python scripts/provision_onnxruntime.py \
+            --target aarch64-apple-darwin \
+            --work-dir "$run_dir/onnxruntime-provision" \
+            --report "$run_dir/runtime-provision.json" \
+            --github-env "$GITHUB_ENV"
+
+      - name: Fetch locked dependencies and build production tools
+        run: |
+          set -euo pipefail
+          export DYLD_LIBRARY_PATH="$ORT_ROOT/lib"
+          export ORT_LIB_LOCATION="$ORT_ROOT"
+          export ORT_PREFER_DYNAMIC_LINK=1
+          export LIBONNXRUNTIME_NO_PKG_CONFIG=1
+          cargo fetch --locked
+          cargo build --locked --features dev --bin tldr_subset --bin askman_candidate
+
+      - name: Patch every executed production tool to the pinned runtime
+        run: |
+          set -euo pipefail
+          runtime_directory="$ORT_ROOT/lib"
+          for binary in \
+            "$GITHUB_WORKSPACE/target/debug/tldr_subset" \
+            "$GITHUB_WORKSPACE/target/debug/askman_candidate"; do
+            test -x "$binary"
+            if ! otool -L "$binary" | grep -F 'libonnxruntime' >/dev/null; then
+              echo "tool is not linked to ONNX Runtime: $binary" >&2
+              exit 1
+            fi
+            if ! otool -l "$binary" | grep -F "$runtime_directory" >/dev/null; then
+              install_name_tool -add_rpath "$runtime_directory" "$binary"
+            fi
+            otool -l "$binary" | grep -F "$runtime_directory"
+          done
+
+      - name: Provision exact pinned model assets
+        run: |
+          python scripts/ci_offline.py provision \
+            --work-dir "$RUN_DIR" \
+            --report-dir "$RUN_DIR/ci-report"
+
+      - name: Build and validate production matching bundle
+        run: |
+          set -euo pipefail
+          export DYLD_LIBRARY_PATH="$ORT_ROOT/lib"
+          export ORT_LIB_LOCATION="$ORT_ROOT"
+          export ORT_PREFER_DYNAMIC_LINK=1
+          export LIBONNXRUNTIME_NO_PKG_CONFIG=1
+          python scripts/provision_tldr_bundle.py \
+            --work-dir "$RUN_DIR" \
+            --model-cache "$RUN_DIR/model-cache" \
+            --output "$RUN_DIR/matching-bundle" \
+            --archive-output "$RUN_DIR/matching-bundle.tar.gz" \
+            --detached-manifest-output "$RUN_DIR/matching-bundle-manifest.json" \
+            --report "$RUN_DIR/matching-bundle-provision.json" \
+            --tldr-subset target/debug/tldr_subset \
+            --askman-candidate target/debug/askman_candidate \
+            --runtime-lib "$ORT_ROOT/lib" \
+            --runtime-archive "$RUN_DIR/onnxruntime-provision/${ORT_ARCHIVE_NAME}" \
+            --cli-compatibility "askman=${EXPECTED_RELEASE_VERSION}" \
+            --check-rebuild
+
+      - name: Fail closed on ineligible or mismatched production evidence
+        run: |
+          python - "$RUN_DIR/matching-bundle-provision.json" \
+            "$RUN_DIR/matching-bundle" \
+            "$RUN_DIR/matching-bundle.tar.gz" \
+            "$RUN_DIR/matching-bundle-manifest.json" \
+            "$RUN_DIR/runtime-provision.json" <<'PY'
+          import hashlib
+          import json
+          import os
+          import sys
+          import tarfile
+          import tomllib
+          from pathlib import Path
+
+          report_path, bundle_path, archive_path, detached_path, runtime_provision_path = map(Path, sys.argv[1:])
+          expected_release_version = os.environ["EXPECTED_RELEASE_VERSION"]
+          tldr_revision = os.environ["TLDR_REVISION"]
+          model_revision = os.environ["MODEL_REVISION"]
+          ort_version = os.environ["ORT_VERSION"]
+          ort_library_sha256 = os.environ["ORT_LIBRARY_SHA256"]
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          runtime_provision = json.loads(runtime_provision_path.read_text(encoding="utf-8"))
+          if runtime_provision.get("version") != ort_version:
+              raise SystemExit("pinned runtime provision version mismatch")
+          pinned_archive = runtime_provision.get("archive", {})
+          pinned_runtime = runtime_provision.get("runtime", {})
+          if (
+              pinned_archive.get("name") != os.environ["ORT_ARCHIVE_NAME"]
+              or pinned_archive.get("sha256") != os.environ["ORT_ARCHIVE_SHA256"]
+              or pinned_runtime.get("library_name") != os.environ["ORT_LIBRARY_NAME"]
+              or pinned_runtime.get("library_sha256") != ort_library_sha256
+          ):
+              raise SystemExit("pinned runtime provision identity mismatch")
+          if len(runtime_provision.get("licenses", [])) < 2:
+              raise SystemExit("pinned runtime provision is missing license/notice evidence")
+          builder = report["builder"]
+          if builder["production_eligible"] is not True or builder["git_dirty"] is not False or builder["allow_dirty"] is not False:
+              raise SystemExit("production bundle evidence is dirty or production-ineligible")
+          manifest_bytes = (bundle_path / "manifest.json").read_bytes()
+          detached_bytes = detached_path.read_bytes()
+          archive_sha = hashlib.sha256(archive_path.read_bytes()).hexdigest()
+          manifest_sha = hashlib.sha256(manifest_bytes).hexdigest()
+          if detached_bytes != manifest_bytes:
+              raise SystemExit("detached release manifest does not match bundle manifest")
+          if report["bundle"]["manifest_sha256"] != manifest_sha:
+              raise SystemExit("production report manifest digest mismatch")
+          if report["bundle"]["detached_manifest_sha256"] != manifest_sha:
+              raise SystemExit("production report detached manifest digest mismatch")
+          if report["bundle"]["archive_sha256"] != archive_sha:
+              raise SystemExit("production report archive digest mismatch")
+          manifest = json.loads(manifest_bytes)
+          if manifest["cli_compatibility"] != f"askman={expected_release_version}":
+              raise SystemExit("production bundle CLI compatibility mismatch")
+          if manifest["source"]["revision"] != tldr_revision:
+              raise SystemExit("production bundle tldr revision mismatch")
+          if report["model"]["revision"] != model_revision:
+              raise SystemExit("production bundle model revision mismatch")
+          runtime = report["model"]["onnx_runtime"]
+          if runtime["version"] != ort_version or runtime["library_sha256"] != ort_library_sha256:
+              raise SystemExit("production bundle ONNX Runtime identity mismatch")
+          with tarfile.open(archive_path, "r:gz") as archive:
+              embedded = archive.extractfile("manifest.json")
+              if embedded is None or embedded.read() != manifest_bytes:
+                  raise SystemExit("archive manifest does not match detached release manifest")
+          with Path("Cargo.toml").open("rb") as stream:
+              cargo_version = tomllib.load(stream)["package"]["version"]
+          if cargo_version != expected_release_version:
+              raise SystemExit("Cargo.toml must be bumped to 0.4.0 before release")
+          print("production bundle evidence and release assets match")
+          PY
+
+      - name: Stage production bundle release assets
+        run: |
+          mkdir -p "$RUN_DIR/release-assets"
+          cp "$RUN_DIR/matching-bundle-manifest.json" \
+            "$RUN_DIR/matching-bundle.tar.gz" \
+            "$RUN_DIR/matching-bundle-provision.json" \
+            "$RUN_DIR/runtime-provision.json" \
+            "$RUN_DIR/release-assets/"
+
+      - name: Upload production bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-matching-bundle
+          path: ${{ runner.temp }}/askman-production/release-assets/*
+          if-no-files-found: error
+
+  production-verification:
+    name: Verify extracted production asset (${{ matrix.artifact_name }})
+    needs: [build-binaries, production-bundle]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: askman-linux-x86_64
+            binary_name: askman
+          - os: macos-15-intel
+            artifact_name: askman-macos-x86_64
+            binary_name: askman
+          - os: macos-15
+            artifact_name: askman-macos-aarch64
+            binary_name: askman
+          - os: windows-latest
+            artifact_name: askman-windows-x86_64
+            binary_name: askman.exe
+
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Download exact binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-binary
+          path: binary-artifact
+
+      - name: Download exact packaged runtime evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-runtime
+          path: runtime-evidence
+
+      - name: Download exact production bundle artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-matching-bundle
+          path: production-bundle
+
+      - name: Install Linux archive/network tooling
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --yes patchelf iptables
+
+      - name: Verify exact asset with Linux firewall and probe
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$(find binary-artifact -type f -name '*.tar.gz' -print -quit)"
+          test -n "$archive"
+          report_dir="$RUNNER_TEMP/askman-production-verification"
+          probe_state="$RUNNER_TEMP/askman-network-probe.json"
+          python scripts/network_probe.py server --state "$probe_state" &
+          probe_pid=$!
+          ipv4_chain="ASKMAN_RELEASE4_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          ipv6_chain="ASKMAN_RELEASE6_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          cleanup() {
+            local status=$?
+            kill "$probe_pid" 2>/dev/null || true
+            wait "$probe_pid" 2>/dev/null || true
+            sudo iptables -w 10 -D OUTPUT -j "$ipv4_chain" 2>/dev/null || status=1
+            sudo iptables -w 10 -F "$ipv4_chain" 2>/dev/null || status=1
+            sudo iptables -w 10 -X "$ipv4_chain" 2>/dev/null || status=1
+            sudo ip6tables -w 10 -D OUTPUT -j "$ipv6_chain" 2>/dev/null || status=1
+            sudo ip6tables -w 10 -F "$ipv6_chain" 2>/dev/null || status=1
+            sudo ip6tables -w 10 -X "$ipv6_chain" 2>/dev/null || status=1
+            exit "$status"
+          }
+          trap cleanup EXIT
+          for _ in {1..50}; do [[ -f "$probe_state" ]] && break; sleep 0.1; done
+          test -f "$probe_state"
+          kill -0 "$probe_pid"
+          probe_url="http://$(python -c 'import json,sys; p=json.load(open(sys.argv[1])); print("{}:{}".format(p["host"],p["port"]))' "$probe_state")"
+          sudo iptables -w 10 -N "$ipv4_chain"
+          sudo iptables -w 10 -A "$ipv4_chain" -j REJECT
+          sudo iptables -w 10 -I OUTPUT 1 -j "$ipv4_chain"
+          sudo ip6tables -w 10 -N "$ipv6_chain"
+          sudo ip6tables -w 10 -A "$ipv6_chain" -j REJECT
+          sudo ip6tables -w 10 -I OUTPUT 1 -j "$ipv6_chain"
+          sudo iptables -w 10 -C OUTPUT -j "$ipv4_chain"
+          sudo ip6tables -w 10 -C OUTPUT -j "$ipv6_chain"
+          set +e
+          python scripts/network_probe.py request --url "$probe_url"
+          probe_status=$?
+          set -e
+          test "$probe_status" -ne 0
+          python scripts/network_probe.py assert-denied --state "$probe_state"
+          ORT_EXPECTED_VERSION=1.20.0 python scripts/verify_release_asset.py \
+            --archive "$archive" \
+            --runtime-report runtime-evidence/runtime-metadata.json \
+            --source-runtime-report runtime-evidence/source-runtime-metadata.json \
+            --runtime-provision-report runtime-evidence/runtime-provision.json \
+            --bundle-archive production-bundle/matching-bundle.tar.gz \
+            --bundle-manifest production-bundle/matching-bundle-manifest.json \
+            --bundle-report production-bundle/matching-bundle-provision.json \
+            --report-dir "$report_dir" \
+            --binary-name '${{ matrix.binary_name }}' \
+            --network-probe-state "$probe_state" \
+            --network-policy 'Linux iptables reject-all OUTPUT'
+
+      - name: Verify exact asset with macOS sandbox and probe
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v sandbox-exec >/dev/null
+          archive="$(find binary-artifact -type f -name '*.tar.gz' -print -quit)"
+          test -n "$archive"
+          report_dir="$RUNNER_TEMP/askman-production-verification"
+          probe_state="$RUNNER_TEMP/askman-network-probe.json"
+          python scripts/network_probe.py server --state "$probe_state" &
+          probe_pid=$!
+          cleanup() { local status=$?; kill "$probe_pid" 2>/dev/null || true; wait "$probe_pid" 2>/dev/null || true; exit "$status"; }
+          trap cleanup EXIT
+          for _ in {1..50}; do [[ -f "$probe_state" ]] && break; sleep 0.1; done
+          test -f "$probe_state"
+          kill -0 "$probe_pid"
+          probe_url="http://$(python -c 'import json,sys; p=json.load(open(sys.argv[1])); print("{}:{}".format(p["host"],p["port"]))' "$probe_state")"
+          set +e
+          sandbox-exec -p '(version 1) (allow default) (deny network*)' \
+            python scripts/network_probe.py request --url "$probe_url"
+          probe_status=$?
+          set -e
+          test "$probe_status" -ne 0
+          python scripts/network_probe.py assert-denied --state "$probe_state"
+          sandbox-exec -p '(version 1) (allow default) (deny network*)' \
+            env ORT_EXPECTED_VERSION=1.20.0 \
+            python scripts/verify_release_asset.py \
+              --archive "$archive" \
+              --runtime-report runtime-evidence/runtime-metadata.json \
+              --source-runtime-report runtime-evidence/source-runtime-metadata.json \
+              --runtime-provision-report runtime-evidence/runtime-provision.json \
+              --bundle-archive production-bundle/matching-bundle.tar.gz \
+              --bundle-manifest production-bundle/matching-bundle-manifest.json \
+              --bundle-report production-bundle/matching-bundle-provision.json \
+              --report-dir "$report_dir" \
+              --binary-name '${{ matrix.binary_name }}' \
+              --network-probe-state "$probe_state" \
+              --network-policy 'macOS sandbox-exec deny network*'
+
+      - name: Verify exact asset with Windows program firewall and probe
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = (Get-ChildItem -LiteralPath binary-artifact -Filter '*.tar.gz' -Recurse | Select-Object -First 1).FullName
+          if (-not $archive) { throw 'binary archive was not downloaded' }
+          $extractDir = Join-Path $env:RUNNER_TEMP 'askman-production-asset'
+          New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
+          $reportDir = Join-Path $env:RUNNER_TEMP 'askman-production-verification'
+          $probeState = Join-Path $env:RUNNER_TEMP 'askman-network-probe.json'
+          $probe = Start-Process python -ArgumentList @('scripts/network_probe.py', 'server', '--state', $probeState) -WorkingDirectory $env:GITHUB_WORKSPACE -PassThru -WindowStyle Hidden
+          $ruleName = "askman-release-outbound-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          $probeRuleName = "askman-release-probe-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          $failure = $null
+          try {
+            for ($i = 0; $i -lt 50 -and -not (Test-Path -LiteralPath $probeState); $i++) { Start-Sleep -Milliseconds 100 }
+            if (-not (Test-Path -LiteralPath $probeState)) { throw 'network probe server did not start' }
+            if ($probe.HasExited) { throw 'network probe server exited before the denial probe' }
+            tar -xzf $archive -C $extractDir
+            $binary = Join-Path $extractDir '${{ matrix.binary_name }}'
+            $python = (Get-Command python).Source
+            New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Program $binary -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
+            New-NetFirewallRule -DisplayName $probeRuleName -Direction Outbound -Program $python -Action Block -Profile Any -Enabled True -ErrorAction Stop | Out-Null
+            $rule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction Stop
+            if (-not $rule) { throw 'shipping program firewall rule missing' }
+            $programFilter = Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $rule -ErrorAction Stop
+            if (-not $programFilter -or $programFilter.Program -ine $binary) { throw 'shipping program firewall rule targets the wrong executable path' }
+            if (-not (Get-NetFirewallRule -DisplayName $probeRuleName -ErrorAction Stop)) { throw 'probe firewall rule missing' }
+            $probeUrl = (Get-Content -Raw -LiteralPath $probeState | ConvertFrom-Json)
+            $probeUrl = "http://$($probeUrl.host):$($probeUrl.port)"
+            $probeResult = Start-Process $python -ArgumentList @('scripts/network_probe.py', 'request', '--url', $probeUrl) -WorkingDirectory $env:GITHUB_WORKSPACE -Wait -PassThru -WindowStyle Hidden
+            if ($probeResult.ExitCode -eq 0) { throw 'network probe unexpectedly connected' }
+            python scripts/network_probe.py assert-denied --state $probeState
+            $env:ORT_EXPECTED_VERSION = '1.20.0'
+            python scripts/verify_release_asset.py --archive $archive --extract-dir $extractDir --runtime-report runtime-evidence/runtime-metadata.json --source-runtime-report runtime-evidence/source-runtime-metadata.json --runtime-provision-report runtime-evidence/runtime-provision.json --bundle-archive production-bundle/matching-bundle.tar.gz --bundle-manifest production-bundle/matching-bundle-manifest.json --bundle-report production-bundle/matching-bundle-provision.json --report-dir $reportDir --binary-name '${{ matrix.binary_name }}' --network-probe-state $probeState --network-policy "Windows program-specific outbound firewall: $binary"
+          } catch { $failure = $_ } finally {
+            Remove-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue
+            Remove-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue
+            if (Get-NetFirewallRule -DisplayName $probeRuleName -ErrorAction SilentlyContinue) { if ($null -eq $failure) { $failure = 'probe firewall cleanup failed' } }
+            if (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue) { if ($null -eq $failure) { $failure = 'shipping firewall cleanup failed' } }
+            if ($probe -and -not $probe.HasExited) { Stop-Process -Id $probe.Id -Force }
+          }
+          if ($null -ne $failure) { throw $failure }
+
+      - name: Upload production verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-production-verification
+          path: ${{ runner.temp }}/askman-production-verification
+          if-no-files-found: error
+
+  package-crate:
+    name: Verify packaged crate
+    needs: [ci, release-readiness, production-bundle, production-verification]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      LIBONNXRUNTIME_NO_PKG_CONFIG: "1"
+      ORT_PREFER_DYNAMIC_LINK: "1"
+      ORT_EXPECTED_VERSION: "1.20.0"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Provision pinned ONNX Runtime for install smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/provision_onnxruntime.py \
+            --target x86_64-unknown-linux-gnu \
+            --work-dir "$RUNNER_TEMP/askman-onnxruntime" \
+            --report "$RUNNER_TEMP/askman-onnxruntime/runtime-provision.json" \
+            --github-env "$GITHUB_ENV"
+
+      - name: Fetch locked dependencies
+        run: cargo fetch --locked
+
+      - name: Package and verify code-only crate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo package --locked --no-verify
+          mkdir -p "$RUNNER_TEMP/askman-crate-artifact"
+          python scripts/verify_crate_package.py \
+            --package target/package/askman-0.4.0.crate \
+            --expected-version 0.4.0 \
+            --report "$RUNNER_TEMP/askman-crate-artifact/package-report.json"
+          cp target/package/askman-0.4.0.crate "$RUNNER_TEMP/askman-crate-artifact/"
+          archive_sha="$(sha256sum target/package/askman-0.4.0.crate | awk '{print $1}')"
+          report_sha="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["archive_sha256"])' "$RUNNER_TEMP/askman-crate-artifact/package-report.json")"
+          test "$archive_sha" = "$report_sha"
+          printf 'askman-0.4.0.crate sha256=%s\n' "$archive_sha" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install from packaged crate and smoke version
+        shell: bash
+        run: |
+          set -euo pipefail
+          extract_dir="$RUNNER_TEMP/askman-crate-extracted"
+          install_root="$RUNNER_TEMP/askman-crate-install"
+          mkdir -p "$extract_dir" "$install_root"
+          tar -xzf target/package/askman-0.4.0.crate -C "$extract_dir"
+          env CARGO_NET_OFFLINE=true \
+            cargo install --locked --offline \
+              --path "$extract_dir/askman-0.4.0" \
+              --root "$install_root" \
+              --bin askman
+          test "$("$install_root/bin/askman" --version)" = "askman 0.4.0"
+
+      - name: Upload verified crate package
+        uses: actions/upload-artifact@v4
+        with:
+          name: askman-crate-package
+          path: ${{ runner.temp }}/askman-crate-artifact
           if-no-files-found: error
 
   publish-release:
     name: Publish Release
-    needs: [build-binaries, release-readiness]
+    needs: [build-binaries, release-readiness, production-bundle, production-verification, package-crate]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Validate tag matches Cargo.toml version
         run: |
@@ -113,18 +801,95 @@ jobs:
       - name: Download binary artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: askman-*
+          pattern: askman-*-binary
           merge-multiple: true
           path: release-assets
 
+      - name: Download production matching bundle artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: production-matching-bundle
+          path: release-assets
+
+      - name: Download post-build production verification evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: askman-*-production-verification
+          merge-multiple: false
+          path: production-verification
+
+      - name: Validate production release assets
+        run: |
+          python - "${GITHUB_WORKSPACE}/release-assets/matching-bundle-provision.json" \
+            "${GITHUB_WORKSPACE}/release-assets/matching-bundle.tar.gz" \
+            "${GITHUB_WORKSPACE}/release-assets/matching-bundle-manifest.json" <<'PY'
+          import hashlib
+          import json
+          import sys
+          import tarfile
+          from pathlib import Path
+
+          report_path, archive_path, manifest_path = map(Path, sys.argv[1:])
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          builder = report["builder"]
+          if builder["production_eligible"] is not True or builder["git_dirty"] is not False or builder["allow_dirty"] is not False:
+              raise SystemExit("release bundle report is dirty or not production-eligible")
+          manifest_bytes = manifest_path.read_bytes()
+          if hashlib.sha256(manifest_bytes).hexdigest() != report["bundle"]["manifest_sha256"]:
+              raise SystemExit("release manifest does not match production report")
+          if hashlib.sha256(archive_path.read_bytes()).hexdigest() != report["bundle"]["archive_sha256"]:
+              raise SystemExit("release archive does not match production report")
+          with tarfile.open(archive_path, "r:gz") as archive:
+              embedded = archive.extractfile("manifest.json")
+              if embedded is None or embedded.read() != manifest_bytes:
+                  raise SystemExit("release archive and manifest are mismatched")
+          manifest = json.loads(manifest_bytes)
+          if manifest["cli_compatibility"] != "askman=0.4.0":
+              raise SystemExit("release bundle CLI compatibility mismatch")
+          if manifest["source"]["revision"] != "e7186598dc466e69c2adf5d8f06037d5b186f08d":
+              raise SystemExit("release bundle tldr revision mismatch")
+          if report["model"]["revision"] != "5f1b8cd78bc4fb444dd171e59b18f3a3af89a079":
+              raise SystemExit("release bundle model revision mismatch")
+          if report["model"]["onnx_runtime"]["version"] != "1.20.0":
+              raise SystemExit("release bundle ONNX Runtime version mismatch")
+          print("production matching bundle release assets verified")
+          PY
+
+      - name: Require published bytes to be the tested bytes
+        run: |
+          python - "${GITHUB_WORKSPACE}/release-assets" "${GITHUB_WORKSPACE}/production-verification" <<'PY'
+          import hashlib
+          import json
+          import sys
+          from pathlib import Path
+
+          assets, evidence_root = map(Path, sys.argv[1:])
+          reports = sorted(evidence_root.rglob("production-verification.json"))
+          if len(reports) != 4:
+              raise SystemExit(f"expected four native production verification reports, found {len(reports)}")
+          for report_path in reports:
+              report = json.loads(report_path.read_text(encoding="utf-8"))
+              if report.get("status") != "passed":
+                  raise SystemExit(f"production verification did not pass: {report_path}")
+              asset_name = report.get("asset_name")
+              expected_sha = report.get("archive_sha256")
+              if not isinstance(asset_name, str) or not isinstance(expected_sha, str):
+                  raise SystemExit(f"production verification has no archive identity: {report_path}")
+              asset_path = assets / asset_name
+              actual_sha = hashlib.sha256(asset_path.read_bytes()).hexdigest()
+              if actual_sha != expected_sha:
+                  raise SystemExit(f"tested archive bytes differ from publish bytes: {asset_name}")
+          print("all published binary archives match exact post-build tested bytes")
+          PY
+
       - name: Generate checksum files
         run: |
+          cp install.sh release-assets/install.sh
           cd release-assets
           for file in askman-*.tar.gz; do
             sha256sum "${file}" > "${file}.sha256"
           done
-          cd ..
-          sha256sum install.sh > release-assets/install.sh.sha256
+          sha256sum install.sh > install.sh.sha256
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
@@ -133,4 +898,54 @@ jobs:
           files: |
             release-assets/askman-*.tar.gz
             release-assets/askman-*.tar.gz.sha256
+            release-assets/matching-bundle-manifest.json
+            release-assets/matching-bundle.tar.gz
+            release-assets/matching-bundle-provision.json
+            release-assets/runtime-provision.json
+            release-assets/install.sh
             release-assets/install.sh.sha256
+
+  publish-crate:
+    name: Publish crates.io package
+    needs: [publish-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Download verified crate package
+        uses: actions/download-artifact@v4
+        with:
+          name: askman-crate-package
+          path: verified-crate
+
+      - name: Rebuild and compare verified package digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_crate_package.py \
+            --package verified-crate/askman-0.4.0.crate \
+            --expected-version 0.4.0
+          cargo package --locked --no-verify
+          expected_sha="$(sha256sum verified-crate/askman-0.4.0.crate | awk '{print $1}')"
+          actual_sha="$(sha256sum target/package/askman-0.4.0.crate | awk '{print $1}')"
+          test "$actual_sha" = "$expected_sha"
+
+      - name: Publish verified crate after GitHub release
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --locked --no-verify

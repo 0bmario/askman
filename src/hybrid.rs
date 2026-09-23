@@ -4,6 +4,7 @@ use crate::search::TargetOs;
 use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_platform};
 use anyhow::{Result, bail};
 use colored::Colorize;
+use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 use std::fs;
@@ -23,7 +24,7 @@ pub const DENSE_DISTANCE_CUTOFF: f64 = 0.55;
 pub const WEAK_MATCH_CUTOFF: f64 = 0.50;
 const FROZEN_DENSE_RECIPE: &str = "description";
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Candidate {
     pub example_id: String,
     pub page_id: String,
@@ -63,6 +64,178 @@ pub fn run_candidate(options: CandidateOptions) -> Result<()> {
     run_candidate_with_query_mode(options, DenseQueryMode::ExpandedDev)
 }
 
+/// Return the same hybrid/dense results rendered by the shipping candidate
+/// path, without changing the human-facing CLI output. Development tooling
+/// uses this only for deterministic offline provisioning probes.
+pub fn query_candidate_results(options: CandidateOptions) -> Result<Vec<Candidate>> {
+    query_candidate_results_with_query_mode(options, DenseQueryMode::ExpandedDev)
+}
+
+/// Render the historical `-j/--json` object contract used by existing
+/// consumers. CI uses the separate versioned array contract so this public
+/// response can evolve independently without changing its shape.
+pub fn query_legacy_json(options: CandidateOptions, verbose: bool) -> Result<serde_json::Value> {
+    let query = options.query.clone();
+    let target_os = options.target_os.as_str();
+    let index = HybridIndex::open(&options.bundle)?;
+    let result = (|| -> Result<serde_json::Value> {
+        let fused = index.query(
+            &options.query,
+            options.target_os,
+            DenseQueryMode::ExpandedDev,
+            options.platform_explicit,
+        )?;
+        let results = display_candidates(&fused)
+            .into_iter()
+            .take(2)
+            .map(|candidate| {
+                let examples = index.full_examples(&candidate.page_id)?;
+                Ok(legacy_result_json(&query, &candidate, &examples, verbose))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        Ok(serde_json::json!({
+            "query": query,
+            "os": target_os,
+            "results": results,
+        }))
+    })();
+    std::mem::forget(index);
+    result
+}
+
+fn legacy_result_json(
+    query: &str,
+    candidate: &Candidate,
+    examples: &[(String, String)],
+    verbose: bool,
+) -> serde_json::Value {
+    let examples = if examples.is_empty() {
+        vec![(
+            candidate.example_description.clone(),
+            candidate.example_command.clone(),
+        )]
+    } else {
+        examples.to_vec()
+    };
+    let (matched_terms, missing_terms) = legacy_intent_terms(query, candidate, &examples);
+    let term_count = matched_terms.len() + missing_terms.len();
+    let coverage = if term_count == 0 {
+        0.0
+    } else {
+        matched_terms.len() as f64 / term_count as f64
+    };
+    let minimum_coverage = if term_count >= 3 { 0.60 } else { 0.50 };
+    let clean_description = candidate
+        .page_description
+        .split_once(" More information:")
+        .map_or(candidate.page_description.as_str(), |(description, _)| {
+            description
+        });
+    let clean_description = clean_description
+        .split_once(" See also:")
+        .map_or(clean_description, |(description, _)| description)
+        .trim()
+        .replace(['[', ']'], "");
+    let confidence = (candidate.ranking_score.clamp(0.0, 1.0) * 10000.0).round() / 10000.0;
+    let mut result = serde_json::json!({
+        "command": candidate.page_command,
+        "platform": candidate.platform,
+        "description": clean_description,
+        "confidence": confidence,
+        "intent": {
+            "coverage": (coverage * 10000.0).round() / 10000.0,
+            "status": if coverage >= minimum_coverage { "pass" } else { "warn" },
+            "missing_terms": missing_terms,
+        },
+        "examples": examples
+            .iter()
+            .map(|(description, syntax)| {
+                serde_json::json!({
+                    "description": description.replace(['[', ']'], ""),
+                    "syntax": syntax,
+                })
+            })
+            .collect::<Vec<_>>(),
+    });
+    if verbose {
+        if let Some(object) = result.as_object_mut() {
+            object.insert(
+                "adjusted_distance".to_string(),
+                serde_json::json!(1.0 - candidate.ranking_score.clamp(0.0, 1.0)),
+            );
+            object.insert(
+                "raw_distance".to_string(),
+                serde_json::json!(
+                    candidate
+                        .dense_distance
+                        .unwrap_or_else(|| { 1.0 - candidate.ranking_score.clamp(0.0, 1.0) })
+                ),
+            );
+            object.insert(
+                "heuristics_applied".to_string(),
+                serde_json::json!(["hybrid-rrf"]),
+            );
+            object.insert(
+                "intent_matched_terms".to_string(),
+                serde_json::json!(matched_terms),
+            );
+        }
+    }
+    result
+}
+
+fn legacy_intent_terms(
+    query: &str,
+    candidate: &Candidate,
+    examples: &[(String, String)],
+) -> (Vec<String>, Vec<String>) {
+    let query_terms = normalized_terms(query);
+    let mut corpus = format!(
+        "{} {} {}",
+        candidate.page_command, candidate.page_description, candidate.example_description
+    );
+    for (description, syntax) in examples {
+        corpus.push(' ');
+        corpus.push_str(description);
+        corpus.push(' ');
+        corpus.push_str(syntax);
+    }
+    let corpus_terms = normalized_terms(&corpus);
+    let corpus_terms = corpus_terms
+        .iter()
+        .map(String::as_str)
+        .collect::<HashSet<_>>();
+    let mut matched_terms = Vec::new();
+    let mut missing_terms = Vec::new();
+    for term in query_terms {
+        if corpus_terms.contains(term.as_str()) {
+            matched_terms.push(term);
+        } else {
+            missing_terms.push(term);
+        }
+    }
+    (matched_terms, missing_terms)
+}
+
+fn normalized_terms(text: &str) -> Vec<String> {
+    const STOPWORDS: &[&str] = &[
+        "a", "an", "and", "as", "at", "by", "for", "from", "get", "how", "in", "into", "list",
+        "of", "on", "or", "run", "show", "the", "then", "to", "using", "with",
+    ];
+    let mut terms = Vec::new();
+    let mut seen = HashSet::new();
+    for raw in text.split_whitespace() {
+        let term = raw
+            .trim_matches(|character: char| !character.is_ascii_alphanumeric() && character != '-')
+            .to_ascii_lowercase();
+        if term.len() < 2 || STOPWORDS.contains(&term.as_str()) || !seen.insert(term.clone()) {
+            continue;
+        }
+        terms.push(term);
+    }
+    terms
+}
+
 /// Development alias: the dev-only candidate CLI runs the same guarded path.
 #[cfg(feature = "dev")]
 pub fn run_expanded_dev_candidate(options: CandidateOptions) -> Result<()> {
@@ -73,17 +246,25 @@ fn run_candidate_with_query_mode(
     options: CandidateOptions,
     query_mode: DenseQueryMode,
 ) -> Result<()> {
+    let verbose = options.verbose;
+    let displayed = query_candidate_results_with_query_mode(options, query_mode)?;
+    print!("{}", render_results(&displayed, verbose));
+    Ok(())
+}
+
+fn query_candidate_results_with_query_mode(
+    options: CandidateOptions,
+    query_mode: DenseQueryMode,
+) -> Result<Vec<Candidate>> {
     let index = HybridIndex::open(&options.bundle)?;
-    let result = (|| -> Result<()> {
+    let result = (|| -> Result<Vec<Candidate>> {
         let fused = index.query(
             &options.query,
             options.target_os,
             query_mode,
             options.platform_explicit,
         )?;
-        let displayed = display_candidates(&fused);
-        print!("{}", render_results(&displayed, options.verbose));
-        Ok(())
+        Ok(display_candidates(&fused))
     })();
     // fastembed's native runtime can abort during teardown on hosts that
     // already loaded another ONNX Runtime. The candidate is a short-lived
@@ -151,10 +332,20 @@ impl HybridIndex {
 
         fuse_candidates(&keyword, &dense)
     }
+
+    fn full_examples(&self, page_id: &str) -> Result<Vec<(String, String)>> {
+        let connection = rusqlite::Connection::open(&self.artifact)?;
+        let mut statement = connection.prepare(
+            "SELECT description, command FROM examples WHERE page_id = ?1 ORDER BY position",
+        )?;
+        let rows = statement.query_map([page_id], |row| Ok((row.get(0)?, row.get(1)?)))?;
+        rows.collect::<rusqlite::Result<Vec<_>>>()
+            .map_err(Into::into)
+    }
 }
 
 fn validate_frozen_bundle(manifest: &BundleManifest) -> Result<()> {
-    let expected_cli = format!("askman={}", env!("CARGO_PKG_VERSION"));
+    let expected_cli = expected_bundle_cli_compatibility();
     if manifest.cli_compatibility != expected_cli {
         bail!(
             "matching bundle CLI compatibility is {}, expected {}",
@@ -170,6 +361,10 @@ fn validate_frozen_bundle(manifest: &BundleManifest) -> Result<()> {
         );
     }
     Ok(())
+}
+
+fn expected_bundle_cli_compatibility() -> String {
+    format!("askman={}", env!("CARGO_PKG_VERSION"))
 }
 
 fn candidate_from_keyword(result: QueryResult) -> Candidate {
@@ -244,6 +439,15 @@ pub fn fuse_candidates(
 
             candidates_by_id
                 .entry(candidate.example_id.clone())
+                .and_modify(|existing| {
+                    // Keyword and dense retrieval can identify the same
+                    // example. Preserve the dense distance in the fused
+                    // result so diagnostics and probes can prove that the
+                    // dense leg participated instead of looking keyword-only.
+                    if existing.dense_distance.is_none() {
+                        existing.dense_distance = candidate.dense_distance;
+                    }
+                })
                 .or_insert_with(|| candidate.clone());
             *scores_by_id
                 .entry(candidate.example_id.clone())
@@ -420,6 +624,59 @@ mod tests {
         let expected = (KEYWORD_WEIGHT / (RRF_K + 1.0) + DENSE_WEIGHT / (RRF_K + 2.0))
             / ((KEYWORD_WEIGHT + DENSE_WEIGHT) / (RRF_K + 1.0));
         assert!((fused[0].ranking_score - expected).abs() < 0.000_001);
+    }
+
+    #[test]
+    fn legacy_json_preserves_public_object_fields_and_full_examples() {
+        let fixture: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/compatibility/legacy-json-v1.json"
+        ))
+        .unwrap();
+        let candidate = candidate("example", "page");
+        let result = legacy_result_json(
+            "tool example",
+            &candidate,
+            &[
+                ("first example".to_string(), "tool --first".to_string()),
+                ("second example".to_string(), "tool --second".to_string()),
+            ],
+            true,
+        );
+        assert_eq!(result["command"], "tool");
+        assert_eq!(result["platform"], "common");
+        assert!(result["intent"].is_object());
+        assert_eq!(result["examples"].as_array().unwrap().len(), 2);
+        assert!(result["confidence"].is_number());
+        assert!(result["adjusted_distance"].is_number());
+        assert!(result["raw_distance"].is_number());
+        assert!(result["heuristics_applied"].is_array());
+        for field in fixture["results"][0].as_object().unwrap().keys() {
+            assert!(
+                result.get(field).is_some(),
+                "missing legacy JSON field {field}"
+            );
+        }
+        let root = serde_json::json!({
+            "query": "tool example",
+            "os": "linux",
+            "results": [result],
+        });
+        for field in fixture.as_object().unwrap().keys() {
+            assert!(
+                root.get(field).is_some(),
+                "missing legacy JSON root field {field}"
+            );
+        }
+    }
+
+    #[test]
+    fn fusion_preserves_dense_metadata_when_retrievers_agree() {
+        let mut dense = candidate("shared", "page-shared");
+        dense.dense_distance = Some(0.12);
+
+        let fused = fuse_candidates(&[candidate("shared", "page-shared")], &[dense]).unwrap();
+
+        assert_eq!(fused[0].dense_distance, Some(0.12));
     }
 
     #[test]

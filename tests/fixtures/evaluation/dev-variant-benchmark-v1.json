@@ -1,0 +1,370 @@
+{
+  "dataset_id": "askman-dev-variant-benchmark-v1",
+  "schema_version": 1,
+  "scorer_version": "task-scorer-v1",
+  "split": "dev",
+  "split_id": "dev-variant-scenario-families-v1",
+  "task_count": 30,
+  "answerable_task_count": 25,
+  "unanswerable_task_count": 5,
+  "freeze_status": "NON-FROZEN",
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "3",
+    "parser_version": "tldr-subset-v3",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8"
+  },
+  "provenance": {
+    "authoring_method": "Queries were independently written from behavior differences in the pinned corpus examples. This is an exploratory development set, not a frozen benchmark.",
+    "source_manifest": "tests/fixtures/tldr-evaluation-v2/manifest.json",
+    "source_manifest_sha256": "b68651e210e7c0f85ee8ccc503e2d586d5829425aa1ee03fa94edd3271798ad8",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "source_pages": [
+      "pages/common/find.md",
+      "pages/common/grep.md",
+      "pages/common/sort.md",
+      "pages/linux/systemctl.md",
+      "pages/osx/screencapture.md",
+      "pages/windows/findstr.md"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "dev-variant-v1-sort-01",
+      "split": "dev",
+      "family": "variant-common-sort",
+      "question": "Order a file's lines from last to first alphabetically.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-d0e3fda8bc712264a0e01e7c181e34b302bb2e5052228147e97b1d9ee79405f8"],
+      "rationale": "The reverse-order example uses the reverse option.",
+      "source_examples": [{"page": "pages/common/sort.md", "example_positions": [2]}]
+    },
+    {
+      "id": "dev-variant-v1-sort-02",
+      "split": "dev",
+      "family": "variant-common-sort",
+      "question": "Sort text without treating uppercase and lowercase letters differently.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-5d09c75a518514e31f768a34add321aa8ffd2802819fce2b3c674266bbe18640"],
+      "rationale": "The ignore-case example uses the case-insensitive sort option.",
+      "source_examples": [{"page": "pages/common/sort.md", "example_positions": [3]}]
+    },
+    {
+      "id": "dev-variant-v1-sort-03",
+      "split": "dev",
+      "family": "variant-common-sort",
+      "question": "Arrange numeric values by magnitude rather than as text.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-9401e615e42aac59e1c88665393b3e85c5bd4766b64dd13b1d3e1f8fb044d20c"],
+      "rationale": "The numeric-sort example selects numeric ordering.",
+      "source_examples": [{"page": "pages/common/sort.md", "example_positions": [4]}]
+    },
+    {
+      "id": "dev-variant-v1-sort-04",
+      "split": "dev",
+      "family": "variant-common-sort",
+      "question": "Sort a file while keeping just one copy of repeated lines.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24"],
+      "rationale": "The unique-lines example removes duplicate output lines.",
+      "source_examples": [{"page": "pages/common/sort.md", "example_positions": [7]}]
+    },
+    {
+      "id": "dev-variant-v1-sort-05",
+      "split": "dev",
+      "family": "variant-common-sort",
+      "question": "Save the sorted result to a chosen output path.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842"],
+      "rationale": "The output-file example names both the destination and input file.",
+      "source_examples": [{"page": "pages/common/sort.md", "example_positions": [8]}]
+    },
+    {
+      "id": "dev-variant-v1-find-01",
+      "split": "dev",
+      "family": "variant-common-find",
+      "question": "Look below a folder for files whose names have a chosen extension.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"],
+      "rationale": "The extension example matches names below a directory tree.",
+      "source_examples": [{"page": "pages/common/find.md", "example_positions": [1]}]
+    },
+    {
+      "id": "dev-variant-v1-find-02",
+      "split": "dev",
+      "family": "variant-common-find",
+      "question": "Match either a full path pattern or a separate filename pattern.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-8ce4049b12e6fbdd8ddf55f64fe04680b35071710b29124b53a08b088e26429d"],
+      "rationale": "The page's second example combines path and name patterns.",
+      "source_examples": [{"page": "pages/common/find.md", "example_positions": [2]}]
+    },
+    {
+      "id": "dev-variant-v1-find-03",
+      "split": "dev",
+      "family": "variant-common-find",
+      "question": "Find directories with a name match that ignores letter case.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-c5fcd87e47e9d553fdb1891154e8176aabb962d6465da156970ef98684e31805"],
+      "rationale": "The directory example uses a case-insensitive name match.",
+      "source_examples": [{"page": "pages/common/find.md", "example_positions": [3]}]
+    },
+    {
+      "id": "dev-variant-v1-find-04",
+      "split": "dev",
+      "family": "variant-common-find",
+      "question": "Skip a particular subtree while searching for matching files.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-72069b7f688efc1ad6e2e48ba1a29800dffdc9c7644f6e8bb17f77864ebda5f2"],
+      "rationale": "The exclusion example omits paths under a selected directory.",
+      "source_examples": [{"page": "pages/common/find.md", "example_positions": [4]}]
+    },
+    {
+      "id": "dev-variant-v1-find-05",
+      "split": "dev",
+      "family": "variant-common-find",
+      "question": "Run a utility once for each file that matches a search.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": ["example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85"],
+      "rationale": "The per-file execution example uses the matched path as a command argument.",
+      "source_examples": [{"page": "pages/common/find.md", "example_positions": [6]}]
+    },
+    {
+      "id": "dev-variant-v1-systemctl-01",
+      "split": "dev",
+      "family": "variant-linux-systemctl",
+      "question": "Restart one named service on a Linux system.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": ["example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"],
+      "rationale": "The service-action example includes a restart operation.",
+      "source_examples": [{"page": "pages/linux/systemctl.md", "example_positions": [3]}]
+    },
+    {
+      "id": "dev-variant-v1-systemctl-02",
+      "split": "dev",
+      "family": "variant-linux-systemctl",
+      "question": "Set a unit to start automatically during boot.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": ["example-724e3719743b247049c4132dd9feb3092c28515d41455a9813847269b5e8dc7d"],
+      "rationale": "The boot configuration example enables a unit.",
+      "source_examples": [{"page": "pages/linux/systemctl.md", "example_positions": [4]}]
+    },
+    {
+      "id": "dev-variant-v1-systemctl-03",
+      "split": "dev",
+      "family": "variant-linux-systemctl",
+      "question": "Refresh systemd's unit definitions after adding or changing a unit file.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": ["example-011841c17bb47a0959c6f904421fe8999ec8524178684750864e7d14b518fafc"],
+      "rationale": "The daemon-reload example makes systemd rescan unit files.",
+      "source_examples": [{"page": "pages/linux/systemctl.md", "example_positions": [5]}]
+    },
+    {
+      "id": "dev-variant-v1-systemctl-04",
+      "split": "dev",
+      "family": "variant-linux-systemctl",
+      "question": "Check whether a specific unit is active, enabled, or failed.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": ["example-c271943f3dad6797361b9e6b7fefb432da846eb2bf306addf579d49fab7474ba"],
+      "rationale": "The unit-state example checks the requested state.",
+      "source_examples": [{"page": "pages/linux/systemctl.md", "example_positions": [7]}]
+    },
+    {
+      "id": "dev-variant-v1-systemctl-05",
+      "split": "dev",
+      "family": "variant-linux-systemctl",
+      "question": "List service units filtered to those that are running or failed.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": ["example-0381c06079b9332c10b3cdf29086ac8b6064a08f2c3c5a93717f56a5555171ff"],
+      "rationale": "The list-units example filters by unit type and state.",
+      "source_examples": [{"page": "pages/linux/systemctl.md", "example_positions": [8]}]
+    },
+    {
+      "id": "dev-variant-v1-screencapture-01",
+      "split": "dev",
+      "family": "variant-osx-screencapture",
+      "question": "Take a still image with the pointer included.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": ["example-ab19aefda2e3cfb2186012fcf4a4404a8915afdae649c10563a4c0a691662074"],
+      "rationale": "The cursor option includes the mouse pointer in a screenshot.",
+      "source_examples": [{"page": "pages/osx/screencapture.md", "example_positions": [2]}]
+    },
+    {
+      "id": "dev-variant-v1-screencapture-02",
+      "split": "dev",
+      "family": "variant-osx-screencapture",
+      "question": "Capture only a rectangle that I select on screen.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": ["example-9bc5ba41e0eb5a49d3d6ba0b8f745482bb8fe2f16c9b118e95b297297e006536"],
+      "rationale": "The interactive option lets the user select a rectangular region.",
+      "source_examples": [{"page": "pages/osx/screencapture.md", "example_positions": [4]}]
+    },
+    {
+      "id": "dev-variant-v1-screencapture-03",
+      "split": "dev",
+      "family": "variant-osx-screencapture",
+      "question": "Wait for a chosen number of seconds before saving a screenshot.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": ["example-de64dda539bedf85793c294db045de42f64d51d1d8eb5caac45dd1d87aab70bf"],
+      "rationale": "The delay option postpones the capture by the requested interval.",
+      "source_examples": [{"page": "pages/osx/screencapture.md", "example_positions": [5]}]
+    },
+    {
+      "id": "dev-variant-v1-screencapture-04",
+      "split": "dev",
+      "family": "variant-osx-screencapture",
+      "question": "Record screen activity and save it as a movie file.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": ["example-469ff55ef896f21e9c3c70bc16e2305597b6b02e3134e0f3b270b2b4f6180836"],
+      "rationale": "The video option records the screen to a movie file.",
+      "source_examples": [{"page": "pages/osx/screencapture.md", "example_positions": [6]}]
+    },
+    {
+      "id": "dev-variant-v1-screencapture-05",
+      "split": "dev",
+      "family": "variant-osx-screencapture",
+      "question": "Open a captured image in Preview instead of writing it to a file.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": ["example-594b6e4037fe5c79012ce50068b4f4dd9775f3cdda8d0dea2253c98eebd42ae6"],
+      "rationale": "The Preview option opens the capture rather than saving it.",
+      "source_examples": [{"page": "pages/osx/screencapture.md", "example_positions": [3]}]
+    },
+    {
+      "id": "dev-variant-v1-findstr-01",
+      "split": "dev",
+      "family": "variant-windows-findstr",
+      "question": "Search files and all their nested folders for matching text.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": ["example-a057373ff643fe0023f9f7455b1119a1785629e82599e16c31fb91557733a8cb"],
+      "rationale": "The recursive-search example descends through subdirectories.",
+      "source_examples": [{"page": "pages/windows/findstr.md", "example_positions": [3]}]
+    },
+    {
+      "id": "dev-variant-v1-findstr-02",
+      "split": "dev",
+      "family": "variant-windows-findstr",
+      "question": "Match text in Windows files without regard to capitalization.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": ["example-d71952b51686dab66762a1775289ab7d0103d5ef6b6cb7fd7dcde5001955f7aa"],
+      "rationale": "The case-insensitive example ignores letter case during matching.",
+      "source_examples": [{"page": "pages/windows/findstr.md", "example_positions": [4]}]
+    },
+    {
+      "id": "dev-variant-v1-findstr-03",
+      "split": "dev",
+      "family": "variant-windows-findstr",
+      "question": "Search Windows files with a regular expression pattern.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": ["example-9d63900d2b3c33d5060b83e900caf81b45fd7cf8eea8e006a819137f7ac07322"],
+      "rationale": "The regex example enables regular-expression matching.",
+      "source_examples": [{"page": "pages/windows/findstr.md", "example_positions": [5]}]
+    },
+    {
+      "id": "dev-variant-v1-findstr-04",
+      "split": "dev",
+      "family": "variant-windows-findstr",
+      "question": "Look for an exact phrase with spaces in Windows text files.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": ["example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"],
+      "rationale": "The literal-string example keeps a phrase with spaces together.",
+      "source_examples": [{"page": "pages/windows/findstr.md", "example_positions": [6]}]
+    },
+    {
+      "id": "dev-variant-v1-findstr-05",
+      "split": "dev",
+      "family": "variant-windows-findstr",
+      "question": "Return only the names of files that contain a match.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": ["example-ef87c19e056c3915d0d682e5076e58ba59f94e405517ac83af9f4d9e5df5cfc0"],
+      "rationale": "The filename-only example lists files with at least one match.",
+      "source_examples": [{"page": "pages/windows/findstr.md", "example_positions": [8]}]
+    },
+    {
+      "id": "dev-variant-v1-guard-01",
+      "split": "dev",
+      "family": "guardrail-out-of-scope-or-ambiguous",
+      "question": "Sort lines by each file's modification date.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned sorting page has no example for ordering records by file modification time.",
+      "source_examples": [{"page": "pages/common/sort.md", "example_positions": []}]
+    },
+    {
+      "id": "dev-variant-v1-guard-02",
+      "split": "dev",
+      "family": "guardrail-out-of-scope-or-ambiguous",
+      "question": "Configure a Linux service to restart automatically after it crashes.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned service-manager page has no automatic restart-policy example.",
+      "source_examples": [{"page": "pages/linux/systemctl.md", "example_positions": []}]
+    },
+    {
+      "id": "dev-variant-v1-guard-03",
+      "split": "dev",
+      "family": "guardrail-out-of-scope-or-ambiguous",
+      "question": "Capture the screen and system audio together in one movie.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned screen-capture page includes video recording but no audio capture behavior.",
+      "source_examples": [{"page": "pages/osx/screencapture.md", "example_positions": []}]
+    },
+    {
+      "id": "dev-variant-v1-guard-04",
+      "split": "dev",
+      "family": "guardrail-out-of-scope-or-ambiguous",
+      "question": "Replace every matching phrase in Windows files and save the edits in place.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows search page finds matches but does not describe text replacement.",
+      "source_examples": [{"page": "pages/windows/findstr.md", "example_positions": []}]
+    },
+    {
+      "id": "dev-variant-v1-guard-05",
+      "split": "dev",
+      "family": "guardrail-out-of-scope-or-ambiguous",
+      "question": "Find something on my computer.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The request does not specify whether to search file names or contents, so the pinned examples do not identify one intended behavior.",
+      "source_examples": [
+        {"page": "pages/common/find.md", "example_positions": []},
+        {"page": "pages/common/grep.md", "example_positions": []}
+      ]
+    }
+  ]
+}

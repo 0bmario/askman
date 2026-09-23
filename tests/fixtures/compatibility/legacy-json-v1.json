@@ -1,0 +1,23 @@
+{
+  "query": "copy files",
+  "os": "linux",
+  "results": [
+    {
+      "command": "cp",
+      "platform": "common",
+      "description": "Copy files",
+      "confidence": 0.999,
+      "intent": {
+        "coverage": 1.0,
+        "status": "pass",
+        "missing_terms": []
+      },
+      "examples": [
+        {
+          "description": "Copy one file to another location",
+          "syntax": "cp {{source}} {{destination}}"
+        }
+      ]
+    }
+  ]
+}

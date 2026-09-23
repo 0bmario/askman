@@ -3,7 +3,7 @@ use crate::tldr_subset::{
 };
 use anyhow::{Context, Result, anyhow, bail};
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, Row, params, params_from_iter};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlite_vec::sqlite3_vec_init;
@@ -19,12 +19,22 @@ pub const MODEL_REVISION: &str = "5f1b8cd78bc4fb444dd171e59b18f3a3af89a079";
 pub const MODEL_DIMENSION: usize = 384;
 pub const MODEL_MAX_LENGTH: usize = 512;
 pub const MODEL_RUNTIME: &str = "fastembed-4.8.0";
-pub const DENSE_INDEX_VERSION: &str = "dense-vec0-v1";
+pub const DENSE_INDEX_VERSION: &str = "dense-vec0-v2";
+pub const DENSE_RETRIEVAL_STRATEGY: &str = "partitioned-knn-v1";
+pub const DENSE_PARTITION_KEY: &str = "platform";
+pub const DENSE_ROWID_MAPPING: &str = "example_dense.dense_rowid-v1";
+pub const DENSE_PARTITIONS: [&str; 4] = ["common", "linux", "osx", "windows"];
+pub const DENSE_PARTITIONS_JSON: &str = "[\"common\",\"linux\",\"osx\",\"windows\"]";
 pub const DENSE_NORMALIZATION: &str = "l2";
 pub const DENSE_DISTANCE_METRIC: &str = "cosine";
 pub const DENSE_RECIPE_VERSION: &str = "dense-text-v1";
 pub const DEFAULT_BATCH_SIZE: usize = 32;
 const DENSE_QUERY_MODE_ENV: &str = "ASKMAN_DENSE_QUERY_MODE";
+// sqlite-vec rejects KNN limits above this hard maximum. Each required
+// platform partition is queried independently with this bound. If the union
+// does not contain the requested number of unique pages, retrieval falls back
+// to SQL scalar distances over the selected pages.
+const MAX_KNN_BATCH_SIZE: usize = 4096;
 const EXPANDED_DEV_QUERY_MODE: &str = "expanded-dev";
 
 pub const MODEL_FILES: [(&str, &str); 5] = [
@@ -150,6 +160,21 @@ struct DenseRow {
     example_id: String,
     page_description: String,
     example_description: String,
+    platform: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct DensePartitionStats {
+    raw_count: usize,
+    unique_page_count: usize,
+    saturated: bool,
+}
+
+#[derive(Debug, Clone)]
+struct DensePartitionCandidates {
+    partition: String,
+    stats: DensePartitionStats,
+    candidates: Vec<DenseCandidate>,
 }
 
 #[derive(Debug)]
@@ -370,84 +395,295 @@ impl DenseIndex {
         if selected.is_empty() {
             return Ok(Vec::new());
         }
-        let total_vectors: i64 =
-            self.connection
-                .query_row("SELECT COUNT(*) FROM example_dense_index", [], |row| {
-                    row.get(0)
-                })?;
-        if total_vectors == 0 {
-            return Ok(Vec::new());
-        }
-
         let query_blob = embedding_blob(&query_vector);
-        let mut statement = self.connection.prepare(
-            "SELECT dense.example_id, dense.distance
-             FROM example_dense_index AS dense
-             WHERE dense.embedding MATCH ?1
-             ORDER BY dense.distance
-             LIMIT ?2",
-        )?;
-        let mut details = self.connection.prepare(
-            "SELECT e.example_id, e.page_id, p.command, e.command, p.description, e.description,
-                    p.source_path, p.source_ref, p.source_revision, p.platform,
-                    p.page_position, e.position
-             FROM examples AS e
-             JOIN pages AS p ON p.page_id = e.page_id
-             WHERE e.example_id = ?1",
-        )?;
-        let rows = statement.query_map(params![query_blob, total_vectors], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, f64>(1)?))
-        })?;
-
-        let mut seen_pages = HashSet::new();
-        let mut results = Vec::new();
-        for row in rows {
-            let (example_id, distance) = row?;
-            let candidate = details.query_row(params![example_id], |row| {
-                Ok(DenseCandidate {
-                    example_id: row.get(0)?,
-                    page_id: row.get(1)?,
-                    page_command: row.get(2)?,
-                    command: row.get(3)?,
-                    page_description: row.get(4)?,
-                    example_description: row.get(5)?,
-                    source_path: row.get(6)?,
-                    source_ref: row.get(7)?,
-                    source_revision: row.get(8)?,
-                    platform: row.get(9)?,
-                    page_position: row.get::<_, i64>(10)? as usize,
-                    example_position: row.get::<_, i64>(11)? as usize,
-                    ranking_score: distance,
-                })
-            })?;
-            if !selected.contains(&candidate.page_id)
-                || !seen_pages.insert(candidate.page_id.clone())
-            {
-                continue;
-            }
-            results.push(candidate);
-            if results.len() == limit {
-                break;
-            }
+        let mut partition_results = Vec::new();
+        for partition in required_dense_partitions(platform) {
+            partition_results.push(self.query_knn_partition(&query_blob, &selected, partition)?);
+        }
+        let knn_candidates = partition_results
+            .iter()
+            .flat_map(|result| result.candidates.iter().cloned())
+            .collect::<Vec<_>>();
+        let ranked = rank_dense_candidates(
+            knn_candidates,
+            &selected,
+            platform,
+            platform_explicit,
+            limit,
+        );
+        if ranked.len() == limit
+            && partition_union_proves_completeness(
+                &partition_results,
+                platform,
+                platform_explicit,
+                limit,
+            )
+        {
+            return Ok(ranked);
         }
 
-        // Platform precedence for ordering as well as selection: when the
-        // user explicitly requested a platform, a target-platform page
-        // outranks an equally relevant common page (the documented selection
-        // invariant, applied to the candidate order; the stable sort keeps
-        // distance order within each group). Host-default queries keep pure
-        // relevance ordering.
-        if platform_explicit {
-            results.sort_by(|a, b| {
-                let a_target = a.platform == platform;
-                let b_target = b.platform == platform;
-                b_target
-                    .cmp(&a_target)
-                    .then_with(|| a.ranking_score.total_cmp(&b.ranking_score))
-            });
-        }
-        Ok(results)
+        // A partition KNN batch is bounded by sqlite-vec's hard 4096-row
+        // limit. If the required partition union cannot supply the requested
+        // page budget, compute exact distances in SQLite over the selected
+        // pages. This path deliberately never decodes vector blobs in Rust.
+        self.sql_distance_candidates(&query_blob, &selected, platform, platform_explicit, limit)
     }
+
+    fn query_knn_partition(
+        &self,
+        query_blob: &[u8],
+        selected: &HashSet<String>,
+        partition: &str,
+    ) -> Result<DensePartitionCandidates> {
+        query_knn_partition(&self.connection, query_blob, selected, partition)
+    }
+
+    fn sql_distance_candidates(
+        &self,
+        query_blob: &[u8],
+        selected: &HashSet<String>,
+        platform: &str,
+        platform_explicit: bool,
+        limit: usize,
+    ) -> Result<Vec<DenseCandidate>> {
+        sql_distance_candidates(
+            &self.connection,
+            query_blob,
+            selected,
+            platform,
+            platform_explicit,
+            limit,
+        )
+    }
+}
+
+fn query_knn_partition(
+    connection: &Connection,
+    query_blob: &[u8],
+    selected: &HashSet<String>,
+    partition: &str,
+) -> Result<DensePartitionCandidates> {
+    let mut statement = connection.prepare(
+        "SELECT dense.rowid, dense.example_id, dense.distance
+         FROM example_dense_index AS dense
+         WHERE dense.embedding MATCH ?1
+           AND dense.k = ?2
+           AND dense.platform = ?3
+         ORDER BY dense.distance
+         ",
+    )?;
+    let rows = statement.query_map(
+        params![query_blob, MAX_KNN_BATCH_SIZE as i64, partition],
+        |row| {
+            Ok((
+                row.get::<_, i64>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, f64>(2)?,
+            ))
+        },
+    )?;
+    let mut details = connection.prepare(
+        "SELECT e.example_id, e.page_id, p.command, e.command,
+                p.description, e.description, p.source_path, p.source_ref,
+                p.source_revision, p.platform, p.page_position, e.position
+         FROM examples AS e
+         JOIN pages AS p ON p.page_id = e.page_id
+         WHERE e.example_id = ?1",
+    )?;
+    let mut candidates = Vec::new();
+    let mut raw_count = 0;
+    for row in rows {
+        raw_count += 1;
+        let (_rowid, example_id, distance) = row?;
+        let mut candidate =
+            details.query_row(params![example_id], dense_candidate_details_from_row)?;
+        candidate.ranking_score = distance;
+        if selected.contains(&candidate.page_id) {
+            candidates.push(candidate);
+        }
+    }
+    candidates.sort_by(|left, right| {
+        left.ranking_score
+            .total_cmp(&right.ranking_score)
+            .then_with(|| left.example_id.cmp(&right.example_id))
+    });
+    let unique_page_count = candidates
+        .iter()
+        .map(|candidate| candidate.page_id.as_str())
+        .collect::<HashSet<_>>()
+        .len();
+    Ok(DensePartitionCandidates {
+        partition: partition.to_string(),
+        stats: DensePartitionStats {
+            raw_count,
+            unique_page_count,
+            saturated: raw_count >= MAX_KNN_BATCH_SIZE,
+        },
+        candidates,
+    })
+}
+
+fn sql_distance_candidates(
+    connection: &Connection,
+    query_blob: &[u8],
+    selected: &HashSet<String>,
+    platform: &str,
+    platform_explicit: bool,
+    limit: usize,
+) -> Result<Vec<DenseCandidate>> {
+    let mut page_ids = selected.iter().cloned().collect::<Vec<_>>();
+    page_ids.sort();
+    let placeholders = (0..page_ids.len())
+        .map(|index| format!("?{}", index + 2))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let query = format!(
+        "SELECT dense.example_id, e.page_id, p.command, e.command,
+                p.description, e.description, p.source_path, p.source_ref,
+                p.source_revision, p.platform, p.page_position, e.position,
+                vec_distance_cosine(?1, dense.embedding)
+         FROM example_dense AS dense
+         JOIN examples AS e ON e.example_id = dense.example_id
+         JOIN pages AS p ON p.page_id = e.page_id
+         WHERE e.page_id IN ({placeholders})
+         ORDER BY vec_distance_cosine(?1, dense.embedding), dense.dense_rowid"
+    );
+    let mut values = Vec::with_capacity(page_ids.len() + 1);
+    values.push(rusqlite::types::Value::Blob(query_blob.to_vec()));
+    values.extend(page_ids.into_iter().map(rusqlite::types::Value::Text));
+    let mut statement = connection.prepare(&query)?;
+    let rows = statement.query_map(params_from_iter(values), dense_candidate_from_row)?;
+    let mut candidates = Vec::new();
+    for row in rows {
+        candidates.push(row?);
+    }
+    Ok(rank_dense_candidates(
+        candidates,
+        selected,
+        platform,
+        platform_explicit,
+        limit,
+    ))
+}
+
+fn dense_candidate_from_row(row: &Row<'_>) -> rusqlite::Result<DenseCandidate> {
+    Ok(DenseCandidate {
+        example_id: row.get(0)?,
+        page_id: row.get(1)?,
+        page_command: row.get(2)?,
+        command: row.get(3)?,
+        page_description: row.get(4)?,
+        example_description: row.get(5)?,
+        source_path: row.get(6)?,
+        source_ref: row.get(7)?,
+        source_revision: row.get(8)?,
+        platform: row.get(9)?,
+        page_position: row.get::<_, i64>(10)? as usize,
+        example_position: row.get::<_, i64>(11)? as usize,
+        ranking_score: row.get(12)?,
+    })
+}
+
+fn dense_candidate_details_from_row(row: &Row<'_>) -> rusqlite::Result<DenseCandidate> {
+    Ok(DenseCandidate {
+        example_id: row.get(0)?,
+        page_id: row.get(1)?,
+        page_command: row.get(2)?,
+        command: row.get(3)?,
+        page_description: row.get(4)?,
+        example_description: row.get(5)?,
+        source_path: row.get(6)?,
+        source_ref: row.get(7)?,
+        source_revision: row.get(8)?,
+        platform: row.get(9)?,
+        page_position: row.get::<_, i64>(10)? as usize,
+        example_position: row.get::<_, i64>(11)? as usize,
+        ranking_score: 0.0,
+    })
+}
+
+fn required_dense_partitions(platform: &str) -> Vec<&str> {
+    if platform == "common" {
+        vec!["common"]
+    } else {
+        vec![platform, "common"]
+    }
+}
+
+fn partition_union_proves_completeness(
+    partitions: &[DensePartitionCandidates],
+    platform: &str,
+    platform_explicit: bool,
+    limit: usize,
+) -> bool {
+    if limit == 0 {
+        return true;
+    }
+    if !platform_explicit {
+        // Host-default ranking merges by distance. Every saturated partition
+        // must independently expose enough unique pages for a global top-k;
+        // an unsaturated partition returned its complete vector population.
+        return partitions.iter().all(|partition| {
+            !partition.stats.saturated || partition.stats.unique_page_count >= limit
+        });
+    }
+
+    let Some(target) = partitions
+        .iter()
+        .find(|partition| partition.partition == platform)
+        .or_else(|| partitions.first())
+    else {
+        return false;
+    };
+    if target.stats.unique_page_count >= limit {
+        // Explicit platform precedence means target pages alone prove the
+        // result; common pages cannot outrank them.
+        return true;
+    }
+    if target.stats.saturated {
+        // A saturated target with too few unique pages may hide additional
+        // target pages behind duplicate examples. Common cannot prove target
+        // precedence, so use the exact SQL fallback.
+        return false;
+    }
+
+    let remaining = limit.saturating_sub(target.stats.unique_page_count);
+    let Some(common) = partitions.iter().find(|partition| {
+        partition.partition == "common" && partition.partition != target.partition
+    }) else {
+        return false;
+    };
+    // Target was unsaturated (complete). Common may be saturated, but then
+    // its observed unique-page count must cover the remaining budget.
+    common.stats.unique_page_count >= remaining
+}
+
+fn rank_dense_candidates(
+    mut candidates: Vec<DenseCandidate>,
+    selected: &HashSet<String>,
+    platform: &str,
+    platform_explicit: bool,
+    limit: usize,
+) -> Vec<DenseCandidate> {
+    candidates.retain(|candidate| selected.contains(&candidate.page_id));
+    candidates.sort_by(|left, right| {
+        let target_order = if platform_explicit {
+            (right.platform == platform).cmp(&(left.platform == platform))
+        } else {
+            std::cmp::Ordering::Equal
+        };
+        target_order
+            .then_with(|| left.ranking_score.total_cmp(&right.ranking_score))
+            .then_with(|| left.page_position.cmp(&right.page_position))
+            .then_with(|| left.example_position.cmp(&right.example_position))
+            .then_with(|| left.example_id.cmp(&right.example_id))
+    });
+    let mut seen_pages = HashSet::new();
+    candidates
+        .into_iter()
+        .filter(|candidate| seen_pages.insert(candidate.page_id.clone()))
+        .take(limit)
+        .collect()
 }
 
 fn dense_server_query_mode() -> Result<DenseQueryMode> {
@@ -575,7 +811,9 @@ fn write_dense_artifact(
          DROP TABLE IF EXISTS example_dense;
          DELETE FROM artifact_metadata WHERE key LIKE 'dense_%';
          CREATE TABLE example_dense (
-             example_id TEXT PRIMARY KEY NOT NULL REFERENCES examples(example_id),
+             dense_rowid INTEGER PRIMARY KEY NOT NULL,
+             example_id TEXT UNIQUE NOT NULL REFERENCES examples(example_id),
+             platform TEXT NOT NULL CHECK(platform IN ('common', 'linux', 'osx', 'windows')),
              embedding_text TEXT NOT NULL,
              embedding BLOB NOT NULL,
              dimension INTEGER NOT NULL,
@@ -585,6 +823,7 @@ fn write_dense_artifact(
     transaction.execute_batch(&format!(
         "CREATE VIRTUAL TABLE example_dense_index USING vec0(
              embedding float[{MODEL_DIMENSION}] distance_metric={DENSE_DISTANCE_METRIC},
+             platform text partition key,
              +example_id text
          );"
     ))?;
@@ -598,6 +837,13 @@ fn write_dense_artifact(
         ("dense_model_max_length", MODEL_MAX_LENGTH.to_string()),
         ("dense_normalization", DENSE_NORMALIZATION.to_string()),
         ("dense_distance_metric", DENSE_DISTANCE_METRIC.to_string()),
+        (
+            "dense_retrieval_strategy",
+            DENSE_RETRIEVAL_STRATEGY.to_string(),
+        ),
+        ("dense_partition_key", DENSE_PARTITION_KEY.to_string()),
+        ("dense_partitions", DENSE_PARTITIONS_JSON.to_string()),
+        ("dense_rowid_mapping", DENSE_ROWID_MAPPING.to_string()),
         ("dense_recipe_version", DENSE_RECIPE_VERSION.to_string()),
         ("dense_embedding_text_recipe", recipe.name().to_string()),
         (
@@ -636,10 +882,13 @@ fn write_dense_artifact(
             let blob = embedding_blob(&embedding);
             transaction.execute(
                 "INSERT INTO example_dense(
-                     example_id, embedding_text, embedding, dimension, normalization
-                 ) VALUES (?1, ?2, ?3, ?4, ?5)",
+                     dense_rowid, example_id, platform, embedding_text, embedding,
+                     dimension, normalization
+                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
                 params![
+                    row_id,
                     row.example_id,
+                    row.platform,
                     texts[offset],
                     blob,
                     MODEL_DIMENSION as i64,
@@ -647,9 +896,14 @@ fn write_dense_artifact(
                 ],
             )?;
             transaction.execute(
-                "INSERT INTO example_dense_index(rowid, embedding, example_id)
-                 VALUES (?1, ?2, ?3)",
-                params![row_id, embedding_blob(&embedding), row.example_id],
+                "INSERT INTO example_dense_index(rowid, embedding, platform, example_id)
+                 VALUES (?1, ?2, ?3, ?4)",
+                params![
+                    row_id,
+                    embedding_blob(&embedding),
+                    row.platform,
+                    row.example_id
+                ],
             )?;
         }
     }
@@ -677,7 +931,7 @@ fn write_dense_artifact(
 
 fn load_dense_rows(connection: &Connection) -> Result<Vec<DenseRow>> {
     let mut statement = connection.prepare(
-        "SELECT e.example_id, p.description, e.description
+        "SELECT e.example_id, p.description, e.description, p.platform
          FROM example_lexical AS lexical
          JOIN examples AS e ON e.example_id = lexical.example_id
          JOIN pages AS p ON p.page_id = e.page_id
@@ -688,6 +942,7 @@ fn load_dense_rows(connection: &Connection) -> Result<Vec<DenseRow>> {
             example_id: row.get(0)?,
             page_description: row.get(1)?,
             example_description: row.get(2)?,
+            platform: row.get(3)?,
         })
     })?;
     rows.collect::<rusqlite::Result<Vec<_>>>()
@@ -704,6 +959,13 @@ fn validate_dense_artifact(connection: &Connection, assets: &ModelAssets) -> Res
         ("dense_model_max_length", MODEL_MAX_LENGTH.to_string()),
         ("dense_normalization", DENSE_NORMALIZATION.to_string()),
         ("dense_distance_metric", DENSE_DISTANCE_METRIC.to_string()),
+        (
+            "dense_retrieval_strategy",
+            DENSE_RETRIEVAL_STRATEGY.to_string(),
+        ),
+        ("dense_partition_key", DENSE_PARTITION_KEY.to_string()),
+        ("dense_partitions", DENSE_PARTITIONS_JSON.to_string()),
+        ("dense_rowid_mapping", DENSE_ROWID_MAPPING.to_string()),
         ("dense_recipe_version", DENSE_RECIPE_VERSION.to_string()),
     ];
     for (key, expected) in expected_metadata {
@@ -740,29 +1002,86 @@ fn validate_dense_artifact(connection: &Connection, assets: &ModelAssets) -> Res
         bail!("dense row-count metadata does not match stored vectors");
     }
     validate_dense_index_schema(connection)?;
-    let dense_embeddings = connection
-        .prepare("SELECT example_id, embedding FROM example_dense")?
+    let dense_rows = connection
+        .prepare(
+            "SELECT dense.dense_rowid, dense.example_id, dense.platform, dense.embedding,
+                    p.platform
+             FROM example_dense AS dense
+             JOIN examples AS e ON e.example_id = dense.example_id
+             JOIN pages AS p ON p.page_id = e.page_id
+             ORDER BY dense.dense_rowid",
+        )?
         .query_map([], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, Vec<u8>>(1)?))
+            Ok((
+                row.get::<_, i64>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, Vec<u8>>(3)?,
+                row.get::<_, String>(4)?,
+            ))
         })?
-        .collect::<rusqlite::Result<HashMap<_, _>>>()?;
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+    if dense_rows.len() != dense_ids.len() {
+        bail!("dense row mapping coverage does not match stored vectors");
+    }
+    let mut dense_by_id = HashMap::new();
+    let mut dense_by_rowid = HashMap::new();
+    for (expected, (rowid, example_id, platform, embedding, page_platform)) in
+        dense_rows.into_iter().enumerate()
+    {
+        let expected_rowid = (expected + 1) as i64;
+        if rowid != expected_rowid {
+            bail!("dense row mapping is not contiguous: expected {expected_rowid}, got {rowid}");
+        }
+        if !DENSE_PARTITIONS.contains(&platform.as_str()) || platform != page_platform {
+            bail!("dense row mapping platform mismatch for {example_id}");
+        }
+        validate_embedding_blob(&embedding, &example_id)?;
+        dense_by_id.insert(
+            example_id.clone(),
+            (rowid, platform.clone(), embedding.clone()),
+        );
+        dense_by_rowid.insert(rowid, (example_id, platform, embedding));
+    }
     let index_rows = connection
-        .prepare("SELECT example_id, embedding FROM example_dense_index")?
+        .prepare(
+            "SELECT rowid, example_id, platform, embedding
+             FROM example_dense_index
+             ORDER BY rowid",
+        )?
         .query_map([], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, Vec<u8>>(1)?))
+            Ok((
+                row.get::<_, i64>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, Vec<u8>>(3)?,
+            ))
         })?
         .collect::<rusqlite::Result<Vec<_>>>()?;
     if index_rows.len() != dense_ids.len() {
         bail!("dense vector index row coverage does not match stored vectors");
     }
     let mut index_ids = HashSet::new();
-    for (example_id, embedding) in index_rows {
+    for (expected, (rowid, example_id, platform, embedding)) in index_rows.into_iter().enumerate() {
+        let expected_rowid = (expected + 1) as i64;
+        if rowid != expected_rowid {
+            bail!(
+                "dense vector index rowids are not contiguous: expected {expected_rowid}, got {rowid}"
+            );
+        }
         if !index_ids.insert(example_id.clone()) {
             bail!("dense vector index contains a duplicate example identity: {example_id}");
         }
         validate_embedding_blob(&embedding, &example_id)?;
-        if dense_embeddings.get(&example_id) != Some(&embedding) {
+        let Some((dense_rowid, dense_platform, dense_embedding)) = dense_by_id.get(&example_id)
+        else {
+            bail!("dense vector index contains an unknown example identity: {example_id}");
+        };
+        if *dense_rowid != rowid || dense_platform != &platform || dense_embedding != &embedding {
             bail!("dense vector index payload does not match stored vector: {example_id}");
+        }
+        if dense_by_rowid.get(&rowid).map(|(id, _, _)| id) != Some(&example_id) {
+            bail!("dense vector index rowid mapping does not match stored vector: {rowid}");
         }
     }
     if index_ids != dense_ids {
@@ -802,9 +1121,15 @@ fn validate_dense_index_schema(connection: &Connection) -> Result<()> {
         .to_ascii_lowercase();
     let expected_dimension = format!("float[{MODEL_DIMENSION}]");
     let expected_metric = format!("distance_metric={DENSE_DISTANCE_METRIC}");
-    if !normalized_sql.contains(&expected_dimension) || !normalized_sql.contains(&expected_metric) {
+    let expected_partition = "platformtextpartitionkey";
+    let expected_auxiliary = "+example_idtext";
+    if !normalized_sql.contains(&expected_dimension)
+        || !normalized_sql.contains(&expected_metric)
+        || !normalized_sql.contains(expected_partition)
+        || !normalized_sql.contains(expected_auxiliary)
+    {
         bail!(
-            "dense vector index schema is incompatible: expected {expected_dimension} and {expected_metric}"
+            "dense vector index schema is incompatible: expected {expected_dimension}, {expected_metric}, {expected_partition}, and {expected_auxiliary}"
         );
     }
     Ok(())
@@ -840,6 +1165,10 @@ fn validate_embedding(embedding: &[f32], identity: &str) -> Result<()> {
 }
 
 fn validate_embedding_blob(blob: &[u8], identity: &str) -> Result<()> {
+    embedding_from_blob(blob, identity).map(|_| ())
+}
+
+fn embedding_from_blob(blob: &[u8], identity: &str) -> Result<Vec<f32>> {
     if blob.len() != MODEL_DIMENSION * std::mem::size_of::<f32>() {
         bail!("dense vector blob for {identity} has invalid byte length");
     }
@@ -847,7 +1176,8 @@ fn validate_embedding_blob(blob: &[u8], identity: &str) -> Result<()> {
         .chunks_exact(4)
         .map(|chunk| f32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]))
         .collect::<Vec<_>>();
-    validate_embedding(&values, identity)
+    validate_embedding(&values, identity)?;
+    Ok(values)
 }
 
 fn embedding_blob(embedding: &[f32]) -> Vec<u8> {
@@ -1004,6 +1334,108 @@ fn hardware_label() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashSet;
+
+    fn query_fixture(rows: &[(String, String, String)]) -> (Connection, HashSet<String>, Vec<u8>) {
+        register_sqlite_vec();
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE pages(
+                     page_id TEXT PRIMARY KEY,
+                     command TEXT NOT NULL,
+                     description TEXT NOT NULL,
+                     source_path TEXT NOT NULL,
+                     source_ref TEXT NOT NULL,
+                     source_revision TEXT NOT NULL,
+                     platform TEXT NOT NULL,
+                     page_position INTEGER NOT NULL
+                 );
+                 CREATE TABLE examples(
+                     example_id TEXT PRIMARY KEY,
+                     page_id TEXT NOT NULL,
+                     command TEXT NOT NULL,
+                     description TEXT NOT NULL,
+                     position INTEGER NOT NULL
+                 );
+                 CREATE TABLE example_dense(
+                     dense_rowid INTEGER PRIMARY KEY NOT NULL,
+                     example_id TEXT UNIQUE NOT NULL,
+                     platform TEXT NOT NULL,
+                     embedding_text TEXT NOT NULL,
+                     embedding BLOB NOT NULL,
+                     dimension INTEGER NOT NULL,
+                     normalization TEXT NOT NULL
+                 );
+                 CREATE VIRTUAL TABLE example_dense_index USING vec0(
+                     embedding float[384] distance_metric=cosine,
+                     platform text partition key,
+                     +example_id text
+                 );",
+            )
+            .unwrap();
+
+        let vector = vec![1.0f32; MODEL_DIMENSION]
+            .into_iter()
+            .map(|value| value / (MODEL_DIMENSION as f32).sqrt())
+            .collect::<Vec<_>>();
+        let blob = embedding_blob(&vector);
+        let mut pages = HashSet::new();
+        for (rowid, (example_id, page_id, platform)) in rows.iter().enumerate() {
+            if pages.insert(page_id.clone()) {
+                connection
+                    .execute(
+                        "INSERT INTO pages(
+                             page_id, command, description, source_path, source_ref,
+                             source_revision, platform, page_position
+                         ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                        params![
+                            page_id,
+                            page_id,
+                            "page",
+                            format!("pages/{platform}/{page_id}.md"),
+                            "tldr-pages@test:path",
+                            "test",
+                            platform,
+                            rowid as i64,
+                        ],
+                    )
+                    .unwrap();
+            }
+            connection
+                .execute(
+                    "INSERT INTO examples(example_id, page_id, command, description, position)
+                     VALUES (?1, ?2, ?3, ?4, ?5)",
+                    params![example_id, page_id, example_id, "example", rowid as i64],
+                )
+                .unwrap();
+            connection
+                .execute(
+                    "INSERT INTO example_dense(
+                         dense_rowid, example_id, platform, embedding_text, embedding,
+                         dimension, normalization
+                     ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                    params![
+                        rowid as i64 + 1,
+                        example_id,
+                        platform,
+                        "example",
+                        &blob,
+                        MODEL_DIMENSION as i64,
+                        DENSE_NORMALIZATION,
+                    ],
+                )
+                .unwrap();
+            connection
+                .execute(
+                    "INSERT INTO example_dense_index(rowid, embedding, platform, example_id)
+                     VALUES (?1, ?2, ?3, ?4)",
+                    params![rowid as i64 + 1, &blob, platform, example_id],
+                )
+                .unwrap();
+        }
+        (connection, pages, blob)
+    }
 
     #[test]
     fn parses_the_declared_embedding_recipes() {
@@ -1162,5 +1594,428 @@ mod tests {
         validate_embedding(&vector, "test").unwrap();
         assert!(validate_embedding(&[0.0; MODEL_DIMENSION], "test").is_err());
         assert!(validate_embedding(&[0.0; MODEL_DIMENSION - 1], "test").is_err());
+    }
+
+    #[test]
+    fn dense_schema_requires_partition_key_and_stable_row_mapping() {
+        let rows = vec![(
+            "example-1".to_string(),
+            "page-1".to_string(),
+            "linux".to_string(),
+        )];
+        let (connection, _, _) = query_fixture(&rows);
+        validate_dense_index_schema(&connection).unwrap();
+        let row: (i64, String, String) = connection
+            .query_row(
+                "SELECT rowid, example_id, platform FROM example_dense_index",
+                [],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+            )
+            .unwrap();
+        assert_eq!(row, (1, "example-1".to_string(), "linux".to_string()));
+        assert_eq!(required_dense_partitions("linux"), ["linux", "common"]);
+        assert_eq!(required_dense_partitions("common"), ["common"]);
+    }
+
+    #[test]
+    fn partitioned_knn_unions_over_4096_vectors_and_deduplicates_pages() {
+        let rows = (0..5000)
+            .map(|index| {
+                let platform = if index < 3000 { "linux" } else { "common" };
+                let page_id = format!("{platform}-page-{}", index / 2);
+                (format!("example-{index}"), page_id, platform.to_string())
+            })
+            .collect::<Vec<_>>();
+        let (connection, selected, blob) = query_fixture(&rows);
+        let target_result = query_knn_partition(&connection, &blob, &selected, "linux").unwrap();
+        let common_result = query_knn_partition(&connection, &blob, &selected, "common").unwrap();
+        assert_eq!(target_result.stats.raw_count, 3000);
+        assert!(!target_result.stats.saturated);
+        assert_eq!(target_result.stats.unique_page_count, 1500);
+        assert_eq!(common_result.stats.raw_count, 2000);
+        assert!(!common_result.stats.saturated);
+        assert_eq!(common_result.stats.unique_page_count, 1000);
+        assert_eq!(target_result.candidates.len(), 3000);
+        assert_eq!(common_result.candidates.len(), 2000);
+        assert!(
+            target_result
+                .candidates
+                .iter()
+                .all(|candidate| candidate.platform == "linux")
+        );
+        assert!(
+            common_result
+                .candidates
+                .iter()
+                .all(|candidate| candidate.platform == "common")
+        );
+
+        let ranked = rank_dense_candidates(
+            target_result
+                .candidates
+                .into_iter()
+                .chain(common_result.candidates)
+                .collect(),
+            &selected,
+            "linux",
+            true,
+            selected.len(),
+        );
+        assert_eq!(ranked.len(), 2500);
+        assert_eq!(
+            ranked
+                .iter()
+                .map(|candidate| candidate.page_id.clone())
+                .collect::<HashSet<_>>()
+                .len(),
+            2500
+        );
+        assert!(
+            ranked[..1500]
+                .iter()
+                .all(|candidate| candidate.platform == "linux")
+        );
+        assert!(
+            ranked[1500..]
+                .iter()
+                .all(|candidate| candidate.platform == "common")
+        );
+    }
+
+    #[test]
+    fn underfilled_knn_uses_sql_cosine_fallback_and_matches_oracle() {
+        let mut rows = (0..4096)
+            .map(|index| {
+                (
+                    format!("noise-{index}"),
+                    format!("noise-page-{index}"),
+                    "linux".to_string(),
+                )
+            })
+            .collect::<Vec<_>>();
+        rows.extend([
+            (
+                "selected-a".to_string(),
+                "selected-page-a".to_string(),
+                "linux".to_string(),
+            ),
+            (
+                "selected-b".to_string(),
+                "selected-page-b".to_string(),
+                "linux".to_string(),
+            ),
+        ]);
+        let (connection, _, blob) = query_fixture(&rows);
+        let selected =
+            HashSet::from(["selected-page-a".to_string(), "selected-page-b".to_string()]);
+        let knn = query_knn_partition(&connection, &blob, &selected, "linux").unwrap();
+        assert_eq!(knn.stats.raw_count, MAX_KNN_BATCH_SIZE);
+        assert!(knn.stats.saturated);
+        assert_eq!(knn.stats.unique_page_count, 0);
+        assert!(
+            knn.candidates.is_empty(),
+            "selected rows are outside the KNN batch"
+        );
+
+        let fallback =
+            sql_distance_candidates(&connection, &blob, &selected, "linux", false, 2).unwrap();
+        assert_eq!(
+            fallback
+                .iter()
+                .map(|candidate| candidate.page_id.as_str())
+                .collect::<Vec<_>>(),
+            ["selected-page-a", "selected-page-b"]
+        );
+        for candidate in fallback {
+            let oracle: f64 = connection
+                .query_row(
+                    "SELECT vec_distance_cosine(?1, embedding)
+                     FROM example_dense WHERE example_id = ?2",
+                    params![&blob, candidate.example_id],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            assert!((candidate.ranking_score - oracle).abs() < 1e-6);
+        }
+    }
+
+    #[test]
+    fn sql_cosine_matches_knn_for_normalized_f32_vectors() {
+        register_sqlite_vec();
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE VIRTUAL TABLE vectors USING vec0(
+                     embedding float[384] distance_metric=cosine,
+                     platform text partition key,
+                     +example_id text
+                 );
+                 CREATE TABLE scalar(example_id TEXT PRIMARY KEY, embedding BLOB NOT NULL);",
+            )
+            .unwrap();
+        let mut first = vec![0.0f32; MODEL_DIMENSION];
+        first[0] = 1.0;
+        let mut second = vec![0.0f32; MODEL_DIMENSION];
+        second[1] = 1.0;
+        let mut query = vec![0.0f32; MODEL_DIMENSION];
+        query[0] = 0.6;
+        query[1] = 0.8;
+        let query_blob = embedding_blob(&query);
+        for (rowid, (id, vector)) in [("first", &first), ("second", &second)]
+            .into_iter()
+            .enumerate()
+        {
+            let blob = embedding_blob(vector);
+            connection
+                .execute(
+                    "INSERT INTO vectors(rowid, embedding, platform, example_id)
+                     VALUES (?1, ?2, 'linux', ?3)",
+                    params![rowid as i64 + 1, &blob, id],
+                )
+                .unwrap();
+            connection
+                .execute(
+                    "INSERT INTO scalar(example_id, embedding) VALUES (?1, ?2)",
+                    params![id, &blob],
+                )
+                .unwrap();
+        }
+        let knn: Vec<(String, f64)> = connection
+            .prepare(
+                "SELECT example_id, distance FROM vectors
+                 WHERE embedding MATCH ?1 AND k = ?2 AND platform = 'linux'
+                 ORDER BY distance",
+            )
+            .unwrap()
+            .query_map(params![&query_blob, 2], |row| {
+                Ok((row.get(0)?, row.get(1)?))
+            })
+            .unwrap()
+            .collect::<rusqlite::Result<_>>()
+            .unwrap();
+        let scalar: Vec<(String, f64)> = connection
+            .prepare(
+                "SELECT example_id, vec_distance_cosine(?1, embedding)
+                 FROM scalar ORDER BY 2, example_id",
+            )
+            .unwrap()
+            .query_map([&query_blob], |row| Ok((row.get(0)?, row.get(1)?)))
+            .unwrap()
+            .collect::<rusqlite::Result<_>>()
+            .unwrap();
+        assert_eq!(
+            knn.iter().map(|(id, _)| id).collect::<Vec<_>>(),
+            scalar.iter().map(|(id, _)| id).collect::<Vec<_>>()
+        );
+        for ((_, knn_distance), (_, scalar_distance)) in knn.iter().zip(scalar.iter()) {
+            assert!((knn_distance - scalar_distance).abs() < 1e-6);
+        }
+    }
+
+    #[test]
+    fn host_default_ranking_merges_by_distance_while_explicit_prefers_target() {
+        let candidate =
+            |example_id: &str, page_id: &str, platform: &str, distance: f64| DenseCandidate {
+                example_id: example_id.to_string(),
+                page_id: page_id.to_string(),
+                page_command: page_id.to_string(),
+                command: page_id.to_string(),
+                page_description: String::new(),
+                example_description: String::new(),
+                source_path: format!("pages/{platform}/{page_id}.md"),
+                source_ref: String::new(),
+                source_revision: String::new(),
+                platform: platform.to_string(),
+                page_position: 0,
+                example_position: 0,
+                ranking_score: distance,
+            };
+        let selected = HashSet::from(["target".to_string(), "common".to_string()]);
+        let candidates = vec![
+            candidate("target-example", "target", "linux", 0.8),
+            candidate("common-example", "common", "common", 0.1),
+        ];
+        assert_eq!(
+            rank_dense_candidates(candidates.clone(), &selected, "linux", false, 2)[0].page_id,
+            "common"
+        );
+        assert_eq!(
+            rank_dense_candidates(candidates, &selected, "linux", true, 2)[0].page_id,
+            "target"
+        );
+    }
+
+    #[test]
+    fn completeness_rejects_duplicate_heavy_saturated_partition_even_when_union_fills_limit() {
+        let candidate = |partition: &str, index: usize| DenseCandidate {
+            example_id: format!("{partition}-example-{index}"),
+            page_id: format!("{partition}-page-{index}"),
+            page_command: String::new(),
+            command: String::new(),
+            page_description: String::new(),
+            example_description: String::new(),
+            source_path: format!("pages/{partition}/page-{index}.md"),
+            source_ref: String::new(),
+            source_revision: String::new(),
+            platform: partition.to_string(),
+            page_position: index,
+            example_position: 0,
+            ranking_score: index as f64,
+        };
+        let target = DensePartitionCandidates {
+            partition: "linux".to_string(),
+            stats: DensePartitionStats {
+                raw_count: MAX_KNN_BATCH_SIZE,
+                unique_page_count: 1,
+                saturated: true,
+            },
+            candidates: vec![candidate("linux", 0)],
+        };
+        let common = DensePartitionCandidates {
+            partition: "common".to_string(),
+            stats: DensePartitionStats {
+                raw_count: 7,
+                unique_page_count: 7,
+                saturated: false,
+            },
+            candidates: (0..7).map(|index| candidate("common", index)).collect(),
+        };
+        let partitions = vec![target, common];
+        assert!(!partition_union_proves_completeness(
+            &partitions,
+            "linux",
+            true,
+            8
+        ));
+        assert!(!partition_union_proves_completeness(
+            &partitions,
+            "linux",
+            false,
+            8
+        ));
+
+        let target_complete = DensePartitionCandidates {
+            partition: "linux".to_string(),
+            stats: DensePartitionStats {
+                raw_count: MAX_KNN_BATCH_SIZE,
+                unique_page_count: 8,
+                saturated: true,
+            },
+            candidates: (0..8).map(|index| candidate("linux", index)).collect(),
+        };
+        let common_saturated = DensePartitionCandidates {
+            partition: "common".to_string(),
+            stats: DensePartitionStats {
+                raw_count: MAX_KNN_BATCH_SIZE,
+                unique_page_count: 8,
+                saturated: true,
+            },
+            candidates: (0..8).map(|index| candidate("common", index)).collect(),
+        };
+        assert!(partition_union_proves_completeness(
+            &[target_complete, common_saturated.clone()],
+            "linux",
+            true,
+            8
+        ));
+        assert!(partition_union_proves_completeness(
+            &[
+                DensePartitionCandidates {
+                    partition: "linux".to_string(),
+                    stats: DensePartitionStats {
+                        raw_count: 1,
+                        unique_page_count: 1,
+                        saturated: false,
+                    },
+                    candidates: vec![candidate("linux", 0)],
+                },
+                common_saturated.clone(),
+            ],
+            "linux",
+            true,
+            8
+        ));
+        assert!(partition_union_proves_completeness(
+            &[
+                DensePartitionCandidates {
+                    partition: "linux".to_string(),
+                    stats: DensePartitionStats {
+                        raw_count: 1,
+                        unique_page_count: 1,
+                        saturated: false,
+                    },
+                    candidates: vec![candidate("linux", 0)],
+                },
+                common_saturated,
+            ],
+            "linux",
+            false,
+            8
+        ));
+    }
+
+    #[test]
+    fn exact_fallback_ranking_handles_more_than_one_knn_batch() {
+        let candidate =
+            |example_id: String, page_id: &str, platform: &str, distance: f64| DenseCandidate {
+                example_id,
+                page_id: page_id.to_string(),
+                page_command: page_id.to_string(),
+                command: page_id.to_string(),
+                page_description: String::new(),
+                example_description: String::new(),
+                source_path: format!("pages/{platform}/{page_id}.md"),
+                source_ref: String::new(),
+                source_revision: String::new(),
+                platform: platform.to_string(),
+                page_position: 0,
+                example_position: 0,
+                ranking_score: distance,
+            };
+        let mut candidates = (0..MAX_KNN_BATCH_SIZE)
+            .map(|index| {
+                candidate(
+                    format!("unselected-{index}"),
+                    &format!("unselected-page-{index}"),
+                    "common",
+                    index as f64,
+                )
+            })
+            .collect::<Vec<_>>();
+        candidates.extend([
+            candidate(
+                "target-duplicate-a".to_string(),
+                "target-page",
+                "linux",
+                0.4,
+            ),
+            candidate(
+                "target-duplicate-b".to_string(),
+                "target-page",
+                "linux",
+                0.3,
+            ),
+            candidate("target-second".to_string(), "target-second", "linux", 0.5),
+            candidate("common-fallback".to_string(), "common-page", "common", 0.01),
+            candidate(
+                "unselected-tail".to_string(),
+                "unselected-tail",
+                "common",
+                0.0,
+            ),
+        ]);
+        let selected = HashSet::from([
+            "target-page".to_string(),
+            "target-second".to_string(),
+            "common-page".to_string(),
+        ]);
+
+        let ranked = rank_dense_candidates(candidates, &selected, "linux", true, 3);
+
+        assert_eq!(ranked.len(), 3);
+        assert_eq!(ranked[0].page_id, "target-page");
+        assert_eq!(ranked[0].example_id, "target-duplicate-b");
+        assert_eq!(ranked[1].page_id, "target-second");
+        assert_eq!(ranked[2].page_id, "common-page");
     }
 }

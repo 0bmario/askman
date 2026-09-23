@@ -22,6 +22,15 @@ pub struct Args {
     #[arg(long, short = 'v')]
     pub verbose: bool,
 
+    /// Emit structured result records for verification and scripting.
+    #[arg(long, short = 'j')]
+    pub json: bool,
+
+    /// Versioned machine-readable output reserved for CI probes. The public
+    /// `--json` contract remains the historical object-shaped response.
+    #[arg(long = "ci-json-v1", hide = true)]
+    pub ci_json_v1: bool,
+
     /// Force search for Linux commands
     #[arg(long, conflicts_with_all = ["osx", "windows"])]
     pub linux: bool,
@@ -70,6 +79,10 @@ pub struct CandidateArgs {
     #[arg(long, short = 'v')]
     pub verbose: bool,
 
+    /// Emit structured candidate identities for offline provisioning probes.
+    #[arg(long, short = 'j', hide = true)]
+    pub json: bool,
+
     /// Force search for Linux commands
     #[arg(long, conflicts_with_all = ["osx", "windows"])]
     pub linux: bool,
@@ -104,6 +117,7 @@ mod tests {
         assert!(args.linux);
         assert!(!args.osx);
         assert!(!args.windows);
+        assert!(!args.json);
         assert!(CandidateArgs::try_parse_from(["askman_candidate", "search"]).is_err());
         assert!(CandidateArgs::try_parse_from(["askman_candidate", "search", "files"]).is_err());
     }
@@ -126,5 +140,22 @@ mod tests {
             lifecycle_command(&["update", "files"].map(str::to_string)),
             None
         );
+    }
+
+    #[test]
+    fn historical_json_short_alias_is_preserved() {
+        let args = Args::try_parse_from(["askman", "-j", "copy", "files"]).unwrap();
+        assert!(args.json);
+        assert!(!args.ci_json_v1);
+        let candidate = CandidateArgs::try_parse_from([
+            "askman_candidate",
+            "-j",
+            "--bundle",
+            "/tmp/matching-bundle",
+            "copy",
+            "files",
+        ])
+        .unwrap();
+        assert!(candidate.json);
     }
 }

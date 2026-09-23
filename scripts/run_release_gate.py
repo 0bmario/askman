@@ -515,13 +515,16 @@ def paired_bootstrap(
         return samples[index]
 
     observed = sum(deltas) / len(deltas)
+    two_sided_lower = nearest_rank(0.025)
+    two_sided_upper = nearest_rank(0.975)
     return {
         "seed": seed,
         "resamples": resamples,
         "paired_task_count": len(deltas),
         "observed_success_at_1_gain": observed,
-        "interval_95": {"lower": nearest_rank(0.025), "upper": nearest_rank(0.975)},
-        "interval_contains_zero": nearest_rank(0.025) <= 0 <= nearest_rank(0.975),
+        "one_sided_95_lower_bound": nearest_rank(0.05),
+        "interval_95": {"lower": two_sided_lower, "upper": two_sided_upper},
+        "interval_contains_zero": two_sided_lower <= 0 <= two_sided_upper,
     }
 
 
@@ -626,8 +629,8 @@ def evaluate_gate(
                 reasons.append(f"{metric} regressed on platform {platform_name}")
             if metric != "success_at_3" and candidate_rate > main_rate:
                 reasons.append(f"{metric} regressed on platform {platform_name}")
-    if bootstrap["interval_contains_zero"]:
-        reasons.append("paired bootstrap interval contains zero")
+    if bootstrap["one_sided_95_lower_bound"] <= 0:
+        reasons.append("one-sided paired bootstrap lower bound is not above zero")
     performance_passed, performance_reasons = performance_gate(performance)
     reasons.extend(performance_reasons)
     execution = execution or {}
@@ -651,6 +654,7 @@ def evaluate_gate(
         "reasons": reasons,
         "thresholds": {
             "minimum_success_at_1_gain": MIN_SUCCESS_AT_1_GAIN,
+            "minimum_one_sided_95_lower_bound_exclusive": 0.0,
             "maximum_latency_or_memory_regression": MAX_REGRESSION,
         },
     }
@@ -1083,7 +1087,9 @@ def markdown_report(report: dict[str, Any]) -> str:
             "",
             f"- Observed Success@1 gain: `{report['bootstrap']['observed_success_at_1_gain']:.4f}`.",
             f"- {report['bootstrap']['resamples']:,} resamples; seed `{report['bootstrap']['seed']}`.",
-            f"- 95% interval: `{report['bootstrap']['interval_95']['lower']:.4f}` to "
+            f"- One-sided 95% lower bound (5th percentile): `"
+            f"{report['bootstrap']['one_sided_95_lower_bound']:.4f}`.",
+            f"- Two-sided 95% diagnostic interval: `{report['bootstrap']['interval_95']['lower']:.4f}` to "
             f"`{report['bootstrap']['interval_95']['upper']:.4f}`.",
             "",
             "## Gate conditions",
@@ -1282,8 +1288,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         )
         gate = evaluate_gate(combined, bootstrap, performance, execution)
         report = {
-            "schema_version": 1,
+            "schema_version": 2,
             "evidence_id": "askman-main-vs-retrieval-v2-v1",
+            "evaluated_candidate_commit": builds["candidate"]["commit"],
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "status": "complete",
             "protocol": {

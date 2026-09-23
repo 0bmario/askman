@@ -1,0 +1,4110 @@
+{
+  "bootstrap": {
+    "interval_95": {
+      "lower": 0.13333333333333333,
+      "upper": 0.36666666666666664
+    },
+    "interval_contains_zero": false,
+    "observed_success_at_1_gain": 0.25,
+    "paired_task_count": 60,
+    "resamples": 10000,
+    "seed": 33031
+  },
+  "builds": {
+    "candidate": {
+      "binary": "/var/folders/gg/m4k2c11115j155971lzv7vxh0000gn/T/askman-release-gate-ivbc3uvo/candidate-target/release/askman",
+      "binary_bytes": 13133016,
+      "binary_sha256": "3f726feeb15cc7a7494c954e31f805d567026c40842cd4aa5ffabbf272b774c0",
+      "build_elapsed_ms": 51364.108,
+      "cargo_lock_sha256": "c7eb0288a893ce1f387118cb0fc7370465d2efdfe33de1518ec2715b81c94f76",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--release",
+        "--bin",
+        "askman"
+      ],
+      "commit": "b3ebb12f9ef6208eac541aa7f4ad48001f07957e",
+      "ort_rpath": "/tmp/askman-release-gate-inputs-20260921/provision/onnxruntime/onnxruntime-osx-arm64-1.20.0/lib",
+      "ref": "origin/retrieval-v2"
+    },
+    "main": {
+      "binary": "/var/folders/gg/m4k2c11115j155971lzv7vxh0000gn/T/askman-release-gate-ivbc3uvo/main-target/release/askman",
+      "binary_bytes": 12633208,
+      "binary_sha256": "5a4568a7b603fbb488925f41da11b3e4c47c92a7e3db3ef09b4e1cb6541ad02d",
+      "build_elapsed_ms": 53223.243,
+      "cargo_lock_sha256": "79ee86b480ce00437f814657327b326b725ecd13965d1e958772b5d0ff415990",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--release",
+        "--bin",
+        "askman"
+      ],
+      "commit": "8bd9fa296ea7e2f461202091f2ade47221bc8a0e",
+      "ort_rpath": "/tmp/askman-release-gate-inputs-20260921/provision/onnxruntime/onnxruntime-osx-arm64-1.20.0/lib",
+      "ref": "8bd9fa296ea7e2f461202091f2ade47221bc8a0e"
+    }
+  },
+  "evidence_id": "askman-main-vs-retrieval-v2-v1",
+  "execution": {
+    "candidate": [],
+    "main": []
+  },
+  "gate": {
+    "decision": "inconclusive",
+    "family_regressions": [
+      "holdout39-osx-speech-phrase"
+    ],
+    "overall_success_at_1_gain": 0.25,
+    "passed": false,
+    "positive_family_count": 7,
+    "reasons": [
+      "Success@1 regressed in: holdout39-osx-speech-phrase"
+    ],
+    "thresholds": {
+      "maximum_latency_or_memory_regression": 0.2,
+      "minimum_success_at_1_gain": 0.05
+    }
+  },
+  "generated_at_utc": "2026-09-21T17:06:47.615774+00:00",
+  "host": {
+    "cargo": "cargo 1.88.0 (873a06493 2025-05-10)",
+    "logical_cpus": 10,
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "python": "3.14.7 (main, Aug  5 2026, 10:29:49) [Clang 21.0.0 (clang-2100.1.1.101)]",
+    "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)"
+  },
+  "inputs": {
+    "benchmark_id": "askman-evaluation-v2",
+    "bundle": {
+      "bundle_id": "matching-bundle-v2:f3e07052aa2673bc320a90d563b62ecddc8bc82fd4804166aad09a6641fb60f2",
+      "bundle_tree_sha256": "184c5c8ed99491a0735ebc2e1aa074620f8918bb7c829e96db1a168c5591f964",
+      "manifest_sha256": "cde6315f61a0d251cb5d4ac86bd4327684a0393f4f6533230808095978536dfc",
+      "staged_tree_sha256": "1b8ce1e6a7155ddd89bca366d9e3b4b49114df6731356a37ccbfd214b7178a5f"
+    },
+    "bundle_file_sha256": {
+      "manifest.json": "cde6315f61a0d251cb5d4ac86bd4327684a0393f4f6533230808095978536dfc",
+      "matching.db": "e13c01ae5cc570ce7851915f90244d06bb0a836e345d5af0388e33714e5b1a2f",
+      "model-cache/models--Qdrant--all-MiniLM-L6-v2-onnx/refs/main": "c04445fc110a5f892ea0b402a5a4b47b81dbd83fcd1e9159b7da5be732ed8ab7",
+      "model-cache/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/config.json": "1b4d8e2a3988377ed8b519a31d8d31025a25f1c5f8606998e8014111438efcd7",
+      "model-cache/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/model.onnx": "bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5",
+      "model-cache/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/special_tokens_map.json": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a",
+      "model-cache/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/tokenizer.json": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0",
+      "model-cache/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/tokenizer_config.json": "bd2e06a5b20fd1b13ca988bedc8763d332d242381b4fbc98f8fead4524158f79"
+    },
+    "dev_dataset_sha256": "216c0e26f24fda7df197011be4f8add33b6852b7907b32966b0c77e0a26c947d",
+    "freeze_id": "evaluation-v2-release-benchmark-v3",
+    "freeze_manifest_sha256": "4f258311db08cad15c1473c77ff6d98e2fa3b0044990fcdfcbc8110f96fc46dc",
+    "holdout_dataset_sha256": "1aa1c0a8ec5c550b8a6699654bb5eb56928bd6845f0b3610bb7a8ee368813418",
+    "main_data_dir_tree_sha256": "0cfc2946d584f3a8442c8ab3cd3f0af2569bd781a767894ebe54230ebc3a5919",
+    "main_data_file_sha256": {
+      "commands.db": "ef3b96cc8ee5a9effa08d9a5e8366e3d92e9b3c7866493568fe2248d379819db",
+      "models/models--Qdrant--all-MiniLM-L6-v2-onnx/refs/main": "c04445fc110a5f892ea0b402a5a4b47b81dbd83fcd1e9159b7da5be732ed8ab7",
+      "models/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/config.json": "1b4d8e2a3988377ed8b519a31d8d31025a25f1c5f8606998e8014111438efcd7",
+      "models/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/model.onnx": "bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5",
+      "models/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/special_tokens_map.json": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a",
+      "models/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/tokenizer.json": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0",
+      "models/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/tokenizer_config.json": "bd2e06a5b20fd1b13ca988bedc8763d332d242381b4fbc98f8fead4524158f79"
+    },
+    "scorer_sha256": "006f934dc6e7cb251776bdb8090a014ae0c749e2b976d306b58623e01613ec90"
+  },
+  "limitations": [
+    "The main CLI requires a separately provisioned commands.db and model cache; their tree digest is recorded and setup/download is outside this gate.",
+    "Warmed-query samples use fresh CLI processes after filesystem/model caches are warmed; the CLI has no persistent query-server mode.",
+    "Example IDs are mapped from user-visible description/command pairs in the pinned candidate bundle; unmapped output is conservatively scored as not acceptable.",
+    "Peak memory depends on the host time implementation; missing samples make the performance gate inconclusive."
+  ],
+  "performance": {
+    "candidate": {
+      "dev": {
+        "fresh_process": {
+          "memory_sample_count": 60,
+          "p50_ms": 88.775,
+          "p95_ms": 92.336,
+          "peak_memory_bytes": 282903320,
+          "sample_count": 60
+        }
+      },
+      "holdout": {
+        "fresh_process": {
+          "memory_sample_count": 60,
+          "p50_ms": 88.316,
+          "p95_ms": 91.301,
+          "peak_memory_bytes": 242893544,
+          "sample_count": 60
+        }
+      },
+      "warmed_query": {
+        "execution_failures": [],
+        "measured_queries": 30,
+        "memory_sample_count": 30,
+        "p50_ms": 88.724,
+        "p95_ms": 91.113,
+        "peak_memory_bytes": 241795792,
+        "process_scope": "fresh CLI process per sample; filesystem/model cache warmed",
+        "sample_count": 30,
+        "warmup_queries": 5
+      }
+    },
+    "main": {
+      "dev": {
+        "fresh_process": {
+          "memory_sample_count": 60,
+          "p50_ms": 83.866,
+          "p95_ms": 88.635,
+          "peak_memory_bytes": 236995304,
+          "sample_count": 60
+        }
+      },
+      "holdout": {
+        "fresh_process": {
+          "memory_sample_count": 60,
+          "p50_ms": 84.559,
+          "p95_ms": 90.235,
+          "peak_memory_bytes": 235848400,
+          "sample_count": 60
+        }
+      },
+      "warmed_query": {
+        "execution_failures": [],
+        "measured_queries": 30,
+        "memory_sample_count": 30,
+        "p50_ms": 83.569,
+        "p95_ms": 86.759,
+        "peak_memory_bytes": 235930320,
+        "process_scope": "fresh CLI process per sample; filesystem/model cache warmed",
+        "sample_count": 30,
+        "warmup_queries": 5
+      }
+    }
+  },
+  "protocol": {
+    "candidate_ref": "origin/retrieval-v2",
+    "development_and_holdout": true,
+    "evidence_scope": "release-gate",
+    "holdout_access_authorized": true,
+    "main_ref": "8bd9fa296ea7e2f461202091f2ade47221bc8a0e",
+    "no_holdout_tuning": true,
+    "primary_outcome": "user-visible displayed example IDs and abstentions",
+    "query_network_policy": "macOS sandbox-exec deny network*",
+    "setup_download_separate": true,
+    "timing_policy": "macOS time -l"
+  },
+  "quality": {
+    "combined": {
+      "candidate": {
+        "answerable_tasks": 60,
+        "coverage": {
+          "count": 56,
+          "denominator": 120
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 60
+        },
+        "incorrect_answered_tasks": {
+          "count": 4,
+          "denominator": 56
+        },
+        "success_at_1": {
+          "count": 52,
+          "denominator": 60
+        },
+        "success_at_3": {
+          "count": 52,
+          "denominator": 60
+        },
+        "tasks": 120,
+        "unanswerable_tasks": 60
+      },
+      "failures": {
+        "candidate": [
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "refresh the Debian package index with apt",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-01"
+          },
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "reload apt's package index on Linux",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-02"
+          },
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "synchronize the Debian package catalog",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-03"
+          },
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "fetch the latest package index with apt",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "holdout39-osx-speech-phrase",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "use macOS say to speak text",
+            "task_id": "holdout-v2r1-holdoutosx-speech-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3",
+              "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "holdout39-windows-list-current",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "display the current Windows directory without hidden items",
+            "task_id": "holdout-v2r1-holdoutwindows-listing-03"
+          },
+          {
+            "displayed_example_ids": [
+              "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6",
+              "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "holdout39-windows-list-current",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "list visible entries from the current Windows folder",
+            "task_id": "holdout-v2r1-holdoutwindows-listing-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3",
+              "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "holdout39-windows-list-current",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "show the non-hidden contents of the current Windows directory",
+            "task_id": "holdout-v2r1-holdoutwindows-listing-05"
+          }
+        ],
+        "main": [
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-osx-clipboard-output",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "copy shell output to the macOS clipboard",
+            "task_id": "dev-v2r1-devosx-clipboard-01"
+          },
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-osx-clipboard-output",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "send terminal output to the Mac pasteboard",
+            "task_id": "dev-v2r1-devosx-clipboard-02"
+          },
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+              "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "dev39-osx-clipboard-output",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "pipe command output into the Apple clipboard",
+            "task_id": "dev-v2r1-devosx-clipboard-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-osx-clipboard-output",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "put standard output on the Mac pasteboard",
+            "task_id": "dev-v2r1-devosx-clipboard-05"
+          },
+          {
+            "displayed_example_ids": [
+              "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-windows-file-copy-single",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "copy one Windows file to another path",
+            "task_id": "dev-v2r1-devwindows-file-copy-01"
+          },
+          {
+            "displayed_example_ids": [
+              "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-windows-file-copy-single",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "copy one file into a different Windows folder",
+            "task_id": "dev-v2r1-devwindows-file-copy-03"
+          },
+          {
+            "displayed_example_ids": [
+              "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-windows-file-copy-single",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "make a second copy of one Windows file",
+            "task_id": "dev-v2r1-devwindows-file-copy-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": true,
+            "family": "dev39-windows-unsupported-registry",
+            "incorrect_answer": false,
+            "platform": "windows",
+            "question": "look up a Windows registry entry in PowerShell",
+            "task_id": "dev-v2r1-devwindows-unsupported-a-04"
+          },
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "refresh the Debian package index with apt",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-01"
+          },
+          {
+            "displayed_example_ids": [
+              "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16",
+              "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d",
+              "example-26a75f510d23eade1920023e9d21690e523c6712534627e709bc9c6acf4c41a3",
+              "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+              "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904",
+              "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097",
+              "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376"
+            ],
+            "displayed_result_count": 7,
+            "false_answer": true,
+            "family": "holdout39-linux-unsupported-pacman",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "install a package with pacman on Linux",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-02"
+          }
+        ]
+      },
+      "family": {
+        "dev39-common-file-content": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.19999999999999996
+        },
+        "dev39-common-file-copy": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-common-unsupported-file-encryption": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-linux-firewall-unsupported": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-linux-interface-address": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.4
+        },
+        "dev39-linux-systemd-restart": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.19999999999999996
+        },
+        "dev39-osx-clipboard-output": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.8
+        },
+        "dev39-osx-unsupported-dns": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-osx-unsupported-exif": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-windows-file-copy-single": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 2,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.8
+        },
+        "dev39-windows-unsupported-event-log": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-windows-unsupported-registry": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 1,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 1,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-common-file-concatenation": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-common-text-sort-descending": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-common-unsupported-dns": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-linux-apt-update": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 1,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 1
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 3,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 2,
+              "denominator": 3
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-linux-unsupported-firewall": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-linux-unsupported-pacman": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 5,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-osx-open-default": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.4
+        },
+        "holdout39-osx-speech-phrase": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 4,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": -0.19999999999999996
+        },
+        "holdout39-osx-unsupported-sms": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 1,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 1,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-windows-list-current": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 2,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 2,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 4,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.4
+        },
+        "holdout39-windows-unsupported-event-log": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-windows-unsupported-firewall": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        }
+      },
+      "main": {
+        "answerable_tasks": 60,
+        "coverage": {
+          "count": 65,
+          "denominator": 120
+        },
+        "false_answers_on_unanswerable": {
+          "count": 7,
+          "denominator": 60
+        },
+        "incorrect_answered_tasks": {
+          "count": 10,
+          "denominator": 58
+        },
+        "success_at_1": {
+          "count": 37,
+          "denominator": 60
+        },
+        "success_at_3": {
+          "count": 48,
+          "denominator": 60
+        },
+        "tasks": 120,
+        "unanswerable_tasks": 60
+      },
+      "platform": {
+        "common": {
+          "candidate": {
+            "answerable_tasks": 20,
+            "coverage": {
+              "count": 20,
+              "denominator": 30
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 20
+            },
+            "success_at_1": {
+              "count": 20,
+              "denominator": 20
+            },
+            "success_at_3": {
+              "count": 20,
+              "denominator": 20
+            },
+            "tasks": 30,
+            "unanswerable_tasks": 10
+          },
+          "main": {
+            "answerable_tasks": 20,
+            "coverage": {
+              "count": 20,
+              "denominator": 30
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 20
+            },
+            "success_at_1": {
+              "count": 19,
+              "denominator": 20
+            },
+            "success_at_3": {
+              "count": 20,
+              "denominator": 20
+            },
+            "tasks": 30,
+            "unanswerable_tasks": 10
+          }
+        },
+        "linux": {
+          "candidate": {
+            "answerable_tasks": 15,
+            "coverage": {
+              "count": 11,
+              "denominator": 30
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 15
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 11
+            },
+            "success_at_1": {
+              "count": 11,
+              "denominator": 15
+            },
+            "success_at_3": {
+              "count": 11,
+              "denominator": 15
+            },
+            "tasks": 30,
+            "unanswerable_tasks": 15
+          },
+          "main": {
+            "answerable_tasks": 15,
+            "coverage": {
+              "count": 18,
+              "denominator": 30
+            },
+            "false_answers_on_unanswerable": {
+              "count": 5,
+              "denominator": 15
+            },
+            "incorrect_answered_tasks": {
+              "count": 2,
+              "denominator": 13
+            },
+            "success_at_1": {
+              "count": 8,
+              "denominator": 15
+            },
+            "success_at_3": {
+              "count": 11,
+              "denominator": 15
+            },
+            "tasks": 30,
+            "unanswerable_tasks": 15
+          }
+        },
+        "osx": {
+          "candidate": {
+            "answerable_tasks": 15,
+            "coverage": {
+              "count": 15,
+              "denominator": 30
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 15
+            },
+            "incorrect_answered_tasks": {
+              "count": 1,
+              "denominator": 15
+            },
+            "success_at_1": {
+              "count": 14,
+              "denominator": 15
+            },
+            "success_at_3": {
+              "count": 14,
+              "denominator": 15
+            },
+            "tasks": 30,
+            "unanswerable_tasks": 15
+          },
+          "main": {
+            "answerable_tasks": 15,
+            "coverage": {
+              "count": 16,
+              "denominator": 30
+            },
+            "false_answers_on_unanswerable": {
+              "count": 1,
+              "denominator": 15
+            },
+            "incorrect_answered_tasks": {
+              "count": 4,
+              "denominator": 15
+            },
+            "success_at_1": {
+              "count": 9,
+              "denominator": 15
+            },
+            "success_at_3": {
+              "count": 11,
+              "denominator": 15
+            },
+            "tasks": 30,
+            "unanswerable_tasks": 15
+          }
+        },
+        "windows": {
+          "candidate": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 10,
+              "denominator": 30
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 20
+            },
+            "incorrect_answered_tasks": {
+              "count": 3,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 7,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 7,
+              "denominator": 10
+            },
+            "tasks": 30,
+            "unanswerable_tasks": 20
+          },
+          "main": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 11,
+              "denominator": 30
+            },
+            "false_answers_on_unanswerable": {
+              "count": 1,
+              "denominator": 20
+            },
+            "incorrect_answered_tasks": {
+              "count": 4,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 6,
+              "denominator": 10
+            },
+            "tasks": 30,
+            "unanswerable_tasks": 20
+          }
+        }
+      }
+    },
+    "dev": {
+      "candidate": {
+        "answerable_tasks": 30,
+        "coverage": {
+          "count": 30,
+          "denominator": 60
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 30
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 30
+        },
+        "success_at_1": {
+          "count": 30,
+          "denominator": 30
+        },
+        "success_at_3": {
+          "count": 30,
+          "denominator": 30
+        },
+        "tasks": 60,
+        "unanswerable_tasks": 30
+      },
+      "failures": {
+        "candidate": [],
+        "main": [
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-osx-clipboard-output",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "copy shell output to the macOS clipboard",
+            "task_id": "dev-v2r1-devosx-clipboard-01"
+          },
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-osx-clipboard-output",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "send terminal output to the Mac pasteboard",
+            "task_id": "dev-v2r1-devosx-clipboard-02"
+          },
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+              "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "dev39-osx-clipboard-output",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "pipe command output into the Apple clipboard",
+            "task_id": "dev-v2r1-devosx-clipboard-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-osx-clipboard-output",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "put standard output on the Mac pasteboard",
+            "task_id": "dev-v2r1-devosx-clipboard-05"
+          },
+          {
+            "displayed_example_ids": [
+              "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-windows-file-copy-single",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "copy one Windows file to another path",
+            "task_id": "dev-v2r1-devwindows-file-copy-01"
+          },
+          {
+            "displayed_example_ids": [
+              "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-windows-file-copy-single",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "copy one file into a different Windows folder",
+            "task_id": "dev-v2r1-devwindows-file-copy-03"
+          },
+          {
+            "displayed_example_ids": [
+              "example-bf08095597f0c34db32a46737a7e9ffa58bd8150b4d2ef20940f750a30603e2b"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "dev39-windows-file-copy-single",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "make a second copy of one Windows file",
+            "task_id": "dev-v2r1-devwindows-file-copy-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-34ec551605a714d9a5aabb76d979f066b344c34efb17a6f53748b87870ee4078"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": true,
+            "family": "dev39-windows-unsupported-registry",
+            "incorrect_answer": false,
+            "platform": "windows",
+            "question": "look up a Windows registry entry in PowerShell",
+            "task_id": "dev-v2r1-devwindows-unsupported-a-04"
+          }
+        ]
+      },
+      "family": {
+        "dev39-common-file-content": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.19999999999999996
+        },
+        "dev39-common-file-copy": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-common-unsupported-file-encryption": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-linux-firewall-unsupported": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-linux-interface-address": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.4
+        },
+        "dev39-linux-systemd-restart": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.19999999999999996
+        },
+        "dev39-osx-clipboard-output": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.8
+        },
+        "dev39-osx-unsupported-dns": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-osx-unsupported-exif": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-windows-file-copy-single": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 2,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.8
+        },
+        "dev39-windows-unsupported-event-log": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "dev39-windows-unsupported-registry": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 1,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 1,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        }
+      },
+      "main": {
+        "answerable_tasks": 30,
+        "coverage": {
+          "count": 31,
+          "denominator": 60
+        },
+        "false_answers_on_unanswerable": {
+          "count": 1,
+          "denominator": 30
+        },
+        "incorrect_answered_tasks": {
+          "count": 7,
+          "denominator": 30
+        },
+        "success_at_1": {
+          "count": 18,
+          "denominator": 30
+        },
+        "success_at_3": {
+          "count": 23,
+          "denominator": 30
+        },
+        "tasks": 60,
+        "unanswerable_tasks": 30
+      },
+      "platform": {
+        "common": {
+          "candidate": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 10,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 10,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 10,
+              "denominator": 10
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 10,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 9,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 10,
+              "denominator": 10
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 5
+          }
+        },
+        "linux": {
+          "candidate": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 10,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 10,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 10,
+              "denominator": 10
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 10,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 7,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 10,
+              "denominator": 10
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 5
+          }
+        },
+        "osx": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 10
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 10
+          }
+        },
+        "windows": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 10
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 6,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 1,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 2,
+              "denominator": 5
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 10
+          }
+        }
+      }
+    },
+    "holdout": {
+      "candidate": {
+        "answerable_tasks": 30,
+        "coverage": {
+          "count": 26,
+          "denominator": 60
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 30
+        },
+        "incorrect_answered_tasks": {
+          "count": 4,
+          "denominator": 26
+        },
+        "success_at_1": {
+          "count": 22,
+          "denominator": 30
+        },
+        "success_at_3": {
+          "count": 22,
+          "denominator": 30
+        },
+        "tasks": 60,
+        "unanswerable_tasks": 30
+      },
+      "failures": {
+        "candidate": [
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "refresh the Debian package index with apt",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-01"
+          },
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "reload apt's package index on Linux",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-02"
+          },
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "synchronize the Debian package catalog",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-03"
+          },
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "fetch the latest package index with apt",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "holdout39-osx-speech-phrase",
+            "incorrect_answer": true,
+            "platform": "osx",
+            "question": "use macOS say to speak text",
+            "task_id": "holdout-v2r1-holdoutosx-speech-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3",
+              "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "holdout39-windows-list-current",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "display the current Windows directory without hidden items",
+            "task_id": "holdout-v2r1-holdoutwindows-listing-03"
+          },
+          {
+            "displayed_example_ids": [
+              "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6",
+              "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "holdout39-windows-list-current",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "list visible entries from the current Windows folder",
+            "task_id": "holdout-v2r1-holdoutwindows-listing-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3",
+              "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "holdout39-windows-list-current",
+            "incorrect_answer": true,
+            "platform": "windows",
+            "question": "show the non-hidden contents of the current Windows directory",
+            "task_id": "holdout-v2r1-holdoutwindows-listing-05"
+          }
+        ],
+        "main": [
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "refresh the Debian package index with apt",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-01"
+          },
+          {
+            "displayed_example_ids": [
+              "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16",
+              "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d",
+              "example-26a75f510d23eade1920023e9d21690e523c6712534627e709bc9c6acf4c41a3",
+              "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+              "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904",
+              "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097",
+              "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376"
+            ],
+            "displayed_result_count": 7,
+            "false_answer": true,
+            "family": "holdout39-linux-unsupported-pacman",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "install a package with pacman on Linux",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-02"
+          },
+          {
+            "displayed_example_ids": [
+              "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16",
+              "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d",
+              "example-26a75f510d23eade1920023e9d21690e523c6712534627e709bc9c6acf4c41a3",
+              "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+              "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904",
+              "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097",
+              "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376"
+            ],
+            "displayed_result_count": 7,
+            "false_answer": true,
+            "family": "holdout39-linux-unsupported-pacman",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "use pacman to install software on Linux",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-03"
+          },
+          {
+            "displayed_example_ids": [
+              "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16",
+              "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d",
+              "example-26a75f510d23eade1920023e9d21690e523c6712534627e709bc9c6acf4c41a3",
+              "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+              "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904",
+              "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb",
+              "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376"
+            ],
+            "displayed_result_count": 7,
+            "false_answer": true,
+            "family": "holdout39-linux-unsupported-pacman",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "add a package with the pacman manager",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16",
+              "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d",
+              "example-26a75f510d23eade1920023e9d21690e523c6712534627e709bc9c6acf4c41a3",
+              "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+              "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904",
+              "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376",
+              "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097"
+            ],
+            "displayed_result_count": 7,
+            "false_answer": true,
+            "family": "holdout39-linux-unsupported-pacman",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "install Linux software from a pacman repository",
+            "task_id": "holdout-v2r1-holdoutlinux-packages-05"
+          },
+          {
+            "displayed_example_ids": [],
+            "displayed_result_count": 0,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "reload apt's package index on Linux",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-02"
+          },
+          {
+            "displayed_example_ids": [
+              "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16"
+            ],
+            "displayed_result_count": 1,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": true,
+            "platform": "linux",
+            "question": "synchronize the Debian package catalog",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-03"
+          },
+          {
+            "displayed_example_ids": [
+              "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16",
+              "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097"
+            ],
+            "displayed_result_count": 2,
+            "false_answer": false,
+            "family": "holdout39-linux-apt-update",
+            "incorrect_answer": true,
+            "platform": "linux",
+            "question": "fetch the latest package index with apt",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-04"
+          },
+          {
+            "displayed_example_ids": [
+              "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16",
+              "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d",
+              "example-26a75f510d23eade1920023e9d21690e523c6712534627e709bc9c6acf4c41a3",
+              "example-5270e7367ac85aacdf86577d153a225237069a6d0d8a97e0eb86ee127154898b",
+              "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904",
+              "example-54f92822e448d5c7c1633ede9176a56d4e1c7354bf9ed2cfb3a9381c2fe14376",
+              "example-7df27974797b25d1a000ca98ed99d766c15023775f7d2f210bce3fa01a661097"
+            ],
+            "displayed_result_count": 7,
+            "false_answer": true,
+            "family": "holdout39-linux-unsupported-pacman",
+            "incorrect_answer": false,
+            "platform": "linux",
+            "question": "download and install a package with pacman",
+            "task_id": "holdout-v2r1-holdoutlinux-unsupported-a-05"
+          },
+          {
+            "displayed_example_ids": [
+              "example-c7e7560a61cc444906eb6f2eb172fd18d2dda57f6d72cc794370fb3889a77238",
+              "example-35f27a06fccea8383d3b21a035cca8b0d30e2460f92489ce54f8e66be55cd398",
+              "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+            ],
+            "displayed_result_count": 3,
+            "false_answer": true,
+            "family": "holdout39-osx-unsupported-sms",
+            "incorrect_answer": false,
+            "platform": "osx",
+            "question": "write and send a text message from Terminal",
+            "task_id": "holdout-v2r1-holdoutosx-unsupported-05"
+          }
+        ]
+      },
+      "family": {
+        "holdout39-common-file-concatenation": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-common-text-sort-descending": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-common-unsupported-dns": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-linux-apt-update": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 1,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 1
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 3,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 2,
+              "denominator": 3
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-linux-unsupported-firewall": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-linux-unsupported-pacman": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 5,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-osx-open-default": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.4
+        },
+        "holdout39-osx-speech-phrase": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 4,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 4,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 5,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 5,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": -0.19999999999999996
+        },
+        "holdout39-osx-unsupported-sms": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 1,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 1,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-windows-list-current": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 2,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 2,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 0
+            },
+            "incorrect_answered_tasks": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 4,
+              "denominator": 5
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 0
+          },
+          "success_at_1_gain": 0.4
+        },
+        "holdout39-windows-unsupported-event-log": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        },
+        "holdout39-windows-unsupported-firewall": {
+          "candidate": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 0,
+            "coverage": {
+              "count": 0,
+              "denominator": 5
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 0
+            },
+            "success_at_3": {
+              "count": 0,
+              "denominator": 0
+            },
+            "tasks": 5,
+            "unanswerable_tasks": 5
+          },
+          "success_at_1_gain": 0.0
+        }
+      },
+      "main": {
+        "answerable_tasks": 30,
+        "coverage": {
+          "count": 34,
+          "denominator": 60
+        },
+        "false_answers_on_unanswerable": {
+          "count": 6,
+          "denominator": 30
+        },
+        "incorrect_answered_tasks": {
+          "count": 3,
+          "denominator": 28
+        },
+        "success_at_1": {
+          "count": 19,
+          "denominator": 30
+        },
+        "success_at_3": {
+          "count": 25,
+          "denominator": 30
+        },
+        "tasks": 60,
+        "unanswerable_tasks": 30
+      },
+      "platform": {
+        "common": {
+          "candidate": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 10,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 10,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 10,
+              "denominator": 10
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 10,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 10,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 10,
+              "denominator": 10
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 5
+          }
+        },
+        "linux": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 1,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 1
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 10
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 8,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 5,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 2,
+              "denominator": 3
+            },
+            "success_at_1": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 1,
+              "denominator": 5
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 10
+          }
+        },
+        "osx": {
+          "candidate": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 10,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 1,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 9,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 9,
+              "denominator": 10
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 5
+          },
+          "main": {
+            "answerable_tasks": 10,
+            "coverage": {
+              "count": 11,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 1,
+              "denominator": 5
+            },
+            "incorrect_answered_tasks": {
+              "count": 0,
+              "denominator": 10
+            },
+            "success_at_1": {
+              "count": 8,
+              "denominator": 10
+            },
+            "success_at_3": {
+              "count": 10,
+              "denominator": 10
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 5
+          }
+        },
+        "windows": {
+          "candidate": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 3,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 2,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 2,
+              "denominator": 5
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 10
+          },
+          "main": {
+            "answerable_tasks": 5,
+            "coverage": {
+              "count": 5,
+              "denominator": 15
+            },
+            "false_answers_on_unanswerable": {
+              "count": 0,
+              "denominator": 10
+            },
+            "incorrect_answered_tasks": {
+              "count": 1,
+              "denominator": 5
+            },
+            "success_at_1": {
+              "count": 0,
+              "denominator": 5
+            },
+            "success_at_3": {
+              "count": 4,
+              "denominator": 5
+            },
+            "tasks": 15,
+            "unanswerable_tasks": 10
+          }
+        }
+      }
+    }
+  },
+  "recommendation": "inconclusive",
+  "reproduction_command": "scripts/run_release_gate.py --repo-root /Users/mmo/fun/askman --main-ref 8bd9fa296ea7e2f461202091f2ade47221bc8a0e --candidate-ref origin/retrieval-v2 --main-data-dir /tmp/askman-release-gate-inputs-20260921/main-home/Library/Application Support/askman --bundle /tmp/askman-release-gate-inputs-20260921/askman-eval-bundle --allow-holdout --output-json /tmp/askman-release-gate-full-20260921.Oak6Q8/release-gate.json --output-markdown /tmp/askman-release-gate-full-20260921.Oak6Q8/release-gate.md",
+  "schema_version": 1,
+  "status": "complete"
+}

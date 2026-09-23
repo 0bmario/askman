@@ -1,0 +1,283 @@
+{
+  "builder": {
+    "allow_dirty": true,
+    "builder_binary": {
+      "path": "${BUILDER}/tldr_subset",
+      "sha256": "d7fca88af31f307a50fa9236b437bbfbc31ccff642a12e576cebd2760d93a693"
+    },
+    "candidate_binary": {
+      "path": "${BUILDER}/askman_candidate",
+      "sha256": "5234fd956220141858ee130c81c3537cf545a7b2e22ebe15e7d56a8bcc694566"
+    },
+    "cargo": "cargo 1.88.0 (873a06493 2025-05-10)",
+    "git_commit": "b3ebb12f9ef6208eac541aa7f4ad48001f07957e",
+    "git_diff_sha256": "53223672b691176f3cac7330aa79980af975783b9191672f167c1230d9a7774b",
+    "git_dirty": true,
+    "git_status_sha256": "55b76dfe313aa46e1b2d4d959ce06639e21567b0ceb9ec4aba9cab17db146d63",
+    "platform": {
+      "machine": "arm64",
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "release": "25.6.0",
+      "system": "Darwin"
+    },
+    "production_eligible": false,
+    "python": "3.14.7 (main, Aug  5 2026, 10:29:49) [Clang 21.0.0 (clang-2100.1.1.101)]",
+    "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)",
+    "working_tree_sha256": "95ae6ea68b9c74c8c41e4024b054b37c14fded79c644f16765c5414446b44ff1"
+  },
+  "bundle": {
+    "archive_path": "${RUN_DIR}/matching-bundle.tar.gz",
+    "archive_sha256": "bc663019097671dda61a8d35f010aa055cb035959a9eaad6c2d2952732817cc1",
+    "bundle_id": "matching-bundle-v2:8ab84c666b7420575f0df86fd174465d1be8810d15d6ecf0465414213ea7d84b",
+    "cli_compatibility": "askman=0.4.0",
+    "detached_manifest_byte_identical": true,
+    "detached_manifest_path": "${RUN_DIR}/matching-bundle-manifest.json",
+    "detached_manifest_sha256": "3af378161c69dc7d8604dcd22d24fd6c5d0f149411c42e9d8602153d3014174b",
+    "hybrid_probes": {
+      "collision_common_fallback": {
+        "dense_result_count": 2,
+        "expected_platform": "common",
+        "expected_source_path": "pages/common/qcp.md",
+        "explicit_flag": null,
+        "platform": "osx",
+        "query": "copy multiple JPEG files",
+        "result_count": 2,
+        "top_platform": "common",
+        "top_source_path": "pages/common/qcp.md"
+      },
+      "collision_target_precedence": {
+        "dense_result_count": 2,
+        "expected_platform": "windows",
+        "expected_source_path": "pages/windows/copy.md",
+        "explicit_flag": "--windows",
+        "platform": "windows",
+        "query": "copy a file to another location",
+        "result_count": 2,
+        "top_platform": "windows",
+        "top_source_path": "pages/windows/copy.md"
+      },
+      "explicit_linux": {
+        "dense_result_count": 3,
+        "expected_platform": "linux",
+        "expected_source_path": "pages/linux/rc-service.md",
+        "explicit_flag": "--linux",
+        "platform": "linux",
+        "query": "restart service",
+        "result_count": 3,
+        "top_platform": "linux",
+        "top_source_path": "pages/linux/rc-service.md"
+      },
+      "explicit_osx": {
+        "dense_result_count": 1,
+        "expected_platform": "osx",
+        "expected_source_path": "pages/osx/say.md",
+        "explicit_flag": "--osx",
+        "platform": "osx",
+        "query": "say text aloud",
+        "result_count": 1,
+        "top_platform": "osx",
+        "top_source_path": "pages/osx/say.md"
+      }
+    },
+    "inventory": {
+      "dense_index_version": "dense-vec0-v2",
+      "dense_partition_key": "platform",
+      "dense_partitions": [
+        "common",
+        "linux",
+        "osx",
+        "windows"
+      ],
+      "dense_retrieval_strategy": "partitioned-knn-v1",
+      "dense_row_count": 31400,
+      "dense_rowid_mapping": "example_dense.dense_rowid-v1",
+      "examples": 32173,
+      "lexical_examples": 31400,
+      "pages": 7358,
+      "pages_by_platform": {
+        "common": 4670,
+        "linux": 2057,
+        "osx": 331,
+        "windows": 300
+      },
+      "source_digest": "5337158d01155689c62d3ba2fa33a2d04fd2904b35e9088c54d041a562a08905",
+      "source_files": 7415,
+      "source_files_by_status": {
+        "excluded": 57,
+        "parsed": 7358
+      }
+    },
+    "license_notices": [
+      {
+        "path": "notices/tldr-pages-CC-BY-4.0.txt",
+        "sha256": "5e2b471626a0cd4881d0d6be277d45fd2e7d131351638013e0204b38d8fa7f64",
+        "size_bytes": 475
+      },
+      {
+        "path": "notices/all-MiniLM-L6-v2-onnx-README.md",
+        "sha256": "2c47a70b94fe29e24841acf0e177949f1c9aa543e450d43af7e872ea81e43501",
+        "size_bytes": 945
+      }
+    ],
+    "manifest_sha256": "3af378161c69dc7d8604dcd22d24fd6c5d0f149411c42e9d8602153d3014174b",
+    "matching_db_sha256": "3bcc830af2e289b4f02d45d271657a10b51a2b7eca20830ab4b87b2aac15a9d6",
+    "matching_db_size_bytes": 166973440,
+    "path": "${RUN_DIR}/matching-bundle",
+    "probes": {
+      "common": {
+        "expected_platform": "common",
+        "expected_source_path": "pages/common/qcp.md",
+        "query": "copy files",
+        "result_count": 3,
+        "top_example_id": "example-09d37418ef65493dcc1bd47cc0fc4a1dd1cb8e5861cc123324b114bdccfc82b9",
+        "top_platform": "common",
+        "top_source_path": "pages/common/qcp.md"
+      },
+      "linux": {
+        "expected_platform": "linux",
+        "expected_source_path": "pages/linux/rc-service.md",
+        "query": "restart service",
+        "result_count": 3,
+        "top_example_id": "example-2ad74bd5fb6112af304434cabb70dc083cd2cc71769a7fc99e8ec0c26f6fdab6",
+        "top_platform": "linux",
+        "top_source_path": "pages/linux/rc-service.md"
+      },
+      "osx": {
+        "expected_platform": "osx",
+        "expected_source_path": "pages/osx/say.md",
+        "query": "say text aloud",
+        "result_count": 1,
+        "top_example_id": "example-6310d9724b31822675716df13ca27e079320ce106758fa4869397f5b0cee4237",
+        "top_platform": "osx",
+        "top_source_path": "pages/osx/say.md"
+      },
+      "windows": {
+        "expected_platform": "windows",
+        "expected_source_path": "pages/windows/copy.md",
+        "query": "copy files",
+        "result_count": 3,
+        "top_example_id": "example-008e78e3c88d1fe06b455bd6483cb5e86dbb4dace62333597e3211cf3f2a161e",
+        "top_platform": "windows",
+        "top_source_path": "pages/windows/copy.md"
+      }
+    },
+    "tree_sha256": "bd3caf37f2898a71daa698eff931644680a934b98d591188be76286ad991e83c",
+    "validation_output": "valid matching bundle matching-bundle-v2:8ab84c666b7420575f0df86fd174465d1be8810d15d6ecf0465414213ea7d84b"
+  },
+  "model": {
+    "assets": {
+      "config.json": {
+        "sha256": "1b4d8e2a3988377ed8b519a31d8d31025a25f1c5f8606998e8014111438efcd7",
+        "size_bytes": 650
+      },
+      "model.onnx": {
+        "sha256": "bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5",
+        "size_bytes": 90387630
+      },
+      "special_tokens_map.json": {
+        "sha256": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a",
+        "size_bytes": 695
+      },
+      "tokenizer.json": {
+        "sha256": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0",
+        "size_bytes": 711661
+      },
+      "tokenizer_config.json": {
+        "sha256": "bd2e06a5b20fd1b13ca988bedc8763d332d242381b4fbc98f8fead4524158f79",
+        "size_bytes": 1433
+      }
+    },
+    "id": "Qdrant/all-MiniLM-L6-v2-onnx",
+    "license_notice": {
+      "license": "Apache-2.0",
+      "path": "docs/reproducibility/artifacts/model-README-5f1b8cd78bc4fb444dd171e59b18f3a3af89a079.md",
+      "sha256": "2c47a70b94fe29e24841acf0e177949f1c9aa543e450d43af7e872ea81e43501",
+      "size_bytes": 945,
+      "source_url": "https://huggingface.co/Qdrant/all-MiniLM-L6-v2-onnx/resolve/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/README.md"
+    },
+    "onnx_runtime": {
+      "archive_name": "onnxruntime-osx-arm64-1.20.0.tgz",
+      "archive_path": "${RUN_DIR}/onnxruntime-osx-arm64-1.20.0.tgz",
+      "archive_sha256": "2bcfaafa9ff0a3a94f78e3af2f135ffde5bb2d79b08e83a50dbc450b0d20ddae",
+      "binaries": {
+        "askman_candidate": {
+          "architecture": "arm64",
+          "architecture_verified": true,
+          "binary_linkage": "@rpath/libonnxruntime.1.20.0.dylib (compatibility version 0.0.0, current version 1.20.0)",
+          "binary_path": "${BUILDER}/askman_candidate",
+          "linkage_verified_library_path": "${ORT_ROOT}/lib/libonnxruntime.1.20.0.dylib",
+          "linkage_verified_library_sha256": "d8be733cb8dd097cfe2b21e069a7462b5ff561625141d9c4b98d866f15bfb852",
+          "linked_library": "@rpath/libonnxruntime.1.20.0.dylib"
+        },
+        "tldr_subset": {
+          "architecture": "arm64",
+          "architecture_verified": true,
+          "binary_linkage": "@rpath/libonnxruntime.1.20.0.dylib (compatibility version 0.0.0, current version 1.20.0)",
+          "binary_path": "${BUILDER}/tldr_subset",
+          "linkage_verified_library_path": "${ORT_ROOT}/lib/libonnxruntime.1.20.0.dylib",
+          "linkage_verified_library_sha256": "d8be733cb8dd097cfe2b21e069a7462b5ff561625141d9c4b98d866f15bfb852",
+          "linked_library": "@rpath/libonnxruntime.1.20.0.dylib"
+        }
+      },
+      "binary_linkage": "@rpath/libonnxruntime.1.20.0.dylib (compatibility version 0.0.0, current version 1.20.0)",
+      "binary_path": "${BUILDER}/tldr_subset",
+      "candidate_binary_linkage": "@rpath/libonnxruntime.1.20.0.dylib (compatibility version 0.0.0, current version 1.20.0)",
+      "candidate_binary_path": "${BUILDER}/askman_candidate",
+      "library_directory": "${ORT_ROOT}/lib",
+      "library_name": "libonnxruntime.1.20.0.dylib",
+      "library_path": "${ORT_ROOT}/lib/libonnxruntime.1.20.0.dylib",
+      "library_sha256": "d8be733cb8dd097cfe2b21e069a7462b5ff561625141d9c4b98d866f15bfb852",
+      "linkage_verified_library_path": "${ORT_ROOT}/lib/libonnxruntime.1.20.0.dylib",
+      "linkage_verified_library_sha256": "d8be733cb8dd097cfe2b21e069a7462b5ff561625141d9c4b98d866f15bfb852",
+      "platform": {
+        "machine": "arm64",
+        "system": "Darwin"
+      },
+      "verified": true,
+      "version": "1.20.0"
+    },
+    "revision": "5f1b8cd78bc4fb444dd171e59b18f3a3af89a079",
+    "runtime": "fastembed-4.8.0"
+  },
+  "rebuild": {
+    "archive_matches": true,
+    "archive_path": "${RUN_DIR}/matching-bundle-rebuild.tar.gz",
+    "archive_sha256": "bc663019097671dda61a8d35f010aa055cb035959a9eaad6c2d2952732817cc1",
+    "checked": true,
+    "manifest_sha256": "3af378161c69dc7d8604dcd22d24fd6c5d0f149411c42e9d8602153d3014174b",
+    "path": "${RUN_DIR}/matching-bundle-rebuild",
+    "tree_sha256": "bd3caf37f2898a71daa698eff931644680a934b98d591188be76286ad991e83c"
+  },
+  "schema_version": 1,
+  "selection": {
+    "excluded_count": 57,
+    "exclusions_sha256": "e6c349034ffb255a132a1bc94ed412a0b7a9b29a0b31d67eeb906f9590628ac9",
+    "file_count": 7415,
+    "language": "en",
+    "parsed_count": 7358,
+    "platforms": [
+      "common",
+      "linux",
+      "osx",
+      "windows"
+    ]
+  },
+  "source": {
+    "archive_path": "${RUN_DIR}/tldr-pages-e7186598dc466e69c2adf5d8f06037d5b186f08d.tar.gz",
+    "archive_sha256": "95f4f2604f407d8e148a67be88c9b8957f7ea4da344b6754cbfdb072f94057dd",
+    "archive_url": "https://github.com/tldr-pages/tldr/archive/e7186598dc466e69c2adf5d8f06037d5b186f08d.tar.gz",
+    "attribution": "Copyright \u00a9 2014\u2014present the tldr-pages team (https://github.com/orgs/tldr-pages/people) and contributors (https://github.com/tldr-pages/tldr/graphs/contributors).",
+    "exclusions_sha256": "e6c349034ffb255a132a1bc94ed412a0b7a9b29a0b31d67eeb906f9590628ac9",
+    "license": {
+      "name": "CC-BY-4.0",
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "license_path": "LICENSE.md",
+    "license_sha256": "826498c9793c53709035760c33bd6681e48380d34031320447febe675420ef4d",
+    "manifest_path": "docs/reproducibility/artifacts/tldr-pages-e7186598-manifest.json",
+    "manifest_sha256": "7915b2e6aa0b9006225b8966f97655c7c82507fcf9bfffcc1f314ab41a4fdde2",
+    "repository": "https://github.com/tldr-pages/tldr/tree/e7186598dc466e69c2adf5d8f06037d5b186f08d",
+    "revision": "e7186598dc466e69c2adf5d8f06037d5b186f08d",
+    "snapshot_digest": "5337158d01155689c62d3ba2fa33a2d04fd2904b35e9088c54d041a562a08905"
+  }
+}

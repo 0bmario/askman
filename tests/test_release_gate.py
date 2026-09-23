@@ -85,6 +85,7 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(first["resamples"], 100)
         self.assertEqual(first["observed_success_at_1_gain"], 1.0)
+        self.assertEqual(first["one_sided_95_lower_bound"], 1.0)
         self.assertFalse(first["interval_contains_zero"])
 
     def test_gate_rejects_family_safety_and_inconclusive_bootstrap_regressions(self):
@@ -110,8 +111,69 @@ class ReleaseGateTests(unittest.TestCase):
         gate = GATE.evaluate_gate(quality, bootstrap, performance)
         self.assertFalse(gate["passed"])
         self.assertIn("fewer than two scenario families improved in Success@1", gate["reasons"])
-        self.assertIn("paired bootstrap interval contains zero", gate["reasons"])
+        self.assertIn(
+            "one-sided paired bootstrap lower bound is not above zero", gate["reasons"]
+        )
         self.assertTrue(any("false_answers" in reason for reason in gate["reasons"]))
+
+    def test_gate_passes_with_crossing_interval_and_positive_one_sided_bound(self):
+        tasks = [
+            *[task(f"a-positive-{i}", "family-a", "common") for i in range(10)],
+            *[task(f"a-negative-{i}", "family-a", "common") for i in range(6)],
+            *[task(f"b-positive-{i}", "family-b", "common") for i in range(10)],
+            *[task(f"b-negative-{i}", "family-b", "common") for i in range(5)],
+        ]
+        improvements = [True] * 10 + [False] * 6 + [True] * 10 + [False] * 5
+        main = []
+        candidate = []
+        for item, improved in zip(tasks, improvements):
+            if improved:
+                main.append(GATE.score_ids(item, []))
+                candidate.append(GATE.score_ids(item, ["good"]))
+            else:
+                main.append(GATE.score_ids(item, ["good"]))
+                candidate.append(GATE.score_ids(item, ["wrong", "good"]))
+        quality = GATE.compare_quality(tasks, main, candidate)
+        performance = {
+            "main": {"warmed_query": {"p95_ms": 10, "peak_memory_bytes": 100}},
+            "candidate": {"warmed_query": {"p95_ms": 10, "peak_memory_bytes": 100}},
+        }
+        bootstrap = GATE.paired_bootstrap(main, candidate, seed=7, resamples=10_000)
+
+        self.assertLess(bootstrap["interval_95"]["lower"], 0)
+        self.assertGreater(bootstrap["interval_95"]["upper"], 0)
+        self.assertTrue(bootstrap["interval_contains_zero"])
+        self.assertGreater(bootstrap["one_sided_95_lower_bound"], 0)
+
+        gate = GATE.evaluate_gate(quality, bootstrap, performance)
+
+        self.assertTrue(gate["passed"])
+        self.assertEqual(gate["reasons"], [])
+
+    def test_nonpositive_one_sided_bound_fails_the_gate(self):
+        tasks = [task(f"a{i}", "family-a", "common") for i in range(5)] + [
+            task(f"b{i}", "family-b", "linux") for i in range(5)
+        ]
+        main = [GATE.score_ids(item, []) for item in tasks]
+        candidate = [
+            GATE.score_ids(item, ["good"] if index in (0, 5) else [])
+            for index, item in enumerate(tasks)
+        ]
+        quality = GATE.compare_quality(tasks, main, candidate)
+        performance = {
+            "main": {"warmed_query": {"p95_ms": 10, "peak_memory_bytes": 100}},
+            "candidate": {"warmed_query": {"p95_ms": 10, "peak_memory_bytes": 100}},
+        }
+        bootstrap = GATE.paired_bootstrap(main, candidate, seed=7, resamples=10_000)
+
+        self.assertLessEqual(bootstrap["one_sided_95_lower_bound"], 0)
+
+        gate = GATE.evaluate_gate(quality, bootstrap, performance)
+
+        self.assertFalse(gate["passed"])
+        self.assertIn(
+            "one-sided paired bootstrap lower bound is not above zero", gate["reasons"]
+        )
 
     def test_performance_gate_rejects_missing_or_over_budget_measurements(self):
         passed, reasons = GATE.performance_gate(

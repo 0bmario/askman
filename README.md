@@ -2,6 +2,12 @@
 
 An offline CLI that finds terminal commands from natural language descriptions. Describe what you want to do and `askman` returns the closest matching command with examples.
 
+The 0.4.0 release preparation status, evidence, and limitations are recorded
+in the [release notes](https://github.com/0bmario/askman/blob/v0.4.0/docs/releases/0.4.0.md).
+README, release notes, and workflow/package metadata are finalized before the
+release gate; after evaluation, only `release-gate.json` and the release-gate
+summary may change before tagging.
+
 <p align="center">
   <img src="./askman-demo.gif" alt="askman demo" width="700">
 </p>
@@ -11,14 +17,14 @@ An offline CLI that finds terminal commands from natural language descriptions. 
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.3.3/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.4.0/install.sh | bash
 
 ```
 
 ### Cargo
 
 ```bash
-cargo install --git https://github.com/0bmario/askman
+cargo install --locked askman --version 0.4.0
 ```
 
 After installing, provision the compatible matching bundle once while online:
@@ -89,6 +95,8 @@ The held-out evidence protocol and machine-readable report are documented in
 the [held-out evidence instructions](docs/reproducibility/heldout-evidence.md).
 The immutable matching bundle build and validation are documented in the
 [matching bundle instructions](docs/reproducibility/matching-bundle.md).
+The pinned 0.4.0 production corpus and bundle provisioning are documented in
+the [production bundle instructions](docs/reproducibility/production-bundle.md).
 The main-versus-retrieval-v2 release gate is documented in the
 [release gate instructions](docs/reproducibility/release-gate.md).
 Cross-platform CI and offline verification are documented in the

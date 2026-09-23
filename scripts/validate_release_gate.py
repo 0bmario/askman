@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -27,6 +28,10 @@ QUALITY_METRICS = (
     "false_answers_on_unanswerable",
 )
 REQUIRED_PLATFORMS = {"common", "linux", "osx", "windows"}
+POST_EVALUATION_PATHS = {
+    "docs/reproducibility/artifacts/release-gate.json",
+    "docs/reproducibility/release-gate.md",
+}
 
 
 def sha256_file(path: Path) -> str:
@@ -171,12 +176,17 @@ def require_no_regression(summary: dict[str, object], label: str) -> None:
 
 
 def validate_report_evidence(report: dict[str, object]) -> None:
-    if report.get("schema_version") != 1:
+    if report.get("schema_version") != 2:
         raise ValueError("release-gate report schema version is unsupported")
     if report.get("evidence_id") != "askman-main-vs-retrieval-v2-v1":
         raise ValueError("release-gate evidence id is unsupported")
     if report.get("status") != "complete":
         raise ValueError("release-gate report is not complete")
+    evaluated_candidate_commit = report.get("evaluated_candidate_commit")
+    if not isinstance(evaluated_candidate_commit, str) or not COMMIT_PATTERN.fullmatch(
+        evaluated_candidate_commit
+    ):
+        raise ValueError("release-gate evaluated candidate commit is invalid")
 
     protocol = report.get("protocol")
     if not isinstance(protocol, dict):
@@ -230,6 +240,8 @@ def validate_report_evidence(report: dict[str, object]) -> None:
         commit = build.get("commit")
         if not isinstance(commit, str) or not COMMIT_PATTERN.fullmatch(commit):
             raise ValueError(f"release-gate build commit is invalid: {label}")
+        if label == "candidate" and commit != evaluated_candidate_commit:
+            raise ValueError("release-gate evaluated candidate commit does not match candidate build")
         for field in ("cargo_lock_sha256", "binary_sha256"):
             require_digest(build.get(field), f"builds.{label}.{field}")
         if not isinstance(build.get("binary_bytes"), int) or build["binary_bytes"] <= 0:
@@ -237,6 +249,25 @@ def validate_report_evidence(report: dict[str, object]) -> None:
         command = build.get("command")
         if not isinstance(command, list) or not command or not all(isinstance(item, str) for item in command):
             raise ValueError(f"release-gate build command is invalid: {label}")
+
+    host = report.get("host")
+    if isinstance(host, dict):
+        host_platform = host.get("platform")
+        if isinstance(host_platform, str) and any(
+            marker in host_platform.lower() for marker in ("macos", "darwin")
+        ):
+            expected_runtime_path = "onnxruntime-osx-arm64-1.20.0/lib"
+            runtime_paths = []
+            for label in ("main", "candidate"):
+                rpath = builds[label].get("ort_rpath")
+                require_nonempty_string(rpath, f"builds.{label}.ort_rpath")
+                if not rpath.endswith(expected_runtime_path):
+                    raise ValueError(
+                        f"release-gate macOS build did not use provisioned ONNX Runtime 1.20.0: {label}"
+                    )
+                runtime_paths.append(rpath)
+            if runtime_paths[0] != runtime_paths[1]:
+                raise ValueError("release-gate builds use different ONNX Runtime paths")
 
     quality = report.get("quality")
     if not isinstance(quality, dict):
@@ -272,8 +303,6 @@ def validate_report_evidence(report: dict[str, object]) -> None:
     bootstrap = report.get("bootstrap")
     if not isinstance(bootstrap, dict) or bootstrap.get("resamples") != 10_000:
         raise ValueError("release-gate bootstrap evidence is incomplete")
-    if bootstrap.get("interval_contains_zero") is not False:
-        raise ValueError("release-gate bootstrap interval is not wholly above zero")
     if not isinstance(bootstrap.get("seed"), int) or bootstrap["seed"] < 0:
         raise ValueError("release-gate bootstrap seed is invalid")
     if not isinstance(bootstrap.get("paired_task_count"), int) or bootstrap["paired_task_count"] <= 0:
@@ -284,8 +313,21 @@ def validate_report_evidence(report: dict[str, object]) -> None:
         raise ValueError("release-gate bootstrap interval is missing")
     require_number(interval.get("lower"), "bootstrap.interval_95.lower")
     require_number(interval.get("upper"), "bootstrap.interval_95.upper")
-    if interval["lower"] > interval["upper"] or interval["lower"] <= 0:
+    if interval["lower"] > interval["upper"]:
         raise ValueError("release-gate bootstrap interval is invalid")
+    interval_contains_zero = interval["lower"] <= 0 <= interval["upper"]
+    if bootstrap.get("interval_contains_zero") is not interval_contains_zero:
+        raise ValueError("release-gate two-sided bootstrap diagnostic is inconsistent")
+    require_number(
+        bootstrap.get("one_sided_95_lower_bound"),
+        "bootstrap.one_sided_95_lower_bound",
+    )
+    if bootstrap["one_sided_95_lower_bound"] < interval["lower"] or bootstrap[
+        "one_sided_95_lower_bound"
+    ] > interval["upper"]:
+        raise ValueError("release-gate one-sided bootstrap bound is inconsistent")
+    if bootstrap["one_sided_95_lower_bound"] <= 0:
+        raise ValueError("release-gate one-sided bootstrap lower bound is not above zero")
     if bootstrap["paired_task_count"] != main_summary["answerable_tasks"]:
         raise ValueError("release-gate bootstrap task count does not match quality evidence")
 
@@ -368,11 +410,70 @@ def validate_report_evidence(report: dict[str, object]) -> None:
     require_nonempty_string(report.get("reproduction_command"), "reproduction_command")
     if not isinstance(report.get("limitations"), list) or not report["limitations"]:
         raise ValueError("release-gate limitations are missing")
-    if not isinstance(report.get("host"), dict):
+    if not isinstance(host, dict):
         raise ValueError("release-gate host metadata is missing")
 
 
-def validate(report_path: Path, expected_candidate_commit: str | None = None) -> None:
+def validate_release_lineage(
+    evaluated_candidate_commit: str,
+    expected_release_commit: str,
+    repo_root: Path,
+) -> None:
+    repository = repo_root.resolve()
+    ancestor = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repository),
+            "merge-base",
+            "--is-ancestor",
+            evaluated_candidate_commit,
+            expected_release_commit,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if ancestor.returncode != 0:
+        raise ValueError(
+            "release-gate evaluated candidate commit is not an ancestor of the release commit"
+        )
+
+    changed = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repository),
+            "diff",
+            "--name-only",
+            "-z",
+            evaluated_candidate_commit,
+            expected_release_commit,
+        ],
+        check=False,
+        capture_output=True,
+    )
+    if changed.returncode != 0:
+        raise ValueError("could not compare evaluated and release commit trees")
+    paths = {
+        item.decode("utf-8")
+        for item in changed.stdout.split(b"\0")
+        if item
+    }
+    unexpected = sorted(paths - POST_EVALUATION_PATHS)
+    if unexpected:
+        raise ValueError(
+            "release commit changes files outside the post-evaluation evidence allowlist: "
+            + ", ".join(unexpected)
+        )
+
+
+def validate(
+    report_path: Path,
+    expected_release_commit: str | None = None,
+    *,
+    repo_root: Path = ROOT,
+) -> None:
     if not report_path.is_file():
         raise ValueError(f"release-gate report is missing: {report_path}")
     report = json.loads(report_path.read_text(encoding="utf-8"))
@@ -383,21 +484,25 @@ def validate(report_path: Path, expected_candidate_commit: str | None = None) ->
     protocol = report["protocol"]
     if protocol.get("query_network_policy") not in ALLOWED_NETWORK_POLICIES:
         raise ValueError("release-gate query network policy is not an approved offline wrapper")
-    if expected_candidate_commit and report["builds"]["candidate"]["commit"] != expected_candidate_commit:
-        raise ValueError("release-gate candidate commit does not match the release commit")
+    if expected_release_commit:
+        if not COMMIT_PATTERN.fullmatch(expected_release_commit):
+            raise ValueError("release commit is invalid")
+        validate_release_lineage(
+            report["evaluated_candidate_commit"], expected_release_commit, repo_root
+        )
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--report", type=Path, required=True)
-    parser.add_argument("--expected-candidate-commit")
+    parser.add_argument("--expected-release-commit")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     try:
-        validate(args.report.resolve(), args.expected_candidate_commit)
+        validate(args.report.resolve(), args.expected_release_commit)
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
         print(f"release readiness failed: {error}")
         return 1

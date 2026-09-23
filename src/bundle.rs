@@ -26,7 +26,57 @@ pub const MATCHING_DATABASE: &str = "matching.db";
 pub const BUNDLE_MANIFEST: &str = "manifest.json";
 pub const MODEL_DIRECTORY: &str = "model-cache";
 pub const MODEL_REFERENCE: &str = "refs/main";
+pub const TLDR_LICENSE_NOTICE: &str = "notices/tldr-pages-CC-BY-4.0.txt";
+pub const MODEL_LICENSE_NOTICE: &str = "notices/all-MiniLM-L6-v2-onnx-README.md";
 pub const REQUIRED_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
+const PRODUCTION_TLDR_REVISION: &str = "e7186598dc466e69c2adf5d8f06037d5b186f08d";
+const PRODUCTION_TLDR_SOURCE_URL: &str =
+    "https://github.com/tldr-pages/tldr/tree/e7186598dc466e69c2adf5d8f06037d5b186f08d";
+const TLDR_LICENSE_NAME: &str = "CC-BY-4.0";
+const TLDR_LICENSE_URL: &str = "https://creativecommons.org/licenses/by/4.0/";
+
+const TLDR_LICENSE_NOTICE_TEXT: &str = r#"Content from tldr-pages/tldr at commit e7186598dc466e69c2adf5d8f06037d5b186f08d.
+Copyright © 2014—present the tldr-pages team (https://github.com/orgs/tldr-pages/people)
+and contributors (https://github.com/tldr-pages/tldr/graphs/contributors).
+Licensed under the Creative Commons Attribution 4.0 International License (CC-BY-4.0):
+https://creativecommons.org/licenses/by/4.0/
+Source: https://github.com/tldr-pages/tldr/tree/e7186598dc466e69c2adf5d8f06037d5b186f08d/pages
+"#;
+const MODEL_LICENSE_NOTICE_TEXT: &str = r#"---
+license: apache-2.0
+pipeline_tag: sentence-similarity
+---
+
+ONNX port of [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) for text classification and similarity searches.
+
+### Usage
+
+Here's an example of performing inference using the model with [FastEmbed](https://github.com/qdrant/fastembed).
+
+```py
+from fastembed import TextEmbedding
+
+documents = [
+    "You should stay, study and sprint.",
+    "History can only prepare us to be surprised yet again.",
+]
+
+model = TextEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
+embeddings = list(model.embed(documents))
+
+# [
+#     array([
+#         0.00611658, 0.00068912, -0.0203846, ..., -0.01751488, -0.01174267,
+#         0.01463472
+#     ],
+#           dtype=float32),
+#     array([
+#         0.00173448, -0.00329958, 0.01557874, ..., -0.01473586, 0.0281806,
+#         -0.00448205
+#     ],
+#           dtype=float32)
+# ]
+```"#;
 
 /// Release assets are deliberately fixed to the CLI's compatible release.
 /// `setup` and `update` never consult a mutable `latest` endpoint.
@@ -208,6 +258,9 @@ fn build_temporary_bundle(
             temporary.display()
         )
     })?;
+    if source_manifest.source.license.name == "CC-BY-4.0" {
+        write_license_notices(temporary)?;
+    }
 
     let lexical_output = temporary.join("corpus.lexical.db");
     let lexical_report = build_artifact(crate::tldr_subset::BuildOptions {
@@ -290,6 +343,47 @@ fn build_temporary_bundle(
         page_count: lexical_report.page_count,
         example_count: lexical_report.example_count,
     })
+}
+
+fn license_notice_specs() -> [(&'static str, &'static [u8]); 2] {
+    [
+        (TLDR_LICENSE_NOTICE, TLDR_LICENSE_NOTICE_TEXT.as_bytes()),
+        (MODEL_LICENSE_NOTICE, MODEL_LICENSE_NOTICE_TEXT.as_bytes()),
+    ]
+}
+
+fn write_license_notices(root: &Path) -> Result<()> {
+    for (relative, contents) in license_notice_specs() {
+        let path = root.join(relative);
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(&path, contents)
+            .with_context(|| format!("failed to write license notice {}", path.display()))?;
+    }
+    Ok(())
+}
+
+fn validate_license_notice_files(root: &Path, source_license: &str) -> Result<()> {
+    let specs = license_notice_specs();
+    let any_notice = specs
+        .iter()
+        .any(|(relative, _)| root.join(relative).exists());
+    if source_license != "CC-BY-4.0" {
+        if any_notice {
+            bail!("matching bundle license notices require CC-BY-4.0 source metadata");
+        }
+        return Ok(());
+    }
+    for (relative, expected) in specs {
+        let path = root.join(relative);
+        let actual = fs::read(&path)
+            .with_context(|| format!("matching bundle license notice is missing: {relative}"))?;
+        if actual != expected {
+            bail!("matching bundle license notice content mismatch: {relative}");
+        }
+    }
+    Ok(())
 }
 
 /// Validate every component and compatibility identity in a bundle directory.
@@ -393,6 +487,7 @@ pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
     if read_validation_stamp(&stamp_path).is_some_and(|stamp| stamp.files == stats) {
         // Light path: content identity is pinned by the stamp stats; the
         // inventory walk re-checks that exactly the expected files exist.
+        validate_license_notice_files(&root, &manifest.source.license.name)?;
         validate_bundle_file_inventory(&root, &manifest)?;
         return Ok(manifest);
     }
@@ -476,6 +571,7 @@ pub fn validate_matching_bundle(bundle: &Path) -> Result<BundleManifest> {
         }
     }
     validate_model_manifest(&root, &manifest.embedding_model)?;
+    validate_license_notice_files(&root, &manifest.source.license.name)?;
     validate_bundle_file_inventory(&root, &manifest)?;
     Ok(manifest)
 }
@@ -533,6 +629,22 @@ fn validate_source_metadata(source: &SourceMetadata) -> Result<()> {
     ] {
         if value.is_empty() {
             bail!("matching bundle {name} is empty");
+        }
+    }
+    if source.revision == PRODUCTION_TLDR_REVISION {
+        if source.url != PRODUCTION_TLDR_SOURCE_URL {
+            bail!("pinned tldr-pages production source URL is not immutable");
+        }
+        if source.license.name != TLDR_LICENSE_NAME || source.license.url != TLDR_LICENSE_URL {
+            bail!("pinned tldr-pages production source must declare CC-BY-4.0");
+        }
+        for attribution in [
+            "https://github.com/orgs/tldr-pages/people",
+            "https://github.com/tldr-pages/tldr/graphs/contributors",
+        ] {
+            if !source.attribution.contains(attribution) {
+                bail!("pinned tldr-pages production attribution is incomplete");
+            }
         }
     }
     Ok(())
@@ -647,6 +759,19 @@ fn validate_bundle_file_inventory(root: &Path, manifest: &BundleManifest) -> Res
             .iter()
             .map(|asset| asset.path.clone()),
     );
+    let notice_paths = license_notice_specs()
+        .into_iter()
+        .map(|(relative, _)| relative.to_string())
+        .collect::<HashSet<_>>();
+    let actual_notice_paths = actual
+        .intersection(&notice_paths)
+        .cloned()
+        .collect::<HashSet<_>>();
+    if manifest.source.license.name == "CC-BY-4.0" {
+        expected.extend(notice_paths);
+    } else if !actual_notice_paths.is_empty() {
+        bail!("matching bundle contains license notices for a non-CC-BY source");
+    }
 
     if actual != expected {
         let missing = expected.difference(&actual).cloned().collect::<Vec<_>>();
@@ -1059,6 +1184,7 @@ fn sha256_file(path: &Path) -> Result<String> {
 
 const ACTIVE_STATE_SCHEMA_VERSION: u32 = 1;
 const ACTIVE_STATE_FILE: &str = "active-bundle.json";
+const LIFECYCLE_LOCK_FILE: &str = ".lifecycle.lock";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ActiveBundleState {
@@ -1114,25 +1240,29 @@ impl BundleStore {
     /// First-use setup. Existing valid setup is idempotent; an invalid active
     /// state is reported instead of being repaired or replaced implicitly.
     pub fn setup(&self) -> Result<BundleManifest> {
-        if self.read_state()?.is_some() {
-            return self.active_bundle().map(|(_, manifest)| manifest);
-        }
-        self.acquire_and_activate()
+        self.with_lifecycle_lock(|| {
+            if self.read_state()?.is_some() {
+                return self.active_bundle().map(|(_, manifest)| manifest);
+            }
+            self.acquire_and_activate()
+        })
     }
 
     /// Explicitly acquire the release-pinned bundle and activate it after the
     /// same full directory validation used by setup and query.
     pub fn update(&self) -> Result<BundleManifest> {
-        if let Some(state) = self.read_state()? {
-            self.load_bundle(&state.active_bundle_id)?;
-        }
-        self.acquire_and_activate()
+        self.with_lifecycle_lock(|| {
+            if let Some(state) = self.read_state()? {
+                self.load_bundle(&state.active_bundle_id)?;
+            }
+            self.acquire_and_activate()
+        })
     }
 
     /// Atomically switch to the previous valid bundle. The current bundle is
     /// retained as the next rollback target.
     pub fn rollback(&self) -> Result<BundleManifest> {
-        self.rollback_with(validate_matching_bundle)
+        self.with_lifecycle_lock(|| self.rollback_with(validate_matching_bundle))
     }
 
     fn rollback_with<F>(&self, validator: F) -> Result<BundleManifest>
@@ -1254,6 +1384,9 @@ impl BundleStore {
         staging: &Path,
         manifest: &BundleManifest,
     ) -> Result<(PathBuf, bool)> {
+        // setup/update hold the store lock for the whole acquire-and-activate
+        // transaction. This destination check therefore cannot race another
+        // process into replacing an immutable bundle ID.
         self.publish_validated_bundle_checked(staging, manifest, validate_matching_bundle)
     }
 
@@ -1268,7 +1401,9 @@ impl BundleStore {
         F: Fn(&Path) -> Result<BundleManifest> + Copy,
     {
         Ok(self
-            .publish_validated_bundle_checked(staging, manifest, validator)?
+            .with_lifecycle_lock(|| {
+                self.publish_validated_bundle_checked(staging, manifest, validator)
+            })?
             .0)
     }
 
@@ -1382,6 +1517,13 @@ impl BundleStore {
             })?;
         }
         Ok(())
+    }
+
+    fn with_lifecycle_lock<T>(&self, operation: impl FnOnce() -> Result<T>) -> Result<T> {
+        self.ensure_store_root()?;
+        let lock_path = self.root.join(LIFECYCLE_LOCK_FILE);
+        let _lock = LifecycleLock::acquire(&lock_path)?;
+        operation()
     }
 
     fn validate_store_root(&self) -> Result<()> {
@@ -1637,6 +1779,105 @@ fn unique_suffix() -> String {
     format!("{}-{nanos}", std::process::id())
 }
 
+/// Cross-process lifecycle lock. The lock file itself is intentionally kept
+/// in the store: the kernel lock is held by the open handle, so a crashed
+/// process releases it without leaving a stale lock that needs heuristics.
+struct LifecycleLock {
+    file: File,
+}
+
+impl LifecycleLock {
+    fn acquire(path: &Path) -> Result<Self> {
+        let file = OpenOptions::new()
+            .create(true)
+            .read(true)
+            .write(true)
+            .open(path)
+            .with_context(|| format!("failed to open lifecycle lock {}", path.display()))?;
+        lock_file(&file)
+            .with_context(|| format!("failed to acquire lifecycle lock {}", path.display()))?;
+        Ok(Self { file })
+    }
+}
+
+impl Drop for LifecycleLock {
+    fn drop(&mut self) {
+        let _ = unlock_file(&self.file);
+    }
+}
+
+#[cfg(unix)]
+fn lock_file(file: &File) -> std::io::Result<()> {
+    let result = unsafe { libc::flock(std::os::fd::AsRawFd::as_raw_fd(file), libc::LOCK_EX) };
+    if result == 0 {
+        Ok(())
+    } else {
+        Err(std::io::Error::last_os_error())
+    }
+}
+
+#[cfg(unix)]
+fn unlock_file(file: &File) -> std::io::Result<()> {
+    let result = unsafe { libc::flock(std::os::fd::AsRawFd::as_raw_fd(file), libc::LOCK_UN) };
+    if result == 0 {
+        Ok(())
+    } else {
+        Err(std::io::Error::last_os_error())
+    }
+}
+
+#[cfg(windows)]
+fn lock_file(file: &File) -> std::io::Result<()> {
+    use std::os::windows::io::AsRawHandle;
+    use windows_sys::Win32::Storage::FileSystem::{LOCKFILE_EXCLUSIVE_LOCK, LockFileEx};
+    use windows_sys::Win32::System::IO::OVERLAPPED;
+
+    let mut overlapped = unsafe { std::mem::zeroed::<OVERLAPPED>() };
+    let result = unsafe {
+        LockFileEx(
+            file.as_raw_handle(),
+            LOCKFILE_EXCLUSIVE_LOCK,
+            0,
+            1,
+            0,
+            &mut overlapped,
+        )
+    };
+    if result != 0 {
+        Ok(())
+    } else {
+        Err(std::io::Error::last_os_error())
+    }
+}
+
+#[cfg(windows)]
+fn unlock_file(file: &File) -> std::io::Result<()> {
+    use std::os::windows::io::AsRawHandle;
+    use windows_sys::Win32::Storage::FileSystem::UnlockFileEx;
+    use windows_sys::Win32::System::IO::OVERLAPPED;
+
+    let mut overlapped = unsafe { std::mem::zeroed::<OVERLAPPED>() };
+    let result = unsafe { UnlockFileEx(file.as_raw_handle(), 0, 1, 0, &mut overlapped) };
+    if result != 0 {
+        Ok(())
+    } else {
+        Err(std::io::Error::last_os_error())
+    }
+}
+
+#[cfg(not(any(unix, windows)))]
+fn lock_file(_file: &File) -> std::io::Result<()> {
+    Err(std::io::Error::new(
+        std::io::ErrorKind::Unsupported,
+        "lifecycle locking is unsupported on this platform",
+    ))
+}
+
+#[cfg(not(any(unix, windows)))]
+fn unlock_file(_file: &File) -> std::io::Result<()> {
+    Ok(())
+}
+
 #[cfg(not(windows))]
 fn atomic_replace(source: &Path, destination: &Path) -> std::io::Result<()> {
     fs::rename(source, destination)
@@ -1789,7 +2030,7 @@ mod tests {
                 max_length: MODEL_MAX_LENGTH,
                 assets: Vec::new(),
             },
-            cli_compatibility: "askman=0.3.3".to_string(),
+            cli_compatibility: "askman=0.4.0".to_string(),
         }
     }
 
@@ -1814,6 +2055,26 @@ mod tests {
         let mut changed_parser = changed_compatibility;
         changed_parser.parser_version = "tldr-subset-v4".to_string();
         assert_ne!(first, bundle_id(&changed_parser).unwrap());
+    }
+
+    #[test]
+    fn cc_by_bundle_notice_assets_are_required_and_exact() {
+        let directory = tempfile::tempdir().unwrap();
+        let error = validate_license_notice_files(directory.path(), "CC-BY-4.0")
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("license notice is missing"));
+
+        write_license_notices(directory.path()).unwrap();
+        validate_license_notice_files(directory.path(), "CC-BY-4.0").unwrap();
+        assert!(TLDR_LICENSE_NOTICE_TEXT.contains("contributors"));
+        assert!(MODEL_LICENSE_NOTICE_TEXT.contains("license: apache-2.0"));
+
+        fs::write(directory.path().join(TLDR_LICENSE_NOTICE), b"tampered").unwrap();
+        let error = validate_license_notice_files(directory.path(), "CC-BY-4.0")
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("content mismatch"));
     }
 
     #[test]
@@ -1852,8 +2113,8 @@ mod tests {
 
     #[test]
     fn cli_compatibility_requires_an_askman_version_without_whitespace() {
-        assert!(validate_cli_compatibility("askman=0.3.3").is_ok());
-        for invalid in ["", "0.3.3", "askman=", "askman=0.3 3"] {
+        assert!(validate_cli_compatibility("askman=0.4.0").is_ok());
+        for invalid in ["", "0.4.0", "askman=", "askman=0.4 0"] {
             assert!(validate_cli_compatibility(invalid).is_err(), "{invalid:?}");
         }
     }
@@ -1871,7 +2132,7 @@ mod tests {
             snapshot: "tests/fixtures/tldr-full-corpus".into(),
             model_cache: directory.path().join("missing-model-cache"),
             output: output.clone(),
-            cli_compatibility: "askman=0.3.3".to_string(),
+            cli_compatibility: "askman=0.4.0".to_string(),
         })
         .unwrap_err()
         .to_string();
@@ -1894,7 +2155,7 @@ mod tests {
             snapshot: "tests/fixtures/tldr-full-corpus".into(),
             model_cache: directory.path().join("missing-model-cache"),
             output: output.clone(),
-            cli_compatibility: "askman=0.3.3".to_string(),
+            cli_compatibility: "askman=0.4.0".to_string(),
         })
         .unwrap_err()
         .to_string();
@@ -1930,7 +2191,7 @@ mod tests {
             snapshot: "tests/fixtures/tldr-full-corpus".into(),
             model_cache: directory.path().join("missing-model-cache"),
             output: directory.path().join("matching-bundle"),
-            cli_compatibility: "askman=0.3.3".to_string(),
+            cli_compatibility: "askman=0.4.0".to_string(),
         })
         .unwrap_err()
         .to_string();
@@ -2096,6 +2357,112 @@ mod tests {
         assert!(error.contains("already stored with different manifest metadata"));
         assert_eq!(fs::read(marker).unwrap(), b"original");
         fs::remove_dir_all(staging).unwrap();
+    }
+
+    fn concurrent_test_manifest(variant: &str) -> BundleManifest {
+        let mut manifest = lifecycle_manifest(variant);
+        // Keep the storage identity constant while changing metadata. Exactly
+        // one process may publish this ID; the other must refuse the collision.
+        manifest.bundle_id = format!("{BUNDLE_VERSION}:concurrent");
+        manifest
+    }
+
+    #[test]
+    fn concurrent_publication_helper() {
+        let Some(root) = std::env::var_os("ASKMAN_BUNDLE_CONCURRENCY_ROOT") else {
+            return;
+        };
+        let variant = std::env::var("ASKMAN_BUNDLE_CONCURRENCY_VARIANT").unwrap();
+        let root = PathBuf::from(root);
+        let store = BundleStore::new(&root);
+        store.ensure_store_root().unwrap();
+        fs::write(root.join(format!(".ready-{variant}")), b"ready").unwrap();
+        while !root.join(".ready-a").exists() || !root.join(".ready-b").exists() {
+            std::thread::sleep(Duration::from_millis(5));
+        }
+
+        let manifest = concurrent_test_manifest(&variant);
+        let staging = store.create_staging_directory().unwrap();
+        fs::write(
+            staging.join(BUNDLE_MANIFEST),
+            serde_json::to_vec(&manifest).unwrap(),
+        )
+        .unwrap();
+        fs::write(staging.join("winner"), variant.as_bytes()).unwrap();
+        let outcome =
+            store.publish_validated_bundle_with(&staging, &manifest, test_bundle_validator);
+        let result = match outcome {
+            Ok(path) => {
+                assert_eq!(fs::read(path.join("winner")).unwrap(), variant.as_bytes());
+                "published"
+            }
+            Err(error) => {
+                assert!(
+                    error
+                        .to_string()
+                        .contains("already stored with different manifest metadata"),
+                    "{error:#}"
+                );
+                "collision"
+            }
+        };
+        fs::write(root.join(format!(".result-{variant}")), result).unwrap();
+        if staging.exists() {
+            fs::remove_dir_all(staging).unwrap();
+        }
+    }
+
+    #[test]
+    fn concurrent_publication_processes_never_replace_immutable_id() {
+        let directory = tempfile::tempdir().unwrap();
+        let root = directory.path();
+        let executable = std::env::current_exe().unwrap();
+        let mut children = Vec::new();
+        for variant in ["a", "b"] {
+            children.push(
+                std::process::Command::new(&executable)
+                    .args([
+                        "--exact",
+                        "bundle::tests::concurrent_publication_helper",
+                        "--nocapture",
+                    ])
+                    .env("ASKMAN_BUNDLE_CONCURRENCY_ROOT", root)
+                    .env("ASKMAN_BUNDLE_CONCURRENCY_VARIANT", variant)
+                    .spawn()
+                    .unwrap(),
+            );
+        }
+        for child in children {
+            assert!(child.wait_with_output().unwrap().status.success());
+        }
+
+        let results = [
+            fs::read_to_string(root.join(".result-a")).unwrap(),
+            fs::read_to_string(root.join(".result-b")).unwrap(),
+        ];
+        assert_eq!(
+            results
+                .iter()
+                .filter(|result| result.as_str() == "published")
+                .count(),
+            1
+        );
+        assert_eq!(
+            results
+                .iter()
+                .filter(|result| result.as_str() == "collision")
+                .count(),
+            1
+        );
+
+        let store = BundleStore::new(root);
+        let bundle = store
+            .bundle_path(&format!("{BUNDLE_VERSION}:concurrent"))
+            .unwrap();
+        let winner = String::from_utf8(fs::read(bundle.join("winner")).unwrap()).unwrap();
+        assert!(winner == "a" || winner == "b");
+        assert!(!root.join("bundles/.bundle-a.part").exists());
+        assert!(!root.join("bundles/.bundle-b.part").exists());
     }
 
     #[test]

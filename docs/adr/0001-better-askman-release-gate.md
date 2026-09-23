@@ -46,8 +46,10 @@ The paired-bootstrap condition is refined before the release gate runs on the
 bootstrap condition becomes:
 
 - A fixed-seed, 10,000-resample paired bootstrap of the overall paired
-  `Success@1` gain has a **one-sided 95% lower bound above zero**. The seed is
-  recorded in the evidence report. The two-sided interval is still reported.
+  `Success@1` gain has a **one-sided 95% lower bound above zero**. The runner
+  uses the nearest-rank empirical 5th percentile. The seed and bound are
+  recorded in the evidence report. The two-sided 95% interval remains a
+  diagnostic and may contain zero while the one-sided condition passes.
 
 Motivation: on 30-answerable-task splits the two-sided 95% interval puts its
 entire error budget on both tails; a genuinely better candidate with few
@@ -57,3 +59,12 @@ with a two-sided 95% interval of [0.0, +33.3pp] and a one-sided lower bound of
 roughly +4.4pp. This amendment changes only the interval interpretation; the
 five-point absolute `Success@1` gain requirement, the per-family and safety
 conditions, the resource limits, and the offline checks are unchanged.
+
+## Amendment (2026-09-21): evaluated-commit release evidence
+
+The schema-2 report records the exact candidate commit that was evaluated.
+The release commit must descend from it, and the tree diff after evaluation is
+limited to `docs/reproducibility/artifacts/release-gate.json` and
+`docs/reproducibility/release-gate.md`. This avoids a self-referential report
+hash while ensuring the tagged source is exactly the source that passed the
+gate.

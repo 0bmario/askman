@@ -1,10 +1,17 @@
 [package]
 name = "askman"
-version = "0.3.3"
+version = "0.4.0"
 edition = "2024"
 description = "A simple, offline CLI tool to help you use Unix, Linux, macOS, and Windows commands more easily."
 license = "MIT"
 repository = "https://github.com/0bmario/askman"
+include = [
+    "Cargo.toml",
+    "Cargo.lock",
+    "LICENSE",
+    "README.md",
+    "src/**",
+]
 
 [dependencies]
 anyhow = "1.0.98"
@@ -47,7 +54,7 @@ required-features = ["dev"]
 dev = []
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.59.0", features = ["Win32_Storage_FileSystem"] }
+windows-sys = { version = "0.59.0", features = ["Win32_Storage_FileSystem", "Win32_System_IO"] }
 
 [dev-dependencies]
 tempfile = "3.19.1"

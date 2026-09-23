@@ -1,0 +1,158 @@
+import unittest
+from pathlib import Path
+import tomllib
+
+
+ROOT = Path(__file__).resolve().parents[1]
+WORKFLOW = ROOT / ".github/workflows/release.yml"
+
+
+class ReleaseWorkflowTests(unittest.TestCase):
+    def test_release_version_is_consistent_across_package_and_docs(self):
+        cargo = tomllib.loads((ROOT / "Cargo.toml").read_text(encoding="utf-8"))
+        lock = (ROOT / "Cargo.lock").read_text(encoding="utf-8")
+        self.assertEqual(cargo["package"]["version"], "0.4.0")
+        self.assertIn('name = "askman"\nversion = "0.4.0"', lock)
+        self.assertIn("/v0.4.0/install.sh", (ROOT / "README.md").read_text(encoding="utf-8"))
+        notes = (ROOT / "docs/releases/0.4.0.md").read_text(encoding="utf-8")
+        self.assertIn("release gate", notes)
+        self.assertIn("native matrix", notes)
+        self.assertIn("CC-BY-4.0", notes)
+        self.assertIn("Apache-2.0", notes)
+
+    def test_release_is_explicitly_structured_for_040(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn('- "v0.4.0"', workflow)
+        self.assertIn("production-bundle:", workflow)
+        self.assertIn("runs-on: macos-15", workflow)
+        self.assertIn("os: macos-15-intel", workflow)
+        self.assertIn("--cli-compatibility \"askman=${EXPECTED_RELEASE_VERSION}\"", workflow)
+
+    def test_production_bundle_is_required_before_publish(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn(
+            "needs: [build-binaries, release-readiness, production-bundle, production-verification, package-crate]",
+            workflow,
+        )
+        self.assertIn("name: production-matching-bundle", workflow)
+        self.assertIn("matching-bundle-manifest.json", workflow)
+        self.assertIn("matching-bundle.tar.gz", workflow)
+        self.assertIn("production bundle evidence is dirty or production-ineligible", workflow)
+
+    def test_release_permissions_and_locked_builds_are_scoped(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("\npermissions:\n  contents: read\n", workflow)
+        self.assertNotIn("\npermissions:\n  contents: write\n", workflow)
+        self.assertIn("publish-release:\n    name: Publish Release", workflow)
+        self.assertIn("publish-release:\n    name: Publish Release\n    needs:", workflow)
+        self.assertIn("    permissions:\n      contents: write\n\n    steps:", workflow)
+        self.assertEqual(workflow.count("contents: write"), 1)
+        self.assertGreaterEqual(workflow.count("persist-credentials: false"), 4)
+        self.assertIn("cargo fetch --locked", workflow)
+        self.assertIn("cargo build --locked --release --target", workflow)
+
+    def test_crate_package_is_verified_and_published_after_github_release(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("package-crate:", workflow)
+        self.assertIn("scripts/verify_crate_package.py", workflow)
+        self.assertIn("cargo install --locked --offline", workflow)
+        self.assertIn("test \"$(\"$install_root/bin/askman\" --version)\" = \"askman 0.4.0\"", workflow)
+        self.assertIn("publish-crate:", workflow)
+        self.assertIn("needs: [publish-release]", workflow)
+        self.assertIn("CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}", workflow)
+        self.assertIn("cargo publish --locked --no-verify", workflow)
+        self.assertLess(workflow.index("Publish GitHub release"), workflow.index("publish-crate:"))
+        self.assertLess(workflow.index("production-verification:"), workflow.index("package-crate:"))
+
+    def test_build_matrix_action_inputs_are_not_duplicated_or_misplaced(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        build_binaries = workflow.split("  build-binaries:\n", 1)[1].split(
+            "\n  production-bundle:\n", 1
+        )[0]
+        rust_step = build_binaries.split(
+            "      - name: Install Rust toolchain\n", 1
+        )[1].split("\n      - name:", 1)[0]
+        python_step = build_binaries.split(
+            "      - name: Install Python\n", 1
+        )[1].split("\n      - name:", 1)[0]
+
+        self.assertEqual(rust_step.count("\n        with:"), 1)
+        self.assertIn("targets: ${{ matrix.target }}", rust_step)
+        self.assertEqual(python_step.count("\n        with:"), 1)
+        self.assertIn('python-version: "3.x"', python_step)
+        self.assertNotIn("targets:", python_step)
+
+    def test_registry_token_is_scoped_only_to_publish_step(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        publish_crate = workflow.split("  publish-crate:\n", 1)[1]
+        publish_step = publish_crate.split(
+            "      - name: Publish verified crate after GitHub release\n", 1
+        )[1]
+
+        self.assertNotIn(
+            "    env:\n      CARGO_REGISTRY_TOKEN:", publish_crate.split(
+                "      - name: Publish verified crate after GitHub release\n", 1
+            )[0]
+        )
+        self.assertIn(
+            "        env:\n          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}",
+            publish_step,
+        )
+        self.assertEqual(
+            workflow.count("CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}"),
+            1,
+        )
+
+    def test_crate_package_excludes_mutable_assets(self):
+        cargo = (ROOT / "Cargo.toml").read_text(encoding="utf-8")
+        self.assertIn('include = [', cargo)
+        self.assertIn('"src/**"', cargo)
+        self.assertNotIn('"*.db"', cargo)
+        self.assertNotIn('"model-cache/**"', cargo)
+
+    def test_release_metadata_is_frozen_before_gate(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        notes = (ROOT / "docs/releases/0.4.0.md").read_text(encoding="utf-8")
+        self.assertIn("finalized before the\nrelease gate", readme)
+        self.assertIn("only `release-gate.json` and the release-gate summary", notes)
+        self.assertIn("release-gate.json", readme)
+
+    def test_release_publishes_windows_binary_and_installer(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("x86_64-pc-windows-msvc", workflow)
+        self.assertIn("askman-windows-x86_64", workflow)
+        self.assertIn("binary_name: askman.exe", workflow)
+        self.assertIn("cp install.sh release-assets/install.sh", workflow)
+        self.assertIn("release-assets/install.sh", workflow)
+
+    def test_release_uses_native_runtime_provisioning_and_post_build_verification(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("provision_onnxruntime.py", workflow)
+        self.assertIn("runtime-provision.json", workflow)
+        self.assertIn("--target aarch64-apple-darwin", workflow)
+        self.assertNotIn("~/.cache/ort.pyke.io", workflow)
+        self.assertIn("ORT_PREFER_DYNAMIC_LINK", workflow)
+        self.assertIn("production-bundle:", workflow)
+        self.assertIn("production-verification:", workflow)
+        self.assertIn("verify_release_asset.py", workflow)
+        self.assertIn("network_probe.py", workflow)
+        self.assertIn("release-asset-manifest.json", workflow)
+        self.assertIn("--bundle-report production-bundle/matching-bundle-provision.json", workflow)
+        self.assertIn("runtime-report runtime-evidence/runtime-metadata.json", workflow)
+        self.assertIn("--source-runtime-report runtime-evidence/source-runtime-metadata.json", workflow)
+        self.assertIn("--runtime-provision-report runtime-evidence/runtime-provision.json", workflow)
+        self.assertIn("Assemble immutable runtime evidence", workflow)
+        self.assertIn("--extract-dir $extractDir", workflow)
+        self.assertIn("New-NetFirewallRule -DisplayName $ruleName", workflow)
+        self.assertIn("Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule", workflow)
+        self.assertIn("-u LD_LIBRARY_PATH", workflow)
+        self.assertIn("-u DYLD_LIBRARY_PATH", workflow)
+        self.assertIn("-u ORT_LIB_LOCATION", workflow)
+        self.assertIn("HOME=\"$runtime_home\"", workflow)
+        self.assertIn("archive_runtime_environment", (ROOT / "scripts/verify_release_asset.py").read_text(encoding="utf-8"))
+        self.assertIn("--require-release-binary", ROOT.joinpath(".github/workflows/ci.yml").read_text(encoding="utf-8"))
+        self.assertIn("askman_lifecycle", ROOT.joinpath(".github/workflows/ci.yml").read_text(encoding="utf-8"))
+
+
+if __name__ == "__main__":
+    unittest.main()

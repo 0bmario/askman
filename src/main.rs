@@ -4,7 +4,7 @@ use askman::{
     bundle::BundleStore,
     cli::{self, LifecycleCommand},
     db,
-    hybrid::{CandidateOptions, run_candidate},
+    hybrid::{CandidateOptions, query_candidate_results, query_legacy_json, run_candidate},
     search,
 };
 use clap::Parser;
@@ -55,11 +55,26 @@ fn main() -> Result<()> {
 
     let query = args.question.join(" ");
     let (bundle, _) = store.active_bundle()?;
-    run_candidate(CandidateOptions {
+    let options = CandidateOptions {
         bundle,
         query,
         target_os: search::get_target_os(args.linux, args.osx, args.windows),
         platform_explicit: args.linux || args.osx || args.windows,
         verbose: args.verbose,
-    })
+    };
+    if args.ci_json_v1 {
+        println!(
+            "{}",
+            serde_json::to_string(&query_candidate_results(options)?)?
+        );
+        Ok(())
+    } else if args.json {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&query_legacy_json(options, args.verbose)?)?
+        );
+        Ok(())
+    } else {
+        run_candidate(options)
+    }
 }

@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "bundle_id": "matching-bundle-v2:8ab84c666b7420575f0df86fd174465d1be8810d15d6ecf0465414213ea7d84b",
+  "matching_db_sha256": "3bcc830af2e289b4f02d45d271657a10b51a2b7eca20830ab4b87b2aac15a9d6",
+  "dense_index_version": "dense-vec0-v2",
+  "retrieval_strategy": "partitioned-knn-v1",
+  "partition_key": "platform",
+  "partitions": ["common", "linux", "osx", "windows"],
+  "max_knn_k": 4096,
+  "dense_rows_by_platform": {
+    "common": 21002,
+    "linux": 8360,
+    "osx": 850,
+    "windows": 1188
+  },
+  "host": {
+    "system": "Darwin",
+    "machine": "arm64",
+    "runtime": "ONNX Runtime 1.20.0"
+  },
+  "server": {
+    "binary_sha256": "d7fca88af31f307a50fa9236b437bbfbc31ccff642a12e576cebd2760d93a693",
+    "candidate_binary_sha256": "5234fd956220141858ee130c81c3537cf545a7b2e22ebe15e7d56a8bcc694566",
+    "model_load_ms": 12475,
+    "peak_memory_bytes": 468713472
+  },
+  "queries": [
+    {
+      "name": "explicit-linux",
+      "query": "restart service",
+      "platform": "linux",
+      "platform_explicit": true,
+      "elapsed_ms": 280.709,
+      "result_count": 8,
+      "top_platform": "linux",
+      "top_source_path": "pages/linux/rc-service.md"
+    },
+    {
+      "name": "explicit-windows",
+      "query": "copy a file to another location",
+      "platform": "windows",
+      "platform_explicit": true,
+      "elapsed_ms": 196.274,
+      "result_count": 8,
+      "top_platform": "windows",
+      "top_source_path": "pages/windows/copy.md"
+    },
+    {
+      "name": "host-default-common",
+      "query": "copy multiple JPEG files",
+      "platform": "osx",
+      "platform_explicit": false,
+      "elapsed_ms": 193.938,
+      "result_count": 8,
+      "top_platform": "common",
+      "top_source_path": "pages/common/qcp.md"
+    },
+    {
+      "name": "host-default-osx",
+      "query": "say text aloud",
+      "platform": "osx",
+      "platform_explicit": false,
+      "elapsed_ms": 193.123,
+      "result_count": 8,
+      "top_platform": "osx",
+      "top_source_path": "pages/osx/say.md"
+    }
+  ],
+  "underfill_fallback": {
+    "production_queries_filled_by_partition_knn": true,
+    "sql_scalar_fallback_regression": true,
+    "rust_blob_decode_in_fallback": false
+  },
+  "notes": "Single dense-server process against the rebuilt production corpus; timings exclude model startup. Full corpus is 31,400 dense rows; common has 21,002 rows, so no unconditional full-corpus Rust scan is used."
+}

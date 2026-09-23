@@ -5,6 +5,11 @@ pinned embedding assets as one offline bundle. The bundle contains all four
 platform page sets: `common`, `linux`, `osx`, and `windows`. Platform filtering
 remains a query-time policy.
 
+The committed fixture below is for fast tests. The 0.4.0 production source
+snapshot and its exhaustive manifest are built by
+[production-bundle.md](production-bundle.md); do not substitute the fixture
+when producing a release asset.
+
 Provision the tldr snapshot and pinned model cache first. Then build offline:
 
 ```sh
@@ -14,7 +19,7 @@ cargo run --locked --offline --features dev --bin tldr_subset -- \
   --snapshot tests/fixtures/tldr-full-corpus \
   --model-cache "$RUN_DIR/data/models" \
   --output /tmp/askman-matching-bundle \
-  --cli-compatibility 'askman=0.3.3'
+  --cli-compatibility 'askman=0.4.0'
 ```
 
 `--cli-compatibility` must use `askman=<version>` with no whitespace. The
@@ -30,6 +35,22 @@ The output contains:
 - `matching.db`: source-backed pages and examples, SQLite FTS5 lexical index,
   and sqlite-vec dense index;
 - `model-cache/`: the pinned model reference and required model files.
+- `notices/`: the tldr-pages CC-BY-4.0 attribution and the exact pinned model
+  README/license notice (`license: apache-2.0`) required by production bundles.
+
+The dense component is `dense-vec0-v2`. Its vec0 index partitions on the
+`platform` key and stores a stable contiguous `dense_rowid` mapping in
+`example_dense`. A platform query probes the target and `common` partitions
+separately with `k <= 4096`; explicit platform requests apply target
+precedence, while host-default requests merge by distance. Results are
+deterministically page-deduplicated. If the partition union cannot fill the
+requested unique-page budget, the bounded fallback computes
+`vec_distance_cosine` in SQLite over the selected pages; it never decodes
+dense blobs in Rust. Each partition reports raw count, saturation, and unique
+selected-page count: explicit target queries accept target-only proof when the
+target has enough unique pages, while a saturated target with too few unique
+pages always falls back; host-default merges require every saturated partition
+to independently have the requested unique-page budget.
 
 Validate the complete unit without network access:
 
@@ -62,15 +83,18 @@ The archive is unpacked into a private staging directory. The embedded manifest
 must exactly match the release manifest, and `bundle-validate`'s same
 `validate_matching_bundle` path verifies every component version, size,
 SHA-256 digest, source identity, four-platform database coverage, and pinned
-model asset before publication.
+model asset before publication. Production bundles require the exact notice
+files under `notices/` when their source metadata declares CC-BY-4.0.
 
 Validated bundles are stored below the Askman data directory at
 `bundles/<immutable-bundle-id>`. Existing IDs are never replaced. The active
 state is written to a temporary file and atomically replaced only after the
 complete record is synced; an interrupted write leaves the previous selection
 active. A successful update records the former active ID as the rollback
-target. Failed downloads, extraction, validation, or activation leave that
-state and bundle untouched.
+target. Setup, update, and rollback hold a kernel-backed per-store lock for the
+full mutation; a crashed process releases the lock automatically, and any
+staging files left behind are ignored and recoverable. Failed downloads,
+extraction, validation, or activation leave that state and bundle untouched.
 
 Use the explicit lifecycle commands:
 
