@@ -335,12 +335,14 @@ fn read_bundle_manifest(root: &Path) -> Result<BundleManifest> {
     Ok(manifest)
 }
 
-const STAMP_SCHEMA_VERSION: u32 = 1;
+const STAMP_SCHEMA_VERSION: u32 = 2;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 struct StampFileStat {
     size: u64,
     mtime_nanos: i128,
+    change_time_nanos: Option<i128>,
+    file_identity: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -349,9 +351,9 @@ struct ValidationStamp {
     files: BTreeMap<String, StampFileStat>,
 }
 
-/// Per-file identity used by the validation stamp. Sizes and modification
-/// times are cheap to re-stat on every query; any mismatch falls back to a
-/// full deep validation, so a tampered or rolled-back bundle can never pass.
+/// Per-file identity used by the validation stamp. Unix change time and
+/// device/inode detect ordinary writes and replacements even when mtime is
+/// restored. Platforms without those stable fields do not reuse stamps.
 fn stamp_path(root: &Path) -> PathBuf {
     let name = root
         .file_name()
@@ -369,7 +371,9 @@ fn bundle_file_stats(root: &Path) -> Result<BTreeMap<String, StampFileStat>> {
     collect_bundle_files(root, root, &mut files)?;
     let mut stats = BTreeMap::new();
     for relative in files {
-        let metadata = fs::metadata(root.join(&relative))?;
+        let path = root.join(&relative);
+        let metadata = fs::metadata(&path)?;
+        let (change_time_nanos, file_identity) = file_change_identity(&metadata);
         stats.insert(
             relative,
             StampFileStat {
@@ -379,10 +383,35 @@ fn bundle_file_stats(root: &Path) -> Result<BTreeMap<String, StampFileStat>> {
                     .duration_since(std::time::UNIX_EPOCH)
                     .map(|duration| duration.as_nanos() as i128)
                     .unwrap_or_default(),
+                change_time_nanos,
+                file_identity,
             },
         );
     }
     Ok(stats)
+}
+
+#[cfg(unix)]
+fn file_change_identity(metadata: &fs::Metadata) -> (Option<i128>, Option<String>) {
+    use std::os::unix::fs::MetadataExt;
+
+    let change_time_nanos =
+        i128::from(metadata.ctime()) * 1_000_000_000 + i128::from(metadata.ctime_nsec());
+    let file_identity = format!("{}:{}", metadata.dev(), metadata.ino());
+    (Some(change_time_nanos), Some(file_identity))
+}
+
+#[cfg(not(unix))]
+fn file_change_identity(_metadata: &fs::Metadata) -> (Option<i128>, Option<String>) {
+    // Do not trust a cached stamp where the standard library exposes no
+    // portable change-time and file-identity pair. The caller deep-validates.
+    (None, None)
+}
+
+fn can_reuse_validation_stamp(stats: &BTreeMap<String, StampFileStat>) -> bool {
+    stats
+        .values()
+        .all(|stat| stat.change_time_nanos.is_some() && stat.file_identity.is_some())
 }
 
 fn read_validation_stamp(path: &Path) -> Option<ValidationStamp> {
@@ -407,9 +436,11 @@ fn write_validation_stamp(path: &Path, stamp: &ValidationStamp) {
 
 /// Load a matching bundle manifest, reusing a stat-based validation stamp so
 /// a one-shot CLI does not re-hash the pinned model assets on every query.
-/// The stamp is keyed to per-file sizes and modification times; any mismatch
-/// triggers the full deep validation, so the fail-closed contract of
-/// ADR-0004 is unchanged.
+/// Unix stamps additionally include change time and device/inode identity. A
+/// metadata fingerprint mismatch triggers full deep validation; platforms
+/// without a reliable fingerprint always take that deep path. This protects
+/// against ordinary local edits, not an adversary that can forge filesystem
+/// metadata or rewrite the external stamp.
 pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
     let root = fs::canonicalize(bundle)
         .with_context(|| format!("failed to resolve matching bundle {}", bundle.display()))?;
@@ -419,20 +450,25 @@ pub fn load_validated_manifest(bundle: &Path) -> Result<BundleManifest> {
     let manifest = read_bundle_manifest(&root)?;
     let stats = bundle_file_stats(&root)?;
     let stamp_path = stamp_path(&root);
-    if read_validation_stamp(&stamp_path).is_some_and(|stamp| stamp.files == stats) {
+    let can_reuse_stamp = can_reuse_validation_stamp(&stats);
+    if can_reuse_stamp
+        && read_validation_stamp(&stamp_path).is_some_and(|stamp| stamp.files == stats)
+    {
         // Light path: content identity is pinned by the stamp stats; the
         // inventory walk re-checks that exactly the expected files exist.
         validate_bundle_file_inventory(&root, &manifest)?;
         return Ok(manifest);
     }
     let manifest = validate_matching_bundle(bundle)?;
-    write_validation_stamp(
-        &stamp_path,
-        &ValidationStamp {
-            schema_version: STAMP_SCHEMA_VERSION,
-            files: stats,
-        },
-    );
+    if can_reuse_stamp {
+        write_validation_stamp(
+            &stamp_path,
+            &ValidationStamp {
+                schema_version: STAMP_SCHEMA_VERSION,
+                files: stats,
+            },
+        );
+    }
     Ok(manifest)
 }
 
@@ -1699,6 +1735,10 @@ fn atomic_replace(source: &Path, destination: &Path) -> std::io::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::hybrid::{CandidateOptions, run_candidate};
+    use crate::search::TargetOs;
+    use std::fs::FileTimes;
+    use std::time::Duration;
 
     #[test]
     fn stamp_lives_outside_the_bundle_directory() {
@@ -1721,21 +1761,6 @@ mod tests {
 
         let stats = bundle_file_stats(&root).unwrap();
         assert_eq!(stats.len(), 1);
-        let stamp = ValidationStamp {
-            schema_version: STAMP_SCHEMA_VERSION,
-            files: stats
-                .iter()
-                .map(|(path, stat)| {
-                    (
-                        path.clone(),
-                        StampFileStat {
-                            size: stat.size,
-                            mtime_nanos: stat.mtime_nanos,
-                        },
-                    )
-                })
-                .collect(),
-        };
 
         // Unchanged tree: the stamp matches.
         assert_eq!(bundle_file_stats(&root).unwrap(), stats);
@@ -1745,7 +1770,116 @@ mod tests {
         let changed = bundle_file_stats(&root).unwrap();
         assert_ne!(changed, stats);
         assert_ne!(changed.get("asset.bin"), stats.get("asset.bin"));
-        let _ = stamp;
+    }
+
+    #[test]
+    fn candidate_rejects_same_size_bundle_mutation_after_mtime_restore() {
+        let directory = tempfile::tempdir().unwrap();
+        let bundle = directory.path().join("matching-bundle");
+        fs::create_dir(&bundle).unwrap();
+        let original_database = b"verified-database";
+        write_test_query_bundle(&bundle, original_database);
+
+        let root = fs::canonicalize(&bundle).unwrap();
+        let prior_stamp = ValidationStamp {
+            schema_version: STAMP_SCHEMA_VERSION,
+            files: bundle_file_stats(&root).unwrap(),
+        };
+        write_validation_stamp(&stamp_path(&root), &prior_stamp);
+        assert_eq!(
+            read_validation_stamp(&stamp_path(&root)),
+            Some(prior_stamp.clone())
+        );
+        #[cfg(unix)]
+        {
+            assert!(can_reuse_validation_stamp(&prior_stamp.files));
+            assert_eq!(bundle_file_stats(&root).unwrap(), prior_stamp.files);
+        }
+
+        let database = bundle.join(MATCHING_DATABASE);
+        let original_mtime = fs::metadata(&database).unwrap().modified().unwrap();
+        std::thread::sleep(Duration::from_millis(10));
+        let changed_database = b"tampered-database";
+        assert_eq!(changed_database.len(), original_database.len());
+        fs::write(&database, changed_database).unwrap();
+        fs::File::open(&database)
+            .unwrap()
+            .set_times(FileTimes::new().set_modified(original_mtime))
+            .unwrap();
+        assert_eq!(
+            fs::metadata(&database).unwrap().modified().unwrap(),
+            original_mtime
+        );
+        let current_stats = bundle_file_stats(&root).unwrap();
+        let original_stat = prior_stamp.files.get(MATCHING_DATABASE).unwrap();
+        let current_stat = current_stats.get(MATCHING_DATABASE).unwrap();
+        assert_eq!(current_stat.size, original_stat.size);
+        assert_eq!(current_stat.mtime_nanos, original_stat.mtime_nanos);
+        #[cfg(unix)]
+        {
+            assert_ne!(
+                current_stat.change_time_nanos,
+                original_stat.change_time_nanos
+            );
+            assert_eq!(current_stat.file_identity, original_stat.file_identity);
+        }
+        #[cfg(not(unix))]
+        assert!(!can_reuse_validation_stamp(&current_stats));
+
+        let error = run_candidate(CandidateOptions {
+            bundle,
+            query: "find a file".to_string(),
+            target_os: TargetOs::Linux,
+            platform_explicit: false,
+            verbose: false,
+        })
+        .unwrap_err()
+        .to_string();
+
+        assert!(
+            error.contains("bundle component digest mismatch: matching.db"),
+            "unexpected candidate error: {error}"
+        );
+    }
+
+    fn write_test_query_bundle(root: &Path, database: &[u8]) {
+        let database_path = root.join(MATCHING_DATABASE);
+        fs::write(&database_path, database).unwrap();
+        let size_bytes = fs::metadata(&database_path).unwrap().len();
+        let digest = format!("{:x}", Sha256::digest(database));
+
+        let mut manifest = test_manifest(PARSER_VERSION);
+        manifest.lexical_index.size_bytes = size_bytes;
+        manifest.lexical_index.sha256.clone_from(&digest);
+        manifest.corpus.size_bytes = size_bytes;
+        manifest.corpus.sha256.clone_from(&digest);
+        manifest.dense_index.size_bytes = size_bytes;
+        manifest.dense_index.sha256.clone_from(&digest);
+
+        let model_root = format!("{MODEL_DIRECTORY}/{MODEL_CACHE_FOLDER}");
+        let mut model_assets = Vec::new();
+        for (path, content) in std::iter::once((
+            format!("{model_root}/{MODEL_REFERENCE}"),
+            format!("{MODEL_REVISION}\n"),
+        ))
+        .chain(MODEL_FILES.iter().map(|(file, _)| {
+            (
+                format!("{model_root}/snapshots/{MODEL_REVISION}/{file}"),
+                format!("fixture-{file}"),
+            )
+        })) {
+            let asset_path = root.join(&path);
+            fs::create_dir_all(asset_path.parent().unwrap()).unwrap();
+            fs::write(&asset_path, content.as_bytes()).unwrap();
+            model_assets.push(BundleAsset {
+                path,
+                size_bytes: content.len() as u64,
+                sha256: format!("{:x}", Sha256::digest(content.as_bytes())),
+            });
+        }
+        manifest.embedding_model.assets = model_assets;
+        manifest.bundle_id = bundle_id(&manifest).unwrap();
+        write_manifest(&root.join(BUNDLE_MANIFEST), &manifest).unwrap();
     }
 
     #[test]
