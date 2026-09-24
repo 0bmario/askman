@@ -3,7 +3,7 @@ use crate::tldr_subset::{
 };
 use anyhow::{Context, Result, anyhow, bail};
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, params, params_from_iter, types::Value};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlite_vec::sqlite3_vec_init;
@@ -364,90 +364,108 @@ impl DenseIndex {
             .ok_or_else(|| anyhow!("dense model returned no query vector"))?;
         validate_embedding(&query_vector, "query")?;
 
-        let selected = selected_page_ids(&self.connection, platform)?
-            .into_iter()
-            .collect::<HashSet<_>>();
-        if selected.is_empty() {
-            return Ok(Vec::new());
-        }
-        let total_vectors: i64 =
-            self.connection
-                .query_row("SELECT COUNT(*) FROM example_dense_index", [], |row| {
-                    row.get(0)
-                })?;
-        if total_vectors == 0 {
-            return Ok(Vec::new());
-        }
-
-        let query_blob = embedding_blob(&query_vector);
-        let mut statement = self.connection.prepare(
-            "SELECT dense.example_id, dense.distance
-             FROM example_dense_index AS dense
-             WHERE dense.embedding MATCH ?1
-             ORDER BY dense.distance
-             LIMIT ?2",
-        )?;
-        let mut details = self.connection.prepare(
-            "SELECT e.example_id, e.page_id, p.command, e.command, p.description, e.description,
-                    p.source_path, p.source_ref, p.source_revision, p.platform,
-                    p.page_position, e.position
-             FROM examples AS e
-             JOIN pages AS p ON p.page_id = e.page_id
-             WHERE e.example_id = ?1",
-        )?;
-        let rows = statement.query_map(params![query_blob, total_vectors], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, f64>(1)?))
-        })?;
-
-        let mut seen_pages = HashSet::new();
-        let mut results = Vec::new();
-        for row in rows {
-            let (example_id, distance) = row?;
-            let candidate = details.query_row(params![example_id], |row| {
-                Ok(DenseCandidate {
-                    example_id: row.get(0)?,
-                    page_id: row.get(1)?,
-                    page_command: row.get(2)?,
-                    command: row.get(3)?,
-                    page_description: row.get(4)?,
-                    example_description: row.get(5)?,
-                    source_path: row.get(6)?,
-                    source_ref: row.get(7)?,
-                    source_revision: row.get(8)?,
-                    platform: row.get(9)?,
-                    page_position: row.get::<_, i64>(10)? as usize,
-                    example_position: row.get::<_, i64>(11)? as usize,
-                    ranking_score: distance,
-                })
-            })?;
-            if !selected.contains(&candidate.page_id)
-                || !seen_pages.insert(candidate.page_id.clone())
-            {
-                continue;
-            }
-            results.push(candidate);
-            if results.len() == limit {
-                break;
-            }
-        }
-
-        // Platform precedence for ordering as well as selection: when the
-        // user explicitly requested a platform, a target-platform page
-        // outranks an equally relevant common page (the documented selection
-        // invariant, applied to the candidate order; the stable sort keeps
-        // distance order within each group). Host-default queries keep pure
-        // relevance ordering.
-        if platform_explicit {
-            results.sort_by(|a, b| {
-                let a_target = a.platform == platform;
-                let b_target = b.platform == platform;
-                b_target
-                    .cmp(&a_target)
-                    .then_with(|| a.ranking_score.total_cmp(&b.ranking_score))
-            });
-        }
-        Ok(results)
+        query_dense_candidates(
+            &self.connection,
+            &query_vector,
+            platform,
+            limit,
+            platform_explicit,
+        )
     }
+}
+
+fn query_dense_candidates(
+    connection: &Connection,
+    query_vector: &[f32],
+    platform: &str,
+    limit: usize,
+    platform_explicit: bool,
+) -> Result<Vec<DenseCandidate>> {
+    let selected = selected_page_ids(connection, platform)?;
+    if selected.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let page_placeholders = std::iter::repeat_n("?", selected.len())
+        .collect::<Vec<_>>()
+        .join(", ");
+    // vec0 caps K at 4096 examples. Search the existing stored vectors
+    // exactly so platform filtering and page deduplication cannot hide a
+    // relevant page behind an arbitrary example budget.
+    let mut statement = connection.prepare(&format!(
+        "SELECT dense.example_id, e.page_id,
+                vec_distance_cosine(dense.embedding, ?1) AS distance
+         FROM example_dense AS dense
+         JOIN examples AS e ON e.example_id = dense.example_id
+         WHERE e.page_id IN ({page_placeholders})
+         ORDER BY distance, dense.example_id",
+    ))?;
+    let mut details = connection.prepare(
+        "SELECT e.example_id, e.page_id, p.command, e.command, p.description, e.description,
+                p.source_path, p.source_ref, p.source_revision, p.platform,
+                p.page_position, e.position
+         FROM examples AS e
+         JOIN pages AS p ON p.page_id = e.page_id
+         WHERE e.example_id = ?1",
+    )?;
+    let query_params = params_from_iter(
+        std::iter::once(Value::Blob(embedding_blob(query_vector)))
+            .chain(selected.into_iter().map(Value::Text)),
+    );
+    let rows = statement.query_map(query_params, |row| {
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, f64>(2)?,
+        ))
+    })?;
+
+    let mut seen_pages = HashSet::new();
+    let mut results = Vec::new();
+    for row in rows {
+        let (example_id, page_id, distance) = row?;
+        if !seen_pages.insert(page_id) {
+            continue;
+        }
+        let candidate = details.query_row(params![example_id], |row| {
+            Ok(DenseCandidate {
+                example_id: row.get(0)?,
+                page_id: row.get(1)?,
+                page_command: row.get(2)?,
+                command: row.get(3)?,
+                page_description: row.get(4)?,
+                example_description: row.get(5)?,
+                source_path: row.get(6)?,
+                source_ref: row.get(7)?,
+                source_revision: row.get(8)?,
+                platform: row.get(9)?,
+                page_position: row.get::<_, i64>(10)? as usize,
+                example_position: row.get::<_, i64>(11)? as usize,
+                ranking_score: distance,
+            })
+        })?;
+        results.push(candidate);
+        if results.len() == limit {
+            break;
+        }
+    }
+
+    // Platform precedence for ordering as well as selection: when the
+    // user explicitly requested a platform, a target-platform page
+    // outranks an equally relevant common page (the documented selection
+    // invariant, applied to the candidate order; the stable sort keeps
+    // distance order within each group). Host-default queries keep pure
+    // relevance ordering.
+    if platform_explicit {
+        results.sort_by(|a, b| {
+            let a_target = a.platform == platform;
+            let b_target = b.platform == platform;
+            b_target
+                .cmp(&a_target)
+                .then_with(|| a.ranking_score.total_cmp(&b.ranking_score))
+        });
+    }
+    Ok(results)
 }
 
 fn dense_server_query_mode() -> Result<DenseQueryMode> {
@@ -1004,6 +1022,267 @@ fn hardware_label() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn candidate_database() -> Connection {
+        register_sqlite_vec();
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE pages (
+                     page_id TEXT PRIMARY KEY, page_name TEXT, command TEXT,
+                     description TEXT, source_path TEXT, source_ref TEXT,
+                     source_revision TEXT, platform TEXT, page_position INTEGER
+                 );
+                 CREATE TABLE examples (
+                     example_id TEXT PRIMARY KEY, page_id TEXT, command TEXT,
+                     description TEXT, position INTEGER
+                 );
+                 CREATE TABLE example_dense (
+                     example_id TEXT PRIMARY KEY, embedding BLOB
+                 );",
+            )
+            .unwrap();
+        connection
+            .execute_batch(&format!(
+                "CREATE VIRTUAL TABLE example_dense_index USING vec0(
+                     embedding float[{MODEL_DIMENSION}] distance_metric=cosine,
+                     +example_id text
+                 );"
+            ))
+            .unwrap();
+        connection
+    }
+
+    fn unit_vector(x: f32, y: f32) -> Vec<f32> {
+        let mut vector = vec![0.0; MODEL_DIMENSION];
+        vector[0] = x;
+        vector[1] = y;
+        vector
+    }
+
+    fn insert_candidate(
+        connection: &Connection,
+        example_id: &str,
+        page_name: &str,
+        platform: &str,
+        vector: &[f32],
+    ) {
+        let page_id = format!("{platform}/{page_name}");
+        connection
+            .execute(
+                "INSERT OR IGNORE INTO pages VALUES (
+                     ?1, ?2, ?2, 'page description', ?1, 'source', 'revision', ?3, 1
+                 )",
+                params![page_id, page_name, platform],
+            )
+            .unwrap();
+        connection
+            .execute(
+                "INSERT INTO examples VALUES (?1, ?2, ?1, 'example description', 1)",
+                params![example_id, page_id],
+            )
+            .unwrap();
+        let rowid = connection.last_insert_rowid();
+        let blob = embedding_blob(vector);
+        connection
+            .execute(
+                "INSERT INTO example_dense VALUES (?1, ?2)",
+                params![example_id, blob],
+            )
+            .unwrap();
+        connection
+            .execute(
+                "INSERT INTO example_dense_index(rowid, embedding, example_id)
+                 VALUES (?1, ?2, ?3)",
+                params![rowid, blob, example_id],
+            )
+            .unwrap();
+    }
+
+    #[test]
+    fn dense_candidates_find_the_best_example_beyond_4096_vectors() {
+        let mut connection = candidate_database();
+        let transaction = connection.transaction().unwrap();
+        let perpendicular = unit_vector(0.0, 1.0);
+        for index in 0..4096 {
+            insert_candidate(
+                &transaction,
+                &format!("example-{index}"),
+                "tool",
+                "common",
+                &perpendicular,
+            );
+        }
+        let query = unit_vector(1.0, 0.0);
+        insert_candidate(&transaction, "best-example", "tool", "common", &query);
+        transaction.commit().unwrap();
+
+        let results = query_dense_candidates(&connection, &query, "linux", 8, false).unwrap();
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].example_id, "best-example");
+        assert_eq!(results[0].ranking_score, 0.0);
+    }
+
+    #[test]
+    fn dense_candidates_break_example_and_page_distance_ties_by_example_id() {
+        let connection = candidate_database();
+        let query = unit_vector(1.0, 0.0);
+        insert_candidate(&connection, "z-example", "first", "common", &query);
+        insert_candidate(&connection, "b-example", "second", "common", &query);
+        insert_candidate(&connection, "a-example", "first", "common", &query);
+
+        let results = query_dense_candidates(&connection, &query, "linux", 8, false).unwrap();
+
+        assert_eq!(
+            results
+                .iter()
+                .map(|candidate| candidate.example_id.as_str())
+                .collect::<Vec<_>>(),
+            ["a-example", "b-example"]
+        );
+    }
+
+    #[test]
+    fn dense_candidates_select_platform_overrides_and_common_fallbacks() {
+        let connection = candidate_database();
+        let query = unit_vector(1.0, 0.0);
+        insert_candidate(&connection, "common-shared", "shared", "common", &query);
+        insert_candidate(
+            &connection,
+            "common-fallback",
+            "fallback",
+            "common",
+            &unit_vector(-1.0, 0.0),
+        );
+        for platform in ["linux", "osx", "windows"] {
+            insert_candidate(
+                &connection,
+                &format!("{platform}-shared"),
+                "shared",
+                platform,
+                &unit_vector(0.8, 0.6),
+            );
+            insert_candidate(
+                &connection,
+                &format!("{platform}-only"),
+                &format!("{platform}-only"),
+                platform,
+                &query,
+            );
+        }
+
+        for platform in ["common", "linux", "osx", "windows"] {
+            let results = query_dense_candidates(&connection, &query, platform, 8, false).unwrap();
+            let expected = if platform == "common" {
+                vec!["common-shared".to_string(), "common-fallback".to_string()]
+            } else {
+                vec![
+                    format!("{platform}-only"),
+                    format!("{platform}-shared"),
+                    "common-fallback".to_string(),
+                ]
+            };
+            assert_eq!(
+                results
+                    .iter()
+                    .map(|candidate| candidate.example_id.clone())
+                    .collect::<Vec<_>>(),
+                expected,
+                "target platform: {platform}"
+            );
+        }
+    }
+
+    #[test]
+    fn dense_candidates_fill_the_page_budget_after_platform_filtering_and_deduplication() {
+        let mut connection = candidate_database();
+        let transaction = connection.transaction().unwrap();
+        let query = unit_vector(1.0, 0.0);
+        let crowded = unit_vector(0.8, 0.6);
+        for index in 0..4096 {
+            insert_candidate(
+                &transaction,
+                &format!("windows-{index:04}"),
+                "windows-tool",
+                "windows",
+                &query,
+            );
+            insert_candidate(
+                &transaction,
+                &format!("crowded-{index:04}"),
+                "crowded-tool",
+                "common",
+                &crowded,
+            );
+        }
+        for index in 1..=8 {
+            insert_candidate(
+                &transaction,
+                &format!("example-{index}"),
+                &format!("tool-{index}"),
+                "common",
+                &unit_vector(0.0, 1.0),
+            );
+        }
+        transaction.commit().unwrap();
+
+        let results = query_dense_candidates(&connection, &query, "linux", 8, false).unwrap();
+
+        assert_eq!(
+            results
+                .iter()
+                .map(|candidate| candidate.example_id.as_str())
+                .collect::<Vec<_>>(),
+            [
+                "crowded-0000",
+                "example-1",
+                "example-2",
+                "example-3",
+                "example-4",
+                "example-5",
+                "example-6",
+                "example-7",
+            ]
+        );
+    }
+
+    #[test]
+    fn dense_candidates_preserve_explicit_platform_ordering() {
+        let connection = candidate_database();
+        let query = unit_vector(1.0, 0.0);
+        insert_candidate(&connection, "common", "common-tool", "common", &query);
+        for platform in ["linux", "osx", "windows"] {
+            insert_candidate(
+                &connection,
+                platform,
+                "platform-tool",
+                platform,
+                &unit_vector(0.8, 0.6),
+            );
+        }
+
+        for platform in ["linux", "osx", "windows"] {
+            for (explicit, expected) in
+                [(false, ["common", platform]), (true, [platform, "common"])]
+            {
+                let results =
+                    query_dense_candidates(&connection, &query, platform, 8, explicit).unwrap();
+                assert_eq!(
+                    results
+                        .iter()
+                        .map(|candidate| candidate.example_id.as_str())
+                        .collect::<Vec<_>>(),
+                    expected
+                );
+                let platform_result = results
+                    .iter()
+                    .find(|candidate| candidate.platform == platform)
+                    .unwrap();
+                assert!((platform_result.ranking_score - 0.2).abs() < 0.000_001);
+            }
+        }
+    }
 
     #[test]
     fn parses_the_declared_embedding_recipes() {
