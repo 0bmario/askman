@@ -1,9 +1,10 @@
+use crate::bundle::ValidatedBundle;
 use crate::tldr_subset::{
     artifact_metadata, process_peak_memory_bytes, selected_page_ids, validate_artifact,
 };
 use anyhow::{Context, Result, anyhow, bail};
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-use rusqlite::{Connection, params, params_from_iter, types::Value};
+use rusqlite::{Connection, OpenFlags, params, params_from_iter, types::Value};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlite_vec::sqlite3_vec_init;
@@ -324,13 +325,20 @@ impl DenseIndex {
         Self::open_index(artifact, assets)
     }
 
-    /// Open a dense index whose model assets were already verified by the
-    /// matching-bundle validation. Digests come from the pinned constants and
-    /// no per-file hashing happens on this path.
-    pub(crate) fn open_from_bundle(artifact: &Path, model_cache: &Path) -> Result<Self> {
+    /// Open a dense index through the matching-bundle validation capability.
+    /// Its immutable artifacts were checked at that boundary; query opening
+    /// must not repeat corpus/vector scans.
+    pub(crate) fn open_from_bundle(bundle: &ValidatedBundle) -> Result<Self> {
         register_sqlite_vec();
-        let assets = pinned_model_assets(model_cache)?;
-        Self::open_index(artifact, assets)
+        let artifact = bundle.database_path();
+        let model_cache = bundle.model_cache_path();
+        let assets = pinned_model_assets(&model_cache)?;
+        let connection = Connection::open_with_flags(
+            &artifact,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )
+        .with_context(|| format!("failed to open dense artifact {}", artifact.display()))?;
+        Self::from_validated_connection(connection, assets)
     }
 
     fn open_index(artifact: &Path, assets: ModelAssets) -> Result<Self> {
@@ -338,6 +346,10 @@ impl DenseIndex {
             .with_context(|| format!("failed to open dense artifact {}", artifact.display()))?;
         validate_artifact(&connection)?;
         validate_dense_artifact(&connection, &assets)?;
+        Self::from_validated_connection(connection, assets)
+    }
+
+    fn from_validated_connection(connection: Connection, assets: ModelAssets) -> Result<Self> {
         let embedder = OfflineEmbedder::new(load_embedder(&assets)?);
         Ok(Self {
             connection,

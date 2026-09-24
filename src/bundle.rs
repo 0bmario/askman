@@ -70,6 +70,35 @@ pub struct BundleManifest {
     pub cli_compatibility: String,
 }
 
+/// Proof that a bundle passed the normal query-time validation boundary.
+/// Query-index openers require this handle rather than exposing a validation
+/// bypass for arbitrary artifact paths.
+pub(crate) struct ValidatedBundle {
+    root: PathBuf,
+    manifest: BundleManifest,
+}
+
+impl ValidatedBundle {
+    pub(crate) fn open(bundle: &Path) -> Result<Self> {
+        let root = fs::canonicalize(bundle)
+            .with_context(|| format!("failed to resolve matching bundle {}", bundle.display()))?;
+        let manifest = load_validated_manifest(&root)?;
+        Ok(Self { root, manifest })
+    }
+
+    pub(crate) fn manifest(&self) -> &BundleManifest {
+        &self.manifest
+    }
+
+    pub(crate) fn database_path(&self) -> PathBuf {
+        self.root.join(&self.manifest.corpus.path)
+    }
+
+    pub(crate) fn model_cache_path(&self) -> PathBuf {
+        self.root.join(MODEL_DIRECTORY)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PlatformSelection {
     pub platforms: Vec<String>,

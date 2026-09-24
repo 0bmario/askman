@@ -1,6 +1,7 @@
+use crate::bundle::ValidatedBundle;
 use crate::db;
 use anyhow::{Context, Result, anyhow, bail};
-use rusqlite::{Connection, params, params_from_iter};
+use rusqlite::{Connection, OpenFlags, params, params_from_iter};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
@@ -322,23 +323,78 @@ pub fn query_artifact_for_platform(
     let conn = Connection::open(&options.artifact)
         .with_context(|| format!("failed to open artifact {}", options.artifact.display()))?;
     validate_artifact(&conn)?;
+    query_artifact_on_validated_connection(
+        &conn,
+        &fts_query,
+        options.limit,
+        options.platform_explicit,
+        platform,
+    )
+}
+
+/// Query handle created only from a matching bundle that passed its normal
+/// validation boundary. Standalone artifact APIs continue to validate fully.
+pub(crate) struct ValidatedLexicalIndex {
+    connection: Connection,
+}
+
+impl ValidatedLexicalIndex {
+    pub(crate) fn open(bundle: &ValidatedBundle) -> Result<Self> {
+        let artifact = bundle.database_path();
+        let connection = Connection::open_with_flags(
+            &artifact,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )
+        .with_context(|| format!("failed to open lexical index {}", artifact.display()))?;
+        Ok(Self { connection })
+    }
+
+    pub(crate) fn query_for_platform(
+        &self,
+        query: &str,
+        platform: &str,
+        limit: usize,
+        platform_explicit: bool,
+    ) -> Result<Vec<QueryResult>> {
+        if limit == 0 {
+            bail!("query limit must be greater than zero");
+        }
+        validate_platform(platform)?;
+        let fts_query = build_fts_query(query)?;
+        query_artifact_on_validated_connection(
+            &self.connection,
+            &fts_query,
+            limit,
+            platform_explicit,
+            platform,
+        )
+    }
+}
+
+fn query_artifact_on_validated_connection(
+    conn: &Connection,
+    fts_query: &str,
+    limit: usize,
+    platform_explicit: bool,
+    platform: &str,
+) -> Result<Vec<QueryResult>> {
     let selected_page_ids = selected_page_ids(&conn, platform)?;
     if selected_page_ids.is_empty() {
         return Ok(Vec::new());
     }
-    let (order_by, head_params): (String, Vec<&str>) = if options.platform_explicit {
+    let (order_by, head_params): (String, Vec<&str>) = if platform_explicit {
         (
             "CASE WHEN p.platform = ?2 THEN 0 ELSE 1 END, bm25(example_lexical), e.example_id"
                 .to_string(),
-            vec![fts_query.as_str(), platform],
+            vec![fts_query, platform],
         )
     } else {
         (
             "bm25(example_lexical), e.example_id".to_string(),
-            vec![fts_query.as_str()],
+            vec![fts_query],
         )
     };
-    let placeholder_base = if options.platform_explicit { 3 } else { 2 };
+    let placeholder_base = if platform_explicit { 3 } else { 2 };
     let page_placeholders = selected_page_ids
         .iter()
         .enumerate()
@@ -402,7 +458,7 @@ pub fn query_artifact_for_platform(
         }
         result.rank = results.len() + 1;
         results.push(result);
-        if results.len() == options.limit {
+        if results.len() == limit {
             break;
         }
     }

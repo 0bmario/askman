@@ -1,12 +1,11 @@
-use crate::bundle::{BundleManifest, load_validated_manifest};
+use crate::bundle::{BundleManifest, ValidatedBundle};
 use crate::dense::{DenseCandidate, DenseIndex, DenseQueryMode};
 use crate::search::TargetOs;
-use crate::tldr_subset::{QueryOptions, QueryResult, query_artifact_for_platform};
+use crate::tldr_subset::{QueryResult, ValidatedLexicalIndex};
 use anyhow::{Result, bail};
 use colored::Colorize;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
-use std::fs;
 use std::path::{Path, PathBuf};
 
 pub const MAX_DISPLAYED_RESULTS: usize = 3;
@@ -93,25 +92,17 @@ fn run_candidate_with_query_mode(
 }
 
 struct HybridIndex {
-    artifact: PathBuf,
+    lexical: ValidatedLexicalIndex,
     dense: DenseIndex,
 }
 
 impl HybridIndex {
     fn open(bundle: &Path) -> Result<Self> {
-        let root = fs::canonicalize(bundle).map_err(|error| {
-            anyhow::anyhow!(
-                "failed to resolve matching bundle {}: {error}",
-                bundle.display()
-            )
-        })?;
-        let manifest = load_validated_manifest(&root)?;
-        validate_frozen_bundle(&manifest)?;
-
-        let artifact = root.join(&manifest.corpus.path);
-        let model_cache = root.join("model-cache");
-        let dense = DenseIndex::open_from_bundle(&artifact, &model_cache)?;
-        Ok(Self { artifact, dense })
+        let bundle = ValidatedBundle::open(bundle)?;
+        validate_frozen_bundle(bundle.manifest())?;
+        let dense = DenseIndex::open_from_bundle(&bundle)?;
+        let lexical = ValidatedLexicalIndex::open(&bundle)?;
+        Ok(Self { lexical, dense })
     }
 
     fn query(
@@ -121,18 +112,17 @@ impl HybridIndex {
         query_mode: DenseQueryMode,
         platform_explicit: bool,
     ) -> Result<Vec<Candidate>> {
-        let keyword = query_artifact_for_platform(
-            QueryOptions {
-                artifact: self.artifact.clone(),
-                query: query.to_string(),
-                limit: KEYWORD_CANDIDATE_BUDGET,
+        let keyword = self
+            .lexical
+            .query_for_platform(
+                query,
+                target_os.as_str(),
+                KEYWORD_CANDIDATE_BUDGET,
                 platform_explicit,
-            },
-            target_os.as_str(),
-        )?
-        .into_iter()
-        .map(candidate_from_keyword)
-        .collect::<Vec<_>>();
+            )?
+            .into_iter()
+            .map(candidate_from_keyword)
+            .collect::<Vec<_>>();
         // The shipping entrypoint supplies Raw; only the dev entrypoint can
         // supply the experimental expansion mode.
         let dense = self
@@ -376,6 +366,7 @@ fn candidate_identity(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::bundle::BUNDLE_MANIFEST;
 
     fn candidate(example_id: &str, page_id: &str) -> Candidate {
         Candidate {
@@ -525,6 +516,24 @@ mod tests {
         .to_string();
 
         assert!(error.contains("failed to resolve matching bundle"));
+    }
+
+    #[test]
+    fn candidate_fails_closed_when_bundle_manifest_is_corrupt() {
+        let root = tempfile::tempdir().unwrap();
+        std::fs::write(root.path().join(BUNDLE_MANIFEST), b"{not json").unwrap();
+
+        let error = run_candidate(CandidateOptions {
+            bundle: root.path().to_path_buf(),
+            query: "search files".to_string(),
+            target_os: TargetOs::Linux,
+            platform_explicit: true,
+            verbose: false,
+        })
+        .unwrap_err()
+        .to_string();
+
+        assert!(error.contains("failed to parse matching bundle manifest"));
     }
 
     #[test]
