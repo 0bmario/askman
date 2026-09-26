@@ -1,7 +1,7 @@
 use crate::bundle::{BundleManifest, BundleStore, ValidatedBundle};
 use crate::dense::{
-    DenseCandidate, DenseIndex, DenseQueryMode, is_negated_exif_observation_query,
-    is_negated_file_stdout_query,
+    DenseCandidate, DenseIndex, DenseQueryMode, is_file_stdout_query_excluding_cat,
+    is_negated_exif_observation_query, is_negated_file_stdout_query,
 };
 use crate::search::TargetOs;
 use anyhow::{Result, bail};
@@ -83,7 +83,10 @@ fn select_displayed_candidates(
     query: &str,
     candidates: impl IntoIterator<Item = DenseCandidate>,
 ) -> Vec<DenseCandidate> {
-    if is_negated_exif_observation_query(query) || is_negated_file_stdout_query(query) {
+    if is_negated_exif_observation_query(query)
+        || is_negated_file_stdout_query(query)
+        || is_file_stdout_query_excluding_cat(query)
+    {
         return Vec::new();
     }
 
@@ -210,6 +213,16 @@ mod tests {
     fn negated_file_stdout_request_abstains_from_positive_examples() {
         let displayed =
             select_displayed_candidates("do not show file contents to stdout", [candidate(0.1)]);
+
+        assert!(displayed.is_empty());
+    }
+
+    #[test]
+    fn file_stdout_request_abstains_when_its_only_documented_example_is_excluded() {
+        let displayed = select_displayed_candidates(
+            "print file contents to stdout without using cat",
+            [candidate(0.1)],
+        );
 
         assert!(displayed.is_empty());
     }

@@ -1570,6 +1570,78 @@ pub(crate) fn is_negated_file_stdout_query(query: &str) -> bool {
     names_file && names_file_contents && names_stdout && negates_file_output
 }
 
+pub(crate) fn is_file_stdout_query_excluding_cat(query: &str) -> bool {
+    // The pinned corpus has no other verified full-file stdout example.
+    let normalized = query.to_ascii_lowercase();
+    let query_words = normalized
+        .split(|character: char| !character.is_ascii_alphanumeric())
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    let names_file = query_words
+        .iter()
+        .any(|word| ["file", "files"].contains(word));
+    let names_file_contents = query_words
+        .iter()
+        .any(|word| ["content", "contents", "text"].contains(word));
+    let names_stdout = query_words.contains(&"stdout")
+        || query_words
+            .windows(2)
+            .any(|words| words == ["standard", "output"]);
+    let excludes_cat = excludes_named_command(&query_words, "cat");
+
+    names_file && names_file_contents && names_stdout && excludes_cat
+}
+
+fn excludes_named_command(query_words: &[&str], command: &str) -> bool {
+    const NEGATION_WORDS: [&str; 6] =
+        ["avoid", "avoiding", "except", "excluding", "not", "without"];
+    const CONNECTOR_WORDS: [&str; 4] = ["a", "the", "use", "using"];
+    const CONTRACTION_PREFIXES: [&str; 8] = [
+        "can", "didn", "doesn", "don", "mustn", "shouldn", "won", "wouldn",
+    ];
+
+    for (index, word) in query_words.iter().enumerate() {
+        if NEGATION_WORDS.contains(word) {
+            let remaining = &query_words[index + 1..];
+            let command_offset = remaining
+                .iter()
+                .position(|remaining_word| *remaining_word == command);
+            if let Some(command_offset) = command_offset {
+                let intervening = &remaining[..command_offset];
+                if intervening.len() <= 3
+                    && intervening
+                        .iter()
+                        .all(|word| CONNECTOR_WORDS.contains(word))
+                {
+                    return true;
+                }
+            }
+        }
+
+        if index + 2 < query_words.len()
+            && CONTRACTION_PREFIXES.contains(word)
+            && query_words[index + 1] == "t"
+        {
+            let remaining = &query_words[index + 2..];
+            if let Some(command_offset) = remaining
+                .iter()
+                .position(|remaining_word| *remaining_word == command)
+            {
+                let intervening = &remaining[..command_offset];
+                if intervening.len() <= 3
+                    && intervening
+                        .iter()
+                        .all(|word| CONNECTOR_WORDS.contains(word))
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
+}
+
 fn negates_output_action(query_words: &[&str], action_index: usize) -> bool {
     const NEGATION_WORDS: [&str; 6] = ["avoid", "cannot", "never", "no", "not", "without"];
     const CONTRACTION_PREFIXES: [&str; 8] = [
@@ -2882,6 +2954,21 @@ mod tests {
         ));
         assert!(is_negated_file_stdout_query(
             "I don't want to show file contents to stdout"
+        ));
+        assert!(!is_negated_file_stdout_query(
+            "print file contents to stdout without using cat"
+        ));
+        assert!(is_file_stdout_query_excluding_cat(
+            "print file contents to stdout without using cat"
+        ));
+        assert!(is_file_stdout_query_excluding_cat(
+            "avoid cat when printing file contents to stdout"
+        ));
+        assert!(is_file_stdout_query_excluding_cat(
+            "don't use cat to print file contents to stdout"
+        ));
+        assert!(!is_file_stdout_query_excluding_cat(
+            "print file contents to stdout"
         ));
     }
 
