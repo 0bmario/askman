@@ -1,0 +1,486 @@
+{
+  "schema_version": 1,
+  "artifact_type": "askman-holdout-prompt-pool",
+  "tasks": [
+    {
+      "id": "fresh2-common-01",
+      "family": "fresh2-family-001",
+      "question": "Find every Markdown file anywhere below my docs folder.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-02",
+      "family": "fresh2-family-002",
+      "question": "Set the same read and write permissions on a directory and all of its descendants.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-03",
+      "family": "fresh2-family-003",
+      "question": "Compare two directory trees recursively and show which files differ.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-04",
+      "family": "fresh2-family-004",
+      "question": "Show running processes ordered by memory consumption.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-05",
+      "family": "fresh2-family-005",
+      "question": "I have text coming through a pipe and want every `alpha` changed to `beta` in the output. How?",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-06",
+      "family": "fresh2-family-006",
+      "question": "Search one source file for the exact text `TODO: remove`, treating it literally.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-07",
+      "family": "fresh2-family-007",
+      "question": "Calculate and print SHA-256 checksums for all files below a folder.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-08",
+      "family": "fresh2-family-008",
+      "question": "Send a graceful termination signal to process 8421.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-09",
+      "family": "fresh2-family-009",
+      "question": "Sort a file of measurements numerically in ascending order and keep only one copy of each value.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-10",
+      "family": "fresh2-family-010",
+      "question": "Copy a project directory and everything inside it to a backup location. What's the command?",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-11",
+      "family": "fresh2-family-011",
+      "question": "Show staged and unstaged Git changes for this checkout.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-12",
+      "family": "fresh2-family-012",
+      "question": "Extract a ZIP archive into a target folder.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-13",
+      "family": "fresh2-family-013",
+      "question": "Report the sizes of immediate subdirectories, sorted from largest to smallest.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-14",
+      "family": "fresh2-family-014",
+      "question": "Create a symbolic link named `current` that points to `releases/v3`.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-15",
+      "family": "fresh2-family-015",
+      "question": "Pack the `assets` directory into a gzip-compressed tar archive.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-16",
+      "family": "fresh2-family-016",
+      "question": "Under this tree, locate directories whose names contain `cache`, ignoring capitalization.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-17",
+      "family": "fresh2-family-017",
+      "question": "Search a source tree recursively for `panic`, skip binary files, and include three surrounding lines for each hit.",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-18",
+      "family": "fresh2-family-018",
+      "question": "I need to inspect a configuration file in the terminal. What command prints its contents?",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-19",
+      "family": "fresh2-family-019",
+      "question": "Combine three daily CSV files into one report, in the order I specify. How can I do that?",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-common-20",
+      "family": "fresh2-family-020",
+      "question": "I have more output to add to the end of an existing log without replacing its current contents. What should I run?",
+      "platform": "common"
+    },
+    {
+      "id": "fresh2-linux-01",
+      "family": "fresh2-family-021",
+      "question": "List the systemd units that are currently failed.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-02",
+      "family": "fresh2-family-022",
+      "question": "Generate a new Ed25519 SSH key pair in my account's `.ssh` directory.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-03",
+      "family": "fresh2-family-023",
+      "question": "Create an xz-compressed tar archive of my home folder while excluding `.cache` directories.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-04",
+      "family": "fresh2-family-024",
+      "question": "Add a firewall rule that allows incoming HTTPS traffic on port 443.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-05",
+      "family": "fresh2-family-025",
+      "question": "Display the system's routing table, including its default route.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-06",
+      "family": "fresh2-family-026",
+      "question": "Refresh the local APT package index before I install anything. What command should I use?",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-07",
+      "family": "fresh2-family-027",
+      "question": "Remove an installed application and its configuration files with APT.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-08",
+      "family": "fresh2-family-028",
+      "question": "Show mounted filesystems with disk usage in human-readable units.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-09",
+      "family": "fresh2-family-029",
+      "question": "For each filesystem, show how many inodes are free as well as disk space.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-10",
+      "family": "fresh2-family-030",
+      "question": "Show which processes are bound to listening TCP and UDP ports.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-11",
+      "family": "fresh2-family-031",
+      "question": "Show the last hour of logs for the Docker container named `api`.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-12",
+      "family": "fresh2-family-032",
+      "question": "Show the latest 50 journal entries for `sshd.service` and keep following new ones.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-13",
+      "family": "fresh2-family-033",
+      "question": "Search the APT catalog for packages related to PDF metadata tools.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-14",
+      "family": "fresh2-family-034",
+      "question": "Recursively grant a group read access to a project tree while leaving other permissions unchanged.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-15",
+      "family": "fresh2-family-035",
+      "question": "Display a tree of running processes with parent-child relationships.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-16",
+      "family": "fresh2-family-036",
+      "question": "Find which process currently has `/var/log/app.log` open.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-17",
+      "family": "fresh2-family-037",
+      "question": "Show memory use in readable units and refresh the display every two seconds.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-18",
+      "family": "fresh2-family-038",
+      "question": "Print the installed kernel version together with the distribution release details.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-19",
+      "family": "fresh2-family-039",
+      "question": "List network interfaces with brief link-layer details.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-linux-20",
+      "family": "fresh2-family-040",
+      "question": "Schedule `/opt/cleanup.sh` to run every weekday at 2:15 a.m.",
+      "platform": "linux"
+    },
+    {
+      "id": "fresh2-osx-01",
+      "family": "fresh2-family-041",
+      "question": "Create a password-protected ZIP archive from the `Invoices` folder.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-02",
+      "family": "fresh2-family-042",
+      "question": "Copy this folder to an external drive while preserving macOS resource forks and extended attributes.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-03",
+      "family": "fresh2-family-043",
+      "question": "Put the output of `pwd` onto the macOS clipboard.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-04",
+      "family": "fresh2-family-044",
+      "question": "Launch the app with bundle identifier `com.example.Editor` from Terminal.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-05",
+      "family": "fresh2-family-045",
+      "question": "List the LaunchAgents configured to run when I log in.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-06",
+      "family": "fresh2-family-046",
+      "question": "Take a screenshot of a rectangular area I select and save it to a PNG.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-07",
+      "family": "fresh2-family-047",
+      "question": "Open this PDF using whichever application is associated with PDF files.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-08",
+      "family": "fresh2-family-048",
+      "question": "Set the Wi-Fi service to use custom DNS servers `1.1.1.1` and `1.0.0.1`.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-09",
+      "family": "fresh2-family-049",
+      "question": "Save the current clipboard contents into `notes.txt`.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-10",
+      "family": "fresh2-family-050",
+      "question": "Find indexed files whose contents include the phrase `renewal date`.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-11",
+      "family": "fresh2-family-051",
+      "question": "Reveal `/Users/me/Downloads/scan.pdf` in Finder.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-12",
+      "family": "fresh2-family-052",
+      "question": "Batch-resize every JPEG in a folder to a width of 1200 pixels.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-13",
+      "family": "fresh2-family-053",
+      "question": "Show my MacBook's battery cycle count and maximum capacity.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-14",
+      "family": "fresh2-family-054",
+      "question": "Look up the saved password for the current Wi-Fi network in Keychain.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-15",
+      "family": "fresh2-family-055",
+      "question": "Rotate every PDF in a folder 90 degrees clockwise without changing the originals.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-16",
+      "family": "fresh2-family-056",
+      "question": "Remove the quarantine attribute from a downloaded application so Gatekeeper stops flagging it.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-17",
+      "family": "fresh2-family-057",
+      "question": "List the Homebrew packages that have newer versions available.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-18",
+      "family": "fresh2-family-058",
+      "question": "Open the current working folder in Finder.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-19",
+      "family": "fresh2-family-059",
+      "question": "Limit a Spotlight content search to my `Projects/Atlas` folder.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-osx-20",
+      "family": "fresh2-family-060",
+      "question": "Use Spotlight's command line search to find a file named `budget-2026.xlsx`.",
+      "platform": "osx"
+    },
+    {
+      "id": "fresh2-windows-01",
+      "family": "fresh2-family-061",
+      "question": "Search every `.txt` file in this folder for the literal phrase `build failed`, including the space.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-02",
+      "family": "fresh2-family-062",
+      "question": "Install the optional Windows OpenSSH Server capability.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-03",
+      "family": "fresh2-family-063",
+      "question": "Compress the `C:\\Reports` folder into `reports.zip` with PowerShell.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-04",
+      "family": "fresh2-family-064",
+      "question": "Grant `CONTOSO\\Analysts` Modify access to a directory tree while preserving inherited ACLs.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-05",
+      "family": "fresh2-family-065",
+      "question": "Search this directory tree for `timeout` and print only the names of files that contain it.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-06",
+      "family": "fresh2-family-066",
+      "question": "Copy `draft.docx` into the existing `Archive` folder and keep its filename.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-07",
+      "family": "fresh2-family-067",
+      "question": "Move `C:\\Work\\release.zip` to `D:\\Drops\\release.zip`.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-08",
+      "family": "fresh2-family-068",
+      "question": "Map `\\\\fileserver\\team` to drive `T:` and reconnect it at sign-in.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-09",
+      "family": "fresh2-family-069",
+      "question": "Show Error events from the System log that occurred in the last 24 hours.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-10",
+      "family": "fresh2-family-070",
+      "question": "Show the current Command Prompt folder's contents, including hidden entries.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-11",
+      "family": "fresh2-family-071",
+      "question": "Copy `one.txt`, `two.txt`, and `three.txt` together into `D:\\Inbox`.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-12",
+      "family": "fresh2-family-072",
+      "question": "Calculate the SHA-256 hash of `installer.msi`.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-13",
+      "family": "fresh2-family-073",
+      "question": "In PowerShell, show only the subdirectories in the current folder.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-14",
+      "family": "fresh2-family-074",
+      "question": "In PowerShell, include hidden items when listing the current directory.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-15",
+      "family": "fresh2-family-075",
+      "question": "Check whether `server.example.com` accepts TCP connections on port 443.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-16",
+      "family": "fresh2-family-076",
+      "question": "Batch-resize all PNG images in a folder to 50 percent of their current dimensions.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-17",
+      "family": "fresh2-family-077",
+      "question": "Stop the process whose executable name is `worker.exe`.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-18",
+      "family": "fresh2-family-078",
+      "question": "List the current folder's names only, without timestamps or other details.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-19",
+      "family": "fresh2-family-079",
+      "question": "List Windows services that are stopped even though their startup type is Automatic.",
+      "platform": "windows"
+    },
+    {
+      "id": "fresh2-windows-20",
+      "family": "fresh2-family-080",
+      "question": "Show the contents of `D:\\Archive` with the oldest modified items first.",
+      "platform": "windows"
+    }
+  ]
+}

@@ -89,3 +89,18 @@ top-three, answer-safety, platform, offline, latency, or memory regression,
 but the one-sided 95% paired-bootstrap lower bound is zero. Keep main shipped.
 Any independent claim needs another unseen holdout and fresh explicit
 authorization before scoring; neither consumed holdout is reusable.
+
+## Amendment (2026-09-26): fresh holdout v2 frozen, not scored
+
+A new 60-task holdout was authored and frozen for candidate
+`ba74692cf79fa9c294f685fbade8f9315aeacdd1`. It uses the parser-v4 142-record
+corpus, has 30 answerable and 30 abstention tasks, 15 per platform, and is
+disjoint from the default dev split. Prompts were frozen before a separate
+source-ID label audit. No retrieval or candidate scoring has run. Dataset
+SHA-256 is
+`8019c67c7ff13f6a9d06159ea0cf12cc3914011c69686fa2b5c93270f879797d`; freeze
+manifest SHA-256 is
+`c45464cf3591a49372ef1a455648e7e03b3849b7798c8d1b5d0cdd4daec5d4cb`. The
+canonical runner pins this freeze. Require explicit user authorization before
+the one requested candidate run. Full provenance is in
+[`fresh-holdout-v2-freeze.md`](../reproducibility/fresh-holdout-v2-freeze.md).

@@ -1,0 +1,81 @@
+{
+  "freeze_id": "fresh-holdout-v2-freeze-2026-09-26",
+  "frozen_at_utc": "2026-09-26T18:28:06Z",
+  "status": "frozen_unscored",
+  "authorization_required_before_candidate_scoring": true,
+  "candidate_runs_on_this_split": 0,
+  "release_gate_runs_on_this_split": 0,
+  "intended_candidate_commit": "ba74692cf79fa9c294f685fbade8f9315aeacdd1",
+  "intents": {
+    "task_count": 60,
+    "prompt_pool_task_count": 80,
+    "unique_family_count": 60
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "parser_version": "tldr-subset-v4",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "visible_example_count": 142,
+    "visible_examples_sha256": "e512688f1945ee23d594b856ce857d01e1b063a84bba5821c1889146133c2f0c"
+  },
+  "labels": {
+    "answerable": 30,
+    "abstain": 30
+  },
+  "distribution": {
+    "common": {
+      "tasks": 15,
+      "answerable": 7,
+      "abstain": 8
+    },
+    "linux": {
+      "tasks": 15,
+      "answerable": 6,
+      "abstain": 9
+    },
+    "osx": {
+      "tasks": 15,
+      "answerable": 9,
+      "abstain": 6
+    },
+    "windows": {
+      "tasks": 15,
+      "answerable": 8,
+      "abstain": 7
+    }
+  },
+  "artifacts": {
+    "prompt_pool": {
+      "path": "tests/fixtures/evaluation/fresh-holdout-v2-prompts.json",
+      "sha256": "53d9ecab5d835a8723a2abda3f8b85b687cb7275e813ce1a1a9181512a61feab",
+      "task_count": 80
+    },
+    "dataset": {
+      "path": "tests/fixtures/evaluation/fresh-holdout-v2.json",
+      "sha256": "8019c67c7ff13f6a9d06159ea0cf12cc3914011c69686fa2b5c93270f879797d"
+    }
+  },
+  "authoring_and_validation": {
+    "prompts_frozen_before_labeling": true,
+    "labeling_method": "independent prompt-only label audit against pinned source example records",
+    "source_example_id_validation": "passed",
+    "task_content_derived_from_retrieval_outputs": false,
+    "retrieval_or_candidate_scoring_run": false
+  },
+  "structural_checks": {
+    "prompt_pool_field_shape": "passed",
+    "prompt_pool_task_count": 80,
+    "final_prompt_count": 60,
+    "final_questions_preserved_verbatim": true,
+    "unique_task_ids": true,
+    "unique_families": true,
+    "answerable_and_platform_distribution": "passed",
+    "fresh_holdout_schema_validation": "passed",
+    "source_example_id_validation": "passed",
+    "disjoint_from_default_dev_ids_and_families": true,
+    "corpus_source_and_parser_match": true
+  }
+}

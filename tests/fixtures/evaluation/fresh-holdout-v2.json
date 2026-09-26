@@ -1,0 +1,675 @@
+{
+  "dataset_id": "fresh-holdout-v2",
+  "split": "holdout",
+  "scorer_version": "task-scorer-v1",
+  "task_count": 60,
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "parser_version": "tldr-subset-v4",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85"
+  },
+  "tasks": [
+    {
+      "id": "fresh2-common-01",
+      "split": "holdout",
+      "family": "fresh2-family-001",
+      "question": "Find every Markdown file anywhere below my docs folder.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "The common `find` example searches files by extension beneath a directory; `.md` is the requested extension."
+    },
+    {
+      "id": "fresh2-common-02",
+      "split": "holdout",
+      "family": "fresh2-family-002",
+      "question": "Set the same read and write permissions on a directory and all of its descendants.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The common source records have no recursive permission-changing example."
+    },
+    {
+      "id": "fresh2-common-03",
+      "split": "holdout",
+      "family": "fresh2-family-003",
+      "question": "Compare two directory trees recursively and show which files differ.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The common source records have no recursive directory comparison example."
+    },
+    {
+      "id": "fresh2-common-04",
+      "split": "holdout",
+      "family": "fresh2-family-004",
+      "question": "Show running processes ordered by memory consumption.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The common source records have no process listing or memory-sort example."
+    },
+    {
+      "id": "fresh2-common-05",
+      "split": "holdout",
+      "family": "fresh2-family-005",
+      "question": "I have text coming through a pipe and want every `alpha` changed to `beta` in the output. How?",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39"
+      ],
+      "rationale": "The common `sed` example replaces all occurrences in piped input and prints the transformed lines."
+    },
+    {
+      "id": "fresh2-common-06",
+      "split": "holdout",
+      "family": "fresh2-family-006",
+      "question": "Search one source file for the exact text `TODO: remove`, treating it literally.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5"
+      ],
+      "rationale": "The common `grep` example uses fixed-string matching for an exact string in one file."
+    },
+    {
+      "id": "fresh2-common-07",
+      "split": "holdout",
+      "family": "fresh2-family-007",
+      "question": "Calculate and print SHA-256 checksums for all files below a folder.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The common source records have no SHA-256 checksum example."
+    },
+    {
+      "id": "fresh2-common-08",
+      "split": "holdout",
+      "family": "fresh2-family-008",
+      "question": "Send a graceful termination signal to process 8421.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The common source records have no process termination example."
+    },
+    {
+      "id": "fresh2-common-10",
+      "split": "holdout",
+      "family": "fresh2-family-010",
+      "question": "Copy a project directory and everything inside it to a backup location. What's the command?",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-f22866a28532b383fd5f022f2639743b7bfe2426dba3f84fb7ed62f213601ec3"
+      ],
+      "rationale": "The common `cp` example recursively copies a directory and its contents."
+    },
+    {
+      "id": "fresh2-common-11",
+      "split": "holdout",
+      "family": "fresh2-family-011",
+      "question": "Show staged and unstaged Git changes for this checkout.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The common source records have no Git status or diff example."
+    },
+    {
+      "id": "fresh2-common-12",
+      "split": "holdout",
+      "family": "fresh2-family-012",
+      "question": "Extract a ZIP archive into a target folder.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The common source records have no ZIP extraction example."
+    },
+    {
+      "id": "fresh2-common-13",
+      "split": "holdout",
+      "family": "fresh2-family-013",
+      "question": "Report the sizes of immediate subdirectories, sorted from largest to smallest.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The common source records have no example that reports immediate subdirectory sizes sorted by size."
+    },
+    {
+      "id": "fresh2-common-16",
+      "split": "holdout",
+      "family": "fresh2-family-016",
+      "question": "Under this tree, locate directories whose names contain `cache`, ignoring capitalization.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-c5fcd87e47e9d553fdb1891154e8176aabb962d6465da156970ef98684e31805"
+      ],
+      "rationale": "The common `find` example locates directories by a case-insensitive name pattern."
+    },
+    {
+      "id": "fresh2-common-18",
+      "split": "holdout",
+      "family": "fresh2-family-018",
+      "question": "I need to inspect a configuration file in the terminal. What command prints its contents?",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "rationale": "The common `cat` example prints a file’s contents to standard output."
+    },
+    {
+      "id": "fresh2-common-19",
+      "split": "holdout",
+      "family": "fresh2-family-019",
+      "question": "Combine three daily CSV files into one report, in the order I specify. How can I do that?",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+      ],
+      "rationale": "The common `cat` example concatenates multiple files in the supplied order into one output file."
+    },
+    {
+      "id": "fresh2-linux-01",
+      "split": "holdout",
+      "family": "fresh2-family-021",
+      "question": "List the systemd units that are currently failed.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-34dc301369a6806ac1ea9a879f05d745d333553cdc8d73eae653a38eba3240e3"
+      ],
+      "rationale": "The Linux `systemctl` example lists failed units."
+    },
+    {
+      "id": "fresh2-linux-02",
+      "split": "holdout",
+      "family": "fresh2-family-022",
+      "question": "Generate a new Ed25519 SSH key pair in my account's `.ssh` directory.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Linux source records have no SSH key generation example."
+    },
+    {
+      "id": "fresh2-linux-03",
+      "split": "holdout",
+      "family": "fresh2-family-023",
+      "question": "Create an xz-compressed tar archive of my home folder while excluding `.cache` directories.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Linux source records have no tar archive example with compression and exclusions."
+    },
+    {
+      "id": "fresh2-linux-04",
+      "split": "holdout",
+      "family": "fresh2-family-024",
+      "question": "Add a firewall rule that allows incoming HTTPS traffic on port 443.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Linux source records have no firewall rule example."
+    },
+    {
+      "id": "fresh2-linux-05",
+      "split": "holdout",
+      "family": "fresh2-family-025",
+      "question": "Display the system's routing table, including its default route.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bc21810afaa8a4f09d57669a89e3a858de9a580a0b707c6a95b2de0cc91af5b5"
+      ],
+      "rationale": "The Linux `ip` example displays the routing table, including its default route when present."
+    },
+    {
+      "id": "fresh2-linux-06",
+      "split": "holdout",
+      "family": "fresh2-family-026",
+      "question": "Refresh the local APT package index before I install anything. What command should I use?",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "The Linux APT example refreshes the available package index."
+    },
+    {
+      "id": "fresh2-linux-07",
+      "split": "holdout",
+      "family": "fresh2-family-027",
+      "question": "Remove an installed application and its configuration files with APT.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The APT source example removes a package and says to use purge for configuration, but does not provide a purge command."
+    },
+    {
+      "id": "fresh2-linux-08",
+      "split": "holdout",
+      "family": "fresh2-family-028",
+      "question": "Show mounted filesystems with disk usage in human-readable units.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-e289813d18091e93b087eefe1f3b3a028a681047f0c372e67caea94d89bb2bd8"
+      ],
+      "rationale": "The Linux `df` example displays all filesystems in human-readable form."
+    },
+    {
+      "id": "fresh2-linux-09",
+      "split": "holdout",
+      "family": "fresh2-family-029",
+      "question": "For each filesystem, show how many inodes are free as well as disk space.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Linux `df` examples cover disk usage and free inodes separately; no one example shows both as requested."
+    },
+    {
+      "id": "fresh2-linux-10",
+      "split": "holdout",
+      "family": "fresh2-family-030",
+      "question": "Show which processes are bound to listening TCP and UDP ports.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Linux source records have no listening TCP/UDP process lookup example."
+    },
+    {
+      "id": "fresh2-linux-11",
+      "split": "holdout",
+      "family": "fresh2-family-031",
+      "question": "Show the last hour of logs for the Docker container named `api`.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Linux journal examples do not cover Docker container logs."
+    },
+    {
+      "id": "fresh2-linux-13",
+      "split": "holdout",
+      "family": "fresh2-family-033",
+      "question": "Search the APT catalog for packages related to PDF metadata tools.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904"
+      ],
+      "rationale": "The Linux APT example searches packages by name or description."
+    },
+    {
+      "id": "fresh2-linux-14",
+      "split": "holdout",
+      "family": "fresh2-family-034",
+      "question": "Recursively grant a group read access to a project tree while leaving other permissions unchanged.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Linux source records have no process-tree example."
+    },
+    {
+      "id": "fresh2-linux-15",
+      "split": "holdout",
+      "family": "fresh2-family-035",
+      "question": "Display a tree of running processes with parent-child relationships.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Linux source records have no open-file process lookup example."
+    },
+    {
+      "id": "fresh2-linux-19",
+      "split": "holdout",
+      "family": "fresh2-family-039",
+      "question": "List network interfaces with brief link-layer details.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0"
+      ],
+      "rationale": "The Linux `ip` example lists interfaces with brief link-layer details."
+    },
+    {
+      "id": "fresh2-osx-01",
+      "split": "holdout",
+      "family": "fresh2-family-041",
+      "question": "Create a password-protected ZIP archive from the `Invoices` folder.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The macOS source records have no password-protected ZIP creation example."
+    },
+    {
+      "id": "fresh2-osx-02",
+      "split": "holdout",
+      "family": "fresh2-family-042",
+      "question": "Copy this folder to an external drive while preserving macOS resource forks and extended attributes.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The macOS source records have no copy example preserving resource forks and extended attributes."
+    },
+    {
+      "id": "fresh2-osx-03",
+      "split": "holdout",
+      "family": "fresh2-family-043",
+      "question": "Put the output of `pwd` onto the macOS clipboard.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+      ],
+      "rationale": "The macOS `pbcopy` example sends command output to the clipboard."
+    },
+    {
+      "id": "fresh2-osx-04",
+      "split": "holdout",
+      "family": "fresh2-family-044",
+      "question": "Launch the app with bundle identifier `com.example.Editor` from Terminal.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-dd41f6aa5692e218fe6f52073039dcd4f4771b6798fbc1da93b75acaf56f80b0"
+      ],
+      "rationale": "The macOS `open` example launches an app by bundle identifier."
+    },
+    {
+      "id": "fresh2-osx-05",
+      "split": "holdout",
+      "family": "fresh2-family-045",
+      "question": "List the LaunchAgents configured to run when I log in.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The macOS source records have no LaunchAgents listing example."
+    },
+    {
+      "id": "fresh2-osx-06",
+      "split": "holdout",
+      "family": "fresh2-family-046",
+      "question": "Take a screenshot of a rectangular area I select and save it to a PNG.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9bc5ba41e0eb5a49d3d6ba0b8f745482bb8fe2f16c9b118e95b297297e006536"
+      ],
+      "rationale": "The macOS `screencapture` example saves a selected rectangular area to a file."
+    },
+    {
+      "id": "fresh2-osx-07",
+      "split": "holdout",
+      "family": "fresh2-family-047",
+      "question": "Open this PDF using whichever application is associated with PDF files.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "The macOS `open` example uses the associated application for a file."
+    },
+    {
+      "id": "fresh2-osx-08",
+      "split": "holdout",
+      "family": "fresh2-family-048",
+      "question": "Set the Wi-Fi service to use custom DNS servers `1.1.1.1` and `1.0.0.1`.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The macOS source records have no Wi-Fi DNS configuration example."
+    },
+    {
+      "id": "fresh2-osx-09",
+      "split": "holdout",
+      "family": "fresh2-family-049",
+      "question": "Save the current clipboard contents into `notes.txt`.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8c222f364f31888667827b5e955c16f956fa15c4c469184050efe56b247ee614"
+      ],
+      "rationale": "The macOS `pbpaste` example redirects clipboard contents into a file."
+    },
+    {
+      "id": "fresh2-osx-10",
+      "split": "holdout",
+      "family": "fresh2-family-050",
+      "question": "Find indexed files whose contents include the phrase `renewal date`.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-453abcea6ea8baded3debf3c7dc4ded44ee04405706cd1c95f4eb11faaab182c"
+      ],
+      "rationale": "The macOS `mdfind` example searches indexed file contents."
+    },
+    {
+      "id": "fresh2-osx-11",
+      "split": "holdout",
+      "family": "fresh2-family-051",
+      "question": "Reveal `/Users/me/Downloads/scan.pdf` in Finder.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "rationale": "The macOS `open` example reveals a file in Finder."
+    },
+    {
+      "id": "fresh2-osx-12",
+      "split": "holdout",
+      "family": "fresh2-family-052",
+      "question": "Batch-resize every JPEG in a folder to a width of 1200 pixels.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The macOS source records have no JPEG batch-resize example."
+    },
+    {
+      "id": "fresh2-osx-13",
+      "split": "holdout",
+      "family": "fresh2-family-053",
+      "question": "Show my MacBook's battery cycle count and maximum capacity.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The macOS source records have no battery health or cycle-count example."
+    },
+    {
+      "id": "fresh2-osx-18",
+      "split": "holdout",
+      "family": "fresh2-family-058",
+      "question": "Open the current working folder in Finder.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-a4a5b10d133dec76d003217eb9b481d3c931e2b205118e567edb8938ca059f55"
+      ],
+      "rationale": "The macOS `open` example opens the current directory in Finder."
+    },
+    {
+      "id": "fresh2-osx-19",
+      "split": "holdout",
+      "family": "fresh2-family-059",
+      "question": "Limit a Spotlight content search to my `Projects/Atlas` folder.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-00bbff7f142bf20c7bcc5c53a7c669908fc51cbb59b00f400567fcd2a0055549"
+      ],
+      "rationale": "The macOS `mdfind` example limits an indexed content search to a given directory."
+    },
+    {
+      "id": "fresh2-windows-01",
+      "split": "holdout",
+      "family": "fresh2-family-061",
+      "question": "Search every `.txt` file in this folder for the literal phrase `build failed`, including the space.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"
+      ],
+      "rationale": "The Windows `findstr` example searches `.txt` files for a literal string containing spaces."
+    },
+    {
+      "id": "fresh2-windows-02",
+      "split": "holdout",
+      "family": "fresh2-family-062",
+      "question": "Install the optional Windows OpenSSH Server capability.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Windows source records have no optional capability installation example."
+    },
+    {
+      "id": "fresh2-windows-03",
+      "split": "holdout",
+      "family": "fresh2-family-063",
+      "question": "Compress the `C:\\Reports` folder into `reports.zip` with PowerShell.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Windows source records have no PowerShell ZIP creation example."
+    },
+    {
+      "id": "fresh2-windows-04",
+      "split": "holdout",
+      "family": "fresh2-family-064",
+      "question": "Grant `CONTOSO\\Analysts` Modify access to a directory tree while preserving inherited ACLs.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Windows source records have no ACL modification example."
+    },
+    {
+      "id": "fresh2-windows-05",
+      "split": "holdout",
+      "family": "fresh2-family-065",
+      "question": "Search this directory tree for `timeout` and print only the names of files that contain it.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Windows source examples for recursive search and filename-only output do not provide one example satisfying both requirements."
+    },
+    {
+      "id": "fresh2-windows-06",
+      "split": "holdout",
+      "family": "fresh2-family-066",
+      "question": "Copy `draft.docx` into the existing `Archive` folder and keep its filename.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+      ],
+      "rationale": "The Windows `copy` example copies a file into a directory while keeping its name."
+    },
+    {
+      "id": "fresh2-windows-07",
+      "split": "holdout",
+      "family": "fresh2-family-067",
+      "question": "Move `C:\\Work\\release.zip` to `D:\\Drops\\release.zip`.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "rationale": "The Windows `move` example moves a file across drives."
+    },
+    {
+      "id": "fresh2-windows-08",
+      "split": "holdout",
+      "family": "fresh2-family-068",
+      "question": "Map `\\\\fileserver\\team` to drive `T:` and reconnect it at sign-in.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Windows source records have no persistent network-drive mapping example."
+    },
+    {
+      "id": "fresh2-windows-09",
+      "split": "holdout",
+      "family": "fresh2-family-069",
+      "question": "Show Error events from the System log that occurred in the last 24 hours.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Windows source records have no filtered Event Log query example."
+    },
+    {
+      "id": "fresh2-windows-10",
+      "split": "holdout",
+      "family": "fresh2-family-070",
+      "question": "Show the current Command Prompt folder's contents, including hidden entries.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8158f89e24f5fe56d7e7c4f5d98a3c2c2bd3fc5d4495e5233d81e9652993c0b3"
+      ],
+      "rationale": "The Windows `dir` example lists the current directory including hidden entries."
+    },
+    {
+      "id": "fresh2-windows-11",
+      "split": "holdout",
+      "family": "fresh2-family-071",
+      "question": "Copy `one.txt`, `two.txt`, and `three.txt` together into `D:\\Inbox`.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-a075ea8bf47d68389d089aac4d0e2465d70e05889e6306ead44ee83da9ea0104"
+      ],
+      "rationale": "The Windows `copy` example copies multiple files to one directory."
+    },
+    {
+      "id": "fresh2-windows-12",
+      "split": "holdout",
+      "family": "fresh2-family-072",
+      "question": "Calculate the SHA-256 hash of `installer.msi`.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The Windows source records have no SHA-256 hashing example."
+    },
+    {
+      "id": "fresh2-windows-14",
+      "split": "holdout",
+      "family": "fresh2-family-074",
+      "question": "In PowerShell, include hidden items when listing the current directory.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-c69f9f2ef51fdde5ea10fad22fa2f1a8f13cee435b2ce9354b69eed777c0be59"
+      ],
+      "rationale": "The PowerShell `Get-ChildItem` example lists only directories."
+    },
+    {
+      "id": "fresh2-windows-15",
+      "split": "holdout",
+      "family": "fresh2-family-075",
+      "question": "Check whether `server.example.com` accepts TCP connections on port 443.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-1841ac39aea54d2b7e96385686315b7b35ab39f87997aafe683e9263c22818a6"
+      ],
+      "rationale": "The PowerShell `Get-ChildItem` example includes hidden items."
+    },
+    {
+      "id": "fresh2-windows-19",
+      "split": "holdout",
+      "family": "fresh2-family-079",
+      "question": "List Windows services that are stopped even though their startup type is Automatic.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6650aada822cf387a5574f42e02bc3b42ab84e2c4063c7a0c6366292bbb83d4b"
+      ],
+      "rationale": "The Windows `dir` example returns a bare list without additional details."
+    }
+  ]
+}

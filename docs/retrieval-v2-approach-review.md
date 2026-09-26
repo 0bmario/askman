@@ -387,8 +387,9 @@ Full paired CLI artifacts: [focused baseline](reproducibility/artifacts/main-vs-
    recorded.
 2. Candidate `3494a11` did not pass independent validation. The new lexical
    candidate has only dev evidence and must not be promoted yet. Do not tune
-   from either consumed holdout. Independent validation requires a separately
-   frozen unseen holdout and explicit scoring authorization.
+   from either consumed holdout. Holdout v2 is frozen for candidate `ba74692`
+   and remains unscored; proceed only after explicit scoring authorization.
+   See the [holdout v2 freeze record](reproducibility/fresh-holdout-v2-freeze.md).
 3. The exact paired gate uses the 142-record pinned evaluation corpus. The
    installed 0.3.3 database is a different, larger corpus; its sampled behavior
    and stored-row inventory were reported separately. Full-source parsing

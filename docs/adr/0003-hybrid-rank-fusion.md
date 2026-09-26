@@ -161,6 +161,10 @@ cohort; it still requires a new unseen holdout and explicit scoring
 authorization. The original holdout v1 is consumed and was not used for tuning.
 Machine-readable and rendered variant reports are linked from
 [`retrieval-v2-approach-review.md`](../retrieval-v2-approach-review.md).
+A separate holdout v2 is now frozen for candidate commit
+`ba74692cf79fa9c294f685fbade8f9315aeacdd1`; it remains unscored until explicit
+authorization. See
+[`fresh-holdout-v2-freeze.md`](../reproducibility/fresh-holdout-v2-freeze.md).
 
 The controlled results are in
 [`retrieval-v2-controlled-ablation-dev-v2.json`](../reproducibility/artifacts/retrieval-v2-controlled-ablation-dev-v2.json)

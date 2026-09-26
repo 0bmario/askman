@@ -360,6 +360,19 @@ class ReleaseGateTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "requires --dev-only"):
                 GATE.run(arguments)
 
+    def test_default_configuration_describes_frozen_lexical_candidate(self):
+        configuration = GATE.DEFAULT_RETRIEVAL_CONFIGURATION
+        self.assertEqual(
+            configuration["configuration_id"],
+            "focused-same-page-cutoff-060-lexical-005-v1",
+        )
+        self.assertEqual(configuration["dense_recipe"], "main-compatible")
+        self.assertEqual(configuration["query_mode"], "focused-v1")
+        self.assertEqual(configuration["candidate_budget"], 8)
+        self.assertEqual(configuration["distance_cutoff"], 0.60)
+        self.assertIn("0.05", configuration["ranking"])
+        self.assertIn("same-page", configuration["example_selection"])
+
     def test_custom_dev_dataset_requires_schema_3_and_valid_labels_shape(self):
         freeze_path = ROOT / "tests/fixtures/evaluation/dev-only-extension-v1.manifest.json"
         freeze, dataset_path = GATE.validate_custom_dev_freeze(
@@ -1168,6 +1181,41 @@ class ReleaseGateTests(unittest.TestCase):
         dataset["tasks"][0]["family"] = dataset["tasks"][1]["family"]
         with self.assertRaisesRegex(ValueError, "families must be unique"):
             GATE.validate_fresh_holdout_dataset(dataset, freeze)
+
+    def test_fresh_holdout_freeze_requires_a_known_pinned_manifest(self):
+        manifest_path = ROOT / "tests/fixtures/evaluation/fresh-holdout-v1.manifest.json"
+        freeze, dataset_path = GATE.validate_fresh_holdout_freeze(
+            manifest_path, None, ROOT
+        )
+        self.assertEqual(freeze["freeze_id"], "fresh-holdout-v1-freeze-2026-09-26")
+        self.assertEqual(
+            dataset_path,
+            (ROOT / "tests/fixtures/evaluation/fresh-holdout-v1.json").resolve(),
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            unpinned_manifest = Path(directory) / "manifest.json"
+            changed_freeze = dict(freeze)
+            changed_freeze["freeze_id"] = "fresh-holdout-unknown"
+            unpinned_manifest.write_text(json.dumps(changed_freeze))
+            with self.assertRaisesRegex(ValueError, "freeze ID is not pinned"):
+                GATE.validate_fresh_holdout_freeze(unpinned_manifest, None, ROOT)
+
+    def test_fresh_holdout_v2_freeze_is_pinned_and_unscored(self):
+        manifest_path = ROOT / "tests/fixtures/evaluation/fresh-holdout-v2.manifest.json"
+        freeze, dataset_path = GATE.validate_fresh_holdout_freeze(
+            manifest_path, None, ROOT
+        )
+        dataset = GATE.load_json(dataset_path)
+        GATE.validate_fresh_holdout_dataset(dataset, freeze)
+        self.assertEqual(freeze["status"], "frozen_unscored")
+        self.assertEqual(freeze["candidate_runs_on_this_split"], 0)
+        self.assertEqual(freeze["release_gate_runs_on_this_split"], 0)
+        self.assertEqual(
+            freeze["intended_candidate_commit"],
+            "ba74692cf79fa9c294f685fbade8f9315aeacdd1",
+        )
+        self.assertEqual(len(dataset["tasks"]), 60)
 
 
 if __name__ == "__main__":

@@ -35,16 +35,22 @@ BOOTSTRAP_SEED = 33_031
 MIN_SUCCESS_AT_1_GAIN = 0.05
 MAX_REGRESSION = 0.20
 DEFAULT_RETRIEVAL_CONFIGURATION = {
-    "configuration_id": "focused-v1",
+    "configuration_id": "focused-same-page-cutoff-060-lexical-005-v1",
     "dense_recipe": "main-compatible",
     "query_mode": "focused-v1",
     "candidate_budget": 8,
-    "ranking": "raw cosine distance, ascending",
-    "distance_cutoff": 0.55,
-    "example_selection": "one example per page before display",
+    "ranking": (
+        "raw cosine distance minus 0.05 per shared query/candidate token"
+    ),
+    "distance_cutoff": 0.60,
+    "example_selection": (
+        "retain same-page candidates in the top-k; display the top three after reranking"
+    ),
     "display_limit": 3,
-    "fusion": "none",
-    "abstention": "distance cutoff and scoped negation guards",
+    "fusion": (
+        "dense candidate pool reranked by 0.05 per shared lexical token"
+    ),
+    "abstention": "raw distance cutoff 0.60 plus scoped negation guards",
 }
 FROZEN_MANIFEST_SHA256 = (
     "4f258311db08cad15c1473c77ff6d98e2fa3b0044990fcdfcbc8110f96fc46dc"
@@ -55,13 +61,24 @@ FROZEN_DEV_DATASET_SHA256 = (
 FROZEN_HOLDOUT_DATASET_SHA256 = (
     "1aa1c0a8ec5c550b8a6699654bb5eb56928bd6845f0b3610bb7a8ee368813418"
 )
-FRESH_HOLDOUT_FREEZE_ID = "fresh-holdout-v1-freeze-2026-09-26"
-FRESH_HOLDOUT_MANIFEST_SHA256 = (
-    "7463ccb782cf971b4893f369c899f408212306020c68e471b72c146b2da68f1a"
-)
-FRESH_HOLDOUT_DATASET_SHA256 = (
-    "7fe11e153b64941c91233b756543487ebdd34e17bcca7b935a55f8f16a6fb2a0"
-)
+FRESH_HOLDOUT_FREEZES = {
+    "fresh-holdout-v1-freeze-2026-09-26": {
+        "manifest_sha256": (
+            "7463ccb782cf971b4893f369c899f408212306020c68e471b72c146b2da68f1a"
+        ),
+        "dataset_sha256": (
+            "7fe11e153b64941c91233b756543487ebdd34e17bcca7b935a55f8f16a6fb2a0"
+        ),
+    },
+    "fresh-holdout-v2-freeze-2026-09-26": {
+        "manifest_sha256": (
+            "c45464cf3591a49372ef1a455648e7e03b3849b7798c8d1b5d0cdd4daec5d4cb"
+        ),
+        "dataset_sha256": (
+            "8019c67c7ff13f6a9d06159ea0cf12cc3914011c69686fa2b5c93270f879797d"
+        ),
+    },
+}
 DEV_EXTENSION_FREEZE_ID = "askman-dev-extension-v1-freeze-2026-09-26"
 DEV_EXTENSION_MANIFEST_SHA256 = (
     "9dcf13de29e6b0969344e6b2c64b298f9550ac320dad67dfca4a8a9ad9a096d5"
@@ -238,11 +255,17 @@ def validate_fresh_holdout_freeze(
     dataset_override: Path | None,
     repo: Path,
 ) -> tuple[dict[str, Any], Path]:
-    if sha256_file(manifest_path) != FRESH_HOLDOUT_MANIFEST_SHA256:
-        raise ValueError("fresh holdout freeze manifest digest is not the pinned value")
+    if not manifest_path.is_file():
+        raise ValueError(f"fresh holdout freeze manifest is missing: {manifest_path}")
     manifest = load_json(manifest_path)
-    if manifest.get("freeze_id") != FRESH_HOLDOUT_FREEZE_ID:
-        raise ValueError("fresh holdout freeze ID is not the pinned value")
+    freeze_id = manifest.get("freeze_id")
+    if not isinstance(freeze_id, str):
+        raise ValueError("fresh holdout freeze ID is not pinned")
+    frozen_digests = FRESH_HOLDOUT_FREEZES.get(freeze_id)
+    if frozen_digests is None:
+        raise ValueError("fresh holdout freeze ID is not pinned")
+    if sha256_file(manifest_path) != frozen_digests["manifest_sha256"]:
+        raise ValueError("fresh holdout freeze manifest digest is not the pinned value")
     if manifest.get("status") != "frozen_unscored":
         raise ValueError("fresh holdout must be frozen and unscored before evaluation")
     if manifest.get("authorization_required_before_candidate_scoring") is not True:
@@ -255,7 +278,7 @@ def validate_fresh_holdout_freeze(
     dataset_record = manifest.get("artifacts", {}).get("dataset")
     if not isinstance(dataset_record, dict):
         raise ValueError("fresh holdout manifest is missing its dataset record")
-    if dataset_record.get("sha256") != FRESH_HOLDOUT_DATASET_SHA256:
+    if dataset_record.get("sha256") != frozen_digests["dataset_sha256"]:
         raise ValueError("fresh holdout dataset digest is not the pinned value")
     relative_path = dataset_record.get("path")
     if not isinstance(relative_path, str) or not relative_path:
@@ -265,7 +288,7 @@ def validate_fresh_holdout_freeze(
         raise ValueError("holdout dataset path differs from its frozen manifest")
     if not dataset_path.is_file():
         raise ValueError(f"fresh holdout dataset is missing: {dataset_path}")
-    if sha256_file(dataset_path) != FRESH_HOLDOUT_DATASET_SHA256:
+    if sha256_file(dataset_path) != frozen_digests["dataset_sha256"]:
         raise ValueError("fresh holdout dataset digest is not the pinned value")
     corpus_record = manifest.get("corpus")
     if not isinstance(corpus_record, dict):
