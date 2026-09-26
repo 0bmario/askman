@@ -81,25 +81,29 @@ candidate measured 30/30 Success@1, 30/30 Success@3, and 0/30 false answers.
 Main measured 18/30, 23/30, and 1/30. The latest paired canonical dev-only
 gate had zero execution failures, common/Linux/macOS/Windows Success@1 of
 10/10, 10/10, 5/5, and 5/5, and no platform regressions. Network-denied
-execution passed. Warm p95 was 86.852 ms for the candidate vs 86.704 ms for
-main; peak memory was 236,602,040 B vs 236,356,280 B. Fresh-process p95 was
-89.248 ms vs 87.269 ms; peak memory was 282,886,888 B vs 237,421,240 B (19.1%
+execution passed. Warm p95 was 85.001 ms for the candidate vs 86.343 ms for
+main; peak memory was 236,536,504 B vs 236,077,752 B. Fresh-process p95 was
+85.653 ms vs 89.266 ms; peak memory was 282,936,040 B vs 236,438,200 B (19.7%
 higher). Every measured phase stayed within the 20% ceiling. This is
 development evidence only; earlier focused runs remain recorded to show
 measurement variance.
 
-The candidate source digest is
-`4562e5b85dac655df1fe773b2341ae727058050fbef2ba4f9de4bb638a7efa98`; its
-binary digest is
-`8154b0ba4189fd39610168c9b11fcbf911ecbe876f49299b5f06ad04bc029bd4`. The new
-independent holdout is frozen but unscored. Require explicit authorization
-before the canonical paired run; do not tune from its result.
+The committed candidate is `3494a11`; source digest
+`ac58a8c3c63390b31f0af599be4939be49e87510e28282be6d8a6c276164dfa2`; binary
+digest `2e03c4d99601b9d14f1dc0ad63545c12b274ddc5356abbaa043d8b914ce80521`.
+It abstains on negated file-to-stdout requests and when a request excludes
+`cat`, the pinned corpus's only verified full-file stdout example. The new
+direct dev CLI check had exposed `cat` at distance `0.4489` for “do not show
+file contents to stdout”; the final build abstains. The independent holdout is
+frozen but unscored. Require explicit authorization before the canonical
+paired run; do not tune from its result.
 
 The controlled results are in
 [`retrieval-v2-controlled-ablation-dev-v2.json`](../reproducibility/artifacts/retrieval-v2-controlled-ablation-dev-v2.json)
 and the latest paired development run is in
-[`main-vs-retrieval-v2-focused-dev-only-v4.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v4.json).
+[`main-vs-retrieval-v2-focused-dev-only-v5.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v5.json).
 The previous focused runs remain in
+[`main-vs-retrieval-v2-focused-dev-only-v4.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v4.json),
 [`main-vs-retrieval-v2-focused-dev-only-v3.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v3.json),
 [`main-vs-retrieval-v2-focused-dev-only-v2.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v2.json) and
 [`main-vs-retrieval-v2-focused-dev-only-v1.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v1.json).
@@ -109,8 +113,9 @@ The previous focused runs remain in
 - Preserve offline query operation, pinned model assets, and immutable bundle
   activation/rollback.
 - For explicit network allow/block, tar extraction, DNS cache invalidation,
-  recursive text search, and negated EXIF observation, return only an example
-  that demonstrates the requested behavior; otherwise abstain.
+  recursive text search, negated EXIF observation, and negated or explicitly
+  unsupported file-to-stdout requests, return only a grounded example;
+  otherwise abstain.
 - Keep command/example rendering and platform selection covered by the paired
   gate.
 - A learned reranker or model replacement remains out of scope until dense-only

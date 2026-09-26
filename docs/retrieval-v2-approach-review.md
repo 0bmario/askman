@@ -1,10 +1,11 @@
 # Retrieval-v2 approach review and decision — 2026-09-26
 
-Reviewed working tree based on `f61e3af`; main baseline `8bd9fa2` and installed
-Askman 0.3.3. Historical v2 evidence includes two dev-only paired gates and
-one authorized canonical run; the broad candidate failed its independent
-holdout. A smaller candidate was then selected on dev only. The new independent
-holdout is frozen and remains unscored pending explicit authorization.
+Review starts from working tree `f61e3af`; the final focused candidate is
+`3494a11`, against main baseline `8bd9fa2` and installed Askman 0.3.3.
+Historical v2 evidence includes two dev-only paired gates and one authorized
+canonical run; the broad candidate failed its independent holdout. The smaller
+candidate was selected on dev only. The new independent holdout is frozen and
+unscored pending explicit authorization.
 
 ## Recommendation
 
@@ -25,9 +26,9 @@ candidate measured 30/30 Success@1, 30/30 Success@3, and 0/30 false answers;
 main measured 18/30, 23/30, and 1/30. Platform Success@1 was common 9/10→10/10,
 Linux 7/10→10/10, macOS 1/5→5/5, and Windows 1/5→5/5. Top-three usefulness
 improved or tied on all platforms. Network-denied CLI runs had no failures.
-Latest main/candidate warm p95 was 86.704/86.852 ms; peak memory was
-236,356,280/236,602,040 B. Fresh-process p95 was 87.269/89.248 ms; peak
-memory was 237,421,240/282,886,888 B (19.1% higher for candidate). Every
+Latest main/candidate warm p95 was 86.343/85.001 ms; peak memory was
+236,077,752/236,536,504 B. Fresh-process p95 was 89.266/85.653 ms; peak
+memory was 236,438,200/282,936,040 B (19.7% higher for candidate). Every
 measured phase stayed within the 20% ceiling. The machine decision is
 inconclusive because this is dev-only evidence; earlier focused runs remain
 for timing context.
@@ -38,13 +39,15 @@ rule set is smaller. Hybrid tied dense. Late per-example page selection
 regressed top-three usefulness. See the
 [`focused controlled ablation`](reproducibility/artifacts/retrieval-v2-controlled-ablation-dev-v2.json)
 and
-[`latest focused paired dev-only gate`](reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v4.json)
+[`latest focused paired dev-only gate`](reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v5.json)
 and the
-[`previous focused paired dev-only gate`](reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v3.json).
+[`previous focused paired dev-only gate`](reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v4.json).
+The earlier v3 run remains recorded at
+[`main-vs-retrieval-v2-focused-dev-only-v3.json`](reproducibility/artifacts/main-vs-retrieval-v2-focused-dev-only-v3.json).
 
-The candidate source digest is
-`4562e5b85dac655df1fe773b2341ae727058050fbef2ba4f9de4bb638a7efa98`; binary
-digest `8154b0ba4189fd39610168c9b11fcbf911ecbe876f49299b5f06ad04bc029bd4`.
+The candidate is commit `3494a11`; source digest
+`ac58a8c3c63390b31f0af599be4939be49e87510e28282be6d8a6c276164dfa2`; binary
+digest `2e03c4d99601b9d14f1dc0ad63545c12b274ddc5356abbaa043d8b914ce80521`.
 Fresh holdout dataset digest is
 `7fe11e153b64941c91233b756543487ebdd34e17bcca7b935a55f8f16a6fb2a0`; freeze
 manifest digest `7463ccb782cf971b4893f369c899f408212306020c68e471b72c146b2da68f1a`.
@@ -277,14 +280,21 @@ focused intent rules, six source-backed expansions), and searches common
 vectors plus target-platform vectors for non-common targets. Explicit platform
 requests prefer a target-specific example on score ties. It page-deduplicates
 candidates early, keeps up to eight, applies raw cosine distance `<= 0.55`,
-displays up to three, and abstains if none remain. It also preserves the
-negated-EXIF abstention guard.
+displays up to three, and abstains if none remain. It preserves the negated
+EXIF guard, adds scoped abstention for negated file-to-stdout requests, and
+abstains when a query excludes `cat`, the pinned corpus's only verified
+full-file stdout example. Ordinary positive stdout requests remain eligible;
+“without using cat” is treated as a tool exclusion, not negated output.
+A direct dev CLI check had exposed `cat` at distance `0.4489` for “do not show
+file contents to stdout”; the final build returns “No good matches found.” A
+positive “show file contents to stdout” query still returns the pinned `cat`
+example first (distance `0.3169`).
 
 The controlled ablation supports that order: late page selection kept
 Success@1 at 20/30 but reduced Success@3 from 24/30 to 20/30 for raw dense.
 The broad `IntentRulesV1` raised dense-only Success@1 and Success@3 to 30/30;
 the smaller `FocusedIntentRulesV1` tied it on dev. Hybrid RRF matched dense-only
-with the same rules and guard, so the selected product path does not load or
+on the tested dev configuration, so the selected product path does not load or
 fuse lexical candidates. The `0.55` cutoff and intent rules remain dev-derived;
 do not treat the cutoff as calibrated confidence or transfer it to another
 recipe/corpus without new development evidence.
@@ -298,11 +308,12 @@ simpler candidates are tested.
 
 ## Remaining validation
 
-1. Candidate implementation, v4 manifest, ablation report, and canonical
+1. Candidate implementation, v5 paired report, ablation report, and canonical
    dev-only report are recorded. The candidate was not tuned on holdout.
 2. The frozen holdout still requires explicit user authorization. After
-   authorization, run the canonical gate once against this frozen working-tree
-   candidate. Do not adjust retrieval from holdout outcomes.
+   authorization, run the canonical gate once against pinned commit
+   `3494a11c57c31045bb9897c9fa187d768e18ebcb`. Do not adjust retrieval from
+   holdout outcomes.
 3. The exact paired gate uses the 142-record pinned evaluation corpus. The
    installed 0.3.3 database is a different, larger corpus; its sampled behavior
    and stored-row inventory were reported separately. Full-source parsing

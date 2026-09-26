@@ -80,31 +80,35 @@ cargo run --locked --offline --features dev --bin tldr_subset -- bundle-build \
 ## Current focused candidate — development only
 
 The candidate uses main-compatible embedding text, `focused-v1` source-backed
-query mappings, raw cosine ranking, distance `<= 0.55`, and early
-one-example-per-page selection. On the identical pinned dev records, the paired
-gate measured:
+query mappings, raw cosine ranking, distance `<= 0.55`, early
+one-example-per-page selection, and scoped abstention for negated or
+unsupported file-to-stdout requests. On the identical pinned dev records, the
+paired gate measured:
 
 | Metric | main | focused candidate |
 | --- | ---: | ---: |
 | Success@1 | 18/30 | 30/30 |
 | Success@3 | 23/30 | 30/30 |
 | False answers | 1/30 | 0/30 |
-| Warm p95 | 86.704 ms | 86.852 ms |
-| Warm peak memory | 236,356,280 B | 236,602,040 B |
-| Fresh p95 | 87.269 ms | 89.248 ms |
-| Fresh peak memory | 237,421,240 B | 282,886,888 B |
+| Warm p95 | 86.343 ms | 85.001 ms |
+| Warm peak memory | 236,077,752 B | 236,536,504 B |
+| Fresh p95 | 89.266 ms | 85.653 ms |
+| Fresh peak memory | 236,438,200 B | 282,936,040 B |
 
 There were zero execution failures under the network-denied wrapper. The
 candidate improved Success@1 on every platform and tied or improved
 Success@3. Every measured fresh and warm resource metric stayed within the 20%
-ceiling. Source digest is
-`4562e5b85dac655df1fe773b2341ae727058050fbef2ba4f9de4bb638a7efa98`; binary
+ceiling. The fresh memory increase is 19.7%. Source digest is
+`ac58a8c3c63390b31f0af599be4939be49e87510e28282be6d8a6c276164dfa2`; binary
 digest is
-`8154b0ba4189fd39610168c9b11fcbf911ecbe876f49299b5f06ad04bc029bd4`. These
-are dev-only results. Earlier focused timing runs are retained. The new
-holdout is frozen and remains unscored pending explicit authorization. Reports:
-[`latest focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v4.json),
-[`previous focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v3.json),
+`2e03c4d99601b9d14f1dc0ad63545c12b274ddc5356abbaa043d8b914ce80521`. These
+are dev-only results. The gate measured 30/30 vs main's 18/30 Success@1,
+30/30 vs 23/30 Success@3, and zero vs one false answers; platform Success@1
+improved in all four groups. Earlier focused timing runs remain recorded. The
+new holdout is frozen and unscored pending explicit authorization. Reports:
+[`latest focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v5.json),
+[`previous focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v4.json),
+[`earlier focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v3.json),
 [`focused controlled ablation`](artifacts/retrieval-v2-controlled-ablation-dev-v2.json).
 
 After authorization, the independent command uses the frozen dev dataset and
@@ -112,7 +116,7 @@ the fresh holdout manifest:
 
 ```sh
 python3 scripts/run_release_gate.py \
-  --candidate-working-tree \
+  --candidate-ref 3494a11c57c31045bb9897c9fa187d768e18ebcb \
   --main-data-dir /path/to/main-data \
   --bundle /path/to/matching-bundle \
   --allow-holdout \
