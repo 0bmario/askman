@@ -33,7 +33,7 @@ holdout labels in dev-only mode and does not authorize holdout evaluation.
 
 ## Amendment (2026-09-26): authorized holdout result
 
-The current dense-only candidate has now been run once through the canonical
+The earlier dense-only candidate was run once through the canonical
 gate against the frozen holdout. Development improved, but holdout
 `Success@1` tied main at 19/30 and `Success@3` fell from 25/30 to 20/30. The
 candidate is not promoted. Do not tune from this result or reuse this holdout
@@ -69,3 +69,23 @@ The complete post-freeze result is
 Require explicit authorization before scoring any future holdout. The freeze
 process and label audit are recorded in
 [`fresh-holdout-v1-freeze.md`](../reproducibility/fresh-holdout-v1-freeze.md).
+
+## Amendment (2026-09-26): new development-only cohort
+
+The original development split is saturated from repeated candidate work. A
+separate 60-task dev-only cohort was authored and frozen before any retrieval
+run. It has 12 new scenario families, 30 answerable and 30 abstention tasks,
+15 tasks per platform, and uses the pinned 142-record parser-v4 corpus. Dataset
+SHA-256 is
+`6c113bed013be3f532a8287c58a4f257347585c2be963d6c3b475d41ecc49905`; freeze
+manifest SHA-256 is
+`9dcf13de29e6b0969344e6b2c64b298f9550ac320dad67dfca4a8a9ad9a096d5`.
+
+This cohort is development evidence only. Its frozen labels are validated
+against the pinned corpus. Custom-cohort support in the canonical runner is
+restricted to `--dev-only`; it cannot score holdout or recommend release.
+The selected candidate gained 2/30 Success@1 tasks over main with no measured
+top-three, answer-safety, platform, offline, latency, or memory regression,
+but the one-sided 95% paired-bootstrap lower bound is zero. Keep main shipped.
+Any independent claim needs another unseen holdout and fresh explicit
+authorization before scoring; neither consumed holdout is reusable.

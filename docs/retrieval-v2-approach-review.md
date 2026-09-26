@@ -1,7 +1,8 @@
 # Retrieval-v2 approach review and decision — 2026-09-26
 
-Review starts from working tree `f61e3af`; the final focused candidate is
-`3494a11`, against main baseline `8bd9fa2` and installed Askman 0.3.3.
+Review starts from working tree `f61e3af`; the latest development candidate
+build is based on `a1bac27`, against main baseline `8bd9fa2` and installed
+Askman 0.3.3.
 Historical v2 evidence includes two dev-only paired gates and one authorized
 canonical run; the broad candidate failed its independent holdout. The smaller
 candidate was selected on dev only. It was later scored once against fresh
@@ -10,18 +11,19 @@ and the candidate is not approved.
 
 ## Recommendation
 
-The current dev-selected candidate is main-compatible dense-only retrieval
-with five focused intent rules, six source-backed query expansions, raw cosine
-ranking, a `<= 0.55` distance guard, and early one-example-per-page selection.
-It improves main on
-the pinned dev records; this is not independent validation. Hybrid adds no
-measured value. The prior broad `IntentRulesV1` candidate failed holdout
-Success@1 and Success@3 conditions. Keep shipped Askman as the product baseline
-because the focused candidate also failed the split-specific independent gate.
-Do not tune from either consumed holdout. Any further release candidate needs
-fresh independent evaluation and explicit authorization before scoring.
+Keep shipped Askman as the product baseline. The current candidate is
+main-compatible dense retrieval with focused query rules, same-page example
+selection, a raw-distance cutoff of 0.60, and a 0.05 lexical-overlap rerank on
+the dense top-eight pool. It is the best measured variant on a newly frozen
+dev-only cohort: Success@1 15/30 vs main 13/30 and Success@3 22/30 vs 21/30,
+with no measured safety, platform, offline, latency, or memory regressions.
+The paired-bootstrap lower bound is 0.0, so this is not independent evidence
+and the candidate is not approved for release. RRF remains out because it
+showed no additional value. Validate this candidate on a new unseen holdout
+only after explicit authorization; do not reuse or tune from consumed
+holdouts.
 
-## Latest focused candidate — dev only
+## Earlier focused candidate — dev only
 
 On the identical 60-task dev split and 142 pinned records, the focused
 candidate measured 30/30 Success@1, 30/30 Success@3, and 0/30 false answers;
@@ -327,20 +329,74 @@ cannot replace fresh CLI process latency. Avoid adding a daemon, learned
 reranker, model replacement, or generic command-semantic ontology before
 simpler candidates are tested.
 
+## New dev-only cohort and selected candidate
+
+The original 60-task development split had been repeatedly inspected. A new
+cohort was authored and frozen before retrieval runs: 60 tasks, 12 new scenario
+families, 30 answerable / 30 unanswerable, and 15 per platform. It uses the
+same parser-v4 corpus bundle as the controlled main comparison: 142 visible
+examples, source digest
+`651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9`.
+Dataset SHA-256 is
+`6c113bed013be3f532a8287c58a4f257347585c2be963d6c3b475d41ecc49905`; freeze
+manifest SHA-256 is
+`9dcf13de29e6b0969344e6b2c64b298f9550ac320dad67dfca4a8a9ad9a096d5`.
+The custom-cohort path is restricted to the canonical runner's `--dev-only`
+mode. It does not read holdout rows or make a release decision.
+
+| Candidate | Success@1 | Success@3 | Coverage | Incorrect answered | False answers |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Main | 13/30 | 21/30 | 24/60 | 3/24 | 0/30 |
+| Focused dense, one/page, 0.55 | 14/30 | 14/30 | 22/60 | 8/22 | 0/30 |
+| Focused dense, same-page, 0.55 | 14/30 | 19/30 | 22/60 | 3/22 | 0/30 |
+| Focused dense, same-page, 0.60 | 14/30 | 21/30 | 24/60 | 3/24 | 0/30 |
+| Broader query rules, same-page, 0.60 | 14/30 | 21/30 | 24/60 | 3/24 | 0/30 |
+| Focused + same-page + 0.60 + lexical 0.05 | **15/30** | **22/30** | 24/60 | **2/24** | 0/30 |
+
+The selected variant gives the best development results. Against main, it gains
+two first-result tasks (6.7 pp), one top-three task, and reduces incorrect
+answered tasks by one. Two families improve and none regress. Per-platform
+Success@1 is common 3/10 vs 2/10, Linux 2/5 vs 1/5, macOS 8/10 tie, Windows
+2/5 tie. Per-platform Success@3 has no regressions. The one-sided 95% paired
+bootstrap lower bound for Success@1 is 0.0 pp, so the canonical gate is
+inconclusive. The candidate is still development-only.
+
+Network-denied runs had zero execution failures. Fresh-process p95 latency and
+peak memory were 84.969 ms / 269,353,656 B for candidate vs 86.142 ms /
+236,094,136 B for main. Warm p95 and peak memory were 99.226 ms / 237,929,216 B
+vs 87.822 ms / 237,650,616 B. Both phases stay within the 20% limit. The
+candidate source digest is
+`f84e6424cdb88b92726819a40737811a57f64c94b383e936e5c05624219e0627`; binary
+digest is
+`20193571cef751a3d38fd1e12f9d26dd3512fbcc04498d78f128eee906ec3e8f`.
+
+The experiments isolate example selection, abstention cutoff, query mode, and
+ranking. Same-page selection improves Success@3 over early one-per-page
+selection; 0.60 restores main-level coverage/top-three/safety; broader rules
+tie the smaller focused rules. The 0.05 lexical rerank improves on the same
+focused/same-page/0.60 baseline. Historical evidence favors main-compatible
+embedding text over description-only vectors and found RRF tied with dense
+retrieval; the new lexical reranker is not RRF. Keep RRF out. These controlled
+results are development evidence, not holdout validation.
+
+Full paired CLI artifacts: [focused baseline](reproducibility/artifacts/main-vs-dev-extension-v1-focused.json), [same-page selection](reproducibility/artifacts/main-vs-dev-extension-v1-same-page.json), [0.60 cutoff](reproducibility/artifacts/main-vs-dev-extension-v1-cutoff-060.json), [broader query rules](reproducibility/artifacts/main-vs-dev-extension-v1-intent-rules-same-page-cutoff-060.json), and [selected lexical candidate](reproducibility/artifacts/main-vs-dev-extension-v1-focused-same-page-cutoff-060-lexical-005.json). Each has a rendered Markdown report beside the JSON.
+
 ## Remaining validation
 
 1. Candidate implementation, dev-only paired reports, controlled ablations,
    installed-product sample, and the authorized fresh-holdout report are
    recorded.
-2. Candidate `3494a11` did not pass independent validation. Do not tune from
-   either consumed holdout. Any next candidate needs new development evidence,
-   a separately frozen unseen holdout, and explicit scoring authorization.
+2. Candidate `3494a11` did not pass independent validation. The new lexical
+   candidate has only dev evidence and must not be promoted yet. Do not tune
+   from either consumed holdout. Independent validation requires a separately
+   frozen unseen holdout and explicit scoring authorization.
 3. The exact paired gate uses the 142-record pinned evaluation corpus. The
    installed 0.3.3 database is a different, larger corpus; its sampled behavior
    and stored-row inventory were reported separately. Full-source parsing
    recall for the installed database remains unmeasured.
 
-The focused candidate meets the paired dev gate, but fails the independent
-no-regression and bootstrap conditions; the shipped main remains the product
-baseline. A passing development fixture alone does not establish improvement
-for the installed product corpus.
+The lexical candidate has no measured regression on the new paired dev cohort,
+but its bootstrap lower bound is zero and there is no independent result for
+this candidate. Shipped main remains the product baseline. A passing
+development fixture alone does not establish improvement for the installed
+product corpus.

@@ -1,10 +1,11 @@
 # ADR 0003 — Hybrid rank fusion
 
-Status: Superseded on 2026-09-26. Hybrid RRF is not used by the experimental
-dense-only candidate path. The earlier candidate failed independent
-validation. The focused candidate also failed the fresh independent gate and
-is not approved for release. Dense-only remains the development path; hybrid
-has no measured advantage in the controlled ablations.
+Status: Superseded on 2026-09-26. Reciprocal-rank fusion remains out: it tied
+dense-only in controlled development ablations. A new dev-only candidate adds
+a small lexical-overlap rerank to a dense top-eight pool; that change improved
+the new dev cohort without measured regressions, but has no independent
+validation and is not approved for release. Keep shipped main until a fresh
+authorized holdout validates the candidate.
 
 ## Original decision
 
@@ -43,6 +44,7 @@ development results; `IntentRulesV1` was tuned on these same development tasks.
 Do not tune it on holdout results. The candidate needs the explicitly
 authorized independent gate before a release decision.
 
+At this stage, the product candidate did not load or fuse lexical candidates.
 The full ablation and paired dev-only gate reports are in
 [`retrieval-v2-controlled-ablation-dev-v1.json`](../reproducibility/artifacts/retrieval-v2-controlled-ablation-dev-v1.json)
 and
@@ -67,7 +69,7 @@ it from holdout outcomes. The evaluated holdout is consumed; another candidate
 needs a new unseen split. Hybrid remains unjustified by development ablations:
 it tied dense-only and added no measured value.
 
-## Current development candidate (2026-09-26)
+## Earlier focused candidate selected on the original dev split (2026-09-26)
 
 Select dense-only retrieval with the main-compatible embedding text, five
 focused intent rules with six source-backed `FocusedIntentRulesV1` query
@@ -116,6 +118,49 @@ evidence:
 [`main-vs-retrieval-v2-focused-fresh-holdout-v1.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json)
 and its
 [`rendered report`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.md).
+
+## New development cohort (2026-09-26)
+
+The earlier dense candidate and RRF ablations were measured on development
+tasks and did not establish independent improvement. A new 60-task dev-only
+cohort was authored and frozen before retrieval runs, against the same pinned
+142-record parser-v4 corpus. The controlled one-factor runs show:
+
+| Variant | Success@1 | Success@3 | Incorrect answered | Decision signal |
+| --- | ---: | ---: | ---: | --- |
+| Main | 13/30 | 21/30 | 3/24 | Reference |
+| Focused dense, one/page, cutoff 0.55 | 14/30 | 14/30 | 8/22 | Top-three and answer safety regress |
+| Same-page selection, cutoff 0.55 | 14/30 | 19/30 | 3/22 | Restores some top-three usefulness |
+| Same-page, cutoff 0.60 | 14/30 | 21/30 | 3/24 | Ties main on top-three and safety |
+| Broader intent rules, same-page, cutoff 0.60 | 14/30 | 21/30 | 3/24 | Ties focused query rules |
+| Focused + same-page + cutoff 0.60 + lexical 0.05 | 15/30 | 22/30 | 2/24 | Best measured dev variant |
+
+The selected variant keeps the main-compatible embedding text and focused
+query rules. It retrieves a dense top-eight pool, keeps same-page examples,
+rejects candidates above raw cosine distance 0.60, then reranks eligible
+examples by subtracting 0.05 per shared non-stopword token. The raw distance
+still controls abstention. This simple reranker is distinct from RRF: RRF
+showed no additional value, while lexical reranking gained two first-result
+tasks and one top-three task on this dev cohort.
+
+Against main, the selected candidate has 0 false answers (main 0/30), 24/60
+coverage (main 24/60), and 2/24 incorrect answered tasks (main 3/24). Success@1
+is common 3/10 vs 2/10, Linux 2/5 vs 1/5, macOS 8/10 vs 8/10, Windows 2/5 vs
+2/5. Success@3 is common 7/10 vs 7/10, Linux 4/5 vs 3/5, macOS 9/10 vs 9/10,
+Windows 2/5 vs 2/5. No family regressed; two families improved. The observed
+Success@1 gain is 2/30 (6.7 pp), but the fixed-seed one-sided 95% paired
+bootstrap lower bound is 0.0 pp. Network-denied CLI execution had no failures.
+Fresh-process p95/memory were 84.969 ms / 269,353,656 B vs main 86.142 ms /
+236,094,136 B. Warm p95/memory were 99.226 ms / 237,929,216 B vs main 87.822
+ms / 237,650,616 B. All resource deltas are within 20%.
+
+The canonical runner decision remains inconclusive: the development bootstrap
+lower bound is not above zero, and dev-only evidence cannot make a release
+decision. This candidate was selected using only the frozen development
+cohort; it still requires a new unseen holdout and explicit scoring
+authorization. The original holdout v1 is consumed and was not used for tuning.
+Machine-readable and rendered variant reports are linked from
+[`retrieval-v2-approach-review.md`](../retrieval-v2-approach-review.md).
 
 The controlled results are in
 [`retrieval-v2-controlled-ablation-dev-v2.json`](../reproducibility/artifacts/retrieval-v2-controlled-ablation-dev-v2.json)

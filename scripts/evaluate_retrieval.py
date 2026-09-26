@@ -25,9 +25,16 @@ from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SUPPORTED_DATASET_SCHEMA_VERSIONS = {1, 2}
+SUPPORTED_DATASET_SCHEMA_VERSIONS = {1, 2, 3}
 EVALUATION_V2_DATASET_ID = "askman-evaluation-v2"
 EVALUATION_V2_SCHEMA_VERSION = 2
+DEV_EXTENSION_DATASET_ID = "askman-dev-extension-v1"
+DEV_EXTENSION_SCHEMA_VERSION = 3
+DEV_EXTENSION_SPLIT_ID = "scenario-family-dev-extension-v1"
+DEV_EXTENSION_SPLIT_POLICY = (
+    "development-only cohort; twelve new scenario families; five tasks per "
+    "family; thirty answerable and thirty unanswerable tasks"
+)
 EVALUATION_V2_SPLIT_ID = "scenario-family-split-v2"
 EVALUATION_V2_SPLIT_POLICY = (
     "twelve distinct scenario families per split; five independently phrased "
@@ -53,6 +60,13 @@ DATASET_PROFILES = {
         "tasks_per_family": TASKS_PER_FAMILY,
     },
     EVALUATION_V2_SCHEMA_VERSION: {
+        "task_count": 60,
+        "family_count": 12,
+        "tasks_per_family": 5,
+        "answerable_task_count": 30,
+        "unanswerable_task_count": 30,
+    },
+    DEV_EXTENSION_SCHEMA_VERSION: {
         "task_count": 60,
         "family_count": 12,
         "tasks_per_family": 5,
@@ -946,6 +960,7 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
     if dataset.get("scorer_version") != SCORER_VERSION:
         raise ValueError("unsupported scorer version")
     is_evaluation_v2 = schema_version == EVALUATION_V2_SCHEMA_VERSION
+    is_dev_extension = schema_version == DEV_EXTENSION_SCHEMA_VERSION
     if is_evaluation_v2 and dataset.get("dataset_id") != EVALUATION_V2_DATASET_ID:
         raise ValueError("schema 2 datasets must use the evaluation-v2 dataset ID")
     if is_evaluation_v2:
@@ -956,6 +971,16 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
         provenance = dataset.get("provenance")
         if not isinstance(provenance, dict) or not provenance.get("intent_record"):
             raise ValueError("evaluation-v2 dataset is missing provenance metadata")
+    if is_dev_extension:
+        if dataset.get("dataset_id") != DEV_EXTENSION_DATASET_ID:
+            raise ValueError("schema 3 datasets must use the development-extension dataset ID")
+        if dataset.get("split_id") != DEV_EXTENSION_SPLIT_ID:
+            raise ValueError("development-extension dataset has the wrong split ID")
+        if dataset.get("split_policy") != DEV_EXTENSION_SPLIT_POLICY:
+            raise ValueError("development-extension dataset has the wrong split policy")
+        provenance = dataset.get("provenance")
+        if not isinstance(provenance, dict) or not provenance.get("intent_record"):
+            raise ValueError("development-extension dataset is missing provenance metadata")
     if dataset.get("split") != expected_split:
         raise ValueError(f"dataset split must be {expected_split}")
     profile = DATASET_PROFILES[schema_version]
@@ -975,6 +1000,7 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
     task_ids: set[str] = set()
     families: dict[str, set[str]] = {}
     family_counts: dict[str, int] = {}
+    dev_extension_family_labels: dict[str, tuple[str, bool]] = {}
     for task in tasks:
         required = {"id", "split", "family", "question", "platform", "answerable", "acceptable_example_ids", "rationale"}
         if not required <= task.keys():
@@ -1024,6 +1050,15 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
             raise ValueError(f"answerable task {task['id']} has no acceptable IDs")
         families.setdefault(family, set()).add(task["split"])
         family_counts[family] = family_counts.get(family, 0) + 1
+        if is_dev_extension:
+            family_label = (task["platform"], task["answerable"])
+            prior_family_label = dev_extension_family_labels.setdefault(
+                family, family_label
+            )
+            if prior_family_label != family_label:
+                raise ValueError(
+                    f"development-extension family {family} mixes platforms or answerability labels"
+                )
     has_wrong_family_count = len(families) != profile["family_count"]
     if has_wrong_family_count:
         raise ValueError(
@@ -1039,18 +1074,19 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
     has_cross_split_family = any(len(splits) != 1 for splits in families.values())
     if has_cross_split_family:
         raise ValueError("scenario families must not cross the dev/holdout split")
-    if is_evaluation_v2:
+    if is_evaluation_v2 or is_dev_extension:
         answerable_count = sum(task["answerable"] for task in tasks)
         unanswerable_count = len(tasks) - answerable_count
+        label = "development-extension" if is_dev_extension else "evaluation-v2"
         if dataset.get("answerable_task_count") != answerable_count:
-            raise ValueError("evaluation-v2 answerable task count is inconsistent")
+            raise ValueError(f"{label} answerable task count is inconsistent")
         if dataset.get("unanswerable_task_count") != unanswerable_count:
-            raise ValueError("evaluation-v2 unanswerable task count is inconsistent")
+            raise ValueError(f"{label} unanswerable task count is inconsistent")
         if answerable_count != profile["answerable_task_count"]:
-            raise ValueError("each evaluation-v2 split must contain exactly 30 answerable tasks")
+            raise ValueError(f"each {label} split must contain exactly 30 answerable tasks")
         if unanswerable_count != profile["unanswerable_task_count"]:
             raise ValueError(
-                "each evaluation-v2 split must contain exactly 30 unanswerable tasks"
+                f"each {label} split must contain exactly 30 unanswerable tasks"
             )
 
 

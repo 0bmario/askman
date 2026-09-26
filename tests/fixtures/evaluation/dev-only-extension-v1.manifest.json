@@ -1,0 +1,65 @@
+{
+  "answerable_task_count": 30,
+  "authorization_required_before_holdout_scoring": true,
+  "cohort_id": "askman-dev-extension-v1",
+  "corpus": {
+    "artifact_kind": "askman.tldr-subset",
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "parser_version": "tldr-subset-v4",
+    "schema_version": 4,
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef"
+  },
+  "dataset_id": "askman-dev-extension-v1",
+  "dataset_path": "tests/fixtures/evaluation/dev-only-extension-v1.json",
+  "dataset_schema_version": 3,
+  "dataset_sha256": "6c113bed013be3f532a8287c58a4f257347585c2be963d6c3b475d41ecc49905",
+  "development_gate_runs_at_freeze": 0,
+  "families": [
+    "devx-common-find-by-extension",
+    "devx-common-sort-ascending-lines",
+    "devx-common-unsupported-create-user-account",
+    "devx-linux-df-human-readable",
+    "devx-linux-unsupported-bluetooth-pairing",
+    "devx-linux-unsupported-keyboard-layout",
+    "devx-osx-save-screenshot",
+    "devx-osx-synthesize-speech-to-file",
+    "devx-osx-unsupported-set-display-resolution",
+    "devx-windows-move-across-drives",
+    "devx-windows-unsupported-printer-setup",
+    "devx-windows-unsupported-set-system-time"
+  ],
+  "family_count": 12,
+  "freeze_id": "askman-dev-extension-v1-freeze-2026-09-26",
+  "holdout_accessed": false,
+  "platform_distribution": {
+    "common": {
+      "answerable": 10,
+      "tasks": 15,
+      "unanswerable": 5
+    },
+    "linux": {
+      "answerable": 5,
+      "tasks": 15,
+      "unanswerable": 10
+    },
+    "osx": {
+      "answerable": 10,
+      "tasks": 15,
+      "unanswerable": 5
+    },
+    "windows": {
+      "answerable": 5,
+      "tasks": 15,
+      "unanswerable": 10
+    }
+  },
+  "release_gate_runs_at_freeze": 0,
+  "schema_version": 1,
+  "split": "dev",
+  "status": "frozen_dev_only",
+  "task_count": 60,
+  "unanswerable_task_count": 30
+}

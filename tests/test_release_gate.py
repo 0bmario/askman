@@ -340,6 +340,55 @@ class ReleaseGateTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "does not match the pinned evaluation baseline"):
                 GATE.validate_main_data_compatibility(main_data_dir, bundle)
 
+    def test_custom_dev_dataset_requires_dev_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            arguments = GATE.parser().parse_args(
+                [
+                    "--allow-custom-dev-dataset",
+                    "--main-data-dir",
+                    str(root / "main-data"),
+                    "--bundle",
+                    str(root / "bundle"),
+                    "--output-json",
+                    str(root / "report.json"),
+                    "--output-markdown",
+                    str(root / "report.md"),
+                ]
+            )
+
+            with self.assertRaisesRegex(ValueError, "requires --dev-only"):
+                GATE.run(arguments)
+
+    def test_custom_dev_dataset_requires_schema_3_and_valid_labels_shape(self):
+        freeze_path = ROOT / "tests/fixtures/evaluation/dev-only-extension-v1.manifest.json"
+        freeze, dataset_path = GATE.validate_custom_dev_freeze(
+            freeze_path, None, ROOT
+        )
+        self.assertEqual(
+            dataset_path,
+            (ROOT / "tests/fixtures/evaluation/dev-only-extension-v1.json").resolve(),
+        )
+        dataset = GATE.load_json(
+            dataset_path
+        )
+        GATE.validate_custom_dev_dataset(dataset, freeze)
+
+        changed = dict(dataset)
+        changed["schema_version"] = 2
+        with self.assertRaisesRegex(ValueError, "must use schema 3"):
+            GATE.validate_custom_dev_dataset(changed, freeze)
+
+    def test_custom_dev_dataset_skips_only_its_frozen_v2_digest(self):
+        manifest = ROOT / "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json"
+        dataset = ROOT / "tests/fixtures/evaluation/dev-only-extension-v1.json"
+        with self.assertRaisesRegex(ValueError, "digest mismatch"):
+            GATE.validate_frozen_inputs(manifest, dataset)
+
+        GATE.validate_frozen_inputs(
+            manifest, dataset, allow_custom_dev_dataset=True
+        )
+
     def test_vector_only_main_database_change_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             main_data_dir, bundle = matching_main_and_candidate_inputs(Path(directory))

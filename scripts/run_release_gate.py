@@ -34,6 +34,18 @@ BOOTSTRAP_RESAMPLES = 10_000
 BOOTSTRAP_SEED = 33_031
 MIN_SUCCESS_AT_1_GAIN = 0.05
 MAX_REGRESSION = 0.20
+DEFAULT_RETRIEVAL_CONFIGURATION = {
+    "configuration_id": "focused-v1",
+    "dense_recipe": "main-compatible",
+    "query_mode": "focused-v1",
+    "candidate_budget": 8,
+    "ranking": "raw cosine distance, ascending",
+    "distance_cutoff": 0.55,
+    "example_selection": "one example per page before display",
+    "display_limit": 3,
+    "fusion": "none",
+    "abstention": "distance cutoff and scoped negation guards",
+}
 FROZEN_MANIFEST_SHA256 = (
     "4f258311db08cad15c1473c77ff6d98e2fa3b0044990fcdfcbc8110f96fc46dc"
 )
@@ -49,6 +61,13 @@ FRESH_HOLDOUT_MANIFEST_SHA256 = (
 )
 FRESH_HOLDOUT_DATASET_SHA256 = (
     "7fe11e153b64941c91233b756543487ebdd34e17bcca7b935a55f8f16a6fb2a0"
+)
+DEV_EXTENSION_FREEZE_ID = "askman-dev-extension-v1-freeze-2026-09-26"
+DEV_EXTENSION_MANIFEST_SHA256 = (
+    "9dcf13de29e6b0969344e6b2c64b298f9550ac320dad67dfca4a8a9ad9a096d5"
+)
+DEV_EXTENSION_DATASET_SHA256 = (
+    "6c113bed013be3f532a8287c58a4f257347585c2be963d6c3b475d41ecc49905"
 )
 # Deterministic evaluation-corpus DB rebuilt by the main importer at
 # 8bd9fa296ea7e2f461202091f2ade47221bc8a0e from the frozen e1cb... snapshot.
@@ -138,12 +157,17 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def validate_frozen_inputs(
-    manifest: Path, dev_dataset: Path, holdout_dataset: Path | None = None
+    manifest: Path,
+    dev_dataset: Path,
+    holdout_dataset: Path | None = None,
+    *,
+    allow_custom_dev_dataset: bool = False,
 ) -> None:
     expected = {
         manifest: FROZEN_MANIFEST_SHA256,
-        dev_dataset: FROZEN_DEV_DATASET_SHA256,
     }
+    if not allow_custom_dev_dataset:
+        expected[dev_dataset] = FROZEN_DEV_DATASET_SHA256
     if holdout_dataset is not None:
         expected[holdout_dataset] = FROZEN_HOLDOUT_DATASET_SHA256
     for path, expected_digest in expected.items():
@@ -155,6 +179,58 @@ def validate_frozen_inputs(
                 f"frozen evaluation input digest mismatch for {path}: "
                 f"expected {expected_digest}, got {actual_digest}"
             )
+
+
+def validate_custom_dev_freeze(
+    manifest_path: Path,
+    dataset_override: Path | None,
+    repo: Path,
+) -> tuple[dict[str, Any], Path]:
+    if sha256_file(manifest_path) != DEV_EXTENSION_MANIFEST_SHA256:
+        raise ValueError("custom development freeze manifest digest is not pinned")
+    manifest = load_json(manifest_path)
+    if manifest.get("freeze_id") != DEV_EXTENSION_FREEZE_ID:
+        raise ValueError("custom development freeze ID is not pinned")
+    if manifest.get("status") != "frozen_dev_only" or manifest.get("split") != "dev":
+        raise ValueError("custom development manifest must describe a frozen dev-only split")
+    if manifest.get("authorization_required_before_holdout_scoring") is not True:
+        raise ValueError("custom development manifest must preserve the holdout authorization rule")
+    if manifest.get("holdout_accessed") is not False:
+        raise ValueError("custom development manifest records holdout access")
+    if manifest.get("development_gate_runs_at_freeze") != 0:
+        raise ValueError("custom development manifest was not frozen before CLI evaluation")
+    if manifest.get("release_gate_runs_at_freeze") != 0:
+        raise ValueError("custom development manifest records a release-gate run")
+
+    relative_path = manifest.get("dataset_path")
+    if not isinstance(relative_path, str) or not relative_path:
+        raise ValueError("custom development manifest has an invalid dataset path")
+    dataset_path = (repo / relative_path).resolve()
+    if dataset_override is not None and dataset_override.resolve() != dataset_path:
+        raise ValueError("custom development dataset path differs from its freeze manifest")
+    if not dataset_path.is_file():
+        raise ValueError(f"custom development dataset is missing: {dataset_path}")
+    if manifest.get("dataset_sha256") != DEV_EXTENSION_DATASET_SHA256:
+        raise ValueError("custom development dataset digest is not pinned by its manifest")
+    if sha256_file(dataset_path) != DEV_EXTENSION_DATASET_SHA256:
+        raise ValueError("custom development dataset digest differs from its freeze")
+
+    corpus = manifest.get("corpus")
+    if not isinstance(corpus, dict):
+        raise ValueError("custom development manifest is missing its corpus identity")
+    corpus_manifest_path = corpus.get("manifest_path")
+    corpus_manifest_digest = corpus.get("manifest_sha256")
+    if not isinstance(corpus_manifest_path, str) or not isinstance(
+        corpus_manifest_digest, str
+    ):
+        raise ValueError("custom development corpus manifest identity is invalid")
+    pinned_corpus_manifest = (repo / corpus_manifest_path).resolve()
+    if (
+        not pinned_corpus_manifest.is_file()
+        or sha256_file(pinned_corpus_manifest) != corpus_manifest_digest
+    ):
+        raise ValueError("custom development corpus manifest is missing or changed")
+    return manifest, dataset_path
 
 
 def validate_fresh_holdout_freeze(
@@ -335,6 +411,45 @@ def validate_independent_dataset_pair(
             field
         ):
             raise ValueError(f"development and independent holdout {field} must match")
+
+
+def validate_custom_dev_dataset(
+    dataset: dict[str, Any], freeze: dict[str, Any]
+) -> None:
+    if dataset.get("schema_version") != evaluator.DEV_EXTENSION_SCHEMA_VERSION:
+        raise ValueError("custom development data must use schema 3")
+    evaluator.validate_dataset(dataset, "dev")
+    if dataset.get("freeze_id") != freeze.get("freeze_id"):
+        raise ValueError("custom development dataset freeze ID differs from its manifest")
+    for dataset_field, manifest_field in (
+        ("cohort_id", "cohort_id"),
+        ("dataset_id", "dataset_id"),
+        ("schema_version", "dataset_schema_version"),
+        ("task_count", "task_count"),
+        ("answerable_task_count", "answerable_task_count"),
+        ("unanswerable_task_count", "unanswerable_task_count"),
+        ("corpus", "corpus"),
+    ):
+        if dataset.get(dataset_field) != freeze.get(manifest_field):
+            raise ValueError(
+                f"custom development dataset differs from its manifest: {dataset_field}"
+            )
+    if len({task["family"] for task in dataset["tasks"]}) != freeze.get(
+        "family_count"
+    ):
+        raise ValueError("custom development family count differs from its manifest")
+    platform_distribution: dict[str, dict[str, int]] = {}
+    for platform_name in evaluator.SUPPORTED_PLATFORMS:
+        platform_tasks = [
+            task for task in dataset["tasks"] if task["platform"] == platform_name
+        ]
+        platform_distribution[platform_name] = {
+            "tasks": len(platform_tasks),
+            "answerable": sum(task["answerable"] for task in platform_tasks),
+            "unanswerable": sum(not task["answerable"] for task in platform_tasks),
+        }
+    if platform_distribution != freeze.get("platform_distribution"):
+        raise ValueError("custom development platform distribution differs from its manifest")
 
 
 def run_command(command: Sequence[str], *, cwd: Path | None = None) -> str:
@@ -1788,9 +1903,14 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- Matching model assets verified: `{report['inputs']['input_compatibility']['model_asset_count']}`.",
         f"- Dev dataset SHA-256: `{report['inputs']['dev_dataset_sha256']}`",
         f"- Holdout dataset SHA-256: `{report['inputs']['holdout_dataset_sha256']}`",
-        f"- Candidate retrieval: `{report['retrieval_configuration']['dense_recipe']}` text, "
-        f"`{report['retrieval_configuration']['query_mode']}` queries, "
-        f"distance `<= {report['retrieval_configuration']['distance_cutoff']}`, "
+        f"- Candidate configuration: `{report['retrieval_configuration']['configuration_id']}`; "
+        f"`{report['retrieval_configuration']['dense_recipe']}` text; "
+        f"`{report['retrieval_configuration']['query_mode']}` queries; "
+        f"top-{report['retrieval_configuration']['candidate_budget']}; "
+        f"`{report['retrieval_configuration']['example_selection']}`; "
+        f"ranking `{report['retrieval_configuration']['ranking']}`; "
+        f"distance `<= {report['retrieval_configuration']['distance_cutoff']}`; "
+        f"abstention `{report['retrieval_configuration']['abstention']}`; "
         f"fusion `{report['retrieval_configuration']['fusion']}`.",
         f"- Scorer SHA-256: `{report['inputs']['scorer_sha256']}`",
         "- Per-file input digests: recorded in the machine-readable report.",
@@ -2002,7 +2122,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument(
         "--dev-dataset",
         type=Path,
-        default=ROOT / "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
+        help="development dataset; defaults to the frozen evaluation-v2 dev split",
     )
     result.add_argument(
         "--allow-holdout",
@@ -2014,6 +2134,21 @@ def parser() -> argparse.ArgumentParser:
         action="store_true",
         help="dry-run the gate on the development split only; the report is "
         "verification evidence, not a release-gate decision",
+    )
+    result.add_argument(
+        "--allow-custom-dev-dataset",
+        action="store_true",
+        help="validate the pinned schema-3 dev extension; requires --dev-only",
+    )
+    result.add_argument(
+        "--custom-dev-manifest",
+        type=Path,
+        help="manifest for the pinned schema-3 development extension",
+    )
+    result.add_argument(
+        "--candidate-config",
+        type=Path,
+        help="frozen retrieval configuration metadata for this candidate run",
     )
     result.add_argument(
         "--holdout-dataset",
@@ -2033,7 +2168,35 @@ def parser() -> argparse.ArgumentParser:
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    if args.dev_only and (args.allow_holdout or args.independent_holdout_manifest is not None):
+        raise ValueError("--dev-only excludes holdout access; drop holdout authorization options")
+    if args.allow_custom_dev_dataset and not args.dev_only:
+        raise ValueError("--allow-custom-dev-dataset requires --dev-only")
+    if args.candidate_config is not None and not args.dev_only:
+        raise ValueError("--candidate-config is limited to --dev-only experiments")
+    if not args.dev_only and not args.allow_holdout:
+        raise ValueError("--allow-holdout is required for the release gate")
     repo = args.repo_root.resolve()
+    custom_dev_freeze: dict[str, Any] | None = None
+    custom_dev_manifest_path: Path | None = None
+    if args.allow_custom_dev_dataset:
+        custom_dev_manifest_path = (
+            args.custom_dev_manifest.resolve()
+            if args.custom_dev_manifest is not None
+            else ROOT / "tests/fixtures/evaluation/dev-only-extension-v1.manifest.json"
+        )
+        custom_dev_freeze, custom_dev_dataset_path = validate_custom_dev_freeze(
+            custom_dev_manifest_path,
+            args.dev_dataset,
+            repo,
+        )
+        args.dev_dataset = custom_dev_dataset_path
+    else:
+        if args.custom_dev_manifest is not None:
+            raise ValueError("--custom-dev-manifest requires --allow-custom-dev-dataset")
+        if args.dev_dataset is None:
+            args.dev_dataset = ROOT / "tests/fixtures/evaluation/frozen-dev-v2-expanded.json"
+    args.dev_dataset = args.dev_dataset.resolve()
     bundle = args.bundle.resolve()
     main_data_dir = args.main_data_dir.resolve()
     freeze_manifest = args.freeze_manifest.resolve()
@@ -2042,14 +2205,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         if args.independent_holdout_manifest is not None
         else None
     )
-    if args.dev_only and (args.allow_holdout or independent_holdout_manifest_path):
-        raise ValueError("--dev-only excludes holdout access; drop holdout authorization options")
-    if not args.dev_only and not args.allow_holdout:
-        raise ValueError("--allow-holdout is required for the release gate")
     holdout_freeze: dict[str, Any] | None = None
     holdout_dataset_path: Path | None = None
     if args.dev_only or independent_holdout_manifest_path is not None:
-        validate_frozen_inputs(freeze_manifest, args.dev_dataset.resolve())
+        validate_frozen_inputs(
+            freeze_manifest,
+            args.dev_dataset.resolve(),
+            allow_custom_dev_dataset=args.allow_custom_dev_dataset,
+        )
         if independent_holdout_manifest_path is not None:
             holdout_freeze, holdout_dataset_path = validate_fresh_holdout_freeze(
                 independent_holdout_manifest_path,
@@ -2089,6 +2252,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         # --dev-only must not read holdout labels at all; split identity is
         # asserted from the freeze manifest instead.
         holdout = None
+        if args.allow_custom_dev_dataset:
+            assert custom_dev_freeze is not None
+            validate_custom_dev_dataset(dev, custom_dev_freeze)
     else:
         assert holdout_dataset_path is not None
         holdout = load_json(holdout_dataset_path)
@@ -2130,6 +2296,19 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 allow_legacy_tldr_corpus_id=holdout_freeze is not None,
             )
         )
+    if args.allow_custom_dev_dataset:
+        connection = sqlite3.connect(bundle / "matching.db")
+        try:
+            evaluator.validate_labels(connection, dev["tasks"])
+        finally:
+            connection.close()
+    candidate_configuration = DEFAULT_RETRIEVAL_CONFIGURATION
+    if args.candidate_config is not None:
+        candidate_configuration = load_json(args.candidate_config)
+        if not isinstance(candidate_configuration.get("configuration_id"), str) or not candidate_configuration[
+            "configuration_id"
+        ].strip():
+            raise ValueError("candidate configuration is missing its configuration_id")
     if freeze.get("benchmark_id") != "askman-evaluation-v2":
         raise ValueError("freeze manifest is not the frozen evaluation-v2 manifest")
     if freeze.get("splits", {}).get("dev", {}).get("sha256") != FROZEN_DEV_DATASET_SHA256:
@@ -2303,10 +2482,21 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "main_ref": args.main_ref,
                 "candidate_ref": "working-tree" if args.candidate_working_tree else args.candidate_ref,
                 "holdout_access_authorized": args.allow_holdout,
+                "custom_dev_dataset": args.allow_custom_dev_dataset,
+                "custom_dev_freeze_id": custom_dev_freeze.get("freeze_id")
+                if custom_dev_freeze is not None
+                else None,
+                "candidate_configuration_id": candidate_configuration["configuration_id"],
                 "holdout_freeze_id": holdout_freeze.get("freeze_id")
                 if holdout_freeze is not None
                 else freeze.get("freeze_id"),
-                "evidence_scope": "dev-only-verification" if args.dev_only else "release-gate",
+                "evidence_scope": (
+                    "custom-dev-only-exploration"
+                    if args.allow_custom_dev_dataset
+                    else "dev-only-verification"
+                    if args.dev_only
+                    else "release-gate"
+                ),
             },
             "inputs": {
                 "benchmark_id": freeze["benchmark_id"],
@@ -2328,6 +2518,21 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "corpus_record_equivalence": record_equivalence,
                 "benchmark_corpus_compatibility": benchmark_corpus_compatibility,
                 "dev_dataset_sha256": sha256_file(args.dev_dataset),
+                "dev_dataset_id": dev.get("dataset_id"),
+                "dev_cohort_id": dev.get("cohort_id"),
+                "dev_dataset_pinned_to_evaluation_v2": not args.allow_custom_dev_dataset,
+                "custom_dev_freeze_manifest_path": str(custom_dev_manifest_path)
+                if custom_dev_manifest_path is not None
+                else None,
+                "custom_dev_freeze_manifest_sha256": sha256_file(custom_dev_manifest_path)
+                if custom_dev_manifest_path is not None
+                else None,
+                "candidate_config_path": str(args.candidate_config)
+                if args.candidate_config is not None
+                else None,
+                "candidate_config_sha256": sha256_file(args.candidate_config)
+                if args.candidate_config is not None
+                else None,
                 # In dev-only mode the holdout labels are never read; the
                 # frozen digest from the freeze manifest is recorded instead.
                 "holdout_dataset_sha256": freeze["splits"]["holdout"]["sha256"]
@@ -2349,15 +2554,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "bootstrap": bootstrap,
             "independent_holdout_bootstrap": independent_holdout_bootstrap,
             "independent_holdout_gate": independent_holdout_gate,
-            "retrieval_configuration": {
-                "dense_recipe": "main-compatible",
-                "query_mode": "focused-v1",
-                "ranking": "raw cosine distance, ascending",
-                "distance_cutoff": 0.55,
-                "example_selection": "one example per page before display",
-                "display_limit": 3,
-                "fusion": "none",
-            },
+            "retrieval_configuration": candidate_configuration,
             "performance": performance,
             "execution": execution,
             "gate": gate,

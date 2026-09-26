@@ -85,3 +85,21 @@ answered tasks rose from 7/26 to 10/25. The canonical decision is
 The release-readiness validator also rejected it because the independent
 holdout bootstrap lower bound was not positive. The preserved report is
 [`main-vs-retrieval-v2-focused-fresh-holdout-v1.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json).
+
+## Amendment (2026-09-26): later dev-only candidate
+
+A new frozen dev-only cohort was used to compare the selected main-compatible
+dense candidate with same-page example selection, a 0.60 raw-distance cutoff,
+focused versus broader query rules, and a fixed lexical-overlap rerank. The
+best dev variant measured 15/30 vs main 13/30 Success@1, 22/30 vs 21/30
+Success@3, 2/24 vs 3/24 incorrect answered tasks, and 0/30 false answers for
+both. No platform or offline guardrail regressed. Fresh-process p95 latency /
+peak memory were 84.969 ms / 269,353,656 B vs main 86.142 ms / 236,094,136 B;
+warmed p95 / peak memory were 99.226 ms / 237,929,216 B vs 87.822 ms /
+237,650,616 B. All resource deltas stay within the 20% limit. The observed
+Success@1 gain is 6.7 points, but its one-sided 95% paired-bootstrap
+lower bound is 0.0. The gate correctly remains inconclusive; this is not
+independent validation and does not authorize promotion. See
+[`retrieval-v2-approach-review.md`](../retrieval-v2-approach-review.md) for
+the cohort pin and full variant reports. Any fresh holdout score still
+requires explicit authorization.

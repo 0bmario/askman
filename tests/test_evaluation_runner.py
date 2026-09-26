@@ -63,6 +63,23 @@ class EvaluationRunnerTests(unittest.TestCase):
             },
         )
 
+    def test_dev_extension_dataset_uses_the_separate_development_schema(self):
+        dataset = RUNNER.load_json(
+            ROOT / "tests/fixtures/evaluation/dev-only-extension-v1.json"
+        )
+        RUNNER.validate_dataset(dataset, "dev")
+        self.assertEqual(dataset["schema_version"], 3)
+        self.assertEqual(dataset["dataset_id"], "askman-dev-extension-v1")
+        self.assertEqual(len(dataset["tasks"]), 60)
+        self.assertEqual(
+            sum(task["answerable"] for task in dataset["tasks"]), 30
+        )
+        self.assertEqual(
+            len({task["family"] for task in dataset["tasks"]}), 12
+        )
+        with self.assertRaisesRegex(ValueError, "dataset split must be holdout"):
+            RUNNER.validate_dataset(dataset, "holdout")
+
     def test_dev_intents_match_dev_task_ids_without_labels(self):
         dataset = RUNNER.load_json(ROOT / "tests/fixtures/evaluation/frozen-dev-v1.json")
         intents = RUNNER.load_json(

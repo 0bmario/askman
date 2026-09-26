@@ -1,0 +1,994 @@
+{
+  "answerable_task_count": 30,
+  "cohort_id": "askman-dev-extension-v1",
+  "corpus": {
+    "artifact_kind": "askman.tldr-subset",
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "parser_version": "tldr-subset-v4",
+    "schema_version": 4,
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef"
+  },
+  "dataset_id": "askman-dev-extension-v1",
+  "families": [
+    {
+      "answerable": true,
+      "eligible_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "example_position": 1,
+      "family": "devx-common-find-by-extension",
+      "platform": "common",
+      "questions": [
+        "Find files ending in `.csv` beneath `/srv/data`.",
+        "Search below `~/projects` for every `*.toml` file.",
+        "Locate files with the `.bak` extension under `/var/tmp`.",
+        "Look through a directory tree for files named `*.md`.",
+        "Find all `.jpg` files under the given folder recursively."
+      ],
+      "rationale": "Answerable from `pages/common/find.md` example 1: `find <directory> -name <pattern>` finds files by extension/name pattern recursively.",
+      "source_example_description": "Find files by extension",
+      "source_page": "pages/common/find.md",
+      "task_ids": [
+        "devx-common-find-by-extension-01",
+        "devx-common-find-by-extension-02",
+        "devx-common-find-by-extension-03",
+        "devx-common-find-by-extension-04",
+        "devx-common-find-by-extension-05"
+      ]
+    },
+    {
+      "answerable": true,
+      "eligible_example_ids": [
+        "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de"
+      ],
+      "example_position": 1,
+      "family": "devx-common-sort-ascending-lines",
+      "platform": "common",
+      "questions": [
+        "Sort the lines in `names.txt` in the default ascending order.",
+        "Put the entries from `records.txt` in alphabetical order.",
+        "Return the usual sorted order of lines from `items.txt`.",
+        "Arrange the lines in `hosts.txt` in ascending lexical order.",
+        "Produce a default ascending sort of `packages.txt`."
+      ],
+      "rationale": "Answerable from `pages/common/sort.md` example 1: plain `sort <file>` sorts lines in ascending order.",
+      "source_example_description": "Sort a file in ascending order",
+      "source_page": "pages/common/sort.md",
+      "task_ids": [
+        "devx-common-sort-ascending-lines-01",
+        "devx-common-sort-ascending-lines-02",
+        "devx-common-sort-ascending-lines-03",
+        "devx-common-sort-ascending-lines-04",
+        "devx-common-sort-ascending-lines-05"
+      ]
+    },
+    {
+      "answerable": false,
+      "eligible_example_ids": [],
+      "example_position": null,
+      "family": "devx-common-unsupported-create-user-account",
+      "platform": "common",
+      "questions": [
+        "Create a new local user account from a common command-line utility.",
+        "Add a shell user named `riley`.",
+        "Set up a login account for another person on this machine.",
+        "Create a local account called `buildbot` from the terminal.",
+        "Add a user with a home directory using the standard common command."
+      ],
+      "rationale": "Unanswerable against the pinned common-page corpus: its common pages are cat, cp, find, grep, sed, and sort; none has a user/account creation example.",
+      "source_example_description": null,
+      "source_page": null,
+      "task_ids": [
+        "devx-common-unsupported-create-user-account-01",
+        "devx-common-unsupported-create-user-account-02",
+        "devx-common-unsupported-create-user-account-03",
+        "devx-common-unsupported-create-user-account-04",
+        "devx-common-unsupported-create-user-account-05"
+      ]
+    },
+    {
+      "answerable": true,
+      "eligible_example_ids": [
+        "example-e289813d18091e93b087eefe1f3b3a028a681047f0c372e67caea94d89bb2bd8"
+      ],
+      "example_position": 2,
+      "family": "devx-linux-df-human-readable",
+      "platform": "linux",
+      "questions": [
+        "Show filesystem space usage in human-readable units on Linux.",
+        "Give me a readable overview of mounted filesystem usage.",
+        "Display Linux disk-space totals using MB/GB-style units.",
+        "Which command shows filesystem usage without raw byte counts?",
+        "Report filesystem usage in units people can scan quickly."
+      ],
+      "rationale": "Answerable from `pages/linux/df.md` example 2: `df -h` displays filesystems in human-readable form.",
+      "source_example_description": "Display all filesystems in human-readable form",
+      "source_page": "pages/linux/df.md",
+      "task_ids": [
+        "devx-linux-df-human-readable-01",
+        "devx-linux-df-human-readable-02",
+        "devx-linux-df-human-readable-03",
+        "devx-linux-df-human-readable-04",
+        "devx-linux-df-human-readable-05"
+      ]
+    },
+    {
+      "answerable": false,
+      "eligible_example_ids": [],
+      "example_position": null,
+      "family": "devx-linux-unsupported-bluetooth-pairing",
+      "platform": "linux",
+      "questions": [
+        "Pair this Linux computer with a Bluetooth headset.",
+        "Connect a Linux host to a nearby Bluetooth speaker.",
+        "List and pair Bluetooth devices from the Linux shell.",
+        "Remove an existing Bluetooth pairing on Linux.",
+        "Pair a new Bluetooth keyboard with this Linux machine."
+      ],
+      "rationale": "Unanswerable against the pinned Linux examples: apt, df, free, ip, journalctl, and systemctl are present; none documents Bluetooth discovery or pairing.",
+      "source_example_description": null,
+      "source_page": null,
+      "task_ids": [
+        "devx-linux-unsupported-bluetooth-pairing-01",
+        "devx-linux-unsupported-bluetooth-pairing-02",
+        "devx-linux-unsupported-bluetooth-pairing-03",
+        "devx-linux-unsupported-bluetooth-pairing-04",
+        "devx-linux-unsupported-bluetooth-pairing-05"
+      ]
+    },
+    {
+      "answerable": false,
+      "eligible_example_ids": [],
+      "example_position": null,
+      "family": "devx-linux-unsupported-keyboard-layout",
+      "platform": "linux",
+      "questions": [
+        "Switch the Linux keyboard layout to French.",
+        "Set a Dvorak keyboard mapping for the Linux console.",
+        "List keyboard layouts available on this Linux machine.",
+        "Change the active keyboard layout from a Linux terminal.",
+        "Configure a different keyboard mapping for the next Linux login."
+      ],
+      "rationale": "Unanswerable against the pinned Linux examples: none of apt, df, free, ip, journalctl, or systemctl documents setting or listing keyboard layouts.",
+      "source_example_description": null,
+      "source_page": null,
+      "task_ids": [
+        "devx-linux-unsupported-keyboard-layout-01",
+        "devx-linux-unsupported-keyboard-layout-02",
+        "devx-linux-unsupported-keyboard-layout-03",
+        "devx-linux-unsupported-keyboard-layout-04",
+        "devx-linux-unsupported-keyboard-layout-05"
+      ]
+    },
+    {
+      "answerable": true,
+      "eligible_example_ids": [
+        "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167"
+      ],
+      "example_position": 1,
+      "family": "devx-osx-save-screenshot",
+      "platform": "osx",
+      "questions": [
+        "Save a screenshot of the Mac screen to `capture.png`.",
+        "Take a macOS screen capture and write it to a file.",
+        "Capture the Mac display and save the image at `/tmp/shot.png`.",
+        "Create a screenshot image on macOS at a chosen path.",
+        "Take a screen image on macOS and save it locally."
+      ],
+      "rationale": "Answerable from `pages/osx/screencapture.md` example 1: `screencapture <path>` takes a screenshot and saves it to a file.",
+      "source_example_description": "Take a screenshot and save it to a file",
+      "source_page": "pages/osx/screencapture.md",
+      "task_ids": [
+        "devx-osx-save-screenshot-01",
+        "devx-osx-save-screenshot-02",
+        "devx-osx-save-screenshot-03",
+        "devx-osx-save-screenshot-04",
+        "devx-osx-save-screenshot-05"
+      ]
+    },
+    {
+      "answerable": true,
+      "eligible_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "example_position": 6,
+      "family": "devx-osx-synthesize-speech-to-file",
+      "platform": "osx",
+      "questions": [
+        "Generate an AIFF file by speaking `Welcome home` on macOS.",
+        "Synthesize `Done` and save the spoken audio to `done.aiff`.",
+        "Use the Mac command line to write narrated text to an audio file.",
+        "Create an audio file from a supplied spoken phrase on macOS.",
+        "Save the spoken version of a string as an audio file using the built-in Mac speech command."
+      ],
+      "rationale": "Answerable from `pages/osx/say.md` example 6: `say --output-file <file> <text>` writes spoken text to an audio file.",
+      "source_example_description": "Create an audio file of the spoken text",
+      "source_page": "pages/osx/say.md",
+      "task_ids": [
+        "devx-osx-synthesize-speech-to-file-01",
+        "devx-osx-synthesize-speech-to-file-02",
+        "devx-osx-synthesize-speech-to-file-03",
+        "devx-osx-synthesize-speech-to-file-04",
+        "devx-osx-synthesize-speech-to-file-05"
+      ]
+    },
+    {
+      "answerable": false,
+      "eligible_example_ids": [],
+      "example_position": null,
+      "family": "devx-osx-unsupported-set-display-resolution",
+      "platform": "osx",
+      "questions": [
+        "Change the Mac display resolution from the terminal.",
+        "Set a different screen resolution on macOS.",
+        "Switch the built-in display to 1920 by 1080 using a shell command.",
+        "List available monitor resolutions from macOS.",
+        "Configure a scaled display resolution on this Mac."
+      ],
+      "rationale": "Unanswerable against the pinned macOS examples: mdfind, open, pbcopy, pbpaste, say, and screencapture are present; none documents configuring or querying display resolution.",
+      "source_example_description": null,
+      "source_page": null,
+      "task_ids": [
+        "devx-osx-unsupported-set-display-resolution-01",
+        "devx-osx-unsupported-set-display-resolution-02",
+        "devx-osx-unsupported-set-display-resolution-03",
+        "devx-osx-unsupported-set-display-resolution-04",
+        "devx-osx-unsupported-set-display-resolution-05"
+      ]
+    },
+    {
+      "answerable": true,
+      "eligible_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "example_position": 4,
+      "family": "devx-windows-move-across-drives",
+      "platform": "windows",
+      "questions": [
+        "Move `C:\\logs\\app.txt` to `D:\\archive\\app.txt` in Command Prompt.",
+        "Transfer a file from the C drive to a destination on D.",
+        "Move a directory across Windows drives.",
+        "Relocate `C:\\temp\\data.csv` onto the D drive.",
+        "Move a file to another drive using the Windows Command Prompt."
+      ],
+      "rationale": "Answerable from `pages/windows/move.md` example 4: the page explicitly shows moving a path from `C:` to `D:`.",
+      "source_example_description": "Move a file or directory across drives",
+      "source_page": "pages/windows/move.md",
+      "task_ids": [
+        "devx-windows-move-across-drives-01",
+        "devx-windows-move-across-drives-02",
+        "devx-windows-move-across-drives-03",
+        "devx-windows-move-across-drives-04",
+        "devx-windows-move-across-drives-05"
+      ]
+    },
+    {
+      "answerable": false,
+      "eligible_example_ids": [],
+      "example_position": null,
+      "family": "devx-windows-unsupported-set-system-time",
+      "platform": "windows",
+      "questions": [
+        "Set the Windows system clock from a shell session.",
+        "Change this computer\u2019s time zone with a Windows command.",
+        "Synchronize the Windows date and time from the terminal.",
+        "Configure the local time zone using a Windows CLI command.",
+        "Update this Windows machine\u2019s system clock to a specified time."
+      ],
+      "rationale": "Unanswerable against the pinned Windows examples: cat, copy, dir, findstr, Get-ChildItem, and move are present; none documents setting the clock or time zone.",
+      "source_example_description": null,
+      "source_page": null,
+      "task_ids": [
+        "devx-windows-unsupported-set-system-time-01",
+        "devx-windows-unsupported-set-system-time-02",
+        "devx-windows-unsupported-set-system-time-03",
+        "devx-windows-unsupported-set-system-time-04",
+        "devx-windows-unsupported-set-system-time-05"
+      ]
+    },
+    {
+      "answerable": false,
+      "eligible_example_ids": [],
+      "example_position": null,
+      "family": "devx-windows-unsupported-printer-setup",
+      "platform": "windows",
+      "questions": [
+        "Set the default printer from a Windows command prompt.",
+        "List installed printers on Windows through the terminal.",
+        "Add a network printer using a Windows command.",
+        "Remove an installed printer from a Windows shell.",
+        "Change printer properties using a Windows CLI command."
+      ],
+      "rationale": "Unanswerable against the pinned Windows examples: the six Windows pages cover file reading/copying/listing/searching/moving; none documents printer management.",
+      "source_example_description": null,
+      "source_page": null,
+      "task_ids": [
+        "devx-windows-unsupported-printer-setup-01",
+        "devx-windows-unsupported-printer-setup-02",
+        "devx-windows-unsupported-printer-setup-03",
+        "devx-windows-unsupported-printer-setup-04",
+        "devx-windows-unsupported-printer-setup-05"
+      ]
+    }
+  ],
+  "freeze_id": "askman-dev-extension-v1-freeze-2026-09-26",
+  "platform_ambiguity": "Platform values follow corpus page directories: common means pages/common/*; osx corresponds to pages/osx/*. The common bucket is a corpus platform category, not a claim that an operation works on every OS.",
+  "provenance": {
+    "authoring_method": "source-backed scenario families with five paraphrases each",
+    "intent_record": "Prompts were drafted from the pinned parser-v4 source examples and platform corpus inventory before any retrieval run on this cohort. The authoring agent was instructed not to inspect holdout data or retrieval outputs.",
+    "previous_dev_family_review": "disjoint from frozen-dev-v2-expanded.json",
+    "scope": "development-only; not a holdout or release dataset"
+  },
+  "schema_version": 3,
+  "scorer_version": "task-scorer-v1",
+  "split": "dev",
+  "split_id": "scenario-family-dev-extension-v1",
+  "split_policy": "development-only cohort; twelve new scenario families; five tasks per family; thirty answerable and thirty unanswerable tasks",
+  "task_count": 60,
+  "tasks": [
+    {
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "answerable": true,
+      "family": "devx-common-find-by-extension",
+      "id": "devx-common-find-by-extension-01",
+      "platform": "common",
+      "question": "Find files ending in `.csv` beneath `/srv/data`.",
+      "rationale": "Answerable from `pages/common/find.md` example 1: `find <directory> -name <pattern>` finds files by extension/name pattern recursively.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "answerable": true,
+      "family": "devx-common-find-by-extension",
+      "id": "devx-common-find-by-extension-02",
+      "platform": "common",
+      "question": "Search below `~/projects` for every `*.toml` file.",
+      "rationale": "Answerable from `pages/common/find.md` example 1: `find <directory> -name <pattern>` finds files by extension/name pattern recursively.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "answerable": true,
+      "family": "devx-common-find-by-extension",
+      "id": "devx-common-find-by-extension-03",
+      "platform": "common",
+      "question": "Locate files with the `.bak` extension under `/var/tmp`.",
+      "rationale": "Answerable from `pages/common/find.md` example 1: `find <directory> -name <pattern>` finds files by extension/name pattern recursively.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "answerable": true,
+      "family": "devx-common-find-by-extension",
+      "id": "devx-common-find-by-extension-04",
+      "platform": "common",
+      "question": "Look through a directory tree for files named `*.md`.",
+      "rationale": "Answerable from `pages/common/find.md` example 1: `find <directory> -name <pattern>` finds files by extension/name pattern recursively.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "answerable": true,
+      "family": "devx-common-find-by-extension",
+      "id": "devx-common-find-by-extension-05",
+      "platform": "common",
+      "question": "Find all `.jpg` files under the given folder recursively.",
+      "rationale": "Answerable from `pages/common/find.md` example 1: `find <directory> -name <pattern>` finds files by extension/name pattern recursively.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de"
+      ],
+      "answerable": true,
+      "family": "devx-common-sort-ascending-lines",
+      "id": "devx-common-sort-ascending-lines-01",
+      "platform": "common",
+      "question": "Sort the lines in `names.txt` in the default ascending order.",
+      "rationale": "Answerable from `pages/common/sort.md` example 1: plain `sort <file>` sorts lines in ascending order.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de"
+      ],
+      "answerable": true,
+      "family": "devx-common-sort-ascending-lines",
+      "id": "devx-common-sort-ascending-lines-02",
+      "platform": "common",
+      "question": "Put the entries from `records.txt` in alphabetical order.",
+      "rationale": "Answerable from `pages/common/sort.md` example 1: plain `sort <file>` sorts lines in ascending order.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de"
+      ],
+      "answerable": true,
+      "family": "devx-common-sort-ascending-lines",
+      "id": "devx-common-sort-ascending-lines-03",
+      "platform": "common",
+      "question": "Return the usual sorted order of lines from `items.txt`.",
+      "rationale": "Answerable from `pages/common/sort.md` example 1: plain `sort <file>` sorts lines in ascending order.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de"
+      ],
+      "answerable": true,
+      "family": "devx-common-sort-ascending-lines",
+      "id": "devx-common-sort-ascending-lines-04",
+      "platform": "common",
+      "question": "Arrange the lines in `hosts.txt` in ascending lexical order.",
+      "rationale": "Answerable from `pages/common/sort.md` example 1: plain `sort <file>` sorts lines in ascending order.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-f65291f079140febca69f195c82cdd31fe4080c1b69ce10e3582beb83837f3de"
+      ],
+      "answerable": true,
+      "family": "devx-common-sort-ascending-lines",
+      "id": "devx-common-sort-ascending-lines-05",
+      "platform": "common",
+      "question": "Produce a default ascending sort of `packages.txt`.",
+      "rationale": "Answerable from `pages/common/sort.md` example 1: plain `sort <file>` sorts lines in ascending order.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-common-unsupported-create-user-account",
+      "id": "devx-common-unsupported-create-user-account-01",
+      "platform": "common",
+      "question": "Create a new local user account from a common command-line utility.",
+      "rationale": "Unanswerable against the pinned common-page corpus: its common pages are cat, cp, find, grep, sed, and sort; none has a user/account creation example.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-common-unsupported-create-user-account",
+      "id": "devx-common-unsupported-create-user-account-02",
+      "platform": "common",
+      "question": "Add a shell user named `riley`.",
+      "rationale": "Unanswerable against the pinned common-page corpus: its common pages are cat, cp, find, grep, sed, and sort; none has a user/account creation example.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-common-unsupported-create-user-account",
+      "id": "devx-common-unsupported-create-user-account-03",
+      "platform": "common",
+      "question": "Set up a login account for another person on this machine.",
+      "rationale": "Unanswerable against the pinned common-page corpus: its common pages are cat, cp, find, grep, sed, and sort; none has a user/account creation example.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-common-unsupported-create-user-account",
+      "id": "devx-common-unsupported-create-user-account-04",
+      "platform": "common",
+      "question": "Create a local account called `buildbot` from the terminal.",
+      "rationale": "Unanswerable against the pinned common-page corpus: its common pages are cat, cp, find, grep, sed, and sort; none has a user/account creation example.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-common-unsupported-create-user-account",
+      "id": "devx-common-unsupported-create-user-account-05",
+      "platform": "common",
+      "question": "Add a user with a home directory using the standard common command.",
+      "rationale": "Unanswerable against the pinned common-page corpus: its common pages are cat, cp, find, grep, sed, and sort; none has a user/account creation example.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-e289813d18091e93b087eefe1f3b3a028a681047f0c372e67caea94d89bb2bd8"
+      ],
+      "answerable": true,
+      "family": "devx-linux-df-human-readable",
+      "id": "devx-linux-df-human-readable-01",
+      "platform": "linux",
+      "question": "Show filesystem space usage in human-readable units on Linux.",
+      "rationale": "Answerable from `pages/linux/df.md` example 2: `df -h` displays filesystems in human-readable form.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-e289813d18091e93b087eefe1f3b3a028a681047f0c372e67caea94d89bb2bd8"
+      ],
+      "answerable": true,
+      "family": "devx-linux-df-human-readable",
+      "id": "devx-linux-df-human-readable-02",
+      "platform": "linux",
+      "question": "Give me a readable overview of mounted filesystem usage.",
+      "rationale": "Answerable from `pages/linux/df.md` example 2: `df -h` displays filesystems in human-readable form.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-e289813d18091e93b087eefe1f3b3a028a681047f0c372e67caea94d89bb2bd8"
+      ],
+      "answerable": true,
+      "family": "devx-linux-df-human-readable",
+      "id": "devx-linux-df-human-readable-03",
+      "platform": "linux",
+      "question": "Display Linux disk-space totals using MB/GB-style units.",
+      "rationale": "Answerable from `pages/linux/df.md` example 2: `df -h` displays filesystems in human-readable form.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-e289813d18091e93b087eefe1f3b3a028a681047f0c372e67caea94d89bb2bd8"
+      ],
+      "answerable": true,
+      "family": "devx-linux-df-human-readable",
+      "id": "devx-linux-df-human-readable-04",
+      "platform": "linux",
+      "question": "Which command shows filesystem usage without raw byte counts?",
+      "rationale": "Answerable from `pages/linux/df.md` example 2: `df -h` displays filesystems in human-readable form.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-e289813d18091e93b087eefe1f3b3a028a681047f0c372e67caea94d89bb2bd8"
+      ],
+      "answerable": true,
+      "family": "devx-linux-df-human-readable",
+      "id": "devx-linux-df-human-readable-05",
+      "platform": "linux",
+      "question": "Report filesystem usage in units people can scan quickly.",
+      "rationale": "Answerable from `pages/linux/df.md` example 2: `df -h` displays filesystems in human-readable form.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-bluetooth-pairing",
+      "id": "devx-linux-unsupported-bluetooth-pairing-01",
+      "platform": "linux",
+      "question": "Pair this Linux computer with a Bluetooth headset.",
+      "rationale": "Unanswerable against the pinned Linux examples: apt, df, free, ip, journalctl, and systemctl are present; none documents Bluetooth discovery or pairing.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-bluetooth-pairing",
+      "id": "devx-linux-unsupported-bluetooth-pairing-02",
+      "platform": "linux",
+      "question": "Connect a Linux host to a nearby Bluetooth speaker.",
+      "rationale": "Unanswerable against the pinned Linux examples: apt, df, free, ip, journalctl, and systemctl are present; none documents Bluetooth discovery or pairing.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-bluetooth-pairing",
+      "id": "devx-linux-unsupported-bluetooth-pairing-03",
+      "platform": "linux",
+      "question": "List and pair Bluetooth devices from the Linux shell.",
+      "rationale": "Unanswerable against the pinned Linux examples: apt, df, free, ip, journalctl, and systemctl are present; none documents Bluetooth discovery or pairing.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-bluetooth-pairing",
+      "id": "devx-linux-unsupported-bluetooth-pairing-04",
+      "platform": "linux",
+      "question": "Remove an existing Bluetooth pairing on Linux.",
+      "rationale": "Unanswerable against the pinned Linux examples: apt, df, free, ip, journalctl, and systemctl are present; none documents Bluetooth discovery or pairing.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-bluetooth-pairing",
+      "id": "devx-linux-unsupported-bluetooth-pairing-05",
+      "platform": "linux",
+      "question": "Pair a new Bluetooth keyboard with this Linux machine.",
+      "rationale": "Unanswerable against the pinned Linux examples: apt, df, free, ip, journalctl, and systemctl are present; none documents Bluetooth discovery or pairing.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-keyboard-layout",
+      "id": "devx-linux-unsupported-keyboard-layout-01",
+      "platform": "linux",
+      "question": "Switch the Linux keyboard layout to French.",
+      "rationale": "Unanswerable against the pinned Linux examples: none of apt, df, free, ip, journalctl, or systemctl documents setting or listing keyboard layouts.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-keyboard-layout",
+      "id": "devx-linux-unsupported-keyboard-layout-02",
+      "platform": "linux",
+      "question": "Set a Dvorak keyboard mapping for the Linux console.",
+      "rationale": "Unanswerable against the pinned Linux examples: none of apt, df, free, ip, journalctl, or systemctl documents setting or listing keyboard layouts.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-keyboard-layout",
+      "id": "devx-linux-unsupported-keyboard-layout-03",
+      "platform": "linux",
+      "question": "List keyboard layouts available on this Linux machine.",
+      "rationale": "Unanswerable against the pinned Linux examples: none of apt, df, free, ip, journalctl, or systemctl documents setting or listing keyboard layouts.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-keyboard-layout",
+      "id": "devx-linux-unsupported-keyboard-layout-04",
+      "platform": "linux",
+      "question": "Change the active keyboard layout from a Linux terminal.",
+      "rationale": "Unanswerable against the pinned Linux examples: none of apt, df, free, ip, journalctl, or systemctl documents setting or listing keyboard layouts.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-linux-unsupported-keyboard-layout",
+      "id": "devx-linux-unsupported-keyboard-layout-05",
+      "platform": "linux",
+      "question": "Configure a different keyboard mapping for the next Linux login.",
+      "rationale": "Unanswerable against the pinned Linux examples: none of apt, df, free, ip, journalctl, or systemctl documents setting or listing keyboard layouts.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167"
+      ],
+      "answerable": true,
+      "family": "devx-osx-save-screenshot",
+      "id": "devx-osx-save-screenshot-01",
+      "platform": "osx",
+      "question": "Save a screenshot of the Mac screen to `capture.png`.",
+      "rationale": "Answerable from `pages/osx/screencapture.md` example 1: `screencapture <path>` takes a screenshot and saves it to a file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167"
+      ],
+      "answerable": true,
+      "family": "devx-osx-save-screenshot",
+      "id": "devx-osx-save-screenshot-02",
+      "platform": "osx",
+      "question": "Take a macOS screen capture and write it to a file.",
+      "rationale": "Answerable from `pages/osx/screencapture.md` example 1: `screencapture <path>` takes a screenshot and saves it to a file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167"
+      ],
+      "answerable": true,
+      "family": "devx-osx-save-screenshot",
+      "id": "devx-osx-save-screenshot-03",
+      "platform": "osx",
+      "question": "Capture the Mac display and save the image at `/tmp/shot.png`.",
+      "rationale": "Answerable from `pages/osx/screencapture.md` example 1: `screencapture <path>` takes a screenshot and saves it to a file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167"
+      ],
+      "answerable": true,
+      "family": "devx-osx-save-screenshot",
+      "id": "devx-osx-save-screenshot-04",
+      "platform": "osx",
+      "question": "Create a screenshot image on macOS at a chosen path.",
+      "rationale": "Answerable from `pages/osx/screencapture.md` example 1: `screencapture <path>` takes a screenshot and saves it to a file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-81bb973c3cd0cf33ee67463942373247ab1af6843323f6dca0345c1c4c6eb167"
+      ],
+      "answerable": true,
+      "family": "devx-osx-save-screenshot",
+      "id": "devx-osx-save-screenshot-05",
+      "platform": "osx",
+      "question": "Take a screen image on macOS and save it locally.",
+      "rationale": "Answerable from `pages/osx/screencapture.md` example 1: `screencapture <path>` takes a screenshot and saves it to a file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "answerable": true,
+      "family": "devx-osx-synthesize-speech-to-file",
+      "id": "devx-osx-synthesize-speech-to-file-01",
+      "platform": "osx",
+      "question": "Generate an AIFF file by speaking `Welcome home` on macOS.",
+      "rationale": "Answerable from `pages/osx/say.md` example 6: `say --output-file <file> <text>` writes spoken text to an audio file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "answerable": true,
+      "family": "devx-osx-synthesize-speech-to-file",
+      "id": "devx-osx-synthesize-speech-to-file-02",
+      "platform": "osx",
+      "question": "Synthesize `Done` and save the spoken audio to `done.aiff`.",
+      "rationale": "Answerable from `pages/osx/say.md` example 6: `say --output-file <file> <text>` writes spoken text to an audio file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "answerable": true,
+      "family": "devx-osx-synthesize-speech-to-file",
+      "id": "devx-osx-synthesize-speech-to-file-03",
+      "platform": "osx",
+      "question": "Use the Mac command line to write narrated text to an audio file.",
+      "rationale": "Answerable from `pages/osx/say.md` example 6: `say --output-file <file> <text>` writes spoken text to an audio file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "answerable": true,
+      "family": "devx-osx-synthesize-speech-to-file",
+      "id": "devx-osx-synthesize-speech-to-file-04",
+      "platform": "osx",
+      "question": "Create an audio file from a supplied spoken phrase on macOS.",
+      "rationale": "Answerable from `pages/osx/say.md` example 6: `say --output-file <file> <text>` writes spoken text to an audio file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "answerable": true,
+      "family": "devx-osx-synthesize-speech-to-file",
+      "id": "devx-osx-synthesize-speech-to-file-05",
+      "platform": "osx",
+      "question": "Save the spoken version of a string as an audio file using the built-in Mac speech command.",
+      "rationale": "Answerable from `pages/osx/say.md` example 6: `say --output-file <file> <text>` writes spoken text to an audio file.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-osx-unsupported-set-display-resolution",
+      "id": "devx-osx-unsupported-set-display-resolution-01",
+      "platform": "osx",
+      "question": "Change the Mac display resolution from the terminal.",
+      "rationale": "Unanswerable against the pinned macOS examples: mdfind, open, pbcopy, pbpaste, say, and screencapture are present; none documents configuring or querying display resolution.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-osx-unsupported-set-display-resolution",
+      "id": "devx-osx-unsupported-set-display-resolution-02",
+      "platform": "osx",
+      "question": "Set a different screen resolution on macOS.",
+      "rationale": "Unanswerable against the pinned macOS examples: mdfind, open, pbcopy, pbpaste, say, and screencapture are present; none documents configuring or querying display resolution.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-osx-unsupported-set-display-resolution",
+      "id": "devx-osx-unsupported-set-display-resolution-03",
+      "platform": "osx",
+      "question": "Switch the built-in display to 1920 by 1080 using a shell command.",
+      "rationale": "Unanswerable against the pinned macOS examples: mdfind, open, pbcopy, pbpaste, say, and screencapture are present; none documents configuring or querying display resolution.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-osx-unsupported-set-display-resolution",
+      "id": "devx-osx-unsupported-set-display-resolution-04",
+      "platform": "osx",
+      "question": "List available monitor resolutions from macOS.",
+      "rationale": "Unanswerable against the pinned macOS examples: mdfind, open, pbcopy, pbpaste, say, and screencapture are present; none documents configuring or querying display resolution.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-osx-unsupported-set-display-resolution",
+      "id": "devx-osx-unsupported-set-display-resolution-05",
+      "platform": "osx",
+      "question": "Configure a scaled display resolution on this Mac.",
+      "rationale": "Unanswerable against the pinned macOS examples: mdfind, open, pbcopy, pbpaste, say, and screencapture are present; none documents configuring or querying display resolution.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "answerable": true,
+      "family": "devx-windows-move-across-drives",
+      "id": "devx-windows-move-across-drives-01",
+      "platform": "windows",
+      "question": "Move `C:\\logs\\app.txt` to `D:\\archive\\app.txt` in Command Prompt.",
+      "rationale": "Answerable from `pages/windows/move.md` example 4: the page explicitly shows moving a path from `C:` to `D:`.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "answerable": true,
+      "family": "devx-windows-move-across-drives",
+      "id": "devx-windows-move-across-drives-02",
+      "platform": "windows",
+      "question": "Transfer a file from the C drive to a destination on D.",
+      "rationale": "Answerable from `pages/windows/move.md` example 4: the page explicitly shows moving a path from `C:` to `D:`.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "answerable": true,
+      "family": "devx-windows-move-across-drives",
+      "id": "devx-windows-move-across-drives-03",
+      "platform": "windows",
+      "question": "Move a directory across Windows drives.",
+      "rationale": "Answerable from `pages/windows/move.md` example 4: the page explicitly shows moving a path from `C:` to `D:`.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "answerable": true,
+      "family": "devx-windows-move-across-drives",
+      "id": "devx-windows-move-across-drives-04",
+      "platform": "windows",
+      "question": "Relocate `C:\\temp\\data.csv` onto the D drive.",
+      "rationale": "Answerable from `pages/windows/move.md` example 4: the page explicitly shows moving a path from `C:` to `D:`.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "answerable": true,
+      "family": "devx-windows-move-across-drives",
+      "id": "devx-windows-move-across-drives-05",
+      "platform": "windows",
+      "question": "Move a file to another drive using the Windows Command Prompt.",
+      "rationale": "Answerable from `pages/windows/move.md` example 4: the page explicitly shows moving a path from `C:` to `D:`.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-set-system-time",
+      "id": "devx-windows-unsupported-set-system-time-01",
+      "platform": "windows",
+      "question": "Set the Windows system clock from a shell session.",
+      "rationale": "Unanswerable against the pinned Windows examples: cat, copy, dir, findstr, Get-ChildItem, and move are present; none documents setting the clock or time zone.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-set-system-time",
+      "id": "devx-windows-unsupported-set-system-time-02",
+      "platform": "windows",
+      "question": "Change this computer\u2019s time zone with a Windows command.",
+      "rationale": "Unanswerable against the pinned Windows examples: cat, copy, dir, findstr, Get-ChildItem, and move are present; none documents setting the clock or time zone.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-set-system-time",
+      "id": "devx-windows-unsupported-set-system-time-03",
+      "platform": "windows",
+      "question": "Synchronize the Windows date and time from the terminal.",
+      "rationale": "Unanswerable against the pinned Windows examples: cat, copy, dir, findstr, Get-ChildItem, and move are present; none documents setting the clock or time zone.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-set-system-time",
+      "id": "devx-windows-unsupported-set-system-time-04",
+      "platform": "windows",
+      "question": "Configure the local time zone using a Windows CLI command.",
+      "rationale": "Unanswerable against the pinned Windows examples: cat, copy, dir, findstr, Get-ChildItem, and move are present; none documents setting the clock or time zone.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-set-system-time",
+      "id": "devx-windows-unsupported-set-system-time-05",
+      "platform": "windows",
+      "question": "Update this Windows machine\u2019s system clock to a specified time.",
+      "rationale": "Unanswerable against the pinned Windows examples: cat, copy, dir, findstr, Get-ChildItem, and move are present; none documents setting the clock or time zone.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-printer-setup",
+      "id": "devx-windows-unsupported-printer-setup-01",
+      "platform": "windows",
+      "question": "Set the default printer from a Windows command prompt.",
+      "rationale": "Unanswerable against the pinned Windows examples: the six Windows pages cover file reading/copying/listing/searching/moving; none documents printer management.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-printer-setup",
+      "id": "devx-windows-unsupported-printer-setup-02",
+      "platform": "windows",
+      "question": "List installed printers on Windows through the terminal.",
+      "rationale": "Unanswerable against the pinned Windows examples: the six Windows pages cover file reading/copying/listing/searching/moving; none documents printer management.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-printer-setup",
+      "id": "devx-windows-unsupported-printer-setup-03",
+      "platform": "windows",
+      "question": "Add a network printer using a Windows command.",
+      "rationale": "Unanswerable against the pinned Windows examples: the six Windows pages cover file reading/copying/listing/searching/moving; none documents printer management.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-printer-setup",
+      "id": "devx-windows-unsupported-printer-setup-04",
+      "platform": "windows",
+      "question": "Remove an installed printer from a Windows shell.",
+      "rationale": "Unanswerable against the pinned Windows examples: the six Windows pages cover file reading/copying/listing/searching/moving; none documents printer management.",
+      "split": "dev"
+    },
+    {
+      "acceptable_example_ids": [],
+      "answerable": false,
+      "family": "devx-windows-unsupported-printer-setup",
+      "id": "devx-windows-unsupported-printer-setup-05",
+      "platform": "windows",
+      "question": "Change printer properties using a Windows CLI command.",
+      "rationale": "Unanswerable against the pinned Windows examples: the six Windows pages cover file reading/copying/listing/searching/moving; none documents printer management.",
+      "split": "dev"
+    }
+  ],
+  "unanswerable_task_count": 30
+}

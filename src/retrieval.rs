@@ -6,12 +6,14 @@ use crate::dense::{
 use crate::search::TargetOs;
 use anyhow::{Result, bail};
 use colored::Colorize;
+use std::collections::HashSet;
 use std::fmt::Write;
 use std::path::PathBuf;
 
 pub const MAX_DISPLAYED_RESULTS: usize = 3;
 pub const DENSE_CANDIDATE_BUDGET: usize = 8;
-pub const DENSE_DISTANCE_CUTOFF: f64 = 0.55;
+pub const DENSE_DISTANCE_CUTOFF: f64 = 0.60;
+const LEXICAL_OVERLAP_WEIGHT: f64 = 0.05;
 const FROZEN_DENSE_RECIPE: &str = "main-compatible";
 
 #[derive(Debug, Clone)]
@@ -68,7 +70,7 @@ fn run_validated_candidate(
                 DENSE_CANDIDATE_BUDGET,
                 DenseQueryMode::FocusedIntentRulesV1,
                 platform_explicit,
-                false,
+                true,
             )?,
         );
         print!("{}", render_results(&results, verbose));
@@ -90,10 +92,45 @@ fn select_displayed_candidates(
         return Vec::new();
     }
 
-    candidates
+    let query_terms = lexical_terms(query);
+    let mut eligible: Vec<_> = candidates
         .into_iter()
         .filter(|candidate| candidate.ranking_score <= DENSE_DISTANCE_CUTOFF)
-        .take(MAX_DISPLAYED_RESULTS)
+        .collect();
+    eligible.sort_by(|left, right| {
+        lexical_adjusted_distance(left, &query_terms)
+            .total_cmp(&lexical_adjusted_distance(right, &query_terms))
+            .then_with(|| left.example_id.cmp(&right.example_id))
+    });
+    eligible.truncate(MAX_DISPLAYED_RESULTS);
+    eligible
+}
+
+fn lexical_adjusted_distance(candidate: &DenseCandidate, query_terms: &HashSet<String>) -> f64 {
+    let candidate_text = format!(
+        "{} {} {} {}",
+        candidate.page_command,
+        candidate.page_description,
+        candidate.example_description,
+        candidate.command
+    );
+    let candidate_terms = lexical_terms(&candidate_text);
+    let shared_terms = query_terms.intersection(&candidate_terms).count();
+    candidate.ranking_score - LEXICAL_OVERLAP_WEIGHT * shared_terms as f64
+}
+
+fn lexical_terms(value: &str) -> HashSet<String> {
+    const STOP_WORDS: &[&str] = &[
+        "a", "an", "and", "as", "at", "be", "by", "for", "from", "in", "into", "is", "it", "of",
+        "on", "or", "the", "to", "with", "your",
+    ];
+
+    value
+        .split(|character: char| !character.is_alphanumeric() && character != '_')
+        .filter(|token| {
+            !token.is_empty() && !STOP_WORDS.contains(&token.to_ascii_lowercase().as_str())
+        })
+        .map(str::to_ascii_lowercase)
         .collect()
 }
 
@@ -186,8 +223,8 @@ mod tests {
         let results = select_displayed_candidates(
             "copy one file to another path",
             [
-                candidate(0.55),
-                candidate(0.56),
+                candidate(DENSE_DISTANCE_CUTOFF),
+                candidate(DENSE_DISTANCE_CUTOFF + 0.01),
                 candidate(0.1),
                 candidate(0.2),
                 candidate(0.3),
@@ -195,10 +232,29 @@ mod tests {
         );
 
         assert_eq!(results.len(), 3);
-        assert_eq!(results[0].ranking_score, DENSE_DISTANCE_CUTOFF);
-        assert_eq!(results[1].ranking_score, 0.1);
-        assert_eq!(results[2].ranking_score, 0.2);
-        assert!(results.iter().all(|result| result.ranking_score <= 0.55));
+        assert!(
+            results
+                .iter()
+                .all(|result| result.ranking_score <= DENSE_DISTANCE_CUTOFF)
+        );
+    }
+
+    #[test]
+    fn lexical_overlap_reranks_matching_operational_examples() {
+        let mut descending = candidate(0.30);
+        descending.page_command = "sort".to_string();
+        descending.example_description = "Sort a file in descending order:".to_string();
+
+        let mut ascending = candidate(0.34);
+        ascending.page_command = "sort".to_string();
+        ascending.example_description = "Sort a file in ascending order:".to_string();
+
+        let results = select_displayed_candidates("sort ascending a file", [descending, ascending]);
+
+        assert_eq!(
+            results[0].example_description,
+            "Sort a file in ascending order:"
+        );
     }
 
     #[test]
