@@ -243,6 +243,21 @@ class ReleaseGateTests(unittest.TestCase):
         )
 
         self.assertEqual(identity["source_digest"], "c" * 64)
+        dataset["corpus"]["corpus_id"] = f"tldr-pages@{'a' * 40}"
+        with self.assertRaisesRegex(
+            ValueError, "dev benchmark corpus ID is inconsistent"
+        ):
+            GATE.validate_benchmark_corpus_compatibility(
+                dataset, candidate_corpus, "dev"
+            )
+        identity = GATE.validate_benchmark_corpus_compatibility(
+            dataset,
+            candidate_corpus,
+            "holdout",
+            allow_legacy_tldr_corpus_id=True,
+        )
+        self.assertEqual(identity["source_revision"], "a" * 40)
+
         dataset["corpus"]["source_digest"] = "d" * 64
         dataset["corpus"]["corpus_id"] = f"{'a' * 40}:{'d' * 64}"
         with self.assertRaisesRegex(

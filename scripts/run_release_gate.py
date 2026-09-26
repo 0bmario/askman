@@ -858,6 +858,7 @@ def validate_benchmark_corpus_compatibility(
     candidate_corpus: dict[str, str],
     split_name: str,
     record_equivalence: dict[str, Any] | None = None,
+    allow_legacy_tldr_corpus_id: bool = False,
 ) -> dict[str, Any]:
     corpus = dataset.get("corpus")
     if not isinstance(corpus, dict):
@@ -870,7 +871,15 @@ def validate_benchmark_corpus_compatibility(
             raise ValueError(f"{split_name} benchmark corpus identity is invalid: {field}")
         identity[field] = value
 
-    if corpus.get("corpus_id") != f"{identity['source_revision']}:{identity['source_digest']}":
+    expected_corpus_id = f"{identity['source_revision']}:{identity['source_digest']}"
+    is_frozen_legacy_tldr_id = (
+        allow_legacy_tldr_corpus_id
+        and corpus.get("corpus_id") == f"tldr-pages@{identity['source_revision']}"
+    )
+    if (
+        corpus.get("corpus_id") != expected_corpus_id
+        and not is_frozen_legacy_tldr_id
+    ):
         raise ValueError(f"{split_name} benchmark corpus ID is inconsistent")
 
     for field in ("source_revision", "source_digest"):
@@ -2114,7 +2123,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if holdout is not None:
         benchmark_corpus_compatibility["holdout"] = (
             validate_benchmark_corpus_compatibility(
-                holdout, candidate_corpus, "holdout", record_equivalence
+                holdout,
+                candidate_corpus,
+                "holdout",
+                record_equivalence,
+                allow_legacy_tldr_corpus_id=holdout_freeze is not None,
             )
         )
     if freeze.get("benchmark_id") != "askman-evaluation-v2":
