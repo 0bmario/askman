@@ -4,15 +4,15 @@ Decision: **inconclusive**
 
 ## Inputs and builds
 
-- Generated: `2026-09-26T18:04:37.892604+00:00`
+- Generated: `2026-09-26T18:10:02.146849+00:00`
 - Evidence scope: `custom-dev-only-exploration`
 - Query network policy: `macOS sandbox-exec deny network*`
-- Reproduction: `scripts/run_release_gate.py --candidate-working-tree --main-data-dir /tmp/askman-goal.Fk5Zkh/main-import-home/Library/Application Support/askman --bundle /tmp/askman-goal.Fk5Zkh/bundle-final-v2 --dev-only --allow-custom-dev-dataset --candidate-config tests/fixtures/evaluation/dev-extension-v1-candidate-focused-same-page-cutoff-060-lexical-005.json --output-json /tmp/askman-dev-extension-v1-main-vs-lexical-005-formatted.json --output-markdown /tmp/askman-dev-extension-v1-main-vs-lexical-005-formatted.md`
+- Reproduction: `scripts/run_release_gate.py --candidate-ref ba74692cf79fa9c294f685fbade8f9315aeacdd1 --main-data-dir /tmp/askman-goal.Fk5Zkh/main-import-home/Library/Application Support/askman --bundle /tmp/askman-goal.Fk5Zkh/bundle-final-v2 --dev-only --allow-custom-dev-dataset --candidate-config tests/fixtures/evaluation/dev-extension-v1-candidate-focused-same-page-cutoff-060-lexical-005.json --output-json /tmp/askman-dev-extension-v1-main-vs-lexical-005-committed.json --output-markdown /tmp/askman-dev-extension-v1-main-vs-lexical-005-committed.md`
 - Freeze: `evaluation-v2-release-benchmark-v3`
 - Main commit: `8bd9fa296ea7e2f461202091f2ade47221bc8a0e`
 - Main Cargo.lock SHA-256: `79ee86b480ce00437f814657327b326b725ecd13965d1e958772b5d0ff415990`
 - Main binary SHA-256: `e24f91a02008c7e9c6807d4d62c7d8b07170c61197f588e7ab3edf7513cfe38d`
-- Candidate commit: `a1bac275508d14b14192da06f498ce288d85f6b6`
+- Candidate commit: `ba74692cf79fa9c294f685fbade8f9315aeacdd1`
 - Candidate Cargo.lock SHA-256: `c7eb0288a893ce1f387118cb0fc7370465d2efdfe33de1518ec2715b81c94f76`
 - Candidate binary SHA-256: `20193571cef751a3d38fd1e12f9d26dd3512fbcc04498d78f128eee906ec3e8f`
 - Freeze manifest SHA-256: `4f258311db08cad15c1473c77ff6d98e2fa3b0044990fcdfcbc8110f96fc46dc`
@@ -71,8 +71,8 @@ Decision: **inconclusive**
 
 | Phase | main p95 | retrieval-v2 p95 | main peak memory | retrieval-v2 peak memory |
 | --- | ---: | ---: | ---: | ---: |
-| dev fresh | 86.142 ms | 84.969 ms | 236,094,136 B | 269,353,656 B |
-| warmed query | 87.822 ms | 99.226 ms | 237,650,616 B | 237,929,216 B |
+| dev fresh | 86.721 ms | 84.511 ms | 237,028,024 B | 256,328,376 B |
+| warmed query | 85.258 ms | 84.399 ms | 235,930,296 B | 237,765,328 B |
 
 ## Execution
 

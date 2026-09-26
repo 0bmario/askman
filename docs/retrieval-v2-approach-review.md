@@ -1,8 +1,7 @@
 # Retrieval-v2 approach review and decision — 2026-09-26
 
-Review starts from working tree `f61e3af`; the latest development candidate
-build is based on `a1bac27`, against main baseline `8bd9fa2` and installed
-Askman 0.3.3.
+Review starts from working tree `f61e3af`; the latest development candidate is
+commit `ba74692`, against main baseline `8bd9fa2` and installed Askman 0.3.3.
 Historical v2 evidence includes two dev-only paired gates and one authorized
 canonical run; the broad candidate failed its independent holdout. The smaller
 candidate was selected on dev only. It was later scored once against fresh
@@ -362,9 +361,9 @@ bootstrap lower bound for Success@1 is 0.0 pp, so the canonical gate is
 inconclusive. The candidate is still development-only.
 
 Network-denied runs had zero execution failures. Fresh-process p95 latency and
-peak memory were 84.969 ms / 269,353,656 B for candidate vs 86.142 ms /
-236,094,136 B for main. Warm p95 and peak memory were 99.226 ms / 237,929,216 B
-vs 87.822 ms / 237,650,616 B. Both phases stay within the 20% limit. The
+peak memory were 84.511 ms / 256,328,376 B for candidate vs 86.721 ms /
+237,028,024 B for main. Warm p95 and peak memory were 84.399 ms / 237,765,328 B
+vs 85.258 ms / 235,930,296 B. Both phases stay within the 20% limit. The
 candidate source digest is
 `f84e6424cdb88b92726819a40737811a57f64c94b383e936e5c05624219e0627`; binary
 digest is

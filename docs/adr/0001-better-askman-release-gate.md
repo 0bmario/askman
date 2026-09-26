@@ -94,9 +94,9 @@ focused versus broader query rules, and a fixed lexical-overlap rerank. The
 best dev variant measured 15/30 vs main 13/30 Success@1, 22/30 vs 21/30
 Success@3, 2/24 vs 3/24 incorrect answered tasks, and 0/30 false answers for
 both. No platform or offline guardrail regressed. Fresh-process p95 latency /
-peak memory were 84.969 ms / 269,353,656 B vs main 86.142 ms / 236,094,136 B;
-warmed p95 / peak memory were 99.226 ms / 237,929,216 B vs 87.822 ms /
-237,650,616 B. All resource deltas stay within the 20% limit. The observed
+peak memory were 84.511 ms / 256,328,376 B vs main 86.721 ms / 237,028,024 B;
+warmed p95 / peak memory were 84.399 ms / 237,765,328 B vs 85.258 ms /
+235,930,296 B. All resource deltas stay within the 20% limit. The observed
 Success@1 gain is 6.7 points, but its one-sided 95% paired-bootstrap
 lower bound is 0.0. The gate correctly remains inconclusive; this is not
 independent validation and does not authorize promotion. See

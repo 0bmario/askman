@@ -150,9 +150,9 @@ is common 3/10 vs 2/10, Linux 2/5 vs 1/5, macOS 8/10 vs 8/10, Windows 2/5 vs
 Windows 2/5 vs 2/5. No family regressed; two families improved. The observed
 Success@1 gain is 2/30 (6.7 pp), but the fixed-seed one-sided 95% paired
 bootstrap lower bound is 0.0 pp. Network-denied CLI execution had no failures.
-Fresh-process p95/memory were 84.969 ms / 269,353,656 B vs main 86.142 ms /
-236,094,136 B. Warm p95/memory were 99.226 ms / 237,929,216 B vs main 87.822
-ms / 237,650,616 B. All resource deltas are within 20%.
+Fresh-process p95/memory were 84.511 ms / 256,328,376 B vs main 86.721 ms /
+237,028,024 B. Warm p95/memory were 84.399 ms / 237,765,328 B vs main 85.258
+ms / 235,930,296 B. All resource deltas are within 20%.
 
 The canonical runner decision remains inconclusive: the development bootstrap
 lower bound is not above zero, and dev-only evidence cannot make a release

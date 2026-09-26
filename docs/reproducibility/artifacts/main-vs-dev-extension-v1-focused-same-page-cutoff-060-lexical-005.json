@@ -13,10 +13,10 @@
   },
   "builds": {
     "candidate": {
-      "binary": "/var/folders/gg/m4k2c11115j155971lzv7vxh0000gn/T/askman-release-gate-x5tg5aiz/candidate-target/release/askman",
+      "binary": "/var/folders/gg/m4k2c11115j155971lzv7vxh0000gn/T/askman-release-gate-fohluuw4/candidate-target/release/askman",
       "binary_bytes": 31488656,
       "binary_sha256": "20193571cef751a3d38fd1e12f9d26dd3512fbcc04498d78f128eee906ec3e8f",
-      "build_elapsed_ms": 47158.589,
+      "build_elapsed_ms": 47880.077,
       "cargo_lock_sha256": "c7eb0288a893ce1f387118cb0fc7370465d2efdfe33de1518ec2715b81c94f76",
       "command": [
         "cargo",
@@ -27,47 +27,15 @@
         "--bin",
         "askman"
       ],
-      "commit": "a1bac275508d14b14192da06f498ce288d85f6b6",
+      "commit": "ba74692cf79fa9c294f685fbade8f9315aeacdd1",
       "ort_rpath": null,
-      "ref": "working-tree",
-      "working_tree_source_sha256": "f84e6424cdb88b92726819a40737811a57f64c94b383e936e5c05624219e0627",
-      "working_tree_status": [
-        " M docs/adr/0001-better-askman-release-gate.md",
-        " M docs/adr/0002-two-tier-evaluation-benchmarks.md",
-        " M docs/adr/0003-hybrid-rank-fusion.md",
-        " M docs/retrieval-v2-approach-review.md",
-        " M scripts/evaluate_retrieval.py",
-        " M scripts/run_release_gate.py",
-        " M src/retrieval.rs",
-        " M tests/test_evaluation_runner.py",
-        " M tests/test_release_gate.py",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-cutoff-060.json",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-cutoff-060.md",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-focused-same-page-cutoff-060-lexical-005.json",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-focused-same-page-cutoff-060-lexical-005.md",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-focused.json",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-focused.md",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-intent-rules-same-page-cutoff-060.json",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-intent-rules-same-page-cutoff-060.md",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-same-page.json",
-        "?? docs/reproducibility/artifacts/main-vs-dev-extension-v1-same-page.md",
-        "?? scripts/__pycache__/evaluate_retrieval.cpython-314.pyc",
-        "?? scripts/__pycache__/run_release_gate.cpython-314.pyc",
-        "?? tests/__pycache__/test_evaluation_runner.cpython-314.pyc",
-        "?? tests/__pycache__/test_release_gate.cpython-314.pyc",
-        "?? tests/fixtures/evaluation/dev-extension-v1-candidate-focused-same-page-cutoff-060-lexical-005.json",
-        "?? tests/fixtures/evaluation/dev-extension-v1-candidate-intent-rules-same-page-cutoff-060.json",
-        "?? tests/fixtures/evaluation/dev-extension-v1-candidate-same-page-cutoff-060.json",
-        "?? tests/fixtures/evaluation/dev-extension-v1-candidate-same-page.json",
-        "?? tests/fixtures/evaluation/dev-only-extension-v1.json",
-        "?? tests/fixtures/evaluation/dev-only-extension-v1.manifest.json"
-      ]
+      "ref": "HEAD"
     },
     "main": {
-      "binary": "/var/folders/gg/m4k2c11115j155971lzv7vxh0000gn/T/askman-release-gate-x5tg5aiz/main-target/release/askman",
+      "binary": "/var/folders/gg/m4k2c11115j155971lzv7vxh0000gn/T/askman-release-gate-fohluuw4/main-target/release/askman",
       "binary_bytes": 30898832,
       "binary_sha256": "e24f91a02008c7e9c6807d4d62c7d8b07170c61197f588e7ab3edf7513cfe38d",
-      "build_elapsed_ms": 45775.69,
+      "build_elapsed_ms": 46454.027,
       "cargo_lock_sha256": "79ee86b480ce00437f814657327b326b725ecd13965d1e958772b5d0ff415990",
       "command": [
         "cargo",
@@ -103,7 +71,7 @@
       "minimum_success_at_1_gain": 0.05
     }
   },
-  "generated_at_utc": "2026-09-26T18:04:37.892604+00:00",
+  "generated_at_utc": "2026-09-26T18:10:02.146849+00:00",
   "host": {
     "cargo": "cargo 1.88.0 (873a06493 2025-05-10)",
     "logical_cpus": 10,
@@ -193,9 +161,9 @@
       "dev": {
         "fresh_process": {
           "memory_sample_count": 60,
-          "p50_ms": 82.507,
-          "p95_ms": 84.969,
-          "peak_memory_bytes": 269353656,
+          "p50_ms": 83.051,
+          "p95_ms": 84.511,
+          "peak_memory_bytes": 256328376,
           "sample_count": 60
         }
       },
@@ -203,9 +171,9 @@
         "execution_failures": [],
         "measured_queries": 30,
         "memory_sample_count": 30,
-        "p50_ms": 86.348,
-        "p95_ms": 99.226,
-        "peak_memory_bytes": 237929216,
+        "p50_ms": 82.87,
+        "p95_ms": 84.399,
+        "peak_memory_bytes": 237765328,
         "process_scope": "fresh CLI process per sample; filesystem/model cache warmed",
         "sample_count": 30,
         "warmup_queries": 5
@@ -215,9 +183,9 @@
       "dev": {
         "fresh_process": {
           "memory_sample_count": 60,
-          "p50_ms": 83.1,
-          "p95_ms": 86.142,
-          "peak_memory_bytes": 236094136,
+          "p50_ms": 83.403,
+          "p95_ms": 86.721,
+          "peak_memory_bytes": 237028024,
           "sample_count": 60
         }
       },
@@ -225,9 +193,9 @@
         "execution_failures": [],
         "measured_queries": 30,
         "memory_sample_count": 30,
-        "p50_ms": 83.728,
-        "p95_ms": 87.822,
-        "peak_memory_bytes": 237650616,
+        "p50_ms": 83.346,
+        "p95_ms": 85.258,
+        "peak_memory_bytes": 235930296,
         "process_scope": "fresh CLI process per sample; filesystem/model cache warmed",
         "sample_count": 30,
         "warmup_queries": 5
@@ -236,7 +204,7 @@
   },
   "protocol": {
     "candidate_configuration_id": "focused-same-page-cutoff-060-lexical-005-v1",
-    "candidate_ref": "working-tree",
+    "candidate_ref": "HEAD",
     "custom_dev_dataset": true,
     "custom_dev_freeze_id": "askman-dev-extension-v1-freeze-2026-09-26",
     "development_and_holdout": false,
@@ -2595,7 +2563,7 @@
     }
   },
   "recommendation": "inconclusive",
-  "reproduction_command": "scripts/run_release_gate.py --candidate-working-tree --main-data-dir /tmp/askman-goal.Fk5Zkh/main-import-home/Library/Application Support/askman --bundle /tmp/askman-goal.Fk5Zkh/bundle-final-v2 --dev-only --allow-custom-dev-dataset --candidate-config tests/fixtures/evaluation/dev-extension-v1-candidate-focused-same-page-cutoff-060-lexical-005.json --output-json /tmp/askman-dev-extension-v1-main-vs-lexical-005-formatted.json --output-markdown /tmp/askman-dev-extension-v1-main-vs-lexical-005-formatted.md",
+  "reproduction_command": "scripts/run_release_gate.py --candidate-ref ba74692cf79fa9c294f685fbade8f9315aeacdd1 --main-data-dir /tmp/askman-goal.Fk5Zkh/main-import-home/Library/Application Support/askman --bundle /tmp/askman-goal.Fk5Zkh/bundle-final-v2 --dev-only --allow-custom-dev-dataset --candidate-config tests/fixtures/evaluation/dev-extension-v1-candidate-focused-same-page-cutoff-060-lexical-005.json --output-json /tmp/askman-dev-extension-v1-main-vs-lexical-005-committed.json --output-markdown /tmp/askman-dev-extension-v1-main-vs-lexical-005-committed.md",
   "retrieval_configuration": {
     "abstention": "raw distance cutoff 0.60 plus scoped negation guards",
     "candidate_budget": 8,
