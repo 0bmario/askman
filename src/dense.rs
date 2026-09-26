@@ -1551,7 +1551,7 @@ pub(crate) fn is_negated_file_stdout_query(query: &str) -> bool {
         || query_words
             .windows(2)
             .any(|words| words == ["standard", "output"]);
-    let requests_file_output = [
+    let file_output_actions = [
         "display",
         "displaying",
         "print",
@@ -1562,15 +1562,40 @@ pub(crate) fn is_negated_file_stdout_query(query: &str) -> bool {
         "showing",
         "write",
         "writing",
-    ]
-    .iter()
-    .any(|term| query_words.contains(term));
+    ];
+    let negates_file_output = query_words.iter().enumerate().any(|(index, term)| {
+        file_output_actions.contains(term) && negates_output_action(&query_words, index)
+    });
 
-    names_file
-        && names_file_contents
-        && names_stdout
-        && requests_file_output
-        && query_contains_negation(&normalized, &query_words)
+    names_file && names_file_contents && names_stdout && negates_file_output
+}
+
+fn negates_output_action(query_words: &[&str], action_index: usize) -> bool {
+    const NEGATION_WORDS: [&str; 6] = ["avoid", "cannot", "never", "no", "not", "without"];
+    const CONTRACTION_PREFIXES: [&str; 8] = [
+        "can", "didn", "doesn", "don", "mustn", "shouldn", "won", "wouldn",
+    ];
+
+    if action_index > 0 && NEGATION_WORDS.contains(&query_words[action_index - 1]) {
+        return true;
+    }
+
+    let has_negated_contraction = action_index > 1
+        && query_words[action_index - 1] == "t"
+        && CONTRACTION_PREFIXES.contains(&query_words[action_index - 2]);
+    if has_negated_contraction {
+        return true;
+    }
+
+    let has_negated_want_to = action_index > 2
+        && query_words[action_index - 1] == "to"
+        && query_words[action_index - 2] == "want"
+        && (query_words[action_index - 3] == "not"
+            || (action_index > 3
+                && query_words[action_index - 3] == "t"
+                && CONTRACTION_PREFIXES.contains(&query_words[action_index - 4])));
+
+    has_negated_want_to
 }
 
 fn is_negated_exif_observation_words(query: &str, query_words: &[&str]) -> bool {
@@ -2848,6 +2873,15 @@ mod tests {
         ));
         assert!(!is_negated_file_stdout_query(
             "do not show file names in stdout logs"
+        ));
+        assert!(!is_negated_file_stdout_query(
+            "print file contents to stdout without using cat"
+        ));
+        assert!(!is_negated_file_stdout_query(
+            "I don't know how to show file contents to stdout"
+        ));
+        assert!(is_negated_file_stdout_query(
+            "I don't want to show file contents to stdout"
         ));
     }
 
