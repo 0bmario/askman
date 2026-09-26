@@ -1,5 +1,8 @@
 use crate::bundle::{BundleManifest, BundleStore, ValidatedBundle};
-use crate::dense::{DenseCandidate, DenseIndex, DenseQueryMode, is_negated_exif_observation_query};
+use crate::dense::{
+    DenseCandidate, DenseIndex, DenseQueryMode, is_negated_exif_observation_query,
+    is_negated_file_stdout_query,
+};
 use crate::search::TargetOs;
 use anyhow::{Result, bail};
 use colored::Colorize;
@@ -80,7 +83,7 @@ fn select_displayed_candidates(
     query: &str,
     candidates: impl IntoIterator<Item = DenseCandidate>,
 ) -> Vec<DenseCandidate> {
-    if is_negated_exif_observation_query(query) {
+    if is_negated_exif_observation_query(query) || is_negated_file_stdout_query(query) {
         return Vec::new();
     }
 
@@ -199,6 +202,14 @@ mod tests {
     fn negated_exif_observation_abstains_from_positive_examples() {
         let displayed =
             select_displayed_candidates("do not read EXIF metadata from a photo", [candidate(0.1)]);
+
+        assert!(displayed.is_empty());
+    }
+
+    #[test]
+    fn negated_file_stdout_request_abstains_from_positive_examples() {
+        let displayed =
+            select_displayed_candidates("do not show file contents to stdout", [candidate(0.1)]);
 
         assert!(displayed.is_empty());
     }

@@ -1535,6 +1535,44 @@ pub(crate) fn is_negated_exif_observation_query(query: &str) -> bool {
     is_negated_exif_observation_words(&normalized, &query_words)
 }
 
+pub(crate) fn is_negated_file_stdout_query(query: &str) -> bool {
+    let normalized = query.to_ascii_lowercase();
+    let query_words = normalized
+        .split(|character: char| !character.is_ascii_alphanumeric())
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    let names_file = query_words
+        .iter()
+        .any(|word| ["file", "files"].contains(word));
+    let names_file_contents = query_words
+        .iter()
+        .any(|word| ["content", "contents", "text"].contains(word));
+    let names_stdout = query_words.contains(&"stdout")
+        || query_words
+            .windows(2)
+            .any(|words| words == ["standard", "output"]);
+    let requests_file_output = [
+        "display",
+        "displaying",
+        "print",
+        "printing",
+        "read",
+        "reading",
+        "show",
+        "showing",
+        "write",
+        "writing",
+    ]
+    .iter()
+    .any(|term| query_words.contains(term));
+
+    names_file
+        && names_file_contents
+        && names_stdout
+        && requests_file_output
+        && query_contains_negation(&normalized, &query_words)
+}
+
 fn is_negated_exif_observation_words(query: &str, query_words: &[&str]) -> bool {
     let names_photo = ["photo", "picture", "image"]
         .iter()
@@ -2795,6 +2833,22 @@ mod tests {
                 "negated EXIF intent must not add a positive-read query: {query}"
             );
         }
+    }
+
+    #[test]
+    fn negated_file_stdout_intents_are_detected_without_matching_positive_queries() {
+        assert!(is_negated_file_stdout_query(
+            "do not show file contents to stdout"
+        ));
+        assert!(is_negated_file_stdout_query(
+            "avoid printing file text to standard output"
+        ));
+        assert!(!is_negated_file_stdout_query(
+            "show file contents to stdout"
+        ));
+        assert!(!is_negated_file_stdout_query(
+            "do not show file names in stdout logs"
+        ));
     }
 
     #[test]
