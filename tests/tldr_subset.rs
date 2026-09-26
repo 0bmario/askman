@@ -2,22 +2,23 @@
 
 use askman::tldr_subset::{
     BuildOptions, InspectOptions, PageKind, QueryOptions, build_artifact,
-    build_artifact_with_failure_injection, inspect_page, parse_page, query_artifact,
-    query_artifact_for_platform,
+    build_artifact_with_failure_injection, compare_visible_corpus, inspect_page, parse_page,
+    query_artifact, query_artifact_for_platform,
 };
-use rusqlite::Connection;
+use rusqlite::{Connection, params};
 use sha2::{Digest, Sha256};
 use std::fs;
 use std::path::{Path, PathBuf};
 use tempfile::tempdir;
+use zerocopy::IntoBytes;
 
 const FIXTURE_ROOT: &str = "tests/fixtures/tldr-subset";
-const FIXTURE_MANIFEST: &str = "tests/fixtures/tldr-subset/manifest.json";
+const FIXTURE_MANIFEST: &str = "tests/fixtures/tldr-subset/manifest-v4.json";
 const REFERENCES_FIXTURE_ROOT: &str = "tests/fixtures/tldr-subset-platform-references";
 const REFERENCES_FIXTURE_MANIFEST: &str =
-    "tests/fixtures/tldr-subset-platform-references/manifest.json";
+    "tests/fixtures/tldr-subset-platform-references/manifest-v4.json";
 const FULL_CORPUS_FIXTURE_ROOT: &str = "tests/fixtures/tldr-full-corpus";
-const FULL_CORPUS_FIXTURE_MANIFEST: &str = "tests/fixtures/tldr-full-corpus/manifest.json";
+const FULL_CORPUS_FIXTURE_MANIFEST: &str = "tests/fixtures/tldr-full-corpus/manifest-v4.json";
 
 #[test]
 fn parses_typed_page_without_losing_order_or_placeholders() {
@@ -115,6 +116,38 @@ fn builds_and_queries_a_traceable_source_artifact() {
         .unwrap();
     assert!(!lexical_text.contains("# cp"));
     assert!(lexical_text.contains("Copy a file to another location:"));
+}
+
+#[test]
+fn natural_language_function_words_do_not_block_a_matching_lexical_example() {
+    let snapshot = tempdir().unwrap();
+    write_snapshot_file(
+        snapshot.path(),
+        "pages/common/ng-add.md",
+        "# ng add\n\n> Add and configure packages for the current workspace project.\n> More information: <https://angular.dev/cli/add>.\n\n- Add a package to the current project:\n\n`ng add {{package}}`\n",
+    );
+
+    let output_dir = tempdir().unwrap();
+    let output = output_dir.path().join("subset.db");
+    build_custom_snapshot(snapshot.path(), &["pages/common/ng-add.md"], output.clone()).unwrap();
+
+    let results = query_artifact_for_platform(
+        QueryOptions {
+            artifact: output,
+            query: "add package to an Angular workspace".to_string(),
+            limit: 10,
+            platform_explicit: true,
+        },
+        "common",
+    )
+    .unwrap();
+
+    assert!(
+        !results.is_empty(),
+        "expected the matching Angular package example"
+    );
+    assert_eq!(results[0].source_path, "pages/common/ng-add.md");
+    assert_eq!(results[0].command, "ng add {{package}}");
 }
 
 #[test]
@@ -572,6 +605,114 @@ fn broken_references_fail_with_the_originating_source_and_line() {
 }
 
 #[test]
+fn platform_specific_disambiguation_destinations_are_filtered_by_target() {
+    let snapshot = tempdir().unwrap();
+    write_snapshot_file(
+        snapshot.path(),
+        "pages/common/just.md",
+        "# just\n\n> `just` can refer to multiple commands with the same name.\n\n- View documentation for the command runner:\n\n`tldr just.1`\n\n- View documentation for the JavaScript runtime:\n\n`tldr just.js`\n",
+    );
+    write_snapshot_file(
+        snapshot.path(),
+        "pages/common/just.1.md",
+        "# just.1\n\n> The manual page for the just command runner.\n\n- Open the manual:\n\n`man just`\n",
+    );
+    write_snapshot_file(
+        snapshot.path(),
+        "pages/linux/just.js.md",
+        "# just.js\n\n> A JavaScript runtime for Linux.\n\n- Start a REPL:\n\n`just`\n",
+    );
+
+    let output_dir = tempdir().unwrap();
+    let output = output_dir.path().join("subset.db");
+    build_custom_snapshot(
+        snapshot.path(),
+        &[
+            "pages/common/just.md",
+            "pages/common/just.1.md",
+            "pages/linux/just.js.md",
+        ],
+        output.clone(),
+    )
+    .unwrap();
+
+    let windows_lookup = inspect_page(InspectOptions {
+        artifact: output.clone(),
+        page: "just".to_string(),
+        platform: "windows".to_string(),
+    })
+    .unwrap();
+    let windows_destinations: Vec<&str> = windows_lookup
+        .destinations
+        .iter()
+        .map(|page| page.page_name.as_str())
+        .collect();
+    assert_eq!(windows_destinations, ["just.1"]);
+
+    let linux_lookup = inspect_page(InspectOptions {
+        artifact: output,
+        page: "just".to_string(),
+        platform: "linux".to_string(),
+    })
+    .unwrap();
+    let linux_destinations: Vec<&str> = linux_lookup
+        .destinations
+        .iter()
+        .map(|page| page.page_name.as_str())
+        .collect();
+    assert_eq!(linux_destinations, ["just.1", "just.js"]);
+}
+
+#[test]
+fn explicit_platform_references_resolve_the_declared_page_variant() {
+    let snapshot = tempdir().unwrap();
+    write_snapshot_file(
+        snapshot.path(),
+        "pages/common/msedge.md",
+        "# msedge\n\n> Edge is named differently across platforms.\n\n- View documentation for Windows:\n\n`tldr {{[-p|--platform]}} windows msedge`\n\n- View documentation for other platforms:\n\n`tldr {{[-p|--platform]}} common microsoft-edge`\n",
+    );
+    write_snapshot_file(
+        snapshot.path(),
+        "pages/windows/msedge.md",
+        "# msedge\n\n> Microsoft Edge for Windows.\n\n- Open a URL:\n\n`msedge {{https://example.com}}`\n",
+    );
+    write_snapshot_file(
+        snapshot.path(),
+        "pages/common/microsoft-edge.md",
+        "# microsoft-edge\n\n> Microsoft Edge for other platforms.\n\n- Open a URL:\n\n`microsoft-edge {{https://example.com}}`\n",
+    );
+
+    let output_dir = tempdir().unwrap();
+    let output = output_dir.path().join("subset.db");
+    build_custom_snapshot(
+        snapshot.path(),
+        &[
+            "pages/common/msedge.md",
+            "pages/windows/msedge.md",
+            "pages/common/microsoft-edge.md",
+        ],
+        output.clone(),
+    )
+    .unwrap();
+
+    let lookup = inspect_page(InspectOptions {
+        artifact: output,
+        page: "msedge".to_string(),
+        platform: "common".to_string(),
+    })
+    .unwrap();
+    let destinations: Vec<(&str, &str)> = lookup
+        .destinations
+        .iter()
+        .map(|page| (page.page_name.as_str(), page.platform.as_str()))
+        .collect();
+    assert_eq!(
+        destinations,
+        [("msedge", "windows"), ("microsoft-edge", "common")]
+    );
+}
+
+#[test]
 fn cyclic_references_fail_with_the_source_path_chain() {
     let snapshot = tempdir().unwrap();
     let content = |name: &str| {
@@ -612,6 +753,41 @@ fn parses_reference_kind_without_indexing_navigation_examples() {
     assert_eq!(alias.references[0].destination_name, "vim");
 }
 
+#[test]
+fn optional_platform_placeholder_is_not_part_of_a_reference_destination() {
+    let page = parse_page(
+        "pages/common/file-rename.md",
+        "common",
+        "en",
+        "fixture-tldr-full-corpus-v1",
+        "# file-rename\n\n> This command is an alias of `rename`.\n\n- View documentation for the original command:\n\n`tldr {{[-p|--platform]}} common rename`\n",
+    )
+    .unwrap();
+
+    assert_eq!(page.kind, PageKind::Reference);
+    assert_eq!(page.references[0].destination_name, "rename");
+    assert_eq!(
+        page.references[0].destination_platform.as_deref(),
+        Some("common")
+    );
+}
+
+#[test]
+fn documentation_examples_with_non_tldr_commands_remain_operational() {
+    let page = parse_page(
+        "pages/osx/signal.md",
+        "osx",
+        "en",
+        "fixture-tldr-full-corpus-v1",
+        "# signal\n\n> Simplified software signal facilities.\n\n- View documentation for signals in macOS:\n\n`man signal`\n",
+    )
+    .unwrap();
+
+    assert_eq!(page.kind, PageKind::Operational);
+    assert!(page.references.is_empty());
+    assert_eq!(page.examples[0].command, "man signal");
+}
+
 fn write_snapshot_file(root: &Path, relative_path: &str, content: &str) {
     let path = root.join(relative_path);
     fs::create_dir_all(path.parent().unwrap()).unwrap();
@@ -631,8 +807,8 @@ fn build_custom_snapshot(
         .join(",");
     let manifest = format!(
         r#"{{
-  "schema_version": 3,
-  "parser_version": "tldr-subset-v3",
+  "schema_version": 4,
+  "parser_version": "tldr-subset-v4",
   "source": {{
     "name": "tldr-pages",
     "revision": "fixture-invalid-v1",
@@ -648,7 +824,7 @@ fn build_custom_snapshot(
   "lexical_index": {{
     "tokenizer": "unicode61",
     "fields": ["page.command", "page.description", "example.description", "example.command"],
-    "query_normalization": "split non-alphanumeric except underscore; lowercase ASCII; quote and AND-join unique sorted tokens"
+    "query_normalization": "split non-alphanumeric except underscore; lowercase ASCII; remove common English function words while preserving negators; quote and AND-join unique sorted tokens"
   }}
 }}"#
     );
@@ -759,7 +935,7 @@ fn logical_records(path: &Path) -> Vec<String> {
         "references:{:?}",
         connection
             .prepare(
-                "SELECT page_id, position, destination_name, source_line
+                "SELECT page_id, position, destination_name, destination_platform, source_line
                  FROM page_references ORDER BY page_id, position",
             )
             .unwrap()
@@ -768,7 +944,8 @@ fn logical_records(path: &Path) -> Vec<String> {
                     row.get::<_, String>(0)?,
                     row.get::<_, i64>(1)?,
                     row.get::<_, String>(2)?,
-                    row.get::<_, i64>(3)?,
+                    row.get::<_, Option<String>>(3)?,
+                    row.get::<_, i64>(4)?,
                 ))
             })
             .unwrap()
@@ -897,4 +1074,86 @@ fn refuses_to_publish_over_an_executable_adjacent_database() {
         error.contains("refusing to replace installed Askman database"),
         "{error}"
     );
+}
+
+#[test]
+fn compares_visible_examples_from_the_legacy_vec_database_with_the_bundle() {
+    unsafe {
+        rusqlite::ffi::sqlite3_auto_extension(Some(std::mem::transmute(
+            sqlite_vec::sqlite3_vec_init as *const (),
+        )));
+    }
+    let directory = tempdir().unwrap();
+    let main_database = directory.path().join("commands.db");
+    let candidate_database = directory.path().join("matching.db");
+    {
+        let connection = Connection::open(&main_database).unwrap();
+        connection
+            .execute_batch(
+                "CREATE VIRTUAL TABLE pages_vec USING vec0(
+                    command TEXT,
+                    os TEXT,
+                    description TEXT,
+                    example_desc TEXT,
+                    example_cmd TEXT,
+                    embedding FLOAT[384]
+                )",
+            )
+            .unwrap();
+        let embedding = vec![0.0_f32; 384];
+        connection
+            .execute(
+                "INSERT INTO pages_vec
+                 (command, os, description, example_desc, example_cmd, embedding)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![
+                    "get-childitem",
+                    "windows",
+                    "List items in a directory. More information: https://example.test",
+                    "List all non-hidden items in the current directory:",
+                    "Get-ChildItem",
+                    embedding.as_bytes(),
+                ],
+            )
+            .unwrap();
+    }
+    {
+        let connection = Connection::open(&candidate_database).unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE pages (
+                     page_id TEXT, platform TEXT, command TEXT, description TEXT
+                 );
+                 CREATE TABLE examples (
+                     example_id TEXT, page_id TEXT, description TEXT, command TEXT
+                 );
+                 INSERT INTO pages VALUES (
+                     'page-1', 'windows', 'Get-ChildItem',
+                     'List items in a directory.\nMore information: https://example.test'
+                 );
+                 INSERT INTO examples VALUES (
+                     'example-1', 'page-1',
+                     'List all non-hidden items in the current directory:',
+                     'Get-ChildItem'
+                 );",
+            )
+            .unwrap();
+    }
+
+    let report = compare_visible_corpus(&main_database, &candidate_database).unwrap();
+    assert_eq!(report.visible_corpus_example_count, 1);
+    assert_eq!(report.visible_corpus_examples_sha256.len(), 64);
+
+    let connection = Connection::open(&candidate_database).unwrap();
+    connection
+        .execute("UPDATE examples SET command = 'Get-ChildItem -Hidden'", [])
+        .unwrap();
+    let error = compare_visible_corpus(&main_database, &candidate_database)
+        .unwrap_err()
+        .to_string();
+    assert!(
+        error.contains("visible example inventory differ"),
+        "{error}"
+    );
+    assert!(error.contains("example_command"), "{error}");
 }

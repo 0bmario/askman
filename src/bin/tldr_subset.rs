@@ -1,11 +1,12 @@
 use anyhow::Result;
 use askman::bundle::{BundleBuildOptions, build_matching_bundle, validate_matching_bundle};
 use askman::dense::{
-    DenseBuildOptions, DenseRecipe, DenseServerOptions, build_dense_index, run_query_server,
+    DenseBuildOptions, DenseRecipe, DenseServerOptions, LegacyMainDatabaseOptions,
+    build_dense_index, build_legacy_main_database, run_query_server,
 };
 use askman::tldr_subset::{
-    BuildOptions, InspectOptions, QueryOptions, build_artifact, inspect_page,
-    query_artifact_for_platform,
+    BuildOptions, InspectOptions, QueryOptions, build_artifact, compare_visible_corpus,
+    inspect_page, query_artifact_for_platform,
 };
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
@@ -39,12 +40,36 @@ enum Command {
             default_value = concat!("askman=", env!("CARGO_PKG_VERSION"))
         )]
         cli_compatibility: String,
+        /// Dense text recipe: description, description-plus-parent, or main-compatible.
+        #[arg(long, default_value = "main-compatible")]
+        dense_recipe: String,
     },
     /// Validate a previously built matching bundle without network access.
     BundleValidate {
         /// Bundle directory produced by `bundle-build`.
         #[arg(long)]
         bundle: PathBuf,
+    },
+    /// Verify main and candidate databases expose the same indexed examples.
+    CompareVisibleCorpus {
+        /// Installed main commands database.
+        #[arg(long)]
+        main_database: PathBuf,
+        /// Candidate matching database.
+        #[arg(long)]
+        candidate_database: PathBuf,
+    },
+    /// Build a scratch legacy-main database from a matching bundle for same-corpus A/B checks.
+    LegacyMainBuild {
+        /// Validated matching bundle whose visible examples define the corpus.
+        #[arg(long)]
+        bundle: PathBuf,
+        /// New commands.db path; existing paths are refused.
+        #[arg(long)]
+        output: PathBuf,
+        /// Number of source examples embedded per inference batch.
+        #[arg(long, default_value_t = askman::dense::DEFAULT_BATCH_SIZE)]
+        batch_size: usize,
     },
     /// Build a replacement SQLite artifact from a provisioned local snapshot.
     Build {
@@ -122,6 +147,7 @@ fn main() -> Result<()> {
             model_cache,
             output,
             cli_compatibility,
+            dense_recipe,
         } => {
             let report = build_matching_bundle(BundleBuildOptions {
                 manifest,
@@ -129,6 +155,7 @@ fn main() -> Result<()> {
                 model_cache,
                 output,
                 cli_compatibility,
+                dense_recipe: DenseRecipe::parse(&dense_recipe)?,
             })?;
             println!(
                 "built matching bundle {} with {} pages and {} examples into {}",
@@ -141,6 +168,31 @@ fn main() -> Result<()> {
         Command::BundleValidate { bundle } => {
             let manifest = validate_matching_bundle(&bundle)?;
             println!("valid matching bundle {}", manifest.bundle_id);
+        }
+        Command::CompareVisibleCorpus {
+            main_database,
+            candidate_database,
+        } => {
+            let report = compare_visible_corpus(&main_database, &candidate_database)?;
+            println!("{}", serde_json::to_string(&report)?);
+        }
+        Command::LegacyMainBuild {
+            bundle,
+            output,
+            batch_size,
+        } => {
+            let report = build_legacy_main_database(LegacyMainDatabaseOptions {
+                bundle,
+                output,
+                batch_size,
+            })?;
+            println!(
+                "built {} legacy main examples into {}",
+                report.example_count,
+                report.output.display()
+            );
+            println!("build_time_ms={}", report.build_time_ms);
+            println!("artifact_size_bytes={}", report.artifact_size_bytes);
         }
         Command::Build {
             manifest,

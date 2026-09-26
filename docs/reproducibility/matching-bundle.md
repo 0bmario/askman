@@ -10,7 +10,7 @@ Provision the tldr snapshot and pinned model cache first. Then build offline:
 ```sh
 cargo run --locked --offline --features dev --bin tldr_subset -- \
   bundle-build \
-  --manifest tests/fixtures/tldr-full-corpus/manifest.json \
+  --manifest tests/fixtures/tldr-full-corpus/manifest-v4.json \
   --snapshot tests/fixtures/tldr-full-corpus \
   --model-cache "$RUN_DIR/data/models" \
   --output /tmp/askman-matching-bundle \

@@ -10,11 +10,15 @@ use std::path::{Component, Path, PathBuf};
 use std::time::Instant;
 
 const ARTIFACT_KIND: &str = "askman.tldr-subset";
-const SCHEMA_VERSION: u32 = 3;
-pub const PARSER_VERSION: &str = "tldr-subset-v3";
+const SCHEMA_VERSION: u32 = 4;
+pub const PARSER_VERSION: &str = "tldr-subset-v4";
 const SUPPORTED_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
 const LEXICAL_INDEX_TOKENIZER: &str = "unicode61";
-const LEXICAL_QUERY_NORMALIZATION: &str = "split non-alphanumeric except underscore; lowercase ASCII; quote and AND-join unique sorted tokens";
+const LEXICAL_QUERY_NORMALIZATION: &str = "split non-alphanumeric except underscore; lowercase ASCII; remove common English function words while preserving negators; quote and AND-join unique sorted tokens";
+const QUERY_FUNCTION_WORDS: &[&str] = &[
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "into", "is", "of", "on",
+    "or", "the", "to", "with",
+];
 const LEXICAL_INDEX_FIELDS: [&str; 4] = [
     "page.command",
     "page.description",
@@ -43,6 +47,12 @@ pub struct BuildReport {
     pub hardware: String,
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub struct VisibleCorpusReport {
+    pub visible_corpus_example_count: usize,
+    pub visible_corpus_examples_sha256: String,
+}
+
 #[derive(Debug, Clone)]
 pub struct QueryOptions {
     pub artifact: PathBuf,
@@ -58,6 +68,136 @@ pub struct InspectOptions {
     pub artifact: PathBuf,
     pub page: String,
     pub platform: String,
+}
+
+type VisibleExample = (String, String, String, String, String);
+
+pub fn compare_visible_corpus(
+    main_database: &Path,
+    candidate_database: &Path,
+) -> Result<VisibleCorpusReport> {
+    crate::dense::register_sqlite_vec();
+    let main = Connection::open_with_flags(main_database, OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .with_context(|| format!("failed to open main database {}", main_database.display()))?;
+    let candidate =
+        Connection::open_with_flags(candidate_database, OpenFlags::SQLITE_OPEN_READ_ONLY)
+            .with_context(|| {
+                format!(
+                    "failed to open candidate database {}",
+                    candidate_database.display()
+                )
+            })?;
+    let main_inventory = visible_example_inventory(
+        &main,
+        "SELECT os, command, description, example_desc, example_cmd FROM pages_vec",
+        "main database",
+    )?;
+    let candidate_inventory = visible_example_inventory(
+        &candidate,
+        "SELECT pages.platform, pages.command, pages.description, examples.description, examples.command \
+         FROM examples JOIN pages ON pages.page_id = examples.page_id",
+        "candidate bundle",
+    )?;
+    if main_inventory != candidate_inventory {
+        let main_example = first_inventory_only(&main_inventory, &candidate_inventory);
+        let candidate_example = first_inventory_only(&candidate_inventory, &main_inventory);
+        bail!(
+            "main database and candidate bundle visible example inventory differ ({} vs {} examples); first main-only example={}, first candidate-only example={}",
+            main_inventory.len(),
+            candidate_inventory.len(),
+            main_example
+                .map(format_visible_example)
+                .unwrap_or_else(|| "<missing>".to_string()),
+            candidate_example
+                .map(format_visible_example)
+                .unwrap_or_else(|| "<missing>".to_string()),
+        );
+    }
+    let serialized = serde_json::to_vec(&main_inventory)?;
+    Ok(VisibleCorpusReport {
+        visible_corpus_example_count: main_inventory.len(),
+        visible_corpus_examples_sha256: format!("{:x}", Sha256::digest(serialized)),
+    })
+}
+
+fn visible_example_inventory(
+    connection: &Connection,
+    query: &str,
+    label: &str,
+) -> Result<Vec<VisibleExample>> {
+    let mut statement = connection
+        .prepare(query)
+        .with_context(|| format!("{label} visible example inventory is unavailable"))?;
+    let rows = statement.query_map([], |row| {
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+            row.get::<_, String>(3)?,
+            row.get::<_, String>(4)?,
+        ))
+    })?;
+    let mut inventory = rows.collect::<rusqlite::Result<Vec<VisibleExample>>>()?;
+    for example in &mut inventory {
+        example.2 = normalize_visible_page_description(&example.2);
+        if example.0 == "windows" {
+            // PowerShell command names are case-insensitive; the legacy importer
+            // lowercases these while the source-backed bundle preserves casing.
+            example.1.make_ascii_lowercase();
+        }
+    }
+    inventory.sort_unstable();
+    if inventory.is_empty() {
+        bail!("{label} visible example inventory is empty");
+    }
+    Ok(inventory)
+}
+
+fn normalize_visible_page_description(value: &str) -> String {
+    value
+        .split_once("More information:")
+        .map_or(value, |(description, _)| description)
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn first_inventory_only<'a>(
+    inventory: &'a [VisibleExample],
+    other: &[VisibleExample],
+) -> Option<&'a VisibleExample> {
+    let mut remaining: HashMap<&VisibleExample, usize> = HashMap::new();
+    for example in other {
+        *remaining.entry(example).or_default() += 1;
+    }
+    for example in inventory {
+        match remaining.get_mut(example) {
+            Some(count) if *count > 0 => *count -= 1,
+            _ => return Some(example),
+        }
+    }
+    None
+}
+
+fn format_visible_example(example: &VisibleExample) -> String {
+    fn preview(value: &str) -> String {
+        let mut characters = value.chars();
+        let prefix = characters.by_ref().take(120).collect::<String>();
+        if characters.next().is_some() {
+            format!("{prefix}…")
+        } else {
+            prefix
+        }
+    }
+
+    format!(
+        "platform={:?}, page_command={:?}, page_description={:?}, example_description={:?}, example_command={:?}",
+        preview(&example.0),
+        preview(&example.1),
+        preview(&example.2),
+        preview(&example.3),
+        preview(&example.4),
+    )
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -114,6 +254,7 @@ pub enum PageKind {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct PageReference {
     pub destination_name: String,
+    pub destination_platform: Option<String>,
     pub example_position: usize,
     pub source_line: usize,
 }
@@ -349,10 +490,16 @@ impl ValidatedLexicalIndex {
         Ok(Self { connection })
     }
 
+    pub(crate) fn selected_page_ids(&self, platform: &str) -> Result<Vec<String>> {
+        validate_platform(platform)?;
+        selected_page_ids(&self.connection, platform)
+    }
+
     pub(crate) fn query_for_platform(
         &self,
         query: &str,
         platform: &str,
+        selected_page_ids: &[String],
         limit: usize,
         platform_explicit: bool,
     ) -> Result<Vec<QueryResult>> {
@@ -361,12 +508,13 @@ impl ValidatedLexicalIndex {
         }
         validate_platform(platform)?;
         let fts_query = build_fts_query(query)?;
-        query_artifact_on_validated_connection(
+        query_artifact_with_selected_page_ids(
             &self.connection,
             &fts_query,
+            selected_page_ids,
+            platform,
             limit,
             platform_explicit,
-            platform,
         )
     }
 }
@@ -378,7 +526,25 @@ fn query_artifact_on_validated_connection(
     platform_explicit: bool,
     platform: &str,
 ) -> Result<Vec<QueryResult>> {
-    let selected_page_ids = selected_page_ids(&conn, platform)?;
+    let selected_page_ids = selected_page_ids(conn, platform)?;
+    query_artifact_with_selected_page_ids(
+        conn,
+        fts_query,
+        &selected_page_ids,
+        platform,
+        limit,
+        platform_explicit,
+    )
+}
+
+fn query_artifact_with_selected_page_ids(
+    conn: &Connection,
+    fts_query: &str,
+    selected_page_ids: &[String],
+    platform: &str,
+    limit: usize,
+    platform_explicit: bool,
+) -> Result<Vec<QueryResult>> {
     if selected_page_ids.is_empty() {
         return Ok(Vec::new());
     }
@@ -642,20 +808,30 @@ fn classify_page_references(
         return Ok((PageKind::Operational, Vec::new()));
     }
 
+    if examples
+        .iter()
+        .any(|example| example.command.split_whitespace().next() != Some("tldr"))
+    {
+        // A navigation-style description can introduce a real documentation
+        // command (`man signal`, for example), not only a tldr page alias.
+        return Ok((PageKind::Operational, Vec::new()));
+    }
+
     let mut references = Vec::with_capacity(examples.len());
     for example in examples {
-        let destination_name = parse_reference_command(&example.command).ok_or_else(|| {
+        let reference = parse_reference_command(
+            &example.command,
+            example.position,
+            example.source_line,
+        )
+        .ok_or_else(|| {
             anyhow!(
                 "{}:{}: documentation-navigation example must invoke tldr with a destination",
                 source_path,
                 example.source_line
             )
         })?;
-        references.push(PageReference {
-            destination_name,
-            example_position: example.position,
-            source_line: example.source_line,
-        });
+        references.push(reference);
     }
 
     let kind = if references.len() == 1 {
@@ -671,24 +847,43 @@ fn is_documentation_navigation(description: &str) -> bool {
     normalized.starts_with("view documentation") || normalized.starts_with("view the documentation")
 }
 
-fn parse_reference_command(command: &str) -> Option<String> {
+fn parse_reference_command(
+    command: &str,
+    example_position: usize,
+    source_line: usize,
+) -> Option<PageReference> {
     let mut tokens = command.split_whitespace();
     if tokens.next()? != "tldr" {
         return None;
     }
 
     let mut destination_tokens = Vec::new();
-    let mut skip_next = false;
-    for token in tokens {
-        if skip_next {
-            skip_next = false;
+    let mut destination_platform = None;
+    while let Some(token) = tokens.next() {
+        let optional_platform_flag = token.starts_with("{{")
+            && token.ends_with("}}")
+            && token.contains("-p")
+            && token.contains("--platform")
+            && !token.contains('=');
+        if token == "-p" || token == "--platform" || optional_platform_flag {
+            if destination_platform.is_some() {
+                return None;
+            }
+            let platform = tokens.next()?;
+            if !SUPPORTED_PLATFORMS.contains(&platform) {
+                return None;
+            }
+            destination_platform = Some(platform.to_string());
             continue;
         }
-        if token == "-p" || token == "--platform" {
-            skip_next = true;
-            continue;
-        }
-        if token.starts_with("--platform=") || token.starts_with("-p=") {
+        let inline_platform = token
+            .strip_prefix("--platform=")
+            .or_else(|| token.strip_prefix("-p="));
+        if let Some(platform) = inline_platform {
+            if destination_platform.is_some() || !SUPPORTED_PLATFORMS.contains(&platform) {
+                return None;
+            }
+            destination_platform = Some(platform.to_string());
             continue;
         }
         if token.starts_with('-') {
@@ -696,11 +891,16 @@ fn parse_reference_command(command: &str) -> Option<String> {
         }
         destination_tokens.push(token);
     }
-    if skip_next || destination_tokens.is_empty() {
+    if destination_tokens.is_empty() {
         return None;
     }
 
-    normalize_page_name(&destination_tokens.join("-")).ok()
+    Some(PageReference {
+        destination_name: normalize_page_name(&destination_tokens.join("-")).ok()?,
+        destination_platform,
+        example_position,
+        source_line,
+    })
 }
 
 fn page_name_from_source_path(source_path: &str) -> Result<String> {
@@ -817,19 +1017,34 @@ fn resolve_page_name(
     stack.push(page.source_path.clone());
     let mut destinations = Vec::new();
     for reference in &page.references {
-        let destination =
-            select_page(pages, &reference.destination_name, platform).ok_or_else(|| {
-                anyhow!(
-                    "{}:{}: unresolved page reference `{}`",
-                    page.source_path,
-                    reference.source_line,
-                    reference.destination_name
-                )
-            })?;
+        let destination_platform = reference
+            .destination_platform
+            .as_deref()
+            .unwrap_or(platform);
+        let Some(destination) =
+            select_page(pages, &reference.destination_name, destination_platform)
+        else {
+            // A reference can be valid in the corpus but unavailable on this
+            // target. Omit that destination while keeping globally broken
+            // references as source errors.
+            if reference.destination_platform.is_none()
+                && pages
+                    .iter()
+                    .any(|candidate| candidate.page_name == reference.destination_name)
+            {
+                continue;
+            }
+            bail!(
+                "{}:{}: unresolved page reference `{}`",
+                page.source_path,
+                reference.source_line,
+                reference.destination_name
+            );
+        };
         let resolved = resolve_page_name(
             pages,
             &destination.page_name,
-            platform,
+            destination_platform,
             stack,
             Some((&page.source_path, reference.source_line)),
         )
@@ -1111,6 +1326,10 @@ fn write_artifact(
              page_id TEXT NOT NULL REFERENCES pages(page_id),
              position INTEGER NOT NULL,
              destination_name TEXT NOT NULL,
+             destination_platform TEXT CHECK (
+                 destination_platform IS NULL OR
+                 destination_platform IN ('common', 'linux', 'osx', 'windows')
+             ),
              source_line INTEGER NOT NULL,
              PRIMARY KEY(page_id, position)
          );
@@ -1236,12 +1455,14 @@ fn write_artifact(
         }
         for reference in &page.references {
             transaction.execute(
-                "INSERT INTO page_references(page_id, position, destination_name, source_line)
-                 VALUES (?1, ?2, ?3, ?4)",
+                "INSERT INTO page_references(
+                    page_id, position, destination_name, destination_platform, source_line
+                 ) VALUES (?1, ?2, ?3, ?4, ?5)",
                 params![
                     page.page_id,
                     reference.example_position as i64,
                     reference.destination_name,
+                    reference.destination_platform,
                     reference.source_line as i64,
                 ],
             )?;
@@ -1661,7 +1882,7 @@ fn load_pages(conn: &Connection) -> Result<Vec<Page>> {
     }
 
     let mut references = conn.prepare(
-        "SELECT page_id, position, destination_name, source_line
+        "SELECT page_id, position, destination_name, destination_platform, source_line
          FROM page_references ORDER BY page_id, position",
     )?;
     let reference_rows = references.query_map([], |row| {
@@ -1669,8 +1890,9 @@ fn load_pages(conn: &Connection) -> Result<Vec<Page>> {
             row.get::<_, String>(0)?,
             PageReference {
                 destination_name: row.get(2)?,
+                destination_platform: row.get(3)?,
                 example_position: row.get::<_, i64>(1)? as usize,
-                source_line: row.get::<_, i64>(3)? as usize,
+                source_line: row.get::<_, i64>(4)? as usize,
             },
         ))
     })?;
@@ -1706,6 +1928,14 @@ fn build_fts_query(query: &str) -> Result<String> {
     }
     if !current.is_empty() {
         tokens.push(current);
+    }
+    let content_tokens = tokens
+        .iter()
+        .filter(|token| !QUERY_FUNCTION_WORDS.contains(&token.as_str()))
+        .cloned()
+        .collect::<Vec<_>>();
+    if !content_tokens.is_empty() {
+        tokens = content_tokens;
     }
     tokens.sort();
     tokens.dedup();

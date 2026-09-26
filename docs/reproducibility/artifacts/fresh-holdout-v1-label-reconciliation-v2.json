@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "dataset_id": "askman-fresh-holdout-v1-2026-09-26",
+  "intent_freeze_v1_superseded_sha256": "8bd65dfa078c80a14bf6d80c788f0048b3d0daed7a81e81e1f4b86ece28c2c3f",
+  "final_intent_freeze_id": "fresh-holdout-intents-v2-2026-09-26",
+  "retrieval_or_candidate_scoring_performed": false,
+  "resolutions": [
+    {
+      "task_id": "fresh-2026-09-26-common-positive-03",
+      "issue": "Independent labeler selected the verbose recursive-copy example; author selected the standard recursive-copy example.",
+      "resolution": "Accept both source records because both use recursive directory copying into an existing destination, preserving the source directory nesting.",
+      "acceptable_example_ids": [
+        "example-f22866a28532b383fd5f022f2639743b7bfe2426dba3f84fb7ed62f213601ec3",
+        "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f"
+      ]
+    },
+    {
+      "task_id": "fresh-2026-09-26-common-positive-04",
+      "issue": "Independent labeler rationale identified interactive overwrite prompts, but its ID pointed to the symbolic-link example.",
+      "resolution": "Use the source record that explicitly says interactive mode and prompting before overwrite.",
+      "acceptable_example_ids": [
+        "example-13c8699b86f8979b78ad259f5ebcf17efb41517059d9ae59f9d4230b6b80b0e0"
+      ]
+    },
+    {
+      "task_id": "fresh-2026-09-26-linux-positive-08",
+      "issue": "Original wording could refer to detailed status output or a one-word active-state check.",
+      "resolution": "Narrow the prompt to a full service status report. Independent v2 review found only the named-unit status pattern matches.",
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ]
+    },
+    {
+      "task_id": "fresh-2026-09-26-osx-positive-04",
+      "issue": "Original intent targeted the pinned pbcopy example whose command contains `find -type t`; local `find` rejects this operand.",
+      "source_observation": {
+        "command": "find -type t",
+        "local_result": "exit 1; find: -type: t: unknown type"
+      },
+      "resolution": "Replace the task intent with file contents passed through shell input redirection. Independent v2 review found one matching pbcopy record.",
+      "acceptable_example_ids": [
+        "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b"
+      ]
+    },
+    {
+      "task_ids": [
+        "fresh-2026-09-26-common-negative-02",
+        "fresh-2026-09-26-common-negative-06"
+      ],
+      "issue": "Two negative rationales overstated the corpus gap.",
+      "resolution": "Clarify that `tar -cvf` is uncompressed, and that the corpus `find ... -exec wc -l` example reports line counts only, not all three requested per-file counts."
+    }
+  ]
+}

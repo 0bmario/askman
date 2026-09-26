@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import re
 import sqlite3
 import subprocess
@@ -116,6 +117,7 @@ LEXICAL_INDEX_FIELDS = [
 ]
 LEXICAL_QUERY_NORMALIZATION = (
     "split non-alphanumeric except underscore; lowercase ASCII; "
+    "remove common English function words while preserving negators; "
     "quote and AND-join unique sorted tokens"
 )
 OFFICIAL_SOURCE_MARKERS = (
@@ -220,8 +222,25 @@ def query_resources(query_times_ms: list[float]) -> dict[str, Any]:
 
 
 class DenseClient:
-    def __init__(self, helper: Path, artifact: Path, model_cache: Path) -> None:
+    def __init__(
+        self,
+        helper: Path,
+        artifact: Path,
+        model_cache: Path,
+        query_mode: str | None = None,
+    ) -> None:
+        if query_mode not in {None, "raw", "expanded-dev", "focused-v1"}:
+            raise ValueError(
+                "dense query mode must be raw, expanded-dev, or focused-v1"
+            )
         started = time.perf_counter()
+        environment = None
+        if query_mode is not None:
+            environment = os.environ.copy()
+            if query_mode == "raw":
+                environment.pop("ASKMAN_DENSE_QUERY_MODE", None)
+            else:
+                environment["ASKMAN_DENSE_QUERY_MODE"] = query_mode
         try:
             self.process = subprocess.Popen(
                 [
@@ -238,6 +257,7 @@ class DenseClient:
                 stderr=subprocess.PIPE,
                 text=True,
                 bufsize=1,
+                env=environment,
             )
         except OSError as error:
             raise RuntimeError(f"failed to start dense helper {helper}: {error}") from error
@@ -262,14 +282,25 @@ class DenseClient:
         self.startup_ms = (time.perf_counter() - started) * 1000
 
     def query(
-        self, question: str, platform: str, limit: int = MAX_DISPLAYED_RESULTS
+        self,
+        question: str,
+        platform: str,
+        limit: int = MAX_DISPLAYED_RESULTS,
+        *,
+        include_same_page_examples: bool = False,
     ) -> list[Candidate]:
         if self.process.stdin is None or self.process.stdout is None:
             raise RuntimeError("dense helper is not connected")
         if limit <= 0:
             raise ValueError("dense candidate budget must be greater than zero")
         request = json.dumps(
-            {"query": question, "platform": platform, "limit": limit}
+            {
+                "query": question,
+                "platform": platform,
+                "limit": limit,
+                "platform_explicit": platform != "common",
+                "include_same_page_examples": include_same_page_examples,
+            }
         )
         started = time.perf_counter()
         try:

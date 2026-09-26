@@ -1,0 +1,692 @@
+{
+  "schema_version": 2,
+  "dataset_id": "askman-fresh-holdout-v1-2026-09-26",
+  "split": "holdout",
+  "split_id": "fresh-holdout-v1-2026-09-26",
+  "freeze_note": "Frozen fresh holdout. Label review and adjudication completed after intent freeze. No retrieval candidate has been run or scored. Explicit user approval is required before any candidate accesses this split.",
+  "split_policy": "60 newly authored task intents on the pinned 142-example corpus: 15 per platform, 30 answerable and 30 abstention tasks. Positive labels are balanced 8/8/7/7 across common/linux/osx/windows; task families and IDs are unique.",
+  "scorer_version": "task-scorer-v1",
+  "corpus": {
+    "artifact_kind": "askman.tldr-subset",
+    "corpus_id": "tldr-pages@e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "parser_version": "tldr-subset-v4",
+    "schema_version": "4",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef"
+  },
+  "provenance": {
+    "intent_freeze_id": "fresh-holdout-intents-v2-2026-09-26",
+    "intent_schema_version": 1,
+    "intent_record": "Freshly authored task prompts; no old task prompts, retrieval results, or old holdout rows used. One ambiguous systemctl intent was narrowed before this final freeze.",
+    "labels_adjudicated_after_intent_freeze": true,
+    "label_review": "Independent prompt-only label pass, source-record verification, and recorded manual adjudication of identified disagreements; see fresh-holdout-v1-freeze.md."
+  },
+  "task_count": 60,
+  "answerable_task_count": 30,
+  "unanswerable_task_count": 30,
+  "tasks": [
+    {
+      "id": "fresh-2026-09-26-common-positive-01",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": true,
+      "family": "manifest-inspection",
+      "question": "The release bot left a generated inventory file. I want its contents printed in the terminal for a quick review. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "rationale": "The common/cat page has an example for printing one file to stdout."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-02",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": true,
+      "family": "incident-bundle-assembly",
+      "question": "Three plain-text incident fragments must be combined in order into a report file, replacing its current contents. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+      ],
+      "rationale": "The common/cat page documents concatenating several files into an output file."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-03",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": true,
+      "family": "template-tree-staging",
+      "question": "Stage a template folder recursively under an existing scratch destination, keeping the source folder nested inside it. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-f22866a28532b383fd5f022f2639743b7bfe2426dba3f84fb7ed62f213601ec3",
+        "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f"
+      ],
+      "rationale": "The common/cp page documents recursive directory copying into an existing destination; both recursive examples use that behavior."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-04",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": true,
+      "family": "shared-drop-review",
+      "question": "Copy all matching .cfg files from a shared drop into a review folder, asking before replacing any existing file. Which documented pattern fits?",
+      "acceptable_example_ids": [
+        "example-13c8699b86f8979b78ad259f5ebcf17efb41517059d9ae59f9d4230b6b80b0e0"
+      ],
+      "rationale": "The common/cp page includes interactive copying for wildcard-selected files."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-05",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": true,
+      "family": "repository-extension-inventory",
+      "question": "Find every .toml file below the repository root. Which documented command pattern searches by extension?",
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "The common/find page has a file-extension search example."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-06",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": true,
+      "family": "text-only-content-audit",
+      "question": "Search files recursively for a token while ignoring binary files. Which documented pattern fits this audit?",
+      "acceptable_example_ids": [
+        "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43"
+      ],
+      "rationale": "The common/grep page has a recursive search example that ignores binary files."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-07",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": true,
+      "family": "migration-stream-normalization",
+      "question": "Transform a generated text stream by replacing each occurrence of “staging” with “candidate” and print the changed lines. Which documented pattern fits?",
+      "acceptable_example_ids": [
+        "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39"
+      ],
+      "rationale": "The common/sed page documents a global substitution over input lines, printing to stdout."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-08",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": true,
+      "family": "deduplicated-import-queue",
+      "question": "A package-name list has repeated lines. Sort the entries and retain just one copy of each line. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24"
+      ],
+      "rationale": "The common/sort page documents sorting while preserving only unique lines."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-01",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": true,
+      "family": "fresh-package-index",
+      "question": "Before planning a software install on a Debian workstation, refresh the local list of available package versions. Which documented command fits?",
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "The linux/apt page documents updating available package lists."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-02",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": true,
+      "family": "package-change-review",
+      "question": "Before approving a software change, inspect the package description and other detailed package information. Which documented command fits?",
+      "acceptable_example_ids": [
+        "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb"
+      ],
+      "rationale": "The linux/apt page documents showing detailed information for a package."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-03",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": true,
+      "family": "mount-capacity-triage",
+      "question": "A support ticket names one directory. Show disk usage for the filesystem that contains that path. Which documented command fits?",
+      "acceptable_example_ids": [
+        "example-9c3f58af214e9a579b9f6943bc021cdb16a28ef87eba18ff5d7bde38affe3e85"
+      ],
+      "rationale": "The linux/df page documents displaying the filesystem containing a specified path."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-04",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": true,
+      "family": "memory-snapshot",
+      "question": "Capture a quick human-readable summary of system memory before a workload starts. Which documented command fits?",
+      "acceptable_example_ids": [
+        "example-f632ec772f5c9ae6d66d4358b393e057fffaf9652e2a7802e6059fefcd49f156"
+      ],
+      "rationale": "The linux/free page documents human-readable memory output."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-05",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": true,
+      "family": "route-table-audit",
+      "question": "During a network handoff, display the host routing table. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-bc21810afaa8a4f09d57669a89e3a858de9a580a0b707c6a95b2de0cc91af5b5"
+      ],
+      "rationale": "The linux/ip page documents displaying the routing table."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-06",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": true,
+      "family": "interface-address-provisioning",
+      "question": "Assign an additional IP address and prefix to a named network interface. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-26c2742f375015e84ac61f1c323bdde3641ebd0d34179fba484df7cffa8fb735"
+      ],
+      "rationale": "The linux/ip page documents adding or deleting an IP address on an interface."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-07",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": true,
+      "family": "service-log-isolation",
+      "question": "Pull the journal entries associated with one named systemd service for a support review. Which documented command fits?",
+      "acceptable_example_ids": [
+        "example-cff6ab09d9188f20b21210dbc40500fadf5705093b0875de340dd7553cf3a33f"
+      ],
+      "rationale": "The linux/journalctl page documents showing messages by a specific unit."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-08",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": true,
+      "family": "service-health-check",
+      "question": "Show the full status report for a named systemd service unit, rather than only a single active/inactive value. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+      ],
+      "rationale": "The linux/systemctl page has a service-status pattern with a unit argument; the task requests the full status report rather than a one-word active-state check."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-01",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": true,
+      "family": "workspace-content-locator",
+      "question": "Spotlight-indexed project documents need to be located by text in their contents, limited to one workspace folder. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-00bbff7f142bf20c7bcc5c53a7c669908fc51cbb59b00f400567fcd2a0055549"
+      ],
+      "rationale": "The osx/mdfind page documents a content query restricted to a directory."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-02",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": true,
+      "family": "design-review-open",
+      "question": "Open a PDF with the application macOS already associates with that file type. Which documented command fits?",
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "The osx/open page documents opening a file with its associated application."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-03",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": true,
+      "family": "finder-handoff",
+      "question": "A teammate needs a file selected in Finder but does not want it opened. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "rationale": "The osx/open page documents revealing a file in Finder."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-04",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": true,
+      "family": "clipboard-command-output",
+      "question": "Place the raw contents of one specified file on the macOS clipboard using shell input redirection. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b"
+      ],
+      "rationale": "The osx/pbcopy page documents placing a file’s contents on the clipboard through stdin redirection."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-05",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": true,
+      "family": "clipboard-filter-pipeline",
+      "question": "Use the current clipboard text as input to a grep filter without first creating an intermediate file. Which documented pattern fits?",
+      "acceptable_example_ids": [
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "rationale": "The osx/pbpaste page documents piping clipboard contents into a command."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-06",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": true,
+      "family": "audio-proof-export",
+      "question": "Create an AIFF narration file from a short phrase without playing the phrase aloud. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "rationale": "The osx/say page documents writing spoken text to an audio file."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-07",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": true,
+      "family": "screen-region-capture",
+      "question": "Save a screenshot of only a user-selected rectangular screen region. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-9bc5ba41e0eb5a49d3d6ba0b8f745482bb8fe2f16c9b118e95b297297e006536"
+      ],
+      "rationale": "The osx/screencapture page documents interactive rectangular-area capture."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-01",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": true,
+      "family": "powershell-alias-documentation",
+      "question": "On this Windows machine, PowerShell resolves cat as Get-Content. I need the tldr page for that PowerShell command. Which documented command fits?",
+      "acceptable_example_ids": [
+        "example-010e1e30b93a3df3794409f3c6a51bde3672f3ab81c2e881b94a06166d04b856"
+      ],
+      "rationale": "The windows/cat page directs users to the Get-Content documentation."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-02",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": true,
+      "family": "incoming-batch-copy",
+      "question": "Copy every file from one source folder into another folder, retaining the source filenames. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-711dc9e8f8f4535abc5311d3242d35a349cdfb905a21bcaeb3b2cec947ddf80d"
+      ],
+      "rationale": "The windows/copy page documents copying all files from one directory to another."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-03",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": true,
+      "family": "hidden-folder-inventory",
+      "question": "Show the contents of a specified Windows folder, including hidden entries. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-8187774143ede47a5738bd7f0cd997d87aecb98e0e77e24ae4dcdb301dde5b39"
+      ],
+      "rationale": "The windows/dir page documents listing a given directory including hidden entries."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-04",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": true,
+      "family": "recursive-text-investigation",
+      "question": "Search every file below the current folder for one or more specified strings. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-a057373ff643fe0023f9f7455b1119a1785629e82599e16c31fb91557733a8cb"
+      ],
+      "rationale": "The windows/findstr page documents recursive search through files."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-05",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": true,
+      "family": "powershell-file-scope",
+      "question": "In PowerShell, list only files in the current directory and exclude subdirectories. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-d16a1c35cef57806a7c7ac819ae912941f17fd3a39cae869a700c8557974d6b2"
+      ],
+      "rationale": "The windows/Get-ChildItem page documents filtering to files only."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-06",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": true,
+      "family": "cross-volume-archive-move",
+      "question": "Move a package folder from the C: volume to a target path on D:. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "rationale": "The windows/move page documents moving a file or directory across drives."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-07",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": true,
+      "family": "line-oriented-escalation",
+      "question": "Search text files for a suspect string and include each matching line number for an engineer. Which documented command pattern fits?",
+      "acceptable_example_ids": [
+        "example-dc37bc1e174ccc19c0595098d7c6e0de7fbf6ec84ab9c4724a06523521160e67"
+      ],
+      "rationale": "The windows/findstr page documents displaying line numbers before matching lines."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-01",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": false,
+      "family": "growing-log-tail",
+      "question": "A growing application log needs its latest 100 lines printed and then followed as new lines arrive. Which documented common-platform command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages do not include a tail/follow example."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-02",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": false,
+      "family": "compressed-backup-creation",
+      "question": "Create a gzip-compressed tar archive of a selected backup directory. Which documented common-platform command pattern does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The common/find page has an uncompressed tar creation example (`tar -cvf`), but no gzip-compressed archive-creation pattern."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-03",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": false,
+      "family": "integrity-digest-generation",
+      "question": "Calculate and print a SHA-256 checksum for each release artifact. Which documented common-platform command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no checksum utility example."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-04",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": false,
+      "family": "permission-hardening",
+      "question": "Set a shell script’s POSIX permissions to owner read/write/execute only. Which documented common-platform command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "No chmod or permission-setting example appears in the pinned common pages."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-05",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": false,
+      "family": "structured-response-projection",
+      "question": "Extract only the id and status keys from a JSON response using a command-line JSON processor. Which documented common-platform command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no JSON-query utility example."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-06",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": false,
+      "family": "batch-line-counting",
+      "question": "For each of several text files, report all three separate counts: lines, words, and bytes. Which documented common-platform command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The common/find page includes `find ... -exec wc -l`, which counts lines only; it does not demonstrate all three per-file counts for lines, words, and bytes."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-07",
+      "split": "holdout",
+      "platform": "common",
+      "answerable": false,
+      "family": "configuration-diff-review",
+      "question": "Compare two configuration files and print their changed lines. Which documented common-platform command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no diff/comparison example."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-01",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": false,
+      "family": "socket-owner-investigation",
+      "question": "Identify which process owns the listening TCP socket on port 5432. Which documented Linux command pattern does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages do not include ss, lsof, or a socket-owner example."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-02",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": false,
+      "family": "arch-package-install",
+      "question": "Install a package from Arch Linux repositories on an Arch host. Which documented Linux command fits?",
+      "acceptable_example_ids": [],
+      "rationale": "The package-manager page is for Debian-based apt; no Arch package-manager example is present."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-03",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": false,
+      "family": "live-cpu-investigation",
+      "question": "Watch per-process CPU usage update live while a service is under load. Which documented Linux command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages have aggregate memory and filesystem/network examples but no live process monitor."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-04",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": false,
+      "family": "ownership-repair",
+      "question": "Recursively change the owner and group of a deployment directory. Which documented Linux command pattern does that?",
+      "acceptable_example_ids": [],
+      "rationale": "No chown or ownership-management example appears in the pinned Linux pages."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-05",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": false,
+      "family": "firewall-rule-change",
+      "question": "Add a host firewall rule that permits inbound TCP traffic on port 8443. Which documented Linux command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no firewall-management example."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-06",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": false,
+      "family": "kernel-ring-buffer-review",
+      "question": "Display kernel ring-buffer messages directly for a boot diagnosis. Which documented Linux command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "No dmesg or kernel-only journal filter example appears in the pinned Linux pages."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-07",
+      "split": "holdout",
+      "platform": "linux",
+      "answerable": false,
+      "family": "directory-space-breakdown",
+      "question": "Measure disk space used by each immediate subdirectory under a cache directory. Which documented Linux command pattern does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The df examples show filesystem-level usage; the pinned corpus has no per-directory du example."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-01",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": false,
+      "family": "desktop-app-log-follow",
+      "question": "Print the latest 100 lines of an ordinary app log on macOS and continue following new lines. Which documented macOS command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages do not include tail or ordinary-file log following."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-02",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": false,
+      "family": "clipboard-history-recovery",
+      "question": "Show several earlier clipboard entries from a clipboard-history store, not just the current clipboard value. Which documented macOS command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "pbpaste covers the current clipboard only; no clipboard-history example appears in the pinned macOS pages."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-03",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": false,
+      "family": "wireless-network-join",
+      "question": "Join a named Wi-Fi network from Terminal without opening System Settings. Which documented macOS command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no Wi-Fi configuration example."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-04",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": false,
+      "family": "display-brightness-control",
+      "question": "Set the built-in display brightness to 60 percent from the command line. Which documented macOS command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "No display-brightness control example appears in the pinned macOS pages."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-05",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": false,
+      "family": "lossless-video-trim",
+      "question": "Remove a middle segment from an MP4 file without re-encoding the remaining video. Which documented macOS command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no video-editing or ffmpeg example."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-06",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": false,
+      "family": "encrypted-image-mount",
+      "question": "Mount an encrypted disk image from Terminal after supplying its password. Which documented macOS command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no disk-image mount or encryption example."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-07",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": false,
+      "family": "metadata-preserving-archive",
+      "question": "Create a ZIP archive of a folder while preserving macOS package metadata. Which documented macOS command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no archive-creation example."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-08",
+      "split": "holdout",
+      "platform": "osx",
+      "answerable": false,
+      "family": "default-app-association",
+      "question": "Change the account-wide default application for opening CSV files from the command line. Which documented macOS command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The open examples launch apps or files; no default-association editing example is present."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-01",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": false,
+      "family": "process-inventory",
+      "question": "List running process names and process IDs in a Windows terminal. Which documented Windows command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no tasklist/process-inventory example."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-02",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": false,
+      "family": "process-termination",
+      "question": "Terminate a Windows process by its numeric process ID. Which documented Windows command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no taskkill/process-termination example."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-03",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": false,
+      "family": "https-file-download",
+      "question": "Download a URL to a local file from PowerShell. Which documented Windows command pattern does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no web-request or download example."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-04",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": false,
+      "family": "built-in-zip-creation",
+      "question": "Create a ZIP archive from a folder using a built-in PowerShell command. Which documented Windows command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no Compress-Archive or archive-creation example."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-05",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": false,
+      "family": "network-configuration-report",
+      "question": "Show the Windows host’s IP address, gateway, and DNS configuration. Which documented Windows command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no ipconfig/network-configuration example."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-06",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": false,
+      "family": "text-file-comparison",
+      "question": "Compare two text files and print their differences from a Windows command prompt. Which documented Windows command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no fc/file-comparison example."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-07",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": false,
+      "family": "directory-link-creation",
+      "question": "Create a directory symbolic link from one Windows path to another. Which documented Windows command does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no mklink/symbolic-link example."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-08",
+      "split": "holdout",
+      "platform": "windows",
+      "answerable": false,
+      "family": "tree-mirroring",
+      "question": "Mirror a source tree to a destination and remove destination-only files so both trees match. Which documented Windows command pattern does that?",
+      "acceptable_example_ids": [],
+      "rationale": "The copy examples do not provide synchronization or deletion of destination-only files; no mirror example is present."
+    }
+  ],
+  "freeze_id": "fresh-holdout-v1-freeze-2026-09-26"
+}

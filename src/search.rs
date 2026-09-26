@@ -74,19 +74,33 @@ pub fn adjust_score(cmd: &str, desc: &str, raw_distance: f64) -> Option<(f64, Ve
         return None;
     }
 
+    let (multiplier, applied_heuristics) = score_heuristic_multiplier(cmd, desc);
+    Some((raw_distance * multiplier, applied_heuristics))
+}
+
+/// Reciprocal preference weight for rank fusion, matching main's distance heuristics.
+pub(crate) fn main_compatible_rank_weight(cmd: &str, desc: &str) -> f64 {
+    // The legacy importer uses hyphens for command-page aliases such as
+    // `magick-convert`; the matching bundle keeps the tldr page's spaces.
+    let legacy_command = cmd.replace(' ', "-");
+    let (multiplier, _) = score_heuristic_multiplier(&legacy_command, desc);
+    1.0 / multiplier
+}
+
+fn score_heuristic_multiplier(cmd: &str, desc: &str) -> (f64, Vec<String>) {
     let mut applied_heuristics = Vec::new();
     let is_official = OFFICIAL_SITES.iter().any(|&site| desc.contains(site));
-    let mut score = if is_official {
+    let mut multiplier = if is_official {
         applied_heuristics.push("official_site (0.8x)".to_string());
-        raw_distance * 0.8
+        0.8
     } else {
-        raw_distance
+        1.0
     };
 
     // Heuristic to prefer basic unix commands over niche variants
     if cmd == "grep" || (cmd.len() <= 3 && !cmd.starts_with('q') && !cmd.starts_with('z')) {
         applied_heuristics.push("core_command (0.67x)".to_string());
-        score *= 0.67; // Boost core commands like 'mv', 'cp', 'rm', 'grep'
+        multiplier *= 0.67; // Boost core commands like 'mv', 'cp', 'rm', 'grep'
     } else if cmd.contains('-')
         || cmd.starts_with('q')
         || cmd.starts_with('z')
@@ -94,10 +108,10 @@ pub fn adjust_score(cmd: &str, desc: &str, raw_distance: f64) -> Option<(f64, Ve
         || cmd.ends_with("all")
     {
         applied_heuristics.push("niche_variant (1.33x)".to_string());
-        score *= 1.33; // Penalize niche variants
+        multiplier *= 1.33; // Penalize niche variants
     }
 
-    Some((score, applied_heuristics))
+    (multiplier, applied_heuristics)
 }
 
 pub fn perform_search(
@@ -241,5 +255,16 @@ mod tests {
         // 'curl' is 4 chars, no special prefix/suffix -> no boost or penalty
         let (score, _) = adjust_score("curl", "transfer data", 0.5).unwrap();
         assert!((score - 0.5).abs() < 0.001);
+    }
+
+    #[test]
+    fn main_compatible_rank_weight_reverses_distance_heuristics() {
+        assert!((main_compatible_rank_weight("grep", "search") - 1.0 / 0.67).abs() < 0.001);
+        assert!((main_compatible_rank_weight("pdfgrep", "search") - 1.0 / 1.33).abs() < 0.001);
+        assert!((main_compatible_rank_weight("curl", "archive") - 1.0).abs() < 0.001);
+        assert_eq!(
+            main_compatible_rank_weight("magick convert", "convert images"),
+            main_compatible_rank_weight("magick-convert", "convert images")
+        );
     }
 }

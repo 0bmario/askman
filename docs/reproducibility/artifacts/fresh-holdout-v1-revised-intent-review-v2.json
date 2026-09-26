@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "task_id": "fresh-2026-09-26-linux-positive-08",
+  "unambiguous": true,
+  "answerable": true,
+  "acceptable_example_ids": [
+    "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade"
+  ],
+  "rationale": "The revised wording asks for the full report and excludes a single active/inactive value. Example 3 documents systemctl status for a named unit; the is-active/is-enabled/is-failed example does not match.",
+  "id_verification": "Derived from the parser deterministic_id routine for pages/linux/systemctl.md, example position 3, at the pinned source revision.",
+  "additional_reviews": [
+    {
+      "task_id": "fresh-2026-09-26-osx-positive-04",
+      "answerable": true,
+      "matching_example_count": 1,
+      "acceptable_example_ids": [
+        "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b"
+      ],
+      "rationale": "The revised prompt specifies one file and shell input redirection, matching only pbcopy example 1; example 2 pipes command output."
+    }
+  ]
+}

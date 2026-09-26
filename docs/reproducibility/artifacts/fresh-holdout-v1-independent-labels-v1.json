@@ -1,0 +1,492 @@
+{
+  "schema_version": 1,
+  "intent_freeze_id": "askman-fresh-holdout-intents-2026-09-26-v1",
+  "corpus_id": "tldr-pages@e1cb966e711d73c42d75e79834be7e4dc17264ef",
+  "independent_label_count": 60,
+  "id_verification": "IDs computed from parser deterministic_id routine and checked against manifest paths and ordered example positions.",
+  "tasks": [
+    {
+      "id": "fresh-2026-09-26-common-positive-01",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-b1339e30586a6a791eb124959561905d0f2c467a62a74a4faa6e2cee104a8651"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The common cat page documents printing a file to stdout."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-02",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The cat page documents concatenating several files to an output file with truncating redirection."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-03",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-f22866a28532b383fd5f022f2639743b7bfe2426dba3f84fb7ed62f213601ec3",
+        "example-908bc3ab677195e809e96957b618bba3e79acf37c57e15101bfc5aa02db5c01f"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The cp page documents recursive directory copying into an existing destination, which nests the source folder; verbose recursive copy also meets the request."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-04",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-6a895683594f0e1af4ba619ed22ae064a2f09ad3a4449f8c665780cfcbd44253"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The cp page documents copying files matching an extension with interactive overwrite prompts."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-05",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The find page documents recursive extension matching."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-06",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-38141b4858477c7e64a25e8acd2a173e5a613b28bda28f5fb02c3c377c635d43"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The grep page documents recursive search while treating binary files as non-matching."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-07",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The sed page documents global substitution on each input line and printing to stdout."
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-08",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The sort page documents sorting while retaining only unique lines."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-01",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The apt page documents refreshing the available package and version list."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-02",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The apt page documents showing detailed package information."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-03",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9c3f58af214e9a579b9f6943bc021cdb16a28ef87eba18ff5d7bde38affe3e85"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The df page documents displaying the filesystem containing a specified path."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-04",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-f632ec772f5c9ae6d66d4358b393e057fffaf9652e2a7802e6059fefcd49f156"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The free page documents a human-readable memory summary."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-05",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bc21810afaa8a4f09d57669a89e3a858de9a580a0b707c6a95b2de0cc91af5b5"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The ip page documents displaying the routing table."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-06",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-26c2742f375015e84ac61f1c323bdde3641ebd0d34179fba484df7cffa8fb735"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The ip page documents adding an address and prefix to a named interface."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-07",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-cff6ab09d9188f20b21210dbc40500fadf5705093b0875de340dd7553cf3a33f"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The journalctl page documents showing messages for a named systemd unit."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-08",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-635808eeb22bdbe61688c222a223c384429fa1d9dd798154c7937d5d3ad28ade",
+        "example-da5da8ecc41b766f610565f3a5609529202c2ed456f1310668ea319630ced4c4"
+      ],
+      "ambiguous_intent": true,
+      "rationale": "The systemctl page documents status output for a named unit and a separate active/enabled/failed state check; either can answer “current status” depending on intended detail.",
+      "ambiguity_note": "“Status” may mean detailed systemctl status output or only the active/enabled/failed state."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-01",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-00bbff7f142bf20c7bcc5c53a7c669908fc51cbb59b00f400567fcd2a0055549"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The mdfind page documents content search constrained to a given directory."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-02",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The open page documents opening a file with its associated application."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-03",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The open page documents revealing a file in Finder."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-04",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0505b8928b6a7ac9d8a476007110acb31944a964fcbc4a0cd2d17c84b517e31a"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The pbcopy page documents placing command output in the clipboard through a pipe."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-05",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The pbpaste page documents piping clipboard contents to a command."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-06",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-ad09edccd5904d5046ee20a47a60b0f07ce8a4eaefee4d12526a2110a775a5ff"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The say page documents writing spoken text to an AIFF file."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-07",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9bc5ba41e0eb5a49d3d6ba0b8f745482bb8fe2f16c9b118e95b297297e006536"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The screencapture page documents saving a user-selected rectangular area."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-01",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-010e1e30b93a3df3794409f3c6a51bde3672f3ab81c2e881b94a06166d04b856"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The Windows cat page documents using tldr get-content for PowerShell’s Get-Content alias."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-02",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-711dc9e8f8f4535abc5311d3242d35a349cdfb905a21bcaeb3b2cec947ddf80d"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The copy page documents copying all files from one directory to another while retaining filenames."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-03",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8187774143ede47a5738bd7f0cd997d87aecb98e0e77e24ae4dcdb301dde5b39"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The dir page documents listing a specified directory including hidden entries."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-04",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-a057373ff643fe0023f9f7455b1119a1785629e82599e16c31fb91557733a8cb"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The findstr page documents recursive search through all files below the current folder."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-05",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-d16a1c35cef57806a7c7ac819ae912941f17fd3a39cae869a700c8557974d6b2"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The Get-ChildItem page documents listing only files in the current directory."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-06",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The move page documents moving a path across C: and D: drives."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-07",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-dc37bc1e174ccc19c0595098d7c6e0de7fbf6ec84ab9c4724a06523521160e67"
+      ],
+      "ambiguous_intent": false,
+      "rationale": "The findstr page documents reporting matching line numbers; its pattern supports selecting text files."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-01",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned common pages do not document following a growing ordinary log with a tail command."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-02",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned common pages do not document creating a gzip-compressed tar archive."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-03",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned common pages do not document SHA-256 digest generation."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-04",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned common pages do not document changing POSIX permissions."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-05",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned common pages do not document JSON projection with a command-line JSON processor."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-06",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned common pages do not document reporting lines, words, and bytes for each file."
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-07",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned common pages do not document comparing files and printing changed lines."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-01",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Linux pages do not document identifying the process owning a listening socket."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-02",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Linux apt page covers Debian-based systems; no Arch package installation command is present."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-03",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Linux pages do not document a live per-process CPU monitor."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-04",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Linux pages do not document recursively changing ownership and group."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-05",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Linux pages do not document adding host firewall rules."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-06",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The journalctl page only mentions dmesg as related documentation; no kernel ring-buffer command example is included."
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-07",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Linux pages do not document per-subdirectory disk usage; df reports filesystem usage instead."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-01",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned macOS pages do not document following an ordinary application log."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-02",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned macOS pages only expose the current clipboard value, not clipboard history."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-03",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned macOS pages do not document joining a Wi-Fi network from Terminal."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-04",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned macOS pages do not document controlling display brightness."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-05",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned macOS pages do not document lossless video trimming."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-06",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned macOS pages do not document mounting an encrypted disk image."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-07",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned macOS pages do not document ZIP creation that preserves package metadata."
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-08",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The open page covers opening files with current associations, not changing the default application association."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-01",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Windows pages do not document listing running processes and process IDs."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-02",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Windows pages do not document terminating a process by numeric ID."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-03",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Windows pages do not document downloading a URL to a local file from PowerShell."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-04",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Windows pages do not document built-in PowerShell ZIP creation."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-05",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Windows pages do not document reporting IP, gateway, and DNS configuration."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-06",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Windows pages do not document comparing files and printing their differences."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-07",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Windows pages do not document creating directory symbolic links."
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-08",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "ambiguous_intent": false,
+      "rationale": "The pinned Windows pages do not document mirroring trees while deleting destination-only files."
+    }
+  ]
+}

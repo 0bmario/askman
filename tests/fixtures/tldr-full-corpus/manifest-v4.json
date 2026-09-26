@@ -1,0 +1,38 @@
+{
+  "schema_version": 4,
+  "parser_version": "tldr-subset-v4",
+  "source": {
+    "name": "tldr-pages",
+    "revision": "fixture-tldr-full-corpus-v1",
+    "digest_algorithm": "sha256",
+    "digest": "d93ffff3c216b85caabdec2a36c6f20a9107526a32143a7bb2cc086dc77d5822",
+    "url": "https://github.com/tldr-pages/tldr",
+    "attribution": "Content from the tldr-pages project.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/tldr-pages/tldr/blob/main/LICENSE.md"
+    }
+  },
+  "language": "en",
+  "pages_root": "pages",
+  "files": [
+    "pages/common/cp.md",
+    "pages/common/vi.md",
+    "pages/common/vim.md",
+    "pages/common/excluded.md",
+    "pages/linux/grep.md",
+    "pages/osx/pbcopy.md",
+    "pages/windows/printf.md"
+  ],
+  "exclusions": [
+    {
+      "path": "pages/common/excluded.md",
+      "reason": "fixture page documents an explicit parser exclusion"
+    }
+  ],
+  "lexical_index": {
+    "tokenizer": "unicode61",
+    "fields": ["page.command", "page.description", "example.description", "example.command"],
+    "query_normalization": "split non-alphanumeric except underscore; lowercase ASCII; remove common English function words while preserving negators; quote and AND-join unique sorted tokens"
+  }
+}

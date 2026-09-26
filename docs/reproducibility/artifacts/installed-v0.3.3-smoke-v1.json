@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "run_id": "installed-v0.3.3-smoke-v1",
+  "recorded_at_utc": "2026-09-26 12:01:45 UTC",
+  "evidence_scope": "installed-product sample; not scored against the pinned 142-record evaluation corpus",
+  "host": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64"
+  },
+  "network_policy": {
+    "wrapper": "/usr/bin/sandbox-exec",
+    "profile": "(version 1) (allow default) (deny network*)",
+    "applied_to_every_query": true
+  },
+  "product": {
+    "version": "0.3.3",
+    "binary_path": "/Users/mmo/.local/bin/askman",
+    "binary_sha256": "723e8720cd53759769ca3f0a399dc99b9b954920941608fdbee227ff3f711078",
+    "source_tag": "v0.3.3",
+    "source_commit": "23fb923cc2cbb8ec06a50512464f4ba4efcdc874"
+  },
+  "database": {
+    "path": "/Users/mmo/Library/Application Support/askman/commands.db",
+    "sha256": "0218c1fd18dc6eb1c6b405356c92e47379286cec68f9fea1a70be896d5f71495",
+    "read_only_inventory": {
+      "rows": 30205,
+      "distinct_commands": 6775,
+      "platforms": 4,
+      "empty_command_rows": 0,
+      "empty_description_rows": 0,
+      "empty_example_command_rows": 0,
+      "common": {
+        "rows": 20245,
+        "commands": 4464
+      },
+      "linux": {
+        "rows": 7917,
+        "commands": 1825
+      },
+      "osx": {
+        "rows": 946,
+        "commands": 358
+      },
+      "windows": {
+        "rows": 1097,
+        "commands": 260
+      },
+      "pages_with_multiple_examples": 5943,
+      "duplicate_example_groups": 1,
+      "tldr_navigation_rows": 8
+    }
+  },
+  "query_results": [
+    {
+      "platform": "linux",
+      "query": "copy files",
+      "exit_status": 0,
+      "stdout": "cp\nCopy files and directories.\n\nExamples:\n  Copy a file to another location:\n   cp path/to/source_file path/to/target_file\n\n  Use the full path of source files, creating any missing intermediate directories when copying:\n   cp --parents source/path/to/file path/to/target_file\n\n  Copy a directory recursively, in verbose mode (shows files as they are copied):\n   cp [-vr|--verbose --recursive] path/to/source_directory path/to/target_directory\n\n  Copy a file into another directory, keeping the filename:\n   cp path/to/source_file path/to/target_parent_directory\n\n  Copy multiple files at once to a directory:\n   cp [-t|--target-directory] path/to/destination_directory path/to/file1 path/to/file2 ...\n\n  Recursively copy a directory's contents to another location (if the destination exists, the directory is copied inside it):\n   cp [-r|--recursive] path/to/source_directory path/to/target_directory\n\n\ngio\nHandle local and virtual files (GVfs). Part of GLib used in GNOME-based systems.\n\nExamples:\n  Copy a file:\n   gio copy path/to/source path/to/destination\n\n\n",
+      "stderr": ""
+    },
+    {
+      "platform": "osx",
+      "query": "copy text to clipboard",
+      "exit_status": 0,
+      "stdout": "cb\nCut, copy, and paste anything in the terminal.\n\nExamples:\n  Copy some text to the clipboard:\n   cb copy \"Some example text\"\n\n  Paste clipboard content:\n   cb paste\n\n  Copy piped data to the clipboard:\n   echo \"Some example text\" | cb\n\n  Pipe out clipboard content:\n   cb | cat\n\n  Show clipboard information:\n   cb info\n\n  Copy a file to the clipboard:\n   cb copy path/to/file\n\n\n",
+      "stderr": ""
+    },
+    {
+      "platform": "linux",
+      "query": "restart a Linux service",
+      "exit_status": 0,
+      "stdout": "needrestart\nCheck which daemons need to be restarted after library upgrades.\n\nExamples:\n  Interactively restart services:\n   sudo needrestart\n\n\n",
+      "stderr": ""
+    },
+    {
+      "platform": "osx",
+      "query": "flush the macOS DNS cache",
+      "exit_status": 0,
+      "stdout": "resolvconf\nManage nameserver information. Acts as an intermediary between programs that supply nameserver information and applications that use this information. This page documents Debian's implementation of `resolvconf`.\n\nExamples:\n  Delete the IFACE.PROG record and run the update scripts if updating is enabled:\n   resolvconf -d IFACR.PROG\n\n\n",
+      "stderr": ""
+    },
+    {
+      "platform": "windows",
+      "query": "view Windows event logs",
+      "exit_status": 0,
+      "stdout": "eventcreate\nCreate custom entries in the event log. Event IDs can be any number between 1 and 1000.\n\nExamples:\n  Create an event in a specific event log:\n   eventcreate /l log_name /t type /id id /d \"message\"\n\n  Create an event in a remote machine's event log:\n   eventcreate /s hostname /u username /p password /t type /id id /d \"message\"\n\n\nmimikatz-event\nManage Windows Event Log records.\n\nExamples:\n  Display event log sources:\n   mimikatz \"event::providers\"\n\n\n",
+      "stderr": ""
+    }
+  ]
+}

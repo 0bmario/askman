@@ -29,7 +29,8 @@ policy. Capture both commits, lockfiles, and runtime metadata.
   scored as user-visible outcomes.
 - A fixed-seed, 10,000-resample paired bootstrap for the overall paired
   `Success@1` gain has a 95% interval wholly above zero.
-- Warmed-query p95 latency and peak memory are each no more than 20% above
+- Fresh-process p95 latency and peak memory for every evaluated split, plus
+  warmed-query p95 latency and peak memory, are each no more than 20% above
   `main`.
 
 The evidence report includes exact counts and denominators, overall and
@@ -57,3 +58,21 @@ with a two-sided 95% interval of [0.0, +33.3pp] and a one-sided lower bound of
 roughly +4.4pp. This amendment changes only the interval interpretation; the
 five-point absolute `Success@1` gain requirement, the per-family and safety
 conditions, the resource limits, and the offline checks are unchanged.
+
+## Clarification (2026-09-26): evaluate holdout guardrails separately
+
+For a candidate selected on development tasks, development results cannot
+offset a holdout regression. Report split results separately; promotion needs a
+holdout `Success@1` gain of at least five percentage points with a one-sided
+95% paired-bootstrap lower bound above zero. Holdout `Success@3`, incorrect-
+answer rate, and false-answer rate must not regress overall or by platform;
+`Success@1` and `Success@3` must not regress on any platform. Offline execution
+must succeed, and fresh-process p95 and peak memory for each split plus warmed
+p95 and peak memory keep the 20% limits. Combined counts remain descriptive
+and cannot establish independent improvement on their own.
+
+The canonical runner now records a separate independent-holdout decision and
+includes it in the release recommendation. It also rejects a fresh holdout
+whose frozen manifest or dataset digest differs from the reviewed freeze.
+Resource limits apply to every measured phase, and fresh-process memory
+measurements are required.

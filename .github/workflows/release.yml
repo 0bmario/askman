@@ -42,6 +42,9 @@ jobs:
     name: Build Binary (${{ matrix.artifact_name }})
     needs: [ci, release-readiness]
     runs-on: ${{ matrix.os }}
+    env:
+      LIBONNXRUNTIME_NO_PKG_CONFIG: "1"
+      ORT_PREFER_DYNAMIC_LINK: "0"
     strategy:
       matrix:
         include:

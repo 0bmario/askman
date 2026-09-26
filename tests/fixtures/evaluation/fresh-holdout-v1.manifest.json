@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "freeze_id": "fresh-holdout-v1-freeze-2026-09-26",
+  "frozen_at_utc": "2026-09-26T13:05:01Z",
+  "status": "frozen_unscored",
+  "authorization_required_before_candidate_scoring": true,
+  "candidate_runs_on_this_split": 0,
+  "release_gate_runs_on_this_split": 0,
+  "artifacts": {
+    "dataset": {
+      "path": "tests/fixtures/evaluation/fresh-holdout-v1.json",
+      "sha256": "7fe11e153b64941c91233b756543487ebdd34e17bcca7b935a55f8f16a6fb2a0"
+    },
+    "intents_v2": {
+      "path": "tests/fixtures/evaluation/fresh-holdout-v1-intents-v2.json",
+      "sha256": "d41afe4e0fdf3b5fdcae9bf37bbab97f2966b54a99643fef61877590b4e015d5"
+    },
+    "superseded_intents_v1": {
+      "path": "docs/reproducibility/artifacts/fresh-holdout-v1-intents-v1-superseded.json",
+      "sha256": "8bd65dfa078c80a14bf6d80c788f0048b3d0daed7a81e81e1f4b86ece28c2c3f"
+    },
+    "independent_labels_v1": {
+      "path": "docs/reproducibility/artifacts/fresh-holdout-v1-independent-labels-v1.json",
+      "sha256": "4c773803c30abacc048edb3393f81f4dc7ba459e89134941c875a6193d659c14"
+    },
+    "revised_intent_review_v2": {
+      "path": "docs/reproducibility/artifacts/fresh-holdout-v1-revised-intent-review-v2.json",
+      "sha256": "2981e833b5393a91fe3d2959231276a4d3a3ead038bc1f7109dfd1db0c23edc5"
+    },
+    "label_reconciliation_v2": {
+      "path": "docs/reproducibility/artifacts/fresh-holdout-v1-label-reconciliation-v2.json",
+      "sha256": "06a9827deed3f2422d216eb4547631f487b44a2a0f982cbd8905604c8733d2d1"
+    }
+  },
+  "corpus": {
+    "artifact_kind": "askman.tldr-subset",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "parser_version": "tldr-subset-v4",
+    "schema_version": 4,
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "visible_example_count": 142,
+    "visible_example_inventory_sha256": "0a874b094cc82bb0a3ea9d5270115276d50639c1915dda957eb10d1458cee1db"
+  },
+  "intents": {
+    "intent_freeze_id": "fresh-holdout-intents-v2-2026-09-26",
+    "task_count": 60,
+    "old_task_prompts_or_retrieval_results_used": false
+  },
+  "labels": {
+    "answerable": 30,
+    "abstain": 30,
+    "review_method": "independent prompt-only label pass plus exact-record source verification; discrepancies and revisions recorded in fresh-holdout-v1-freeze.md",
+    "all_acceptable_ids_exist_in_pinned_corpus": true,
+    "all_acceptable_ids_match_task_platform": true
+  },
+  "distribution": {
+    "common": {
+      "tasks": 15,
+      "answerable": 8,
+      "abstain": 7
+    },
+    "linux": {
+      "tasks": 15,
+      "answerable": 8,
+      "abstain": 7
+    },
+    "osx": {
+      "tasks": 15,
+      "answerable": 7,
+      "abstain": 8
+    },
+    "windows": {
+      "tasks": 15,
+      "answerable": 7,
+      "abstain": 8
+    }
+  },
+  "static_validation": {
+    "parser_derived_example_ids": 142,
+    "invalid_ids": 0,
+    "platform_mismatches": 0,
+    "answerable_without_target": 0,
+    "unanswerable_with_target": 0,
+    "unique_task_ids": true,
+    "unique_families": true,
+    "candidate_queries_run": false
+  }
+}

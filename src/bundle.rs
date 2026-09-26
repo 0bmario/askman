@@ -1,5 +1,5 @@
 use crate::dense::{
-    DENSE_INDEX_VERSION, MODEL_CACHE_FOLDER, MODEL_DIMENSION, MODEL_FILES, MODEL_ID,
+    DENSE_INDEX_VERSION, DenseRecipe, MODEL_CACHE_FOLDER, MODEL_DIMENSION, MODEL_FILES, MODEL_ID,
     MODEL_MAX_LENGTH, MODEL_REVISION, MODEL_RUNTIME, validate_dense_artifact_file,
     validate_model_cache,
 };
@@ -44,6 +44,7 @@ pub struct BundleBuildOptions {
     pub model_cache: PathBuf,
     pub output: PathBuf,
     pub cli_compatibility: String,
+    pub dense_recipe: DenseRecipe,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -207,6 +208,7 @@ pub fn build_matching_bundle(options: BundleBuildOptions) -> Result<BundleBuildR
         &snapshot,
         &model_cache,
         options.cli_compatibility,
+        options.dense_recipe,
     );
     match result {
         Ok(report) => {
@@ -230,6 +232,7 @@ fn build_temporary_bundle(
     snapshot: &Path,
     model_cache: &Path,
     cli_compatibility: String,
+    dense_recipe: DenseRecipe,
 ) -> Result<BundleBuildReport> {
     fs::create_dir(temporary).with_context(|| {
         format!(
@@ -253,7 +256,7 @@ fn build_temporary_bundle(
         artifact: lexical_output.clone(),
         model_cache: model_output.clone(),
         output: dense_output.clone(),
-        recipe: crate::dense::DenseRecipe::Description,
+        recipe: dense_recipe,
         batch_size: crate::dense::DEFAULT_BATCH_SIZE,
     })
     .context("failed to build dense index component")?;
@@ -1176,6 +1179,17 @@ impl BundleStore {
         self.load_bundle(&state.active_bundle_id)
     }
 
+    /// Return the validated query capability for the active immutable bundle.
+    /// The CLI can pass this handle into retrieval without validating the same
+    /// bundle a second time during one process startup.
+    pub(crate) fn active_validated_bundle(&self) -> Result<ValidatedBundle> {
+        let (path, manifest) = self.active_bundle()?;
+        Ok(ValidatedBundle {
+            root: fs::canonicalize(path)?,
+            manifest,
+        })
+    }
+
     /// First-use setup. Existing valid setup is idempotent; an invalid active
     /// state is reported instead of being repaired or replaced implicitly.
     pub fn setup(&self) -> Result<BundleManifest> {
@@ -1975,14 +1989,14 @@ mod tests {
         );
 
         let mut changed_parser = changed_compatibility;
-        changed_parser.parser_version = "tldr-subset-v4".to_string();
+        changed_parser.parser_version = "tldr-subset-v3".to_string();
         assert_ne!(first, bundle_id(&changed_parser).unwrap());
     }
 
     #[test]
     fn parser_version_must_match_manifest_and_database() {
         let mut manifest = test_manifest(PARSER_VERSION);
-        manifest.parser_version = "tldr-subset-v4".to_string();
+        manifest.parser_version = "tldr-subset-v3".to_string();
         let error = validate_manifest_shape(&manifest).unwrap_err().to_string();
         assert!(error.contains("unsupported matching bundle parser version"));
 
@@ -1992,14 +2006,19 @@ mod tests {
                 "CREATE TABLE artifact_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
                  INSERT INTO artifact_metadata VALUES
                    ('lexical_index_tokenizer', 'unicode61'),
-                   ('parser_version', 'tldr-subset-v3'),
                    ('dense_embedding_text_recipe', 'description');",
+            )
+            .unwrap();
+        connection
+            .execute(
+                "INSERT INTO artifact_metadata VALUES ('parser_version', ?1)",
+                [PARSER_VERSION],
             )
             .unwrap();
         let mut manifest = test_manifest(PARSER_VERSION);
         validate_database_component_versions(&manifest, &connection).unwrap();
 
-        manifest.parser_version = "tldr-subset-v4".to_string();
+        manifest.parser_version = "tldr-subset-v3".to_string();
         let error = validate_database_component_versions(&manifest, &connection)
             .unwrap_err()
             .to_string();
@@ -2030,11 +2049,12 @@ mod tests {
         fs::write(&marker, b"previous bundle").unwrap();
 
         let error = build_matching_bundle(BundleBuildOptions {
-            manifest: "tests/fixtures/tldr-full-corpus/manifest.json".into(),
+            manifest: "tests/fixtures/tldr-full-corpus/manifest-v4.json".into(),
             snapshot: "tests/fixtures/tldr-full-corpus".into(),
             model_cache: directory.path().join("missing-model-cache"),
             output: output.clone(),
             cli_compatibility: "askman=0.3.3".to_string(),
+            dense_recipe: DenseRecipe::Description,
         })
         .unwrap_err()
         .to_string();
@@ -2053,11 +2073,12 @@ mod tests {
         symlink("missing-target", &output).unwrap();
 
         let error = build_matching_bundle(BundleBuildOptions {
-            manifest: "tests/fixtures/tldr-full-corpus/manifest.json".into(),
+            manifest: "tests/fixtures/tldr-full-corpus/manifest-v4.json".into(),
             snapshot: "tests/fixtures/tldr-full-corpus".into(),
             model_cache: directory.path().join("missing-model-cache"),
             output: output.clone(),
             cli_compatibility: "askman=0.3.3".to_string(),
+            dense_recipe: DenseRecipe::Description,
         })
         .unwrap_err()
         .to_string();
@@ -2075,7 +2096,7 @@ mod tests {
     fn bundle_rejects_a_manifest_that_omits_a_snapshot_page() {
         let directory = tempfile::tempdir().unwrap();
         let source_manifest =
-            fs::read_to_string("tests/fixtures/tldr-full-corpus/manifest.json").unwrap();
+            fs::read_to_string("tests/fixtures/tldr-full-corpus/manifest-v4.json").unwrap();
         let mut manifest: serde_json::Value = serde_json::from_str(&source_manifest).unwrap();
         manifest["files"]
             .as_array_mut()
@@ -2094,6 +2115,7 @@ mod tests {
             model_cache: directory.path().join("missing-model-cache"),
             output: directory.path().join("matching-bundle"),
             cli_compatibility: "askman=0.3.3".to_string(),
+            dense_recipe: DenseRecipe::Description,
         })
         .unwrap_err()
         .to_string();

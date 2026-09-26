@@ -56,7 +56,7 @@ pub fn lifecycle_command(question: &[String]) -> Option<LifecycleCommand> {
 #[command(
     name = "askman_candidate",
     version,
-    about = "Ask natural language questions using frozen hybrid retrieval."
+    about = "Ask natural language questions using guarded dense retrieval."
 )]
 pub struct CandidateArgs {
     #[arg(required = true)]
@@ -66,7 +66,7 @@ pub struct CandidateArgs {
     #[arg(long, required = true, value_name = "DIR")]
     pub bundle: PathBuf,
 
-    /// Print the hybrid ranking score for diagnostics.
+    /// Print the dense distance for diagnostics.
     #[arg(long, short = 'v')]
     pub verbose: bool,
 

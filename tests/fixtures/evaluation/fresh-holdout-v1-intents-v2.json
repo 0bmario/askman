@@ -1,0 +1,428 @@
+{
+  "schema_version": 1,
+  "intent_freeze_id": "fresh-holdout-intents-v2-2026-09-26",
+  "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+  "task_count": 60,
+  "tasks": [
+    {
+      "id": "fresh-2026-09-26-common-positive-01",
+      "split": "holdout",
+      "platform": "common",
+      "family": "manifest-inspection",
+      "question": "The release bot left a generated inventory file. I want its contents printed in the terminal for a quick review. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-02",
+      "split": "holdout",
+      "platform": "common",
+      "family": "incident-bundle-assembly",
+      "question": "Three plain-text incident fragments must be combined in order into a report file, replacing its current contents. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-03",
+      "split": "holdout",
+      "platform": "common",
+      "family": "template-tree-staging",
+      "question": "Stage a template folder recursively under an existing scratch destination, keeping the source folder nested inside it. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-04",
+      "split": "holdout",
+      "platform": "common",
+      "family": "shared-drop-review",
+      "question": "Copy all matching .cfg files from a shared drop into a review folder, asking before replacing any existing file. Which documented pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-05",
+      "split": "holdout",
+      "platform": "common",
+      "family": "repository-extension-inventory",
+      "question": "Find every .toml file below the repository root. Which documented command pattern searches by extension?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-06",
+      "split": "holdout",
+      "platform": "common",
+      "family": "text-only-content-audit",
+      "question": "Search files recursively for a token while ignoring binary files. Which documented pattern fits this audit?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-07",
+      "split": "holdout",
+      "platform": "common",
+      "family": "migration-stream-normalization",
+      "question": "Transform a generated text stream by replacing each occurrence of “staging” with “candidate” and print the changed lines. Which documented pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-positive-08",
+      "split": "holdout",
+      "platform": "common",
+      "family": "deduplicated-import-queue",
+      "question": "A package-name list has repeated lines. Sort the entries and retain just one copy of each line. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-01",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "fresh-package-index",
+      "question": "Before planning a software install on a Debian workstation, refresh the local list of available package versions. Which documented command fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-02",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "package-change-review",
+      "question": "Before approving a software change, inspect the package description and other detailed package information. Which documented command fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-03",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "mount-capacity-triage",
+      "question": "A support ticket names one directory. Show disk usage for the filesystem that contains that path. Which documented command fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-04",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "memory-snapshot",
+      "question": "Capture a quick human-readable summary of system memory before a workload starts. Which documented command fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-05",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "route-table-audit",
+      "question": "During a network handoff, display the host routing table. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-06",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "interface-address-provisioning",
+      "question": "Assign an additional IP address and prefix to a named network interface. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-07",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "service-log-isolation",
+      "question": "Pull the journal entries associated with one named systemd service for a support review. Which documented command fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-positive-08",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "service-health-check",
+      "question": "Show the full status report for a named systemd service unit, rather than only a single active/inactive value. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-01",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "workspace-content-locator",
+      "question": "Spotlight-indexed project documents need to be located by text in their contents, limited to one workspace folder. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-02",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "design-review-open",
+      "question": "Open a PDF with the application macOS already associates with that file type. Which documented command fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-03",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "finder-handoff",
+      "question": "A teammate needs a file selected in Finder but does not want it opened. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-04",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "clipboard-command-output",
+      "question": "Place the raw contents of one specified file on the macOS clipboard using shell input redirection. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-05",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "clipboard-filter-pipeline",
+      "question": "Use the current clipboard text as input to a grep filter without first creating an intermediate file. Which documented pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-06",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "audio-proof-export",
+      "question": "Create an AIFF narration file from a short phrase without playing the phrase aloud. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-positive-07",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "screen-region-capture",
+      "question": "Save a screenshot of only a user-selected rectangular screen region. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-01",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "powershell-alias-documentation",
+      "question": "On this Windows machine, PowerShell resolves cat as Get-Content. I need the tldr page for that PowerShell command. Which documented command fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-02",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "incoming-batch-copy",
+      "question": "Copy every file from one source folder into another folder, retaining the source filenames. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-03",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "hidden-folder-inventory",
+      "question": "Show the contents of a specified Windows folder, including hidden entries. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-04",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "recursive-text-investigation",
+      "question": "Search every file below the current folder for one or more specified strings. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-05",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "powershell-file-scope",
+      "question": "In PowerShell, list only files in the current directory and exclude subdirectories. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-06",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "cross-volume-archive-move",
+      "question": "Move a package folder from the C: volume to a target path on D:. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-positive-07",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "line-oriented-escalation",
+      "question": "Search text files for a suspect string and include each matching line number for an engineer. Which documented command pattern fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-01",
+      "split": "holdout",
+      "platform": "common",
+      "family": "growing-log-tail",
+      "question": "A growing application log needs its latest 100 lines printed and then followed as new lines arrive. Which documented common-platform command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-02",
+      "split": "holdout",
+      "platform": "common",
+      "family": "compressed-backup-creation",
+      "question": "Create a gzip-compressed tar archive of a selected backup directory. Which documented common-platform command pattern does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-03",
+      "split": "holdout",
+      "platform": "common",
+      "family": "integrity-digest-generation",
+      "question": "Calculate and print a SHA-256 checksum for each release artifact. Which documented common-platform command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-04",
+      "split": "holdout",
+      "platform": "common",
+      "family": "permission-hardening",
+      "question": "Set a shell script’s POSIX permissions to owner read/write/execute only. Which documented common-platform command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-05",
+      "split": "holdout",
+      "platform": "common",
+      "family": "structured-response-projection",
+      "question": "Extract only the id and status keys from a JSON response using a command-line JSON processor. Which documented common-platform command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-06",
+      "split": "holdout",
+      "platform": "common",
+      "family": "batch-line-counting",
+      "question": "For each of several text files, report all three separate counts: lines, words, and bytes. Which documented common-platform command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-common-negative-07",
+      "split": "holdout",
+      "platform": "common",
+      "family": "configuration-diff-review",
+      "question": "Compare two configuration files and print their changed lines. Which documented common-platform command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-01",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "socket-owner-investigation",
+      "question": "Identify which process owns the listening TCP socket on port 5432. Which documented Linux command pattern does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-02",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "arch-package-install",
+      "question": "Install a package from Arch Linux repositories on an Arch host. Which documented Linux command fits?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-03",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "live-cpu-investigation",
+      "question": "Watch per-process CPU usage update live while a service is under load. Which documented Linux command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-04",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "ownership-repair",
+      "question": "Recursively change the owner and group of a deployment directory. Which documented Linux command pattern does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-05",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "firewall-rule-change",
+      "question": "Add a host firewall rule that permits inbound TCP traffic on port 8443. Which documented Linux command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-06",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "kernel-ring-buffer-review",
+      "question": "Display kernel ring-buffer messages directly for a boot diagnosis. Which documented Linux command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-linux-negative-07",
+      "split": "holdout",
+      "platform": "linux",
+      "family": "directory-space-breakdown",
+      "question": "Measure disk space used by each immediate subdirectory under a cache directory. Which documented Linux command pattern does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-01",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "desktop-app-log-follow",
+      "question": "Print the latest 100 lines of an ordinary app log on macOS and continue following new lines. Which documented macOS command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-02",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "clipboard-history-recovery",
+      "question": "Show several earlier clipboard entries from a clipboard-history store, not just the current clipboard value. Which documented macOS command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-03",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "wireless-network-join",
+      "question": "Join a named Wi-Fi network from Terminal without opening System Settings. Which documented macOS command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-04",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "display-brightness-control",
+      "question": "Set the built-in display brightness to 60 percent from the command line. Which documented macOS command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-05",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "lossless-video-trim",
+      "question": "Remove a middle segment from an MP4 file without re-encoding the remaining video. Which documented macOS command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-06",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "encrypted-image-mount",
+      "question": "Mount an encrypted disk image from Terminal after supplying its password. Which documented macOS command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-07",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "metadata-preserving-archive",
+      "question": "Create a ZIP archive of a folder while preserving macOS package metadata. Which documented macOS command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-osx-negative-08",
+      "split": "holdout",
+      "platform": "osx",
+      "family": "default-app-association",
+      "question": "Change the account-wide default application for opening CSV files from the command line. Which documented macOS command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-01",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "process-inventory",
+      "question": "List running process names and process IDs in a Windows terminal. Which documented Windows command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-02",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "process-termination",
+      "question": "Terminate a Windows process by its numeric process ID. Which documented Windows command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-03",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "https-file-download",
+      "question": "Download a URL to a local file from PowerShell. Which documented Windows command pattern does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-04",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "built-in-zip-creation",
+      "question": "Create a ZIP archive from a folder using a built-in PowerShell command. Which documented Windows command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-05",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "network-configuration-report",
+      "question": "Show the Windows host’s IP address, gateway, and DNS configuration. Which documented Windows command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-06",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "text-file-comparison",
+      "question": "Compare two text files and print their differences from a Windows command prompt. Which documented Windows command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-07",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "directory-link-creation",
+      "question": "Create a directory symbolic link from one Windows path to another. Which documented Windows command does that?"
+    },
+    {
+      "id": "fresh-2026-09-26-windows-negative-08",
+      "split": "holdout",
+      "platform": "windows",
+      "family": "tree-mirroring",
+      "question": "Mirror a source tree to a destination and remove destination-only files so both trees match. Which documented Windows command pattern does that?"
+    }
+  ]
+}

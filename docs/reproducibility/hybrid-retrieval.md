@@ -1,5 +1,10 @@
 # Hybrid retrieval comparison
 
+**Historical experiment record (2026-09-26 decision):** the hybrid configurations
+below remain controlled ablations, but hybrid RRF is not the selected product
+path. Current dense-only behavior and evidence are recorded in ADR 0003 and
+[`retrieval-v2-approach-review.md`](../retrieval-v2-approach-review.md).
+
 Issue #19 adds a development-only hybrid candidate to the frozen retrieval
 evaluation. It fuses the existing keyword and dense candidate IDs. The original
 v1 fixture remains immutable historical evidence; the current candidate policy
@@ -39,14 +44,14 @@ cargo run --locked --offline --features dev --bin askman_candidate -- \
   --linux search patterns files
 ```
 
-This development binary uses the expanded-dev dense query mode. The shipping
-`askman` binary uses the raw query even when built with the `dev` feature.
-Use `--osx` or `--windows` for another target platform. `--verbose` exposes a
-diagnostic normalized ranking score; it is not a confidence percentage. The
-shipping `askman` binary now consumes the active validated bundle through the
-same frozen hybrid path. `askman_candidate` remains available for
-explicit-bundle comparison, while `tldr_subset query` and `dense-server`
-remain available for keyword-only and dense-only diagnostics.
+At the time of this experiment, `askman_candidate` opted into the expanded-dev
+dense query mode, while the then-shipping `askman` binary used raw queries by
+default. A later candidate routed `askman` through the frozen hybrid path.
+Both behaviors are historical and superseded by the dense-only decision in
+ADR 0003. Use `--osx` or `--windows` for another target platform. `--verbose`
+exposes a diagnostic ranking score; it is not a confidence percentage.
+`askman_candidate`, `tldr_subset query`, and `dense-server` remain available
+for explicit-bundle and retrieval diagnostics.
 
 The provisioned offline harness builds the candidate and matching bundle, then
 checks answerable, unanswerable, ambiguous, and cross-platform queries without
@@ -176,9 +181,10 @@ observation. Added terms come from the pinned indexed example descriptions;
 `address` is not added because it also occurs in add/delete descriptions and
 would broaden the observation intent.
 
-Query expansion is behind a development boundary. `askman_candidate` opts in
-directly. Shipping `askman` and `dense-server` use raw queries by default. The
-dense server accepts only the exact environment value below; any other value
+At the time of this experiment, query expansion was behind a development
+boundary: `askman_candidate` opted in directly, and shipping `askman` and
+`dense-server` used raw queries by default. This was superseded by ADR 0003.
+The dense server accepts only the exact environment value below; any other value
 fails closed. Set it only for this expanded-development evaluator invocation:
 
 ```sh

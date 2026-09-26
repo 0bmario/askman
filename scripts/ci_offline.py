@@ -425,7 +425,7 @@ def build_and_validate_bundle(
                 [
                     "bundle-build",
                     "--manifest",
-                    ROOT / "tests/fixtures/tldr-full-corpus/manifest.json",
+                    ROOT / "tests/fixtures/tldr-full-corpus/manifest-v4.json",
                     "--snapshot",
                     ROOT / "tests/fixtures/tldr-full-corpus",
                     "--model-cache",

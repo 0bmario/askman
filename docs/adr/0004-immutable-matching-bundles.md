@@ -10,6 +10,10 @@ corpus, lexical and dense retrieval indexes, embedding model assets, manifest,
 and compatible asset versions. The manifest records component versions, sizes,
 and SHA-256 digests.
 
+The current bundle keeps its lexical index for reproducible ablations and
+source-backed evaluation checks. The selected candidate CLI path is dense-only;
+the lexical index is not fused into user results.
+
 The active CLI and matching bundle must always form a compatible pair. The
 client uses one active bundle offline and changes it only through an explicit
 update flow. Activation is atomic: partial, mixed, invalid, or incompatible

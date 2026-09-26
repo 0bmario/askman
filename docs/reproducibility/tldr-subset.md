@@ -1,9 +1,11 @@
 # Reproducible tldr corpus artifacts
 
 The `tldr_subset` runner builds a source-backed SQLite artifact from a
-provisioned local snapshot. A v3 manifest records the pinned English source,
-revision, complete file selection, lexical-index recipe, and any explicit
-exclusions. The digest covers every selected file, including excluded files.
+provisioned local snapshot. The original v3 manifests remain frozen for
+historical evidence. Current builds use a versioned v4 manifest, which records
+the pinned English source, revision, complete file selection, lexical-index
+recipe, and explicit exclusions. Its source digest covers every selected file,
+including excluded files.
 
 Every selected file is recorded as `parsed` or `excluded` with its SHA256 and
 byte length. A selected file that is missing, malformed, unsupported, or not
@@ -26,7 +28,7 @@ Use a provisioned local snapshot; this command never accesses the network:
 ```sh
 cargo run --locked --offline --features dev --bin tldr_subset -- \
   build \
-  --manifest tests/fixtures/tldr-full-corpus/manifest.json \
+  --manifest tests/fixtures/tldr-full-corpus/manifest-v4.json \
   --snapshot tests/fixtures/tldr-full-corpus \
   --output /tmp/askman-tldr-subset.db
 

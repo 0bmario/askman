@@ -5,5 +5,6 @@ pub mod dense;
 pub mod embed;
 pub mod format;
 pub mod hybrid;
+pub mod retrieval;
 pub mod search;
 pub mod tldr_subset;

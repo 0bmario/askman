@@ -3,15 +3,51 @@
 Issue #33 provides `scripts/run_release_gate.py`. It builds the `main` and
 candidate `askman` binaries separately with `--locked --offline`, stages the
 candidate matching bundle, and runs both CLIs on identical frozen
-`evaluation-v2-expanded` development and holdout tasks. This is the versioned
+`evaluation-v2-expanded` tasks. Use `--candidate-working-tree` to build the
+current checkout, including uncommitted changes. This is the versioned
 corpus-backed release freeze from issue #39.
 
 Provision the main release data directory and a validated candidate bundle
 before running the gate. The main directory must contain `commands.db` and its
 pinned model cache. Provisioning/download is intentionally outside the gate;
 the gate records SHA-256 input digests and does not mutate the supplied main
-directory or bundle. The runner rejects any evaluation manifest or split whose
-digest differs from the checked-in expanded freeze.
+directory or bundle. Before querying, it requires equal visible-corpus
+inventories after stripping `More information:` links, normalizing page
+description whitespace, and case-folding Windows page command names (Windows
+PowerShell commands are case-insensitive). It verifies every model asset
+against the bundle manifest. The report records the shared
+inventory digest, candidate source digest, and verified model-asset count. The
+schema-4 report also records the gate-runner digest. The runner rejects any
+evaluation manifest or split whose digest differs
+from the checked-in expanded freeze.
+
+The consumed evaluation-v2 holdout remains available only as historical
+evidence. For a new independent run, pass
+`--independent-holdout-manifest tests/fixtures/evaluation/fresh-holdout-v1.manifest.json`.
+The runner requires `--allow-holdout`, verifies the pinned freeze and dataset
+digests, and evaluates holdout quality separately from development. A release
+recommendation requires holdout Success@1 improvement with a positive
+one-sided paired-bootstrap lower bound, no holdout safety or platform losses,
+successful network-denied execution, and resource limits met in every measured
+phase.
+`--dev-only` does not load either holdout dataset.
+
+The frozen evaluation-v2 labels use parser v3. If a candidate bundle uses a
+new parser version, the gate rebuilds the frozen 24-page source with the pinned
+parser-v3 reference, then compares stable example IDs, page IDs, platforms,
+commands, and visible descriptions against the candidate. A mismatch fails
+before query evaluation. The original v3 manifest and frozen task files remain
+unchanged; the candidate build uses a separate versioned manifest.
+
+Release runs require the evaluation baseline `commands.db` SHA-256
+`ef3b96cc8ee5a9effa08d9a5e8366e3d92e9b3c7866493568fe2248d379819db`. It was
+reproduced by the `main` importer at `8bd9fa296ea7e2f461202091f2ade47221bc8a0e`
+from the frozen 24-page `e1cb966e711d73c42d75e79834be7e4dc17264ef` corpus with
+the pinned model assets. This pins the baseline vectors, not only visible text.
+The full installed v0.3.3 DB documented in [`offline-smoke.md`](offline-smoke.md)
+is a different corpus and is not a valid input for this 142-example benchmark.
+`--dev-only` may use another scratch database; it records that DB as unpinned,
+and the release-readiness validator rejects it as promotion evidence.
 
 ```sh
 python3 scripts/run_release_gate.py \
@@ -23,6 +59,131 @@ python3 scripts/run_release_gate.py \
   --output-json /tmp/askman-release-gate.json \
   --output-markdown /tmp/askman-release-gate.md
 ```
+
+Use `--dev-only` for development verification only. It cannot produce a
+release decision: its recommendation is always inconclusive, and its protocol
+metadata marks the development-and-holdout requirement as unmet.
+
+Build a candidate bundle from the versioned parser-v4 manifest with the pinned
+model cache provisioned by `scripts/smoke_offline.sh`:
+
+```sh
+cargo run --locked --offline --features dev --bin tldr_subset -- bundle-build \
+  --manifest tests/fixtures/tldr-evaluation-v2/manifest-v4.json \
+  --snapshot tests/fixtures/tldr-evaluation-v2 \
+  --model-cache /path/to/provisioned-data/models \
+  --output /tmp/askman-matching-bundle \
+  --cli-compatibility askman=0.3.3 \
+  --dense-recipe main-compatible
+```
+
+## Current focused candidate — development only
+
+The candidate uses main-compatible embedding text, `focused-v1` source-backed
+query mappings, raw cosine ranking, distance `<= 0.55`, and early
+one-example-per-page selection. On the identical pinned dev records, the paired
+gate measured:
+
+| Metric | main | focused candidate |
+| --- | ---: | ---: |
+| Success@1 | 18/30 | 30/30 |
+| Success@3 | 23/30 | 30/30 |
+| False answers | 1/30 | 0/30 |
+| Warm p95 | 86.704 ms | 86.852 ms |
+| Warm peak memory | 236,356,280 B | 236,602,040 B |
+| Fresh p95 | 87.269 ms | 89.248 ms |
+| Fresh peak memory | 237,421,240 B | 282,886,888 B |
+
+There were zero execution failures under the network-denied wrapper. The
+candidate improved Success@1 on every platform and tied or improved
+Success@3. Every measured fresh and warm resource metric stayed within the 20%
+ceiling. Source digest is
+`4562e5b85dac655df1fe773b2341ae727058050fbef2ba4f9de4bb638a7efa98`; binary
+digest is
+`8154b0ba4189fd39610168c9b11fcbf911ecbe876f49299b5f06ad04bc029bd4`. These
+are dev-only results. Earlier focused timing runs are retained. The new
+holdout is frozen and remains unscored pending explicit authorization. Reports:
+[`latest focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v4.json),
+[`previous focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v3.json),
+[`focused controlled ablation`](artifacts/retrieval-v2-controlled-ablation-dev-v2.json).
+
+After authorization, the independent command uses the frozen dev dataset and
+the fresh holdout manifest:
+
+```sh
+python3 scripts/run_release_gate.py \
+  --candidate-working-tree \
+  --main-data-dir /path/to/main-data \
+  --bundle /path/to/matching-bundle \
+  --allow-holdout \
+  --independent-holdout-manifest tests/fixtures/evaluation/fresh-holdout-v1.manifest.json \
+  --holdout-dataset tests/fixtures/evaluation/fresh-holdout-v1.json \
+  --output-json /tmp/askman-fresh-holdout-gate.json \
+  --output-markdown /tmp/askman-fresh-holdout-gate.md
+```
+
+## Earlier broad-rule candidate (2026-09-26)
+
+The earlier dev-only paired run used the exact
+pinned main database and 142 equivalent parser-v3/v4 records. Main measured
+18/30 Success@1, 23/30 Success@3, and 1/30 false answers; the dense-only
+candidate measured 30/30, 30/30, and 0/30. Fresh p95 was 90.30 ms for main and
+89.79 ms for candidate; peak memory was 238.2 MB and 245.3 MB. Warmed p95 was
+88.38 ms and 92.39 ms; peak memory was 237.5 MB and 236.8 MB. All resource
+measurements were inside the gate's 20% warmed-query limits. An earlier run
+had substantially different memory and warmed-latency measurements, so both
+reports are retained. The candidate source digest is
+`419c2a86c559735bd62173885371bd78e67e4c4c8414eef01f05917813bf046d`; the
+candidate binary digest remains
+`bf3e293d6ecfee8f5d0bbbaafaac57b7498a8fc92adcb8865120b89ff6a077d9`. The
+decision remains `inconclusive` because this run used dev tasks only. Reports:
+[`latest paired dev-only gate`](artifacts/main-vs-retrieval-v2-dev-only-v2.json),
+[`earlier paired dev-only gate`](artifacts/main-vs-retrieval-v2-dev-only-v1.json),
+and [`controlled ablation`](artifacts/retrieval-v2-controlled-ablation-dev-v1.json).
+
+## Prior authorized run (2026-09-26): broad candidate not promoted
+
+After explicit authorization, one canonical run compared the frozen candidate
+against the pinned main database and matching bundle on both splits. The
+candidate source digest was `419c2a86c559735bd62173885371bd78e67e4c4c8414eef01f05917813bf046d`;
+all 142 parser-v3/v4 records were equivalent. Main and candidate had no
+execution failures under the network-denied query wrapper.
+
+| Split | Metric | Main | Candidate |
+| --- | --- | ---: | ---: |
+| Dev | Success@1 | 18/30 | 30/30 |
+| Dev | Success@3 | 23/30 | 30/30 |
+| Dev | False answers | 1/30 | 0/30 |
+| Holdout | Success@1 | 19/30 | 19/30 |
+| Holdout | Success@3 | 25/30 | 20/30 |
+| Holdout | False answers | 6/30 | 6/30 |
+| Combined | Success@1 | 37/60 | 49/60 |
+| Combined | Success@3 | 48/60 | 50/60 |
+| Combined | False answers | 7/60 | 6/60 |
+
+Holdout `Success@3` also fell on macOS (10/10 to 8/10) and Windows (4/5 to
+1/5); holdout `Success@1` tied main on every platform. The runner's pooled
+bootstrap reports a +20-point combined `Success@1` gain (95% interval
+[+10pp, +30pp]), so its machine decision is `better_askman`. That pooled result
+is driven by development gains and does not satisfy the independent
+improvement/no-regression requirement. The candidate is **not approved**.
+
+Warmed p95 was 91.64 ms for main and 88.56 ms for candidate; peak memory was
+237,175,480 and 237,535,904 bytes. Both are within the 20% limits. False-answer
+rate tied on holdout, and offline execution passed. Retrieval relevance is the
+blocking regression.
+
+Before this run, broad searches accidentally surfaced one frozen holdout row
+and snippets from existing holdout evidence. They were not used for tuning;
+the evaluation is not fully blind. No candidate changes were made after the
+run. Retire this holdout from future candidate selection and obtain a fresh
+unseen split before another independent claim.
+
+The immutable run output is
+[`main-vs-retrieval-v2-authorized-v1.json`](artifacts/main-vs-retrieval-v2-authorized-v1.json)
+and its rendered report. It passes the structural readiness validator, which
+does not decide the split-specific promotion condition above. Do not copy it to
+the publication path.
 
 The query phase uses `sandbox-exec` with `deny network*` on macOS and
 `unshare --net` on Linux. It captures each binary's commit, lockfile digest,
@@ -38,11 +199,12 @@ incorrect-answer counts, false-answer counts, platform/family breakdowns, and
 internal candidate details are secondary or diagnostic. The gate uses a fixed
 seed and 10,000 paired bootstrap resamples over answerable tasks, requires a
 five-point overall `Success@1` gain, positive gains in two families, no safety
-regression, and no more than 20% warmed-query p95 or peak-memory regression.
+regression, and no more than 20% regression in fresh-process p95 or peak memory
+for each split, or warmed-query p95 or peak memory.
 Per the ADR-0001 amendment (2026-09-20, pre-registered before holdout access),
 the bootstrap condition is a one-sided 95% lower bound above zero; the
-two-sided interval is still reported and a two-sided interval containing zero
-still produces an **inconclusive** recommendation.
+two-sided interval is still reported for transparency. A two-sided interval
+containing zero does not by itself make the recommendation inconclusive.
 
 Release publication requires a checked-in machine-readable report at
 `docs/reproducibility/artifacts/release-gate.json` with
@@ -52,6 +214,10 @@ network wrapper. The tag workflow validates that report against the tagged
 candidate commit before building or publishing any release assets. No report
 is checked in until the authorized main-data and matching-bundle inputs are
 available.
+
+The machine `passed` flag and structural report validator are not sufficient
+when development and holdout outcomes differ. Apply ADR-0001's split-specific
+holdout conditions before promotion; the authorized v1 report is not approved.
 
 Fresh-process measurements cover every benchmark task. Warmed-query samples
 warm filesystem/model caches first, then run fresh CLI processes; this is the

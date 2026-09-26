@@ -5,12 +5,15 @@ English and follows the importer directories `common`, `linux`, `osx`, and
 `windows`; it does not imply that released binaries contain four-platform
 support.
 
-Build offline from the committed fixture:
+Build offline from the committed fixture. The original `manifest.json` stays
+at parser v3 for the frozen corpus identity; current builder examples use the
+versioned parser-v4 manifest, which keeps the same source selection and source
+digest while recording the current lexical normalization recipe.
 
 ```sh
 cargo run --locked --offline --features dev --bin tldr_subset -- \
   build \
-  --manifest tests/fixtures/tldr-full-corpus/manifest.json \
+  --manifest tests/fixtures/tldr-full-corpus/manifest-v4.json \
   --snapshot tests/fixtures/tldr-full-corpus \
   --output /tmp/askman-full-corpus.db
 

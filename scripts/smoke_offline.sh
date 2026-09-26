@@ -376,7 +376,7 @@ run_candidate() {
     fi
 
     offline_run "$run_dir" "$helper" bundle-build \
-        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest.json" \
+        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest-v4.json" \
         --snapshot "$REPO_ROOT/tests/fixtures/tldr-full-corpus" \
         --model-cache "$data_dir/models" \
         --output "$bundle" \
@@ -501,7 +501,7 @@ run_evidence() {
     fi
     offline_run "$run_dir" "$helper" \
         build \
-        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest.json" \
+        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest-v4.json" \
         --snapshot "$REPO_ROOT/tests/fixtures/tldr-full-corpus" \
         --output "$artifact" \
         > "$run_dir/lexical-build.txt"
@@ -517,7 +517,7 @@ run_evidence() {
     offline_run "$run_dir" env "${cargo_env[@]}" python3 \
         "$REPO_ROOT/scripts/run_heldout_evidence.py" \
         --artifact "$dense_artifact" \
-        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest.json" \
+        --manifest "$REPO_ROOT/tests/fixtures/tldr-full-corpus/manifest-v4.json" \
         --dataset "$REPO_ROOT/tests/fixtures/evaluation/frozen-holdout-v1.json" \
         --hybrid-config "$REPO_ROOT/tests/fixtures/evaluation/hybrid-config-v1.json" \
         --evidence-config "$REPO_ROOT/tests/fixtures/evaluation/heldout-evidence-config-v1.json" \
