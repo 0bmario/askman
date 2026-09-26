@@ -31,6 +31,10 @@ one-sided paired-bootstrap lower bound, no holdout safety or platform losses,
 successful network-denied execution, and resource limits met in every measured
 phase.
 `--dev-only` does not load either holdout dataset.
+Fresh-holdout-v1 preserves the legacy corpus ID `tldr-pages@<revision>`.
+For that explicitly manifested split, preflight accepts this exact alias or
+the digest-based `<revision>:<digest>` form while still checking the frozen
+revision, source digest, parser, corpus manifest, and full dataset digest.
 
 The frozen evaluation-v2 labels use parser v3. If a candidate bundle uses a
 new parser version, the gate rebuilds the frozen 24-page source with the pinned
@@ -77,7 +81,7 @@ cargo run --locked --offline --features dev --bin tldr_subset -- bundle-build \
   --dense-recipe main-compatible
 ```
 
-## Current focused candidate — development only
+## Focused candidate — development and independent results
 
 The candidate uses main-compatible embedding text, `focused-v1` source-backed
 query mappings, raw cosine ranking, distance `<= 0.55`, early
@@ -104,27 +108,47 @@ digest is
 `2e03c4d99601b9d14f1dc0ad63545c12b274ddc5356abbaa043d8b914ce80521`. These
 are dev-only results. The gate measured 30/30 vs main's 18/30 Success@1,
 30/30 vs 23/30 Success@3, and zero vs one false answers; platform Success@1
-improved in all four groups. Earlier focused timing runs remain recorded. The
-new holdout is frozen and unscored pending explicit authorization. Reports:
+improved in all four groups. Earlier focused timing runs remain recorded.
+Reports:
 [`latest focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v5.json),
 [`previous focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v4.json),
 [`earlier focused dev-only gate`](artifacts/main-vs-retrieval-v2-focused-dev-only-v3.json),
 [`focused controlled ablation`](artifacts/retrieval-v2-controlled-ablation-dev-v2.json).
+Earlier dev-only notes that call the fresh holdout “unscored” record the
+pre-authorization state; the independent result below supersedes that status.
 
-After authorization, the independent command uses the frozen dev dataset and
-the fresh holdout manifest:
+After explicit authorization, the canonical gate scored the frozen fresh
+holdout once against candidate commit
+`3494a11c57c31045bb9897c9fa187d768e18ebcb`:
 
-```sh
-python3 scripts/run_release_gate.py \
-  --candidate-ref 3494a11c57c31045bb9897c9fa187d768e18ebcb \
-  --main-data-dir /path/to/main-data \
-  --bundle /path/to/matching-bundle \
-  --allow-holdout \
-  --independent-holdout-manifest tests/fixtures/evaluation/fresh-holdout-v1.manifest.json \
-  --holdout-dataset tests/fixtures/evaluation/fresh-holdout-v1.json \
-  --output-json /tmp/askman-fresh-holdout-gate.json \
-  --output-markdown /tmp/askman-fresh-holdout-gate.md
-```
+| Metric | main | focused candidate |
+| --- | ---: | ---: |
+| Success@1 | 13/30 | 15/30 |
+| Success@3 | 19/30 | 15/30 |
+| Incorrect answered | 7/26 | 10/25 |
+| False answers | 13/30 | 8/30 |
+| Fresh p95 | 93.736 ms | 94.752 ms |
+| Fresh peak memory | 237,634,232 B | 237,535,928 B |
+| Warm p95 | 93.347 ms | 90.551 ms |
+| Warm peak memory | 238,306,000 B | 237,421,264 B |
+
+The observed `Success@1` gain was 6.7 points, but the one-sided 95% paired-
+bootstrap lower bound was −3.3 points. `Success@3` and incorrect answered
+tasks regressed overall, with additional `Success@3` and incorrect-answer
+regressions on Linux and Windows. False answers improved, `Success@1` did not
+regress on any platform, latency and memory stayed within 20%, and both CLIs
+had zero failures under network denial. The independent gate is inconclusive;
+do not promote or tune this candidate. The holdout is consumed. The complete
+immutable report and historical reproduction command are in
+[`focused fresh-holdout gate`](artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json)
+and its
+[`rendered report`](artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.md).
+The release-readiness validator rejects this report because the independent
+holdout bootstrap lower bound is not positive. The freeze manifest retains its
+freeze-time counters and status unchanged; this report records the later
+authorized use.
+Do not rerun this split. Any changed candidate requires a new unseen holdout
+and explicit scoring authorization.
 
 ## Earlier broad-rule candidate (2026-09-26)
 

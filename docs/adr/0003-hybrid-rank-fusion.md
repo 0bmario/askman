@@ -2,8 +2,9 @@
 
 Status: Superseded on 2026-09-26. Hybrid RRF is not used by the experimental
 dense-only candidate path. The earlier candidate failed independent
-validation; the current smaller candidate has dev-only evidence and is not
-approved for release pending authorized independent evaluation.
+validation. The focused candidate also failed the fresh independent gate and
+is not approved for release. Dense-only remains the development path; hybrid
+has no measured advantage in the controlled ablations.
 
 ## Original decision
 
@@ -94,9 +95,27 @@ digest `2e03c4d99601b9d14f1dc0ad63545c12b274ddc5356abbaa043d8b914ce80521`.
 It abstains on negated file-to-stdout requests and when a request excludes
 `cat`, the pinned corpus's only verified full-file stdout example. The new
 direct dev CLI check had exposed `cat` at distance `0.4489` for “do not show
-file contents to stdout”; the final build abstains. The independent holdout is
-frozen but unscored. Require explicit authorization before the canonical
-paired run; do not tune from its result.
+file contents to stdout”; the final build abstains. The independent holdout
+result is recorded below; do not tune from it.
+
+## Independent fresh holdout result (2026-09-26)
+
+The candidate was scored once, without post-freeze changes, against fresh
+holdout v1. Main/candidate results were `Success@1` 13/30→15/30,
+`Success@3` 19/30→15/30, incorrect answered tasks 7/26→10/25, and false
+answers 13/30→8/30. The observed `Success@1` gain was 6.7 points, but its
+one-sided 95% paired-bootstrap lower bound was −3.3 points. Linux and Windows
+also regressed on `Success@3`; no CLI failures occurred under the network-denied
+wrapper, and holdout fresh/warmed latency and memory stayed within the 20%
+limits. The independent gate is inconclusive and the candidate is not approved.
+
+Do not adjust retrieval from this result. Fresh holdout v1 is consumed; any
+changed candidate needs another unseen split and explicit scoring
+authorization. Hybrid remains unjustified by the development ablations. Full
+evidence:
+[`main-vs-retrieval-v2-focused-fresh-holdout-v1.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json)
+and its
+[`rendered report`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.md).
 
 The controlled results are in
 [`retrieval-v2-controlled-ablation-dev-v2.json`](../reproducibility/artifacts/retrieval-v2-controlled-ablation-dev-v2.json)
@@ -118,5 +137,6 @@ The previous focused runs remain in
   otherwise abstain.
 - Keep command/example rendering and platform selection covered by the paired
   gate.
-- A learned reranker or model replacement remains out of scope until dense-only
-  retrieval fails an authorized independent evaluation.
+- A learned reranker or model replacement may be considered in future
+  development-only experiments; any release claim still needs a fresh
+  independently authorized holdout run.

@@ -4,8 +4,9 @@ Review starts from working tree `f61e3af`; the final focused candidate is
 `3494a11`, against main baseline `8bd9fa2` and installed Askman 0.3.3.
 Historical v2 evidence includes two dev-only paired gates and one authorized
 canonical run; the broad candidate failed its independent holdout. The smaller
-candidate was selected on dev only. The new independent holdout is frozen and
-unscored pending explicit authorization.
+candidate was selected on dev only. It was later scored once against fresh
+holdout v1 with explicit authorization; the independent gate was inconclusive
+and the candidate is not approved.
 
 ## Recommendation
 
@@ -16,8 +17,9 @@ It improves main on
 the pinned dev records; this is not independent validation. Hybrid adds no
 measured value. The prior broad `IntentRulesV1` candidate failed holdout
 Success@1 and Success@3 conditions. Keep shipped Askman as the product baseline
-until the new frozen holdout is explicitly authorized, scored once, and passes
-the split-specific canonical gate.
+because the focused candidate also failed the split-specific independent gate.
+Do not tune from either consumed holdout. Any further release candidate needs
+fresh independent evaluation and explicit authorization before scoring.
 
 ## Latest focused candidate — dev only
 
@@ -51,7 +53,26 @@ digest `2e03c4d99601b9d14f1dc0ad63545c12b274ddc5356abbaa043d8b914ce80521`.
 Fresh holdout dataset digest is
 `7fe11e153b64941c91233b756543487ebdd34e17bcca7b935a55f8f16a6fb2a0`; freeze
 manifest digest `7463ccb782cf971b4893f369c899f408212306020c68e471b72c146b2da68f1a`.
-It has not been queried or scored.
+It was scored once against candidate commit
+`3494a11c57c31045bb9897c9fa187d768e18ebcb`.
+
+## Authorized focused-candidate holdout result
+
+Main and candidate measured holdout `Success@1` 13/30 vs 15/30, `Success@3`
+19/30 vs 15/30, incorrect answered tasks 7/26 vs 10/25, and false answers
+13/30 vs 8/30. The observed `Success@1` gain was 6.7 points, but the one-sided
+95% paired-bootstrap lower bound was −3.3 points. Linux and Windows regressed
+on `Success@3`; incorrect answered tasks regressed overall and on both
+platforms. Offline execution had zero failures; latency and memory stayed
+within the 20% limits. The canonical decision is inconclusive. Keep shipped
+Askman as the product baseline.
+
+The holdout was not used for tuning and is now consumed. Its frozen JSON and
+manifest remain unchanged. Do not inspect individual outcomes for candidate
+changes. Preserve the complete gate evidence at
+[`main-vs-retrieval-v2-focused-fresh-holdout-v1.json`](reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json)
+and
+[`rendered report`](reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.md).
 
 ## Earlier broad-candidate matched-corpus results
 
@@ -196,7 +217,7 @@ is a lexical surrogate with main's heuristics, not the shipped main CLI.
 | KNN and startup investigations | Partitioned KNN, bounded `k`, exact fallback, named-model initialization, validation reuse implemented. | Reliability work alone does not prove relevance. The current dev-only gate now measures fresh and warmed CLI latency; it does not establish performance on the full installed corpus. |
 | Parser-v3/v4 record audit | Rebuilt v3 from its frozen manifest and compared to v4: 142/142 IDs and visible records equal; current fixture has 139 operational rows after excluding three navigation examples. | Candidate labels remain relative to the same records; this is not evidence about the full tldr corpus. |
 | Paired canonical dev-only gate (pre-authorized run) | Main 18/30 S@1, 23/30 S@3, 1/30 false; candidate 30/30, 30/30, 0/30. No execution failures; resource limits pass. | Exact pinned-record development comparison; not independent validation. |
-| Earlier broad-rule controlled ablation | Main-compatible text + `IntentRulesV1` reached 30/30 S@1 and S@3; hybrid tied it. Dense-only without expansion was 20/30 S@1. | Expansion benefit did not validate on the consumed holdout. The smaller focused candidate is separately recorded as dev-only above. |
+| Earlier broad-rule controlled ablation | Main-compatible text + `IntentRulesV1` reached 30/30 S@1 and S@3; hybrid tied it. Dense-only without expansion was 20/30 S@1. | Expansion benefit did not validate on its consumed holdout. The focused candidate's later independent result is recorded above. |
 
 Checked-in historical sources:
 [dense](reproducibility/dense-retrieval.md),
@@ -219,9 +240,9 @@ are exploratory, not clean release inputs.
 
 | ADR | Assessment | Proposed treatment |
 | --- | --- | --- |
-| 0001 — release gate | The original pooled decision could hide holdout regression. | The canonical runner now reports split-specific holdout improvement and safety conditions. |
-| 0002 — benchmarks | Corpus-relative labels and split separation remain useful; old v2 holdout is consumed. | Fresh independent holdout is frozen, independently labeled, and unscored; explicit authorization is required. |
-| 0003 — hybrid | Fusion added no value; broad dense rules failed independent review. | Keep the smaller focused dense candidate as dev-selected only. Do not promote before its authorized independent gate. |
+| 0001 — release gate | The original pooled decision could hide holdout regression. | Split-specific conditions correctly leave the focused candidate inconclusive. |
+| 0002 — benchmarks | Corpus-relative labels and split separation remain useful; both prior holdouts are consumed. | Preserve fresh-holdout-v1; any future holdout must be unseen and explicitly authorized before scoring. |
+| 0003 — hybrid | Fusion added no value; both broad and focused dense candidates failed independent review. | Keep focused dense-only for development; do not promote or tune from consumed holdouts. |
 | 0004 — bundles | Appropriate for offline reproducibility, compatible assets, explicit updates, atomic activation, and rollback. | Retained. Candidate bundle keeps lexical index for evaluation/identity checks; its experimental CLI path uses dense-only retrieval. |
 | 0005 — distribution | Appropriate; separate source/model assets from executable distribution. It does not establish retrieval quality. | Retain; apply only after quality/runtime evidence and reproducible production inputs pass. |
 
@@ -308,17 +329,18 @@ simpler candidates are tested.
 
 ## Remaining validation
 
-1. Candidate implementation, v5 paired report, ablation report, and canonical
-   dev-only report are recorded. The candidate was not tuned on holdout.
-2. The frozen holdout still requires explicit user authorization. After
-   authorization, run the canonical gate once against pinned commit
-   `3494a11c57c31045bb9897c9fa187d768e18ebcb`. Do not adjust retrieval from
-   holdout outcomes.
+1. Candidate implementation, dev-only paired reports, controlled ablations,
+   installed-product sample, and the authorized fresh-holdout report are
+   recorded.
+2. Candidate `3494a11` did not pass independent validation. Do not tune from
+   either consumed holdout. Any next candidate needs new development evidence,
+   a separately frozen unseen holdout, and explicit scoring authorization.
 3. The exact paired gate uses the 142-record pinned evaluation corpus. The
    installed 0.3.3 database is a different, larger corpus; its sampled behavior
    and stored-row inventory were reported separately. Full-source parsing
    recall for the installed database remains unmeasured.
 
-Current dev evidence meets the paired gate's quality and resource limits, but
-does not establish independent improvement. A passing small fixture alone is
-insufficient evidence for the full shipped corpus.
+The focused candidate meets the paired dev gate, but fails the independent
+no-regression and bootstrap conditions; the shipped main remains the product
+baseline. A passing development fixture alone does not establish improvement
+for the installed product corpus.

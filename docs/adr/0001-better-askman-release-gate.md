@@ -76,3 +76,12 @@ includes it in the release recommendation. It also rejects a fresh holdout
 whose frozen manifest or dataset digest differs from the reviewed freeze.
 Resource limits apply to every measured phase, and fresh-process memory
 measurements are required.
+
+The authorized focused-candidate run on fresh holdout v1 measured a +2/30
+`Success@1` gain, but its one-sided 95% paired-bootstrap lower bound was
+−3.3 percentage points. `Success@3` fell from 19/30 to 15/30, and incorrect
+answered tasks rose from 7/26 to 10/25. The canonical decision is
+`inconclusive`; do not promote this candidate or tune from the consumed split.
+The release-readiness validator also rejected it because the independent
+holdout bootstrap lower bound was not positive. The preserved report is
+[`main-vs-retrieval-v2-focused-fresh-holdout-v1.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json).

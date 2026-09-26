@@ -57,7 +57,15 @@ recorded in the freeze artifacts. Dataset SHA-256 is
 manifest SHA-256 is
 `7463ccb782cf971b4893f369c899f408212306020c68e471b72c146b2da68f1a`.
 
-Status is `frozen_unscored`. No candidate query or release gate has accessed
-this split. Require explicit user authorization before any scoring. Preserve
-the freeze files and do not tune against its results. See
+The split was scored once by the canonical gate after explicit authorization,
+against candidate commit `3494a11c57c31045bb9897c9fa187d768e18ebcb`. It is
+now consumed. The candidate gained 2/30 `Success@1`, but the one-sided 95%
+paired-bootstrap lower bound was −3.3 points; `Success@3` fell 19/30→15/30
+and incorrect answered tasks rose 7/26→10/25. The decision is inconclusive;
+do not tune on or reuse this split. The frozen dataset and manifest remain
+byte-for-byte unchanged; their status fields record the freeze-time state.
+The complete post-freeze result is
+[`main-vs-retrieval-v2-focused-fresh-holdout-v1.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json).
+Require explicit authorization before scoring any future holdout. The freeze
+process and label audit are recorded in
 [`fresh-holdout-v1-freeze.md`](../reproducibility/fresh-holdout-v1-freeze.md).
