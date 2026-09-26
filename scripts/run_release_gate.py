@@ -232,10 +232,13 @@ def validate_fresh_holdout_dataset(
     for field in ("source_revision", "source_digest", "parser_version"):
         if corpus.get(field) != frozen_corpus.get(field):
             raise ValueError(f"fresh holdout corpus differs from its freeze manifest: {field}")
-    expected_corpus_id = (
-        f"{frozen_corpus.get('source_revision')}:{frozen_corpus.get('source_digest')}"
-    )
-    if corpus.get("corpus_id") != expected_corpus_id:
+    source_revision = frozen_corpus.get("source_revision")
+    expected_corpus_ids = {
+        f"{source_revision}:{frozen_corpus.get('source_digest')}",
+        # The frozen fresh-holdout dataset predates digest-based corpus IDs.
+        f"tldr-pages@{source_revision}",
+    }
+    if corpus.get("corpus_id") not in expected_corpus_ids:
         raise ValueError("fresh holdout corpus ID is inconsistent")
     if corpus.get("manifest_sha256") not in (None, frozen_corpus.get("manifest_sha256")):
         raise ValueError("fresh holdout corpus manifest digest is inconsistent")

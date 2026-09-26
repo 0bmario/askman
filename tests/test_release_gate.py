@@ -1088,6 +1088,19 @@ class ReleaseGateTests(unittest.TestCase):
 
         GATE.validate_fresh_holdout_dataset(dataset, freeze)
 
+        corpus["corpus_id"] = "tldr-pages@revision"
+        GATE.validate_fresh_holdout_dataset(dataset, freeze)
+
+        corpus["corpus_id"] = "tldr-pages@other-revision"
+        with self.assertRaisesRegex(ValueError, "corpus ID is inconsistent"):
+            GATE.validate_fresh_holdout_dataset(dataset, freeze)
+
+        corpus["corpus_id"] = "tldr-pages@revision"
+        corpus["source_digest"] = "other-digest"
+        with self.assertRaisesRegex(ValueError, "source_digest"):
+            GATE.validate_fresh_holdout_dataset(dataset, freeze)
+        corpus["source_digest"] = "digest"
+
         dataset["tasks"][0]["family"] = dataset["tasks"][1]["family"]
         with self.assertRaisesRegex(ValueError, "families must be unique"):
             GATE.validate_fresh_holdout_dataset(dataset, freeze)
