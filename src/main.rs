@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use askman::{cli, db, embed, format, search};
+use askman::{cli, db, embed, format, media_coverage, search};
 use clap::Parser;
 use colored::*;
 use rusqlite::ffi::sqlite3_auto_extension;
@@ -56,7 +56,10 @@ fn try_semantic_search(
 ) -> Result<()> {
     let embedder = embed::init_model(app_dir)?;
     let q_vec = embed::embed_query(&embedder, query)?;
-    let sorted = search::perform_search(conn, &q_vec, target_os)?;
+    let mut sorted = search::perform_search(conn, &q_vec, target_os)?;
+    if !media_coverage::allows_answer(query, target_os) {
+        sorted.clear();
+    }
 
     for (i, (cmd, data)) in sorted.iter().enumerate().take(3) {
         let mut show_count = if i == 0 { data.examples.len() } else { 0 };

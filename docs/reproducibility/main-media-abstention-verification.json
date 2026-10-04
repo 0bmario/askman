@@ -1,0 +1,228 @@
+{
+  "status": "pass",
+  "main_commit": "8bd9fa296ea7e2f461202091f2ade47221bc8a0e",
+  "port_source_sha256": "c19a855375a3742873c8ac37d1530deeb0e709d1ebbfad6f0ba6203a1270a9b4",
+  "binary_sha256": {
+    "candidate": "8ff41ddd8b86b39c26f3d6f80cbfef0b0e9333ed622a04adde7b1f4b2412edf3",
+    "main": "8728a2eda8a50d4bafb779a0531c2ed054c9c742158ed208dadf10347bf3f8e5"
+  },
+  "data_tree_sha256": "be6cdef998a85a3ae8f62bc4cac1a38287e7457f906ceb47e862dd0430517a39",
+  "validation_report_sha256": "8ce3f600fa69ce49d9c2ee518eeb0bb65d38838103a05e39907620b10d1bd3ac",
+  "validation_dataset_sha256": "1eed9bf15beb4cad68126bca940a9a409d40b63dabbf6cf6b1cfa2a6c7a0e60d",
+  "plan_sha256": "14e86d5500e8eab9f521e1efec1d8e6831bddf49935d7f8c59933beda0bf3d13",
+  "full_verification_sha256": "78a9acfd57a196d9c9902aadbeddc98d9020fd83c2851216ecbf77fd79b24da5",
+  "displayed_identity_equivalence_count": 288,
+  "measured_cli_samples": 700,
+  "warmups": 50,
+  "quality_source": "prior synthetic blind development validation: false73\u219268, coverage179/197, S@1 117 and S@3 136 unchanged; port identity equivalence only",
+  "test_count": 18,
+  "rounds": [
+    {
+      "aggregates": {
+        "fresh_process": {
+          "candidate": {
+            "p95_ms": 93.035,
+            "peak_memory_bytes": 237290168,
+            "sample_count": 40
+          },
+          "main": {
+            "p95_ms": 92.47,
+            "peak_memory_bytes": 236421816,
+            "sample_count": 40
+          }
+        },
+        "warmed_query": {
+          "candidate": {
+            "p95_ms": 90.696,
+            "peak_memory_bytes": 236028600,
+            "sample_count": 30
+          },
+          "main": {
+            "p95_ms": 90.178,
+            "peak_memory_bytes": 236536528,
+            "sample_count": 30
+          }
+        }
+      },
+      "pass": true,
+      "relative_changes": {
+        "fresh_process": {
+          "p95_ms": 0.006110089758840642,
+          "peak_memory_bytes": 0.0036728928602765
+        },
+        "warmed_query": {
+          "p95_ms": 0.005744194814699899,
+          "peak_memory_bytes": -0.002147355439325649
+        }
+      },
+      "round": 1
+    },
+    {
+      "aggregates": {
+        "fresh_process": {
+          "candidate": {
+            "p95_ms": 88.874,
+            "peak_memory_bytes": 236110568,
+            "sample_count": 40
+          },
+          "main": {
+            "p95_ms": 91.724,
+            "peak_memory_bytes": 237519592,
+            "sample_count": 40
+          }
+        },
+        "warmed_query": {
+          "candidate": {
+            "p95_ms": 92.763,
+            "peak_memory_bytes": 237683384,
+            "sample_count": 30
+          },
+          "main": {
+            "p95_ms": 91.853,
+            "peak_memory_bytes": 236110520,
+            "sample_count": 30
+          }
+        }
+      },
+      "pass": true,
+      "relative_changes": {
+        "fresh_process": {
+          "p95_ms": -0.031071475295451623,
+          "peak_memory_bytes": -0.0059322432652207935
+        },
+        "warmed_query": {
+          "p95_ms": 0.00990713422533851,
+          "peak_memory_bytes": 0.0066615583244660215
+        }
+      },
+      "round": 2
+    },
+    {
+      "aggregates": {
+        "fresh_process": {
+          "candidate": {
+            "p95_ms": 97.646,
+            "peak_memory_bytes": 237355704,
+            "sample_count": 40
+          },
+          "main": {
+            "p95_ms": 107.009,
+            "peak_memory_bytes": 238109392,
+            "sample_count": 40
+          }
+        },
+        "warmed_query": {
+          "candidate": {
+            "p95_ms": 96.237,
+            "peak_memory_bytes": 237273808,
+            "sample_count": 30
+          },
+          "main": {
+            "p95_ms": 93.603,
+            "peak_memory_bytes": 236307128,
+            "sample_count": 30
+          }
+        }
+      },
+      "pass": true,
+      "relative_changes": {
+        "fresh_process": {
+          "p95_ms": -0.08749731331009536,
+          "peak_memory_bytes": -0.0031653014342247765
+        },
+        "warmed_query": {
+          "p95_ms": 0.028140123713983556,
+          "peak_memory_bytes": 0.004090777998029704
+        }
+      },
+      "round": 3
+    },
+    {
+      "aggregates": {
+        "fresh_process": {
+          "candidate": {
+            "p95_ms": 95.117,
+            "peak_memory_bytes": 236274360,
+            "sample_count": 40
+          },
+          "main": {
+            "p95_ms": 95.381,
+            "peak_memory_bytes": 237421240,
+            "sample_count": 40
+          }
+        },
+        "warmed_query": {
+          "candidate": {
+            "p95_ms": 94.246,
+            "peak_memory_bytes": 237716176,
+            "sample_count": 30
+          },
+          "main": {
+            "p95_ms": 98.164,
+            "peak_memory_bytes": 237732536,
+            "sample_count": 30
+          }
+        }
+      },
+      "pass": true,
+      "relative_changes": {
+        "fresh_process": {
+          "p95_ms": -0.0027678468458077754,
+          "peak_memory_bytes": -0.004830570339873552
+        },
+        "warmed_query": {
+          "p95_ms": -0.03991279898944633,
+          "peak_memory_bytes": -6.881683203852074e-05
+        }
+      },
+      "round": 4
+    },
+    {
+      "aggregates": {
+        "fresh_process": {
+          "candidate": {
+            "p95_ms": 92.886,
+            "peak_memory_bytes": 236110520,
+            "sample_count": 40
+          },
+          "main": {
+            "p95_ms": 92.139,
+            "peak_memory_bytes": 237306576,
+            "sample_count": 40
+          }
+        },
+        "warmed_query": {
+          "candidate": {
+            "p95_ms": 92.432,
+            "peak_memory_bytes": 237601464,
+            "sample_count": 30
+          },
+          "main": {
+            "p95_ms": 93.066,
+            "peak_memory_bytes": 236569272,
+            "sample_count": 30
+          }
+        }
+      },
+      "pass": true,
+      "relative_changes": {
+        "fresh_process": {
+          "p95_ms": 0.008107316120209651,
+          "peak_memory_bytes": -0.005040130029940637
+        },
+        "warmed_query": {
+          "p95_ms": -0.0068123697161154295,
+          "peak_memory_bytes": 0.004363170209189304
+        }
+      },
+      "round": 5
+    }
+  ],
+  "holdout_scoring": false,
+  "limits": [
+    "Pinned corpus only; production/source-family transfer unverified.",
+    "Round1 briefly overlaps test build; other four rounds do not.",
+    "Static media coverage is restricted to macOS.",
+    "No release or merge authorization claimed."
+  ]
+}
