@@ -30,21 +30,28 @@ fn parse_media_request(query: &str) -> Option<MediaRequest> {
     let is_speech = ["speak", "speech", "spoken", "read aloud", "say aloud"]
         .iter()
         .any(|cue| has(&query, cue));
-    let is_capture = [
-        "screenshot",
-        "screenshots",
-        "screen recording",
-        "record the screen",
-        "record the mac screen",
-        "still image",
-        "capture the screen",
-        "capture the whole display",
-        "capture one named application window",
-        "capture a rectangular area",
-        "capture an interactive rectangular area",
-    ]
-    .iter()
-    .any(|cue| has(&query, cue))
+    // A bare "screenshot" noun also appears in file and settings requests
+    // ("convert screenshots to jpeg"), so it only counts with a capture verb.
+    let requests_screenshot_capture = ["screenshot", "screenshots"]
+        .iter()
+        .any(|noun| has(&query, noun))
+        && ["take", "capture", "make", "grab"]
+            .iter()
+            .any(|verb| has(&query, verb));
+    let is_capture = requests_screenshot_capture
+        || [
+            "screen recording",
+            "record the screen",
+            "record the mac screen",
+            "still image",
+            "capture the screen",
+            "capture the whole display",
+            "capture one named application window",
+            "capture a rectangular area",
+            "capture an interactive rectangular area",
+        ]
+        .iter()
+        .any(|cue| has(&query, cue))
         || (has(&query, "screen") && has(&query, "record"))
         || (has(&query, "record") && has(&query, "video") && has(&query, "region"));
     let is_speech = is_speech || (has(&query, "synthesize") && has(&query, "mp3"));
@@ -441,6 +448,18 @@ mod tests {
     #[test]
     fn unfamiliar_or_ambiguous_requests_preserve_search() {
         for query in ["Copy a file", "Speak", "Record speech and take screenshots"] {
+            assert!(allows_answer(query, TargetOs::Osx), "{query}");
+        }
+    }
+
+    #[test]
+    fn screenshot_file_and_settings_requests_preserve_search() {
+        for query in [
+            "Change the default screenshot format to jpg",
+            "Convert screenshots to JPEG",
+            "Rename screenshots on the desktop",
+            "Delete old screenshots",
+        ] {
             assert!(allows_answer(query, TargetOs::Osx), "{query}");
         }
     }
