@@ -3,10 +3,6 @@ use crate::dense::{
     DenseCandidate, DenseIndex, DenseQueryMode, is_file_stdout_query_excluding_cat,
     is_negated_exif_observation_query, is_negated_file_stdout_query,
 };
-use crate::operational_fit::{
-    example_fits_query as operational_example_fits_query,
-    unsupported_fraction as operational_unsupported_fraction,
-};
 use crate::search::TargetOs;
 use anyhow::{Result, bail};
 use colored::Colorize;
@@ -18,8 +14,7 @@ pub const MAX_DISPLAYED_RESULTS: usize = 3;
 pub const DENSE_CANDIDATE_BUDGET: usize = 8;
 pub const DENSE_DISTANCE_CUTOFF: f64 = 0.60;
 const LEXICAL_OVERLAP_WEIGHT: f64 = 0.05;
-const OPERATIONAL_FIT_PENALTY: f64 = 0.05;
-const SUPPORTED_DENSE_RECIPES: [&str; 2] = ["main-compatible", "description"];
+const FROZEN_DENSE_RECIPE: &str = "main-compatible";
 
 #[derive(Debug, Clone)]
 pub struct CandidateOptions {
@@ -65,20 +60,18 @@ fn run_validated_candidate(
     verbose: bool,
 ) -> Result<()> {
     validate_bundle(bundle.manifest())?;
-    let candidate_budget = candidate_budget_from_environment()?;
     let index = DenseIndex::open_from_bundle(&bundle)?;
     let result = (|| -> Result<()> {
-        let results = select_displayed_candidates_with_operational_check(
+        let results = select_displayed_candidates(
             &query,
             index.query_with_mode(
                 &query,
                 target_os.as_str(),
-                candidate_budget,
+                DENSE_CANDIDATE_BUDGET,
                 DenseQueryMode::FocusedIntentRulesV2,
                 platform_explicit,
                 true,
             )?,
-            operational_example_adjustment(),
         );
         print!("{}", render_results(&results, verbose));
         Ok(())
@@ -88,40 +81,9 @@ fn run_validated_candidate(
     result
 }
 
-fn candidate_budget_from_environment() -> Result<usize> {
-    const MAX_EXPERIMENTAL_CANDIDATE_BUDGET: usize = 16;
-
-    match std::env::var("ASKMAN_DENSE_CANDIDATE_BUDGET") {
-        Ok(value) => {
-            let candidate_budget = value.parse::<usize>()?;
-            if candidate_budget == 0 || candidate_budget > MAX_EXPERIMENTAL_CANDIDATE_BUDGET {
-                bail!(
-                    "dense candidate budget must be between 1 and {MAX_EXPERIMENTAL_CANDIDATE_BUDGET}"
-                );
-            }
-            Ok(candidate_budget)
-        }
-        Err(std::env::VarError::NotPresent) => Ok(DENSE_CANDIDATE_BUDGET),
-        Err(error) => bail!("dense candidate budget is not valid Unicode: {error}"),
-    }
-}
-
-#[cfg(test)]
 fn select_displayed_candidates(
     query: &str,
     candidates: impl IntoIterator<Item = DenseCandidate>,
-) -> Vec<DenseCandidate> {
-    select_displayed_candidates_with_operational_check(
-        query,
-        candidates,
-        OperationalExampleAdjustment::Off,
-    )
-}
-
-fn select_displayed_candidates_with_operational_check(
-    query: &str,
-    candidates: impl IntoIterator<Item = DenseCandidate>,
-    operational_adjustment: OperationalExampleAdjustment,
 ) -> Vec<DenseCandidate> {
     if is_negated_exif_observation_query(query)
         || is_negated_file_stdout_query(query)
@@ -134,53 +96,14 @@ fn select_displayed_candidates_with_operational_check(
     let mut eligible: Vec<_> = candidates
         .into_iter()
         .filter(|candidate| candidate.ranking_score <= DENSE_DISTANCE_CUTOFF)
-        .filter(|candidate| {
-            operational_adjustment != OperationalExampleAdjustment::HardFilter
-                || operational_example_fits_query(query, candidate)
-        })
         .collect();
     eligible.sort_by(|left, right| {
-        adjusted_distance(left, query, &query_terms, operational_adjustment)
-            .total_cmp(&adjusted_distance(
-                right,
-                query,
-                &query_terms,
-                operational_adjustment,
-            ))
+        lexical_adjusted_distance(left, &query_terms)
+            .total_cmp(&lexical_adjusted_distance(right, &query_terms))
             .then_with(|| left.example_id.cmp(&right.example_id))
     });
     eligible.truncate(MAX_DISPLAYED_RESULTS);
     eligible
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum OperationalExampleAdjustment {
-    Off,
-    HardFilter,
-    SoftRerank,
-}
-
-fn operational_example_adjustment() -> OperationalExampleAdjustment {
-    match std::env::var("ASKMAN_OPERATIONAL_EXAMPLE_CHECK").as_deref() {
-        Ok("source-backed-fit-v1") => OperationalExampleAdjustment::HardFilter,
-        Ok("source-backed-soft-fit-v1") => OperationalExampleAdjustment::SoftRerank,
-        _ => OperationalExampleAdjustment::Off,
-    }
-}
-
-fn adjusted_distance(
-    candidate: &DenseCandidate,
-    query: &str,
-    query_terms: &HashSet<String>,
-    operational_adjustment: OperationalExampleAdjustment,
-) -> f64 {
-    let operational_penalty = match operational_adjustment {
-        OperationalExampleAdjustment::SoftRerank => {
-            OPERATIONAL_FIT_PENALTY * operational_unsupported_fraction(query, candidate)
-        }
-        OperationalExampleAdjustment::Off | OperationalExampleAdjustment::HardFilter => 0.0,
-    };
-    lexical_adjusted_distance(candidate, query_terms) + operational_penalty
 }
 
 fn lexical_adjusted_distance(candidate: &DenseCandidate, query_terms: &HashSet<String>) -> f64 {
@@ -220,11 +143,11 @@ fn validate_bundle(manifest: &BundleManifest) -> Result<()> {
             expected_cli
         );
     }
-    if !SUPPORTED_DENSE_RECIPES.contains(&manifest.dense_index.recipe.as_str()) {
+    if manifest.dense_index.recipe != FROZEN_DENSE_RECIPE {
         bail!(
-            "matching bundle dense recipe is {}, expected one of {}",
+            "matching bundle dense recipe is {}, expected {}",
             manifest.dense_index.recipe,
-            SUPPORTED_DENSE_RECIPES.join(", ")
+            FROZEN_DENSE_RECIPE
         );
     }
     Ok(())
