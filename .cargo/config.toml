@@ -1,0 +1,4 @@
+[env]
+# Avoid host ONNX Runtime versions that differ from the pinned ort-sys runtime.
+LIBONNXRUNTIME_NO_PKG_CONFIG = "1"
+ORT_PREFER_DYNAMIC_LINK = "0"

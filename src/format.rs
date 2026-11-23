@@ -97,6 +97,12 @@ mod tests {
         let highlighted = highlight_command(cmd);
 
         assert!(!highlighted.is_empty());
+        // Without a terminal (CI, piped test output) `colored` emits no codes.
+        // Forcing colour here would race the other tests, which share that switch.
+        if !colored::control::SHOULD_COLORIZE.should_colorize() {
+            assert_eq!(highlighted, "chmod +x file && ls -la");
+            return;
+        }
         // Verify ANSI escape sequences are present (\x1b[...m)
         assert!(highlighted.contains("\x1b["));
         // Check for specific formatted tokens (e.g. at least one reset code \x1b[0m)
