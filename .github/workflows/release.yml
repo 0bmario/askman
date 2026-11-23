@@ -15,7 +15,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          # Pinned: the binary links the runner's glibc, and ubuntu-latest moved
+          # to 26.04 (glibc 2.43), which current LTS distributions cannot load.
+          - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             artifact_name: askman-linux-x86_64
           - os: macos-latest
@@ -36,6 +38,18 @@ jobs:
 
       - name: Build release binary
         run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Check Linux glibc requirement
+        if: runner.os == 'Linux'
+        run: |
+          max_glibc=2.35
+          required=$(objdump -T target/${{ matrix.target }}/release/askman \
+            | grep -oE 'GLIBC_[0-9]+\.[0-9]+' | sed 's/GLIBC_//' | sort -V | tail -n1)
+          echo "Binary requires glibc ${required}; maximum allowed is ${max_glibc}"
+          if [ "$(printf '%s\n%s\n' "$required" "$max_glibc" | sort -V | tail -n1)" != "$max_glibc" ]; then
+            echo "Linux binary needs glibc ${required}, newer than ${max_glibc}" >&2
+            exit 1
+          fi
 
       - name: Package release archive
         run: |
@@ -87,6 +101,15 @@ jobs:
           merge-multiple: true
           path: release-assets
 
+      # askman 0.3.3 and older download releases/latest/download/commands.db.
+      # Newer binaries use the pinned db-v1 release instead.
+      - name: Attach commands database for older binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download db-v1 --repo "${GITHUB_REPOSITORY}" --pattern commands.db --dir release-assets
+          echo "0218c1fd18dc6eb1c6b405356c92e47379286cec68f9fea1a70be896d5f71495  release-assets/commands.db" | sha256sum -c -
+
       - name: Generate checksum files
         run: |
           cd release-assets
@@ -104,3 +127,4 @@ jobs:
             release-assets/askman-*.tar.gz
             release-assets/askman-*.tar.gz.sha256
             release-assets/install.sh.sha256
+            release-assets/commands.db
