@@ -3,7 +3,7 @@
 An offline CLI that finds terminal commands from natural language descriptions. Describe what you want to do and `askman` returns the closest matching command with examples.
 
 <p align="center">
-  <img src="./askman-demo.gif" alt="askman demo" width="700">
+  <img src="https://raw.githubusercontent.com/0bmario/askman/main/askman-demo.gif" alt="askman demo" width="700">
 </p>
 
 ## Installation
@@ -11,14 +11,22 @@ An offline CLI that finds terminal commands from natural language descriptions. 
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.3.3/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.3.4/install.sh | bash
 
 ```
 
 ### Cargo
 
 ```bash
-cargo install --git https://github.com/0bmario/askman
+cargo install askman
+```
+
+If a system ONNX Runtime is installed (for example through Homebrew) and the
+installed binary fails to start with a `Library not loaded` error, reinstall
+with the bundled runtime instead:
+
+```bash
+LIBONNXRUNTIME_NO_PKG_CONFIG=1 cargo install askman --force
 ```
 
 On first run, `askman` downloads a small embedding model and the `commands.db` asset. After that, lookups run offline.

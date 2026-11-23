@@ -24,9 +24,7 @@ fn normalized(query: &str) -> String {
 
 // Recognize only the media vocabulary validated by the frozen experiment.
 fn parse_media_request(query: &str) -> Option<MediaRequest> {
-    let query = normalized(
-        query.trim_end_matches(|character: char| matches!(character, '.' | '!' | '?' | ';' | ':')),
-    );
+    let query = normalized(query.trim_end_matches(['.', '!', '?', ';', ':']));
     let is_speech = ["speak", "speech", "spoken", "read aloud", "say aloud"]
         .iter()
         .any(|cue| has(&query, cue));
@@ -364,20 +362,20 @@ fn media_variant_entails(request: &MediaRequest, example: &MediaExample) -> bool
     if example.action != request.action {
         return false;
     }
-    if let Some(object_type) = request.object_type {
-        if example.object_type != object_type || example.unknown_slots.contains(&"object_type") {
-            return false;
-        }
+    if let Some(object_type) = request.object_type
+        && (example.object_type != object_type || example.unknown_slots.contains(&"object_type"))
+    {
+        return false;
     }
-    if let Some(scope) = request.scope {
-        if example.scope != scope || example.unknown_slots.contains(&"scope") {
-            return false;
-        }
+    if let Some(scope) = request.scope
+        && (example.scope != scope || example.unknown_slots.contains(&"scope"))
+    {
+        return false;
     }
-    if let Some(output_form) = request.output_form {
-        if example.output_form != output_form || example.unknown_slots.contains(&"output_form") {
-            return false;
-        }
+    if let Some(output_form) = request.output_form
+        && (example.output_form != output_form || example.unknown_slots.contains(&"output_form"))
+    {
+        return false;
     }
     if request
         .modifiers
