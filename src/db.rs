@@ -100,6 +100,25 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
     Ok(global_db_path)
 }
 
+type SqliteExtensionEntryPoint = unsafe extern "C" fn(
+    *mut rusqlite::ffi::sqlite3,
+    *mut *mut std::os::raw::c_char,
+    *const rusqlite::ffi::sqlite3_api_routines,
+) -> std::os::raw::c_int;
+
+/// Registers sqlite-vec for every connection opened afterwards.
+pub fn register_sqlite_vec() {
+    // sqlite-vec exposes its entry point without the argument types SQLite expects.
+    unsafe {
+        rusqlite::ffi::sqlite3_auto_extension(Some(std::mem::transmute::<
+            *const (),
+            SqliteExtensionEntryPoint,
+        >(
+            sqlite_vec::sqlite3_vec_init as *const ()
+        )));
+    }
+}
+
 fn verify_sha256(actual: &str) -> Result<()> {
     if actual != DB_SHA256 {
         bail!("downloaded commands database has SHA-256 {actual}, expected {DB_SHA256}");

@@ -3,14 +3,10 @@ use anyhow::Result;
 use askman::{cli, db, embed, format, media_coverage, search};
 use clap::Parser;
 use colored::*;
-use rusqlite::ffi::sqlite3_auto_extension;
-use sqlite_vec::sqlite3_vec_init;
 
 fn main() -> Result<()> {
     // Required: register sqlite-vec extension before opening any connection
-    unsafe {
-        sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
-    }
+    db::register_sqlite_vec();
 
     let args = cli::Args::parse();
 

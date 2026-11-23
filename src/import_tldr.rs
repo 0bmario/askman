@@ -1,8 +1,6 @@
 use anyhow::{Context, Result};
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-use rusqlite::ffi::sqlite3_auto_extension;
 use rusqlite::{Connection, params};
-use sqlite_vec::sqlite3_vec_init;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -46,9 +44,7 @@ fn download_tldr_pages() -> Result<PathBuf> {
 }
 
 fn main() -> Result<()> {
-    unsafe {
-        sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
-    }
+    db::register_sqlite_vec();
 
     let app_dir = db::get_app_dir()?;
 
@@ -324,9 +320,7 @@ mod tests {
 
     #[test]
     fn test_database_creation() -> Result<()> {
-        unsafe {
-            sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
-        }
+        db::register_sqlite_vec();
 
         // test database
         let db_path = "test_commands.db";
