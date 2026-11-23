@@ -1,5 +1,9 @@
 # askman
 
+[![CI](https://github.com/0bmario/askman/actions/workflows/ci.yml/badge.svg)](https://github.com/0bmario/askman/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/askman.svg)](https://crates.io/crates/askman)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/0bmario/askman/blob/main/LICENSE)
+
 An offline CLI that finds terminal commands from natural language descriptions. Describe what you want to do and `askman` returns the closest matching command with examples.
 
 <p align="center">
