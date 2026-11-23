@@ -15,7 +15,7 @@ An offline CLI that finds terminal commands from natural language descriptions. 
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.3.4/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.3.5/install.sh | bash
 
 ```
 
