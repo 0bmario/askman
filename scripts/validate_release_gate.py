@@ -14,14 +14,35 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FREEZE_MANIFEST = ROOT / "tests/fixtures/evaluation/evaluation-v2-manifest-expanded.json"
 FROZEN_DEV_DATASET = ROOT / "tests/fixtures/evaluation/frozen-dev-v2-expanded.json"
-FRESH_HOLDOUT_MANIFEST = ROOT / "tests/fixtures/evaluation/fresh-holdout-v1.manifest.json"
-FRESH_HOLDOUT_FREEZE_ID = "fresh-holdout-v1-freeze-2026-09-26"
-FRESH_HOLDOUT_MANIFEST_SHA256 = (
-    "7463ccb782cf971b4893f369c899f408212306020c68e471b72c146b2da68f1a"
-)
-FRESH_HOLDOUT_DATASET_SHA256 = (
-    "7fe11e153b64941c91233b756543487ebdd34e17bcca7b935a55f8f16a6fb2a0"
-)
+FRESH_HOLDOUT_FREEZES = {
+    "fresh-holdout-v1-freeze-2026-09-26": {
+        "manifest_path": ROOT / "tests/fixtures/evaluation/fresh-holdout-v1.manifest.json",
+        "manifest_sha256": (
+            "7463ccb782cf971b4893f369c899f408212306020c68e471b72c146b2da68f1a"
+        ),
+        "dataset_sha256": (
+            "7fe11e153b64941c91233b756543487ebdd34e17bcca7b935a55f8f16a6fb2a0"
+        ),
+    },
+    "fresh-holdout-v2-freeze-2026-09-26": {
+        "manifest_path": ROOT / "tests/fixtures/evaluation/fresh-holdout-v2.manifest.json",
+        "manifest_sha256": (
+            "c45464cf3591a49372ef1a455648e7e03b3849b7798c8d1b5d0cdd4daec5d4cb"
+        ),
+        "dataset_sha256": (
+            "8019c67c7ff13f6a9d06159ea0cf12cc3914011c69686fa2b5c93270f879797d"
+        ),
+    },
+    "fresh-holdout-v3-freeze-2026-09-27": {
+        "manifest_path": ROOT / "tests/fixtures/evaluation/fresh-holdout-v3.manifest.json",
+        "manifest_sha256": (
+            "0b8e0c1b96cd68f0bccd86de34c2edc4150a370666808aa4b90dc9ae7812e89a"
+        ),
+        "dataset_sha256": (
+            "b4f25cccf30f5b05232c09d6b1c91e0b914b82e206edb9256a74847b7ed4450d"
+        ),
+    },
+}
 ALLOWED_NETWORK_POLICIES = {
     "Linux unshare --net",
     "macOS sandbox-exec deny network*",
@@ -255,16 +276,20 @@ def validate_report_evidence(report: dict[str, object]) -> None:
         "scorer_sha256",
     ):
         require_digest(inputs.get(field), f"inputs.{field}")
-    if inputs.get("holdout_dataset_sha256") != FRESH_HOLDOUT_DATASET_SHA256:
+    holdout_freeze_id = inputs.get("independent_holdout_freeze_id")
+    if not isinstance(holdout_freeze_id, str):
+        raise ValueError("release-gate holdout freeze ID is missing")
+    fresh_holdout = FRESH_HOLDOUT_FREEZES.get(holdout_freeze_id)
+    if fresh_holdout is None:
+        raise ValueError("release-gate holdout is not a pinned fresh independent dataset")
+    if inputs.get("holdout_dataset_sha256") != fresh_holdout["dataset_sha256"]:
         raise ValueError("release-gate holdout is not the pinned fresh independent dataset")
     if (
         inputs.get("independent_holdout_freeze_manifest_sha256")
-        != FRESH_HOLDOUT_MANIFEST_SHA256
+        != fresh_holdout["manifest_sha256"]
     ):
         raise ValueError("release-gate independent holdout manifest digest is not pinned")
-    if inputs.get("independent_holdout_freeze_id") != FRESH_HOLDOUT_FREEZE_ID:
-        raise ValueError("release-gate independent holdout freeze ID is not pinned")
-    if protocol.get("holdout_freeze_id") != FRESH_HOLDOUT_FREEZE_ID:
+    if protocol.get("holdout_freeze_id") != holdout_freeze_id:
         raise ValueError("release-gate protocol does not identify the fresh holdout")
     if schema_version == 4:
         require_digest(inputs.get("gate_runner_sha256"), "inputs.gate_runner_sha256")
@@ -693,12 +718,15 @@ def validate(report_path: Path, expected_candidate_commit: str | None = None) ->
     independent_manifest_path = inputs.get("independent_holdout_freeze_manifest_path")
     if not isinstance(independent_manifest_path, str):
         raise ValueError("release-gate independent holdout manifest path is missing")
-    if Path(independent_manifest_path).resolve() != FRESH_HOLDOUT_MANIFEST.resolve():
+    holdout_freeze_id = inputs["independent_holdout_freeze_id"]
+    fresh_holdout = FRESH_HOLDOUT_FREEZES[holdout_freeze_id]
+    fresh_holdout_manifest = fresh_holdout["manifest_path"]
+    if Path(independent_manifest_path).resolve() != fresh_holdout_manifest.resolve():
         raise ValueError("release-gate independent holdout manifest path is not pinned")
-    if sha256_file(FRESH_HOLDOUT_MANIFEST) != FRESH_HOLDOUT_MANIFEST_SHA256:
+    if sha256_file(fresh_holdout_manifest) != fresh_holdout["manifest_sha256"]:
         raise ValueError("checked-in independent holdout manifest digest has changed")
-    fresh_freeze = json.loads(FRESH_HOLDOUT_MANIFEST.read_text(encoding="utf-8"))
-    if fresh_freeze.get("freeze_id") != FRESH_HOLDOUT_FREEZE_ID:
+    fresh_freeze = json.loads(fresh_holdout_manifest.read_text(encoding="utf-8"))
+    if fresh_freeze.get("freeze_id") != holdout_freeze_id:
         raise ValueError("checked-in independent holdout freeze ID has changed")
     fresh_dataset_record = fresh_freeze.get("artifacts", {}).get("dataset", {})
     if inputs["holdout_dataset_sha256"] != fresh_dataset_record.get("sha256"):

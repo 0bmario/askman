@@ -1,0 +1,390 @@
+{
+  "ambiguity_and_rejection_decisions": [
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "No Windows example combines recursive filename matching and hidden-directory exclusion; common find shows name matching and exclusion of specified paths, not hidden directories.",
+      "related_example_ids": [
+        "common/find.md#example-1",
+        "common/find.md#example-4"
+      ],
+      "task_id": "dev-004"
+    },
+    {
+      "decision": "rejected",
+      "platform": "common",
+      "rationale": "The find size example filters a size range; no listed example sorts matching paths by total size.",
+      "related_example_ids": [
+        "common/find.md#example-5"
+      ],
+      "task_id": "dev-005"
+    },
+    {
+      "decision": "rejected",
+      "platform": "common",
+      "rationale": "df for a path reports its containing filesystem, not the directory\u2019s own space usage.",
+      "related_example_ids": [
+        "linux/df.md#example-3"
+      ],
+      "task_id": "dev-009"
+    },
+    {
+      "decision": "rejected",
+      "platform": "linux",
+      "rationale": "journalctl separately shows following latest entries and filtering by unit; no single example follows only nginx logs until its service stops.",
+      "related_example_ids": [
+        "linux/journalctl.md#example-1",
+        "linux/journalctl.md#example-3"
+      ],
+      "task_id": "dev-010"
+    },
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "Case-insensitive and literal-space findstr examples are separate; no single example establishes case-insensitive exact-phrase matching.",
+      "related_example_ids": [
+        "windows/findstr.md#example-4",
+        "windows/findstr.md#example-6"
+      ],
+      "task_id": "dev-012"
+    },
+    {
+      "decision": "rejected",
+      "platform": "linux",
+      "rationale": "apt list --installed is shown, but no regex filter or installation-date ordering is documented.",
+      "related_example_ids": [
+        "linux/apt.md#example-8"
+      ],
+      "task_id": "dev-014"
+    },
+    {
+      "decision": "rejected",
+      "platform": "osx",
+      "rationale": "mdfind shows content queries and directory restriction, but not combined PDF, both-term, and seven-day filters.",
+      "related_example_ids": [
+        "osx/mdfind.md#example-2",
+        "osx/mdfind.md#example-3"
+      ],
+      "task_id": "dev-015"
+    },
+    {
+      "decision": "rejected",
+      "platform": "osx",
+      "rationale": "mdfind lists matches; no example prints the total count first.",
+      "related_example_ids": [
+        "osx/mdfind.md#example-1",
+        "osx/mdfind.md#example-2"
+      ],
+      "task_id": "dev-019"
+    },
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "dir /b omits details but does not limit results to the first ten.",
+      "related_example_ids": [
+        "windows/dir.md#example-5"
+      ],
+      "task_id": "dev-020"
+    },
+    {
+      "decision": "rejected",
+      "platform": "osx",
+      "rationale": "screencapture and pbcopy examples cover capture and clipboard separately; none captures the selected window as PNG directly to clipboard.",
+      "related_example_ids": [
+        "osx/screencapture.md#example-1",
+        "osx/screencapture.md#example-4",
+        "osx/screencapture.md#example-6",
+        "osx/pbcopy.md#example-1"
+      ],
+      "task_id": "dev-023"
+    },
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "The move example requires the destination directory to exist; it does not create it.",
+      "related_example_ids": [
+        "windows/move.md#example-3"
+      ],
+      "task_id": "dev-024"
+    },
+    {
+      "decision": "rejected",
+      "platform": "common",
+      "rationale": "The recursive cp example does not preserve symlinks; a separate example follows links. No example also guarantees noninteractive replacement.",
+      "related_example_ids": [
+        "common/cp.md#example-3",
+        "common/cp.md#example-7"
+      ],
+      "task_id": "dev-025"
+    },
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "move can overwrite with /Y, but no example keeps a backup of the old file.",
+      "related_example_ids": [
+        "windows/move.md#example-5"
+      ],
+      "task_id": "dev-028"
+    },
+    {
+      "decision": "rejected",
+      "platform": "common",
+      "rationale": "Interactive cp prompts before overwrite but does not show a diff.",
+      "related_example_ids": [
+        "common/cp.md#example-6"
+      ],
+      "task_id": "dev-029"
+    },
+    {
+      "decision": "rejected",
+      "platform": "linux",
+      "rationale": "apt remove is shown without checking running-service dependencies or previewing affected services.",
+      "related_example_ids": [
+        "linux/apt.md#example-6"
+      ],
+      "task_id": "dev-030"
+    },
+    {
+      "decision": "rejected",
+      "platform": "common",
+      "rationale": "sed examples print output; none edits the source in place with a backup.",
+      "related_example_ids": [
+        "common/sed.md#example-1",
+        "common/sed.md#example-2",
+        "common/sed.md#example-3"
+      ],
+      "task_id": "dev-033"
+    },
+    {
+      "decision": "rejected",
+      "platform": "linux",
+      "rationale": "systemctl shows enabling a unit at boot, but not previewing changed units or dependencies.",
+      "related_example_ids": [
+        "linux/systemctl.md#example-5"
+      ],
+      "task_id": "dev-034"
+    },
+    {
+      "decision": "rejected",
+      "platform": "osx",
+      "rationale": "open launches an app; no example checks whether it is already running first.",
+      "related_example_ids": [
+        "osx/open.md#example-2",
+        "osx/open.md#example-3"
+      ],
+      "task_id": "dev-035"
+    },
+    {
+      "decision": "rejected",
+      "platform": "linux",
+      "rationale": "The journalctl unit-filter example does not show chronological ordering or local-time conversion options.",
+      "related_example_ids": [
+        "linux/journalctl.md#example-3"
+      ],
+      "task_id": "dev-038"
+    },
+    {
+      "decision": "rejected",
+      "platform": "osx",
+      "rationale": "The screencapture delay example is a screenshot; the video example has no delay, frame-rate, or audio options.",
+      "related_example_ids": [
+        "osx/screencapture.md#example-5",
+        "osx/screencapture.md#example-6"
+      ],
+      "task_id": "dev-039"
+    },
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "dir /o:d sorts oldest first; no Windows example combines newest-first, directories-first, and changed-today filtering.",
+      "related_example_ids": [
+        "windows/dir.md#example-6"
+      ],
+      "task_id": "dev-040"
+    },
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "No listed Windows example formats file sizes as IEC units and emits JSON.",
+      "related_example_ids": [],
+      "task_id": "dev-044"
+    },
+    {
+      "decision": "rejected",
+      "platform": "common",
+      "rationale": "common cat has no line-number or color option; the related grep example is a different command.",
+      "related_example_ids": [
+        "common/cat.md#example-1",
+        "common/grep.md#example-5"
+      ],
+      "task_id": "dev-045"
+    },
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "findstr filters piped output, but no example provides ordered phrase matching and match-count-only output.",
+      "related_example_ids": [
+        "windows/findstr.md#example-2"
+      ],
+      "task_id": "dev-048"
+    },
+    {
+      "decision": "rejected",
+      "platform": "common",
+      "rationale": "cat writes stdin to a file but does not guarantee exclusive creation or atomicity.",
+      "related_example_ids": [
+        "common/cat.md#example-5"
+      ],
+      "task_id": "dev-049"
+    },
+    {
+      "decision": "rejected",
+      "platform": "linux",
+      "rationale": "Journal display and text substitution are separate; no example redacts IPs from journal output.",
+      "related_example_ids": [
+        "linux/journalctl.md#example-1",
+        "common/sed.md#example-1"
+      ],
+      "task_id": "dev-050"
+    },
+    {
+      "decision": "rejected",
+      "platform": "linux",
+      "rationale": "Checking failed state and restarting are separate systemctl examples; none conditionally restarts and records prior state.",
+      "related_example_ids": [
+        "linux/systemctl.md#example-3",
+        "linux/systemctl.md#example-6"
+      ],
+      "task_id": "dev-054"
+    },
+    {
+      "decision": "rejected",
+      "platform": "osx",
+      "rationale": "No listed macOS example reveals the bundle identifier of a running app without launching it.",
+      "related_example_ids": [],
+      "task_id": "dev-055"
+    },
+    {
+      "decision": "rejected",
+      "platform": "common",
+      "rationale": "find -exec with ; runs per file but the example filters by extension; modified-today uses + to pass results to one command. No single example satisfies both.",
+      "related_example_ids": [
+        "common/find.md#example-6",
+        "common/find.md#example-7"
+      ],
+      "task_id": "dev-057"
+    },
+    {
+      "decision": "rejected",
+      "platform": "linux",
+      "rationale": "df examples show human-readable usage and inode counts separately; no example filters mounts above 90%.",
+      "related_example_ids": [
+        "linux/df.md#example-2",
+        "linux/df.md#example-4"
+      ],
+      "task_id": "dev-058"
+    },
+    {
+      "decision": "rejected",
+      "platform": "osx",
+      "rationale": "The cursor example is a screenshot; the video example has no cursor or separate audio track.",
+      "related_example_ids": [
+        "osx/screencapture.md#example-2",
+        "osx/screencapture.md#example-6"
+      ],
+      "task_id": "dev-059"
+    },
+    {
+      "decision": "rejected",
+      "platform": "windows",
+      "rationale": "Get-ChildItem examples show files or hidden items, but do not combine recursion, hidden-only, modified-today, and size filters.",
+      "related_example_ids": [
+        "windows/get-childitem.md#example-3",
+        "windows/get-childitem.md#example-4"
+      ],
+      "task_id": "dev-060"
+    }
+  ],
+  "artifact_type": "independent-label-audit-summary",
+  "cohort_name": "compatibility-dev-prompts-v1",
+  "corpus": {
+    "language": "en",
+    "manifest": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "parser_version": "tldr-subset-v4",
+    "source_name": "tldr-pages",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef"
+  },
+  "counts": {
+    "rejected": 32,
+    "supported": 28,
+    "supported_with_exactly_one_example": 28,
+    "tasks": 60
+  },
+  "distribution_by_platform": {
+    "common": {
+      "rejected": 8,
+      "supported": 7,
+      "total": 15
+    },
+    "linux": {
+      "rejected": 8,
+      "supported": 7,
+      "total": 15
+    },
+    "osx": {
+      "rejected": 7,
+      "supported": 8,
+      "total": 15
+    },
+    "windows": {
+      "rejected": 9,
+      "supported": 6,
+      "total": 15
+    }
+  },
+  "example_id_scheme": "Manifest pages_root-relative path plus #example-N, where N is the 1-based order of example bullets in the pinned source page.",
+  "source_reference_checks": {
+    "all_manifest_pages_exist": true,
+    "all_supported_labels_have_exactly_one_source_example": true,
+    "all_supporting_and_related_example_ids_resolve": true,
+    "all_supporting_example_ids_resolve": true,
+    "declared_manifest_sha256": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "literal_manifest_file_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "manifest_declared_source_digest_matches_prompt_metadata": true,
+    "manifest_page_count": 24,
+    "manifest_path": "/Users/mmo/fun/askman/tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "prompt_manifest_sha256_matches_literal_manifest_file_sha256": false,
+    "rejected_labels_have_no_supporting_example_ids": true,
+    "related_candidate_reference_count": 50,
+    "supporting_example_reference_count": 28,
+    "unique_example_reference_count": 61,
+    "unique_supporting_example_reference_count": 28,
+    "validated_page_example_counts": {
+      "common/cat.md": 5,
+      "common/cp.md": 8,
+      "common/find.md": 8,
+      "common/grep.md": 8,
+      "common/sed.md": 3,
+      "common/sort.md": 8,
+      "linux/apt.md": 8,
+      "linux/df.md": 6,
+      "linux/free.md": 4,
+      "linux/ip.md": 8,
+      "linux/journalctl.md": 8,
+      "linux/systemctl.md": 8,
+      "osx/mdfind.md": 3,
+      "osx/open.md": 7,
+      "osx/pbcopy.md": 2,
+      "osx/pbpaste.md": 2,
+      "osx/say.md": 6,
+      "osx/screencapture.md": 6,
+      "windows/cat.md": 3,
+      "windows/copy.md": 6,
+      "windows/dir.md": 6,
+      "windows/findstr.md": 8,
+      "windows/get-childitem.md": 5,
+      "windows/move.md": 6
+    }
+  }
+}

@@ -30,6 +30,9 @@ const DENSE_PLATFORMS: [&str; 4] = ["common", "linux", "osx", "windows"];
 const DENSE_QUERY_MODE_ENV: &str = "ASKMAN_DENSE_QUERY_MODE";
 const EXPANDED_DEV_QUERY_MODE: &str = "expanded-dev";
 const FOCUSED_QUERY_MODE: &str = "focused-v1";
+const FOCUSED_EXTENSION_QUERY_MODE: &str = "focused-extension-v2";
+const FOCUSED_CROSS_DRIVE_QUERY_MODE: &str = "focused-cross-drive-v2";
+const FOCUSED_V2_QUERY_MODE: &str = "focused-v2";
 const ANGULAR_PACKAGE_ADD_QUERY: &str = "Add a package to the current project";
 
 pub const MODEL_FILES: [(&str, &str); 5] = [
@@ -218,6 +221,12 @@ pub(crate) enum DenseQueryMode {
     IntentRulesV1,
     /// Small set of source-backed vocabulary mappings for the new candidate.
     FocusedIntentRulesV1,
+    /// Focused v1 rules plus the non-Windows file-extension search mapping.
+    FocusedExtensionV2,
+    /// Focused v1 rules plus the Windows cross-drive move mapping.
+    FocusedCrossDriveV2,
+    /// Focused v1 rules plus both new source-backed mappings.
+    FocusedIntentRulesV2,
 }
 
 /// The embedded ONNX runtime can abort during process teardown on this target.
@@ -1056,8 +1065,15 @@ fn dense_server_query_mode() -> Result<DenseQueryMode> {
     match std::env::var(DENSE_QUERY_MODE_ENV) {
         Ok(value) if value == EXPANDED_DEV_QUERY_MODE => Ok(DenseQueryMode::IntentRulesV1),
         Ok(value) if value == FOCUSED_QUERY_MODE => Ok(DenseQueryMode::FocusedIntentRulesV1),
+        Ok(value) if value == FOCUSED_EXTENSION_QUERY_MODE => {
+            Ok(DenseQueryMode::FocusedExtensionV2)
+        }
+        Ok(value) if value == FOCUSED_CROSS_DRIVE_QUERY_MODE => {
+            Ok(DenseQueryMode::FocusedCrossDriveV2)
+        }
+        Ok(value) if value == FOCUSED_V2_QUERY_MODE => Ok(DenseQueryMode::FocusedIntentRulesV2),
         Ok(value) => bail!(
-            "unsupported {DENSE_QUERY_MODE_ENV} value `{value}`; unset it for raw queries or use `{EXPANDED_DEV_QUERY_MODE}` or `{FOCUSED_QUERY_MODE}`"
+            "unsupported {DENSE_QUERY_MODE_ENV} value `{value}`; unset it for raw queries or use `{EXPANDED_DEV_QUERY_MODE}`, `{FOCUSED_QUERY_MODE}`, `{FOCUSED_EXTENSION_QUERY_MODE}`, `{FOCUSED_CROSS_DRIVE_QUERY_MODE}`, or `{FOCUSED_V2_QUERY_MODE}`"
         ),
         Err(std::env::VarError::NotPresent) => Ok(DenseQueryMode::Raw),
         Err(std::env::VarError::NotUnicode(_)) => {
@@ -1085,7 +1101,7 @@ pub(crate) fn expanded_query_phrases_for_platform(
     let targets_linux_platform = platform == "linux" || query_words.contains(&"linux");
     let targets_windows_platform = platform == "windows" || query_words.contains(&"windows");
 
-    if query_mode == DenseQueryMode::FocusedIntentRulesV1 {
+    if let Some((add_extension_rule, add_cross_drive_rule)) = focused_rule_flags(query_mode) {
         let mut focused_additions = Vec::new();
         let mentions_file = query_words.contains(&"file");
         let names_file_contents =
@@ -1165,6 +1181,33 @@ pub(crate) fn expanded_query_phrases_for_platform(
             && !query_is_negated
         {
             focused_additions.push("Copy a file into another directory, keeping the filename");
+        }
+
+        let names_searchable_files =
+            query_words.contains(&"file") || query_words.contains(&"files");
+        let requests_file_search = ["find", "search", "locate", "list"]
+            .iter()
+            .any(|term| query_words.contains(term));
+        if add_extension_rule
+            && matches!(platform, "common" | "linux" | "osx")
+            && names_searchable_files
+            && requests_file_search
+            && mentions_file_extension(query, &query_words)
+            && !query_is_negated
+        {
+            focused_additions.push("Find files by extension");
+        }
+
+        let requests_move = ["move", "transfer", "relocate"]
+            .iter()
+            .any(|term| query_words.contains(term));
+        if add_cross_drive_rule
+            && platform == "windows"
+            && requests_move
+            && mentions_distinct_drives(query, &query_words)
+            && !query_is_negated
+        {
+            focused_additions.push("Move a file or directory across drives");
         }
 
         return focused_additions;
@@ -1499,6 +1542,66 @@ pub(crate) fn expanded_query_phrases_for_platform(
     }
 
     additions
+}
+
+fn focused_rule_flags(query_mode: DenseQueryMode) -> Option<(bool, bool)> {
+    match query_mode {
+        DenseQueryMode::FocusedIntentRulesV1 => Some((false, false)),
+        DenseQueryMode::FocusedExtensionV2 => Some((true, false)),
+        DenseQueryMode::FocusedCrossDriveV2 => Some((false, true)),
+        DenseQueryMode::FocusedIntentRulesV2 => Some((true, true)),
+        DenseQueryMode::Raw | DenseQueryMode::IntentRulesV1 => None,
+    }
+}
+
+fn mentions_file_extension(query: &str, query_words: &[&str]) -> bool {
+    query_words
+        .iter()
+        .any(|word| ["extension", "extensions"].contains(word))
+        || query.split_whitespace().any(|token| {
+            let token = token.trim_matches(|character: char| {
+                matches!(
+                    character,
+                    '`' | '"' | '\'' | '(' | ')' | '[' | ']' | ',' | ';'
+                )
+            });
+            let Some((base, extension)) = token.rsplit_once('.') else {
+                return false;
+            };
+            !extension.is_empty()
+                && extension
+                    .chars()
+                    .all(|character| character.is_ascii_alphanumeric())
+                && (base.is_empty()
+                    || base
+                        .chars()
+                        .any(|character| character.is_ascii_alphanumeric() || character == '*'))
+        })
+}
+
+fn mentions_distinct_drives(query: &str, query_words: &[&str]) -> bool {
+    let mut drive_letters = HashSet::new();
+    for pair in query.as_bytes().windows(2) {
+        if pair[0].is_ascii_alphabetic() && pair[1] == b':' {
+            drive_letters.insert(pair[0].to_ascii_lowercase());
+        }
+    }
+    drive_letters.extend(query_words.iter().filter_map(|word| {
+        let bytes = word.as_bytes();
+        (bytes.len() == 1 && bytes[0].is_ascii_alphabetic() && !matches!(bytes[0], b'a' | b'i'))
+            .then_some(bytes[0].to_ascii_lowercase())
+    }));
+    if drive_letters.len() >= 2 {
+        return true;
+    }
+
+    let mentions_drive = query_words
+        .iter()
+        .any(|word| ["drive", "drives"].contains(word));
+    let implies_distinct_drives = query_words
+        .iter()
+        .any(|word| ["across", "another", "between", "different", "other"].contains(word));
+    mentions_drive && implies_distinct_drives
 }
 
 fn query_contains_negation(query: &str, query_words: &[&str]) -> bool {
@@ -2850,6 +2953,101 @@ mod tests {
                 "common"
             ),
             "do not show file contents to stdout"
+        );
+    }
+
+    #[test]
+    fn focused_v2_query_rules_are_isolated_and_guarded() {
+        let extension_query = "Locate files with the `.bak` extension under /var/tmp";
+        assert_eq!(
+            expanded_query_phrases_for_platform(
+                extension_query,
+                DenseQueryMode::FocusedIntentRulesV1,
+                "common"
+            ),
+            Vec::<&str>::new()
+        );
+        assert_eq!(
+            expanded_query_phrases_for_platform(
+                extension_query,
+                DenseQueryMode::FocusedExtensionV2,
+                "common"
+            ),
+            vec!["Find files by extension"]
+        );
+        assert!(
+            expanded_query_phrases_for_platform(
+                extension_query,
+                DenseQueryMode::FocusedExtensionV2,
+                "windows"
+            )
+            .is_empty()
+        );
+        assert_eq!(
+            expanded_query_phrases_for_platform(
+                extension_query,
+                DenseQueryMode::FocusedExtensionV2,
+                "osx"
+            ),
+            vec!["Find files by extension"]
+        );
+        assert!(
+            expanded_query_phrases_for_platform(
+                "Do not find files by extension",
+                DenseQueryMode::FocusedIntentRulesV2,
+                "common"
+            )
+            .is_empty()
+        );
+
+        let cross_drive_query = "Transfer a file from the C drive to a destination on D";
+        assert_eq!(
+            expanded_query_phrases_for_platform(
+                cross_drive_query,
+                DenseQueryMode::FocusedIntentRulesV1,
+                "windows"
+            ),
+            Vec::<&str>::new()
+        );
+        assert!(
+            expanded_query_phrases_for_platform(
+                cross_drive_query,
+                DenseQueryMode::FocusedExtensionV2,
+                "windows"
+            )
+            .is_empty()
+        );
+        assert_eq!(
+            expanded_query_phrases_for_platform(
+                cross_drive_query,
+                DenseQueryMode::FocusedCrossDriveV2,
+                "windows"
+            ),
+            vec!["Move a file or directory across drives"]
+        );
+        assert!(
+            expanded_query_phrases_for_platform(
+                "Move a file across Windows drives",
+                DenseQueryMode::FocusedCrossDriveV2,
+                "osx"
+            )
+            .is_empty()
+        );
+        assert!(
+            expanded_query_phrases_for_platform(
+                "Move a file in drive C",
+                DenseQueryMode::FocusedIntentRulesV2,
+                "windows"
+            )
+            .is_empty()
+        );
+        assert!(
+            expanded_query_phrases_for_platform(
+                "Do not move a file across Windows drives",
+                DenseQueryMode::FocusedIntentRulesV2,
+                "windows"
+            )
+            .is_empty()
         );
     }
 

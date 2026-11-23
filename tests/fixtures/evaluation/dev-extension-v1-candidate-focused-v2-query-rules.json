@@ -1,0 +1,16 @@
+{
+  "abstention": "raw distance cutoff 0.60 plus scoped negation and unsupported-intent guards",
+  "candidate_budget": 8,
+  "configuration_id": "focused-v2-same-page-cutoff-060-lexical-005-v1",
+  "dense_recipe": "main-compatible",
+  "display_limit": 3,
+  "distance_cutoff": 0.6,
+  "example_selection": "retain same-page candidates in the top-k; display the top three after reranking",
+  "fusion": "dense candidate pool reranked by 0.05 per shared lexical token",
+  "query_mode": "focused-v2",
+  "query_rewrites": [
+    "common-platform search requests that name files and an extension or filename pattern map to the corpus wording Find files by extension",
+    "Windows move requests that explicitly imply distinct drives map to the corpus wording Move a file or directory across drives"
+  ],
+  "ranking": "raw cosine distance minus 0.05 per shared query/candidate token"
+}

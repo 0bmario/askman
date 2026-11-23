@@ -1,0 +1,695 @@
+{
+  "dataset_id": "askman-dev-extension-v1",
+  "cohort_id": "askman-dev-description-v1",
+  "schema_version": 3,
+  "scorer_version": "task-scorer-v1",
+  "split": "dev",
+  "split_id": "scenario-family-dev-extension-v1",
+  "split_policy": "development-only cohort; twelve new scenario families; five tasks per family; thirty answerable and thirty unanswerable tasks",
+  "task_count": 60,
+  "answerable_task_count": 30,
+  "unanswerable_task_count": 30,
+  "freeze_id": "askman-dev-description-v3-freeze-2026-09-27",
+  "provenance": {
+    "intent_record": "docs/reproducibility/artifacts/dev-description-v1-prompt-authoring.json",
+    "intent_record_sha256": "3488cafa69e15a8bf3532d4a2a2ec67efa8b51f19d6c88710ae80e50ae5402c1",
+    "authoring_method": "Prompt draft independently labeled against pinned parser-v4 source pages and exact SQLite example IDs; native-shell ambiguities clarified before retrieval.",
+    "scope": "development-only; no holdout files, reports, prior retrieval outcomes, or candidate output inspected; no retrieval run during labeling.",
+    "label_audit": "docs/reproducibility/artifacts/dev-description-v1-label-audit.json",
+    "freeze_metadata_only_changes_after_label_audit": true,
+    "preflight_correction": "Restored the registered schema-3 dataset identity and added the pinned corpus manifest path; task questions and labels are unchanged."
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "4",
+    "parser_version": "tldr-subset-v4",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json"
+  },
+  "platform_ambiguity": "Platform follows corpus selection: common uses common pages; linux/osx/windows use native pages with common fallback. Windows questions explicitly request built-in Command Prompt commands or PowerShell cmdlets to exclude unrelated common utilities.",
+  "tasks": [
+    {
+      "id": "description-dev-v1-001",
+      "split": "dev",
+      "family": "descdev-v1-common-preserve-source-folders",
+      "question": "Copy reports/2026/summary.txt into the backup and recreate that folder path there.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9b5d6d53a8a23ea03fe7bc1aa1eb50e505ca44f0329e9e53ea99d5286e87ff0b"
+      ],
+      "rationale": "pages/common/cp.md example 8 documents cp --parents: retain the source path and create missing intermediate directories. Other copy examples do not preserve the full source folder path."
+    },
+    {
+      "id": "description-dev-v1-002",
+      "split": "dev",
+      "family": "descdev-v1-common-preserve-source-folders",
+      "question": "Put src/assets/logo.svg in an archive folder, keeping its source folders underneath.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9b5d6d53a8a23ea03fe7bc1aa1eb50e505ca44f0329e9e53ea99d5286e87ff0b"
+      ],
+      "rationale": "pages/common/cp.md example 8 documents cp --parents: retain the source path and create missing intermediate directories. Other copy examples do not preserve the full source folder path."
+    },
+    {
+      "id": "description-dev-v1-003",
+      "split": "dev",
+      "family": "descdev-v1-common-preserve-source-folders",
+      "question": "When copying config/team/app.ini to a new root, create the same intermediate folders.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9b5d6d53a8a23ea03fe7bc1aa1eb50e505ca44f0329e9e53ea99d5286e87ff0b"
+      ],
+      "rationale": "pages/common/cp.md example 8 documents cp --parents: retain the source path and create missing intermediate directories. Other copy examples do not preserve the full source folder path."
+    },
+    {
+      "id": "description-dev-v1-004",
+      "split": "dev",
+      "family": "descdev-v1-common-preserve-source-folders",
+      "question": "Back up notes/project/draft.txt without flattening its folder hierarchy.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9b5d6d53a8a23ea03fe7bc1aa1eb50e505ca44f0329e9e53ea99d5286e87ff0b"
+      ],
+      "rationale": "pages/common/cp.md example 8 documents cp --parents: retain the source path and create missing intermediate directories. Other copy examples do not preserve the full source folder path."
+    },
+    {
+      "id": "description-dev-v1-005",
+      "split": "dev",
+      "family": "descdev-v1-common-preserve-source-folders",
+      "question": "Copy a nested file to another root and build any missing folders along its original path.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9b5d6d53a8a23ea03fe7bc1aa1eb50e505ca44f0329e9e53ea99d5286e87ff0b"
+      ],
+      "rationale": "pages/common/cp.md example 8 documents cp --parents: retain the source path and create missing intermediate directories. Other copy examples do not preserve the full source folder path."
+    },
+    {
+      "id": "description-dev-v1-006",
+      "split": "dev",
+      "family": "descdev-v1-common-literal-punctuation-search",
+      "question": "Find lines containing the exact text [draft]. in this file.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5"
+      ],
+      "rationale": "pages/common/grep.md example 2 disables regex interpretation with fixed-strings and matches literal punctuation in a file. Other grep examples use regex patterns or add behavior not requested."
+    },
+    {
+      "id": "description-dev-v1-007",
+      "split": "dev",
+      "family": "descdev-v1-common-literal-punctuation-search",
+      "question": "Search a file for a+b exactly, treating the punctuation as ordinary text.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5"
+      ],
+      "rationale": "pages/common/grep.md example 2 disables regex interpretation with fixed-strings and matches literal punctuation in a file. Other grep examples use regex patterns or add behavior not requested."
+    },
+    {
+      "id": "description-dev-v1-008",
+      "split": "dev",
+      "family": "descdev-v1-common-literal-punctuation-search",
+      "question": "Locate the literal string price$ in a text file.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5"
+      ],
+      "rationale": "pages/common/grep.md example 2 disables regex interpretation with fixed-strings and matches literal punctuation in a file. Other grep examples use regex patterns or add behavior not requested."
+    },
+    {
+      "id": "description-dev-v1-009",
+      "split": "dev",
+      "family": "descdev-v1-common-literal-punctuation-search",
+      "question": "Show lines containing x.y verbatim, with the dot matching only a dot.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5"
+      ],
+      "rationale": "pages/common/grep.md example 2 disables regex interpretation with fixed-strings and matches literal punctuation in a file. Other grep examples use regex patterns or add behavior not requested."
+    },
+    {
+      "id": "description-dev-v1-010",
+      "split": "dev",
+      "family": "descdev-v1-common-literal-punctuation-search",
+      "question": "Search for the exact text item[0] without giving the brackets special meaning.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5"
+      ],
+      "rationale": "pages/common/grep.md example 2 disables regex interpretation with fixed-strings and matches literal punctuation in a file. Other grep examples use regex patterns or add behavior not requested."
+    },
+    {
+      "id": "description-dev-v1-011",
+      "split": "dev",
+      "family": "descdev-v1-common-quoted-csv-sort",
+      "question": "Sort this CSV by its second column, correctly handling commas inside quoted cells.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned common pages are cat, cp, find, grep, sed, and sort. sort.md examples 5-6 split fields at a single separator and do not parse quoted CSV cells. No selected example implements CSV-aware column sorting."
+    },
+    {
+      "id": "description-dev-v1-012",
+      "split": "dev",
+      "family": "descdev-v1-common-quoted-csv-sort",
+      "question": "Order CSV records by the second field without splitting quoted values at their commas.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned common pages are cat, cp, find, grep, sed, and sort. sort.md examples 5-6 split fields at a single separator and do not parse quoted CSV cells. No selected example implements CSV-aware column sorting."
+    },
+    {
+      "id": "description-dev-v1-013",
+      "split": "dev",
+      "family": "descdev-v1-common-quoted-csv-sort",
+      "question": "Alphabetize the second column of a CSV whose quoted cells contain commas.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned common pages are cat, cp, find, grep, sed, and sort. sort.md examples 5-6 split fields at a single separator and do not parse quoted CSV cells. No selected example implements CSV-aware column sorting."
+    },
+    {
+      "id": "description-dev-v1-014",
+      "split": "dev",
+      "family": "descdev-v1-common-quoted-csv-sort",
+      "question": "Sort a CSV on column two using real CSV quoting rules.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned common pages are cat, cp, find, grep, sed, and sort. sort.md examples 5-6 split fields at a single separator and do not parse quoted CSV cells. No selected example implements CSV-aware column sorting."
+    },
+    {
+      "id": "description-dev-v1-015",
+      "split": "dev",
+      "family": "descdev-v1-common-quoted-csv-sort",
+      "question": "Reorder CSV rows by their second cell while respecting embedded commas in quotes.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned common pages are cat, cp, find, grep, sed, and sort. sort.md examples 5-6 split fields at a single separator and do not parse quoted CSV cells. No selected example implements CSV-aware column sorting."
+    },
+    {
+      "id": "description-dev-v1-016",
+      "split": "dev",
+      "family": "descdev-v1-linux-current-service-run-logs",
+      "question": "Show a service logs only from its current run, excluding earlier restarts.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52"
+      ],
+      "rationale": "pages/linux/journalctl.md example 4 filters by the current systemd InvocationID, selecting messages since the unit last started. Unit-only and boot/time filters do not isolate the current invocation."
+    },
+    {
+      "id": "description-dev-v1-017",
+      "split": "dev",
+      "family": "descdev-v1-linux-current-service-run-logs",
+      "question": "Get the journal entries produced since this service last started.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52"
+      ],
+      "rationale": "pages/linux/journalctl.md example 4 filters by the current systemd InvocationID, selecting messages since the unit last started. Unit-only and boot/time filters do not isolate the current invocation."
+    },
+    {
+      "id": "description-dev-v1-018",
+      "split": "dev",
+      "family": "descdev-v1-linux-current-service-run-logs",
+      "question": "Read only this service latest invocation logs.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52"
+      ],
+      "rationale": "pages/linux/journalctl.md example 4 filters by the current systemd InvocationID, selecting messages since the unit last started. Unit-only and boot/time filters do not isolate the current invocation."
+    },
+    {
+      "id": "description-dev-v1-019",
+      "split": "dev",
+      "family": "descdev-v1-linux-current-service-run-logs",
+      "question": "The service restarted several times; show messages from the run active now.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52"
+      ],
+      "rationale": "pages/linux/journalctl.md example 4 filters by the current systemd InvocationID, selecting messages since the unit last started. Unit-only and boot/time filters do not isolate the current invocation."
+    },
+    {
+      "id": "description-dev-v1-020",
+      "split": "dev",
+      "family": "descdev-v1-linux-current-service-run-logs",
+      "question": "Limit a service journal output to its most recent start.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52"
+      ],
+      "rationale": "pages/linux/journalctl.md example 4 filters by the current systemd InvocationID, selecting messages since the unit last started. Unit-only and boot/time filters do not isolate the current invocation."
+    },
+    {
+      "id": "description-dev-v1-021",
+      "split": "dev",
+      "family": "descdev-v1-linux-compact-link-details",
+      "question": "Show a compact interface list with hardware addresses and link state.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0"
+      ],
+      "rationale": "pages/linux/ip.md example 3 lists brief link-layer information, including interface names, hardware addresses, and link state. Its brief address example shows network-layer addresses instead."
+    },
+    {
+      "id": "description-dev-v1-022",
+      "split": "dev",
+      "family": "descdev-v1-linux-compact-link-details",
+      "question": "Give one short row per network interface showing its MAC address and state.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0"
+      ],
+      "rationale": "pages/linux/ip.md example 3 lists brief link-layer information, including interface names, hardware addresses, and link state. Its brief address example shows network-layer addresses instead."
+    },
+    {
+      "id": "description-dev-v1-023",
+      "split": "dev",
+      "family": "descdev-v1-linux-compact-link-details",
+      "question": "List interfaces briefly at the link layer so I can see their hardware addresses.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0"
+      ],
+      "rationale": "pages/linux/ip.md example 3 lists brief link-layer information, including interface names, hardware addresses, and link state. Its brief address example shows network-layer addresses instead."
+    },
+    {
+      "id": "description-dev-v1-024",
+      "split": "dev",
+      "family": "descdev-v1-linux-compact-link-details",
+      "question": "I need a concise summary of interface names, MAC addresses, and whether links are up.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0"
+      ],
+      "rationale": "pages/linux/ip.md example 3 lists brief link-layer information, including interface names, hardware addresses, and link state. Its brief address example shows network-layer addresses instead."
+    },
+    {
+      "id": "description-dev-v1-025",
+      "split": "dev",
+      "family": "descdev-v1-linux-compact-link-details",
+      "question": "Print the short interface view focused on link state and physical addresses.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0"
+      ],
+      "rationale": "pages/linux/ip.md example 3 lists brief link-layer information, including interface names, hardware addresses, and link state. Its brief address example shows network-layer addresses instead."
+    },
+    {
+      "id": "description-dev-v1-026",
+      "split": "dev",
+      "family": "descdev-v1-linux-per-process-memory-ranking",
+      "question": "Show which processes are using the most RAM, largest first.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned Linux pages are apt, df, free, ip, journalctl, and systemctl, plus eligible common pages. free.md reports system-wide memory totals; no selected example enumerates or ranks process RAM consumption."
+    },
+    {
+      "id": "description-dev-v1-027",
+      "split": "dev",
+      "family": "descdev-v1-linux-per-process-memory-ranking",
+      "question": "List running programs ordered by their memory consumption.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned Linux pages are apt, df, free, ip, journalctl, and systemctl, plus eligible common pages. free.md reports system-wide memory totals; no selected example enumerates or ranks process RAM consumption."
+    },
+    {
+      "id": "description-dev-v1-028",
+      "split": "dev",
+      "family": "descdev-v1-linux-per-process-memory-ranking",
+      "question": "Find the ten processes taking up the most physical memory.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned Linux pages are apt, df, free, ip, journalctl, and systemctl, plus eligible common pages. free.md reports system-wide memory totals; no selected example enumerates or ranks process RAM consumption."
+    },
+    {
+      "id": "description-dev-v1-029",
+      "split": "dev",
+      "family": "descdev-v1-linux-per-process-memory-ranking",
+      "question": "Rank individual processes by resident RAM usage.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned Linux pages are apt, df, free, ip, journalctl, and systemctl, plus eligible common pages. free.md reports system-wide memory totals; no selected example enumerates or ranks process RAM consumption."
+    },
+    {
+      "id": "description-dev-v1-030",
+      "split": "dev",
+      "family": "descdev-v1-linux-per-process-memory-ranking",
+      "question": "Display memory use per process and put the biggest consumers at the top.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "Pinned Linux pages are apt, df, free, ip, journalctl, and systemctl, plus eligible common pages. free.md reports system-wide memory totals; no selected example enumerates or ranks process RAM consumption."
+    },
+    {
+      "id": "description-dev-v1-031",
+      "split": "dev",
+      "family": "descdev-v1-osx-reveal-file-in-finder",
+      "question": "Show this PDF selected in its folder in Finder.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "rationale": "pages/osx/open.md example 5 uses open -R to reveal the given file in Finder. Opening a file normally launches its associated application; opening the current directory does not select the given file."
+    },
+    {
+      "id": "description-dev-v1-032",
+      "split": "dev",
+      "family": "descdev-v1-osx-reveal-file-in-finder",
+      "question": "Reveal a file location in Finder so I can see it highlighted.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "rationale": "pages/osx/open.md example 5 uses open -R to reveal the given file in Finder. Opening a file normally launches its associated application; opening the current directory does not select the given file."
+    },
+    {
+      "id": "description-dev-v1-033",
+      "split": "dev",
+      "family": "descdev-v1-osx-reveal-file-in-finder",
+      "question": "Take me to the folder containing this image and select the image.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "rationale": "pages/osx/open.md example 5 uses open -R to reveal the given file in Finder. Opening a file normally launches its associated application; opening the current directory does not select the given file."
+    },
+    {
+      "id": "description-dev-v1-034",
+      "split": "dev",
+      "family": "descdev-v1-osx-reveal-file-in-finder",
+      "question": "Locate this document in Finder instead of displaying its contents.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "rationale": "pages/osx/open.md example 5 uses open -R to reveal the given file in Finder. Opening a file normally launches its associated application; opening the current directory does not select the given file."
+    },
+    {
+      "id": "description-dev-v1-035",
+      "split": "dev",
+      "family": "descdev-v1-osx-reveal-file-in-finder",
+      "question": "Bring up Finder with this particular file selected.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "rationale": "pages/osx/open.md example 5 uses open -R to reveal the given file in Finder. Opening a file normally launches its associated application; opening the current directory does not select the given file."
+    },
+    {
+      "id": "description-dev-v1-036",
+      "split": "dev",
+      "family": "descdev-v1-osx-screenshot-to-clipboard",
+      "question": "Take a screenshot directly onto the clipboard without creating a file.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/screencapture.md examples save captures to files or open Preview; none captures directly to the clipboard. pbcopy.md copies stdin/file data and has no screenshot image capture example. No selected example meets direct image capture without a saved file."
+    },
+    {
+      "id": "description-dev-v1-037",
+      "split": "dev",
+      "family": "descdev-v1-osx-screenshot-to-clipboard",
+      "question": "Capture the screen as a clipboard image ready to paste.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/screencapture.md examples save captures to files or open Preview; none captures directly to the clipboard. pbcopy.md copies stdin/file data and has no screenshot image capture example. No selected example meets direct image capture without a saved file."
+    },
+    {
+      "id": "description-dev-v1-038",
+      "split": "dev",
+      "family": "descdev-v1-osx-screenshot-to-clipboard",
+      "question": "Put a new screenshot in the clipboard from the terminal.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/screencapture.md examples save captures to files or open Preview; none captures directly to the clipboard. pbcopy.md copies stdin/file data and has no screenshot image capture example. No selected example meets direct image capture without a saved file."
+    },
+    {
+      "id": "description-dev-v1-039",
+      "split": "dev",
+      "family": "descdev-v1-osx-screenshot-to-clipboard",
+      "question": "Capture my display and keep the image only in the clipboard.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/screencapture.md examples save captures to files or open Preview; none captures directly to the clipboard. pbcopy.md copies stdin/file data and has no screenshot image capture example. No selected example meets direct image capture without a saved file."
+    },
+    {
+      "id": "description-dev-v1-040",
+      "split": "dev",
+      "family": "descdev-v1-osx-screenshot-to-clipboard",
+      "question": "Make a screenshot I can paste immediately, with no saved image file.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/screencapture.md examples save captures to files or open Preview; none captures directly to the clipboard. pbcopy.md copies stdin/file data and has no screenshot image capture example. No selected example meets direct image capture without a saved file."
+    },
+    {
+      "id": "description-dev-v1-041",
+      "split": "dev",
+      "family": "descdev-v1-osx-audio-transcription",
+      "question": "Turn the speech in this audio file into written text.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/say.md converts supplied text to speech, including speech audio-file creation. No selected common or macOS example recognizes speech from existing audio or produces a transcript."
+    },
+    {
+      "id": "description-dev-v1-042",
+      "split": "dev",
+      "family": "descdev-v1-osx-audio-transcription",
+      "question": "Transcribe a recorded meeting from an audio file.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/say.md converts supplied text to speech, including speech audio-file creation. No selected common or macOS example recognizes speech from existing audio or produces a transcript."
+    },
+    {
+      "id": "description-dev-v1-043",
+      "split": "dev",
+      "family": "descdev-v1-osx-audio-transcription",
+      "question": "Produce a text transcript of this voice recording.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/say.md converts supplied text to speech, including speech audio-file creation. No selected common or macOS example recognizes speech from existing audio or produces a transcript."
+    },
+    {
+      "id": "description-dev-v1-044",
+      "split": "dev",
+      "family": "descdev-v1-osx-audio-transcription",
+      "question": "Recognize the spoken words in an existing sound file.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/say.md converts supplied text to speech, including speech audio-file creation. No selected common or macOS example recognizes speech from existing audio or produces a transcript."
+    },
+    {
+      "id": "description-dev-v1-045",
+      "split": "dev",
+      "family": "descdev-v1-osx-audio-transcription",
+      "question": "Convert a saved audio recording of someone speaking into a transcript.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/osx/say.md converts supplied text to speech, including speech audio-file creation. No selected common or macOS example recognizes speech from existing audio or produces a transcript."
+    },
+    {
+      "id": "description-dev-v1-046",
+      "split": "dev",
+      "family": "descdev-v1-windows-literal-multiword-text-search",
+      "question": "Using a built-in Command Prompt command, search the text files for the exact phrase access denied including its space.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"
+      ],
+      "rationale": "pages/windows/findstr.md example 6 uses /c to match a literal string containing spaces in *.txt. Other findstr examples treat space-separated words as alternatives or use regex; common grep is excluded by the requested built-in Command Prompt command."
+    },
+    {
+      "id": "description-dev-v1-047",
+      "split": "dev",
+      "family": "descdev-v1-windows-literal-multiword-text-search",
+      "question": "In Windows Command Prompt, find the complete phrase connection timed out in every text file here with a built-in command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"
+      ],
+      "rationale": "pages/windows/findstr.md example 6 uses /c to match a literal string containing spaces in *.txt. Other findstr examples treat space-separated words as alternatives or use regex; common grep is excluded by the requested built-in Command Prompt command."
+    },
+    {
+      "id": "description-dev-v1-048",
+      "split": "dev",
+      "family": "descdev-v1-windows-literal-multiword-text-search",
+      "question": "Show matches for service unavailable as one literal phrase in the text files using a built-in Command Prompt command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"
+      ],
+      "rationale": "pages/windows/findstr.md example 6 uses /c to match a literal string containing spaces in *.txt. Other findstr examples treat space-separated words as alternatives or use regex; common grep is excluded by the requested built-in Command Prompt command."
+    },
+    {
+      "id": "description-dev-v1-049",
+      "split": "dev",
+      "family": "descdev-v1-windows-literal-multiword-text-search",
+      "question": "Use a built-in Windows Command Prompt command to look through the text files for the exact words disk is full together.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"
+      ],
+      "rationale": "pages/windows/findstr.md example 6 uses /c to match a literal string containing spaces in *.txt. Other findstr examples treat space-separated words as alternatives or use regex; common grep is excluded by the requested built-in Command Prompt command."
+    },
+    {
+      "id": "description-dev-v1-050",
+      "split": "dev",
+      "family": "descdev-v1-windows-literal-multiword-text-search",
+      "question": "Match the literal phrase account locked in text files, keeping the words together, with a built-in Command Prompt command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"
+      ],
+      "rationale": "pages/windows/findstr.md example 6 uses /c to match a literal string containing spaces in *.txt. Other findstr examples treat space-separated words as alternatives or use regex; common grep is excluded by the requested built-in Command Prompt command."
+    },
+    {
+      "id": "description-dev-v1-051",
+      "split": "dev",
+      "family": "descdev-v1-windows-recursive-copy-with-empty-folders",
+      "question": "Using a built-in Windows Command Prompt command, copy an entire folder tree, including every empty subfolder.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/copy.md examples copy files or wildcard matches, with no recursive tree-copy operation or preservation of empty directories. Common cp.md examples 3-4 describe recursive copying but are not built-in Windows Command Prompt commands. No selected example meets the requested built-in cmd operation."
+    },
+    {
+      "id": "description-dev-v1-052",
+      "split": "dev",
+      "family": "descdev-v1-windows-recursive-copy-with-empty-folders",
+      "question": "Duplicate this directory recursively and keep its empty directories using a built-in Command Prompt command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/copy.md examples copy files or wildcard matches, with no recursive tree-copy operation or preservation of empty directories. Common cp.md examples 3-4 describe recursive copying but are not built-in Windows Command Prompt commands. No selected example meets the requested built-in cmd operation."
+    },
+    {
+      "id": "description-dev-v1-053",
+      "split": "dev",
+      "family": "descdev-v1-windows-recursive-copy-with-empty-folders",
+      "question": "Back up all files and subfolders, even folders with nothing inside, with a built-in Windows Command Prompt command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/copy.md examples copy files or wildcard matches, with no recursive tree-copy operation or preservation of empty directories. Common cp.md examples 3-4 describe recursive copying but are not built-in Windows Command Prompt commands. No selected example meets the requested built-in cmd operation."
+    },
+    {
+      "id": "description-dev-v1-054",
+      "split": "dev",
+      "family": "descdev-v1-windows-recursive-copy-with-empty-folders",
+      "question": "Use a built-in Command Prompt command to copy a folder and all descendants while preserving empty folders.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/copy.md examples copy files or wildcard matches, with no recursive tree-copy operation or preservation of empty directories. Common cp.md examples 3-4 describe recursive copying but are not built-in Windows Command Prompt commands. No selected example meets the requested built-in cmd operation."
+    },
+    {
+      "id": "description-dev-v1-055",
+      "split": "dev",
+      "family": "descdev-v1-windows-recursive-copy-with-empty-folders",
+      "question": "Copy this directory structure into a new location, retaining empty subdirectories, with a built-in Windows Command Prompt command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/copy.md examples copy files or wildcard matches, with no recursive tree-copy operation or preservation of empty directories. Common cp.md examples 3-4 describe recursive copying but are not built-in Windows Command Prompt commands. No selected example meets the requested built-in cmd operation."
+    },
+    {
+      "id": "description-dev-v1-056",
+      "split": "dev",
+      "family": "descdev-v1-windows-recent-directory-filter",
+      "question": "Use a PowerShell cmdlet to list only folders modified during the last seven days.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/get-childitem.md example 2 lists directories but has no modification-time cutoff; dir.md example 6 sorts by date without filtering. Common find.md example 7 selects items modified today and executes a command, but is not a PowerShell cmdlet. No selected example filters directories by a seven-day cutoff using a cmdlet."
+    },
+    {
+      "id": "description-dev-v1-057",
+      "split": "dev",
+      "family": "descdev-v1-windows-recent-directory-filter",
+      "question": "Show directories changed within the past week using a PowerShell cmdlet.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/get-childitem.md example 2 lists directories but has no modification-time cutoff; dir.md example 6 sorts by date without filtering. Common find.md example 7 selects items modified today and executes a command, but is not a PowerShell cmdlet. No selected example filters directories by a seven-day cutoff using a cmdlet."
+    },
+    {
+      "id": "description-dev-v1-058",
+      "split": "dev",
+      "family": "descdev-v1-windows-recent-directory-filter",
+      "question": "Find folders whose modification time is newer than a week ago with a PowerShell cmdlet.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/get-childitem.md example 2 lists directories but has no modification-time cutoff; dir.md example 6 sorts by date without filtering. Common find.md example 7 selects items modified today and executes a command, but is not a PowerShell cmdlet. No selected example filters directories by a seven-day cutoff using a cmdlet."
+    },
+    {
+      "id": "description-dev-v1-059",
+      "split": "dev",
+      "family": "descdev-v1-windows-recent-directory-filter",
+      "question": "Display only recently modified directories, using a seven-day cutoff, with a PowerShell cmdlet.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/get-childitem.md example 2 lists directories but has no modification-time cutoff; dir.md example 6 sorts by date without filtering. Common find.md example 7 selects items modified today and executes a command, but is not a PowerShell cmdlet. No selected example filters directories by a seven-day cutoff using a cmdlet."
+    },
+    {
+      "id": "description-dev-v1-060",
+      "split": "dev",
+      "family": "descdev-v1-windows-recent-directory-filter",
+      "question": "Use a PowerShell cmdlet to filter the folder listing to directories touched in the last week.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "pages/windows/get-childitem.md example 2 lists directories but has no modification-time cutoff; dir.md example 6 sorts by date without filtering. Common find.md example 7 selects items modified today and executes a command, but is not a PowerShell cmdlet. No selected example filters directories by a seven-day cutoff using a cmdlet."
+    }
+  ]
+}

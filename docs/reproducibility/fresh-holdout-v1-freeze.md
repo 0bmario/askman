@@ -1,6 +1,8 @@
 # Fresh holdout v1 freeze
 
-Frozen 2026-09-26T13:05:01Z. Status: **unscored**. No candidate or release gate has run on this split. Get explicit user authorization before any candidate accesses it.
+Frozen 2026-09-26T13:05:01Z. At freeze time, status was **unscored**. The
+split was later scored once after explicit user authorization. Frozen labels
+remain unchanged; manifest state records freeze-time status.
 
 ## Contents
 
@@ -20,6 +22,20 @@ A source/rationale pass and an independent prompt-only label pass reviewed the s
 - Two negative rationales were tightened to distinguish uncompressed tar creation and line-only `wc -l` from the requested gzip archive and per-file line/word/byte counts.
 
 These are authoring-time label/source checks, not retrieval scores. The final intent freeze is v2; v1 is preserved as a superseded prompt-only artifact. The v1 blind label output remains raw evidence, with final adjudications recorded here and in [fresh-holdout-v1-label-reconciliation-v2.json](artifacts/fresh-holdout-v1-label-reconciliation-v2.json) and the revised-intent review artifact.
+
+## Scoring record
+
+Candidate 3494a11 was scored once against main by the canonical release gate.
+Success@1 was 13/30 to 15/30; Success@3 fell 19/30 to 15/30. Incorrect
+answered tasks rose 7/26 to 10/25, while false answers fell 13/30 to 8/30.
+The one-sided 95% paired-bootstrap lower bound was -3.3 points. The decision
+was inconclusive; this split is consumed and must not be reused or used to
+tune a candidate. The frozen dataset and manifest were not changed.
+
+Full evidence:
+[main-vs-retrieval-v2-focused-fresh-holdout-v1.json](artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json)
+and
+[rendered report](artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.md).
 
 ## Digests
 

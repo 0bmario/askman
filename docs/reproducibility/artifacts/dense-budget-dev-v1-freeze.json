@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "freeze_id": "askman-dense-budget-dev-v1-freeze-2026-09-27",
+  "status": "frozen_dev_only",
+  "split": "dev",
+  "dataset_id": "askman-operational-compatibility-dev-v1",
+  "cohort_id": "dense-budget-dev-prompts-v1",
+  "dataset_path": "tests/fixtures/evaluation/dense-budget-dev-v1.json",
+  "dataset_schema_version": 4,
+  "dataset_sha256": "cdb3c6567c5575b007ad0581d0f84d66fcf8237b3f6a8d839dfdddd7d01c0297",
+  "task_count": 60,
+  "answerable_task_count": 26,
+  "unanswerable_task_count": 34,
+  "family_count": 12,
+  "families": [
+    "0d80175810984ad7bfe142762d7a0447",
+    "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+    "1a4e9adf0ce74b4f845d692798a14b59",
+    "46a0c178dc554de59eadee7c6f40b10b",
+    "4addbcd762474a11b07074b6aa37ed8b",
+    "6a7de120cd484640a33ee6e16fdd3839",
+    "9df0dcd9649f48daabbc0bb257a4a78a",
+    "a8342bab79c64eb9ae7804496802b0f2",
+    "ab480a38588b4c7e853e3a46f1823b45",
+    "c4792170a64846e5a1b813ec0203fd7d",
+    "de467238082b4c25bab8d0db77ba875a",
+    "f85e0207fb8c4b199771b6e58563bf0d"
+  ],
+  "platform_distribution": {
+    "common": {
+      "tasks": 15,
+      "answerable": 8,
+      "unanswerable": 7
+    },
+    "linux": {
+      "tasks": 15,
+      "answerable": 7,
+      "unanswerable": 8
+    },
+    "osx": {
+      "tasks": 15,
+      "answerable": 6,
+      "unanswerable": 9
+    },
+    "windows": {
+      "tasks": 15,
+      "answerable": 5,
+      "unanswerable": 10
+    }
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "4",
+    "parser_version": "tldr-subset-v4",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json"
+  },
+  "prompt_pool_sha256": "8eaee926302324bc194bd516b931fb8e2a3db36ecc352b19b173e7d7cbb5456f",
+  "independent_label_output_sha256": "8c42d51afaefdecd6aa6ff90421780a65732109eed5bb8d7750da2a95c6bf2ca",
+  "independent_label_audit_sha256": "1eb5a5c61a5a7cfe0aac00968fd8c2937e8fa503f95a434a38948e8d112f160d",
+  "candidate_source_sha256": {
+    "Cargo.toml": "0d850d2f4709178d47e2c943e3059a5b775e88e9ea21c7816e2526ea81c3cd76",
+    "Cargo.lock": "c7eb0288a893ce1f387118cb0fc7370465d2efdfe33de1518ec2715b81c94f76",
+    "src/bin/askman_candidate.rs": "2ac21944ed23953ac4c994e1e22f7dbc88f7b31939818f02cf7e2431b504cb3d",
+    "src/bin/tldr_subset.rs": "1ebeab9a8f03b0dd7cb5b8c72d908125a7b0d08573a42e8c26c50505aaacdf7b",
+    "src/bundle.rs": "8cee0b483c2f12898d8d136338dc1184e60d05891799759458ddec69cea1261c",
+    "src/cli.rs": "1211845490bfaadcf91a0da503ed361685a617c06a83ba19fa72bf070b8a2524",
+    "src/db.rs": "d66ad276f435eb37195f6cd75b49d5426e0f667dfe9d3d398e2c5898bcd24b05",
+    "src/dense.rs": "b447eec504ab4784f9bc6ee082c43b1b9f7679729e2be6cd161bc2ea95844524",
+    "src/embed.rs": "d84f8806928eaa303e9fc3452415337a0442161ce4ad26093bbbc02388b4d46a",
+    "src/format.rs": "27f57c135f481887aafa181b074bc37779cd73371de8d0af675d58fe1558385e",
+    "src/hybrid.rs": "3c3f79dceb72a29f0353658214f6cc2a5a7b2a9c841cf1f0cd604fabbbd18384",
+    "src/lib.rs": "847a729a4ae0ea071b367611f6bc6d2991fb1cf17490276c361a5c328eadc78c",
+    "src/main.rs": "057bbacf9c90f8184eba3f48984da16cb99e108543ef2219a8ac3e0e0a7cdeae",
+    "src/operational_fit.rs": "49595fc02fe9cdd076b70ed6eba2907518dd21db7c77c100ebada39319a81fbb",
+    "src/retrieval.rs": "a1735b909e2ccb01e76053cc3b3627b6129949ffc0e498de8c8f4f8bb9c3b752",
+    "src/search.rs": "e19d288a8d67d84b69d22754f7025390bbe73e0d4981b4cc60c474ae0dc4d45e",
+    "src/tldr_subset.rs": "53eb7eb81b9063fb0afbf2d00249ed77e5a6f38211f90e03101069c28dfe5625"
+  },
+  "candidate_working_tree_source_sha256": "b95c3482177bbd688741683354cea1d8e8531fee7bbc7904006375b7f8500e28",
+  "protocol_path": "docs/reproducibility/artifacts/dense-budget-dev-v1-protocol.md",
+  "protocol_sha256": "d4834e098d58a07cf646fb61d780d3c146d3d24f99881261813424e6c781b2d0",
+  "control_configuration_path": "docs/reproducibility/artifacts/dense-budget-dev-v1-control-config.json",
+  "control_configuration_sha256": "4e71e76ae75da06e591fb20c31b249326c0947fe1ea0bedb14ce8a0a22447de3",
+  "treatment_configuration_path": "docs/reproducibility/artifacts/dense-budget-dev-v1-treatment-config.json",
+  "treatment_configuration_sha256": "8ee374a18c50f2db6abea6d3cbbad10e22b888213ae1e082cdeb498b1cd4c224",
+  "candidate_ref": "retrieval-v2",
+  "candidate_commit": "03e60bc72d191154d7d3f6c13a3e8afb06f4b1ee",
+  "candidate_source": "working tree including uncommitted changes",
+  "main_ref": "main",
+  "network_policy": "canonical gate network deny at query time",
+  "holdout_accessed": false,
+  "authorization_required_before_holdout_scoring": true,
+  "development_gate_runs_at_freeze": 0,
+  "release_gate_runs_at_freeze": 0,
+  "label_audit_summary": "Independent blind source audit: 26 answerable, 34 unsupported. Individual operational examples required; tldr documentation redirects excluded."
+}

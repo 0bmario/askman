@@ -1,0 +1,384 @@
+{
+  "schema_version": 1,
+  "evidence_id": "askman-operational-soft-fit-dev-v1",
+  "decision": "rejected_for_promotion",
+  "evidence_scope": "development_only",
+  "independent_validation": false,
+  "holdout_accessed": false,
+  "dataset": {
+    "path": "tests/fixtures/evaluation/operational-soft-fit-dev-v1.json",
+    "sha256": "418ac923013146d3b60d920aba50a5d9f69afd3da1c658495c226b648a772daa",
+    "freeze_manifest": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-freeze.json",
+    "freeze_manifest_sha256": "093aefd39bc81f91fb66a99322d0e761d7eabbb51589639ebcfd57bab0607ac1",
+    "freeze_id": "askman-operational-soft-fit-dev-v1-freeze-2026-09-27",
+    "tasks": 60,
+    "answerable": 29,
+    "unsupported": 31,
+    "family_count": 12,
+    "platform_distribution": {
+      "common": {
+        "tasks": 15,
+        "answerable": 7,
+        "unanswerable": 8
+      },
+      "linux": {
+        "tasks": 15,
+        "answerable": 7,
+        "unanswerable": 8
+      },
+      "osx": {
+        "tasks": 15,
+        "answerable": 8,
+        "unanswerable": 7
+      },
+      "windows": {
+        "tasks": 15,
+        "answerable": 7,
+        "unanswerable": 8
+      }
+    }
+  },
+  "label_provenance": {
+    "prompt_pool_sha256": "8e70b6e4e73d8a0c066d33e2a713899abc7ccd191e0201b7e5c5cad99ad5b202",
+    "independent_label_output_sha256": "6835b4706ee44225767be2fe932369f96ffd93318841b94ab7c2c8aa1c989370",
+    "independent_label_audit_sha256": "165622ee736b28227f02bc2969351e7a67b8140df26b4a8dbe1bdd82fa7eaade",
+    "adjudication_sha256": "bff38f6420a40a638bcd3fff490e6fba380e55fc05ed4ec63c8f46bded4e4b2b",
+    "adjudication": "one numeric in-place sort task was marked unsupported because no individual example covers both operations; raw initial audit is preserved"
+  },
+  "corpus": {
+    "parser_version": "tldr-subset-v4",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "pages": 24,
+    "operational_examples": 142
+  },
+  "main_data_compatibility": {
+    "database_sha256": "d8b83e0e6fc9329d65bf3c5ef42c946babbdc2bdb1897b266ed654814c00d095",
+    "matches_pinned_baseline_database": false,
+    "visible_example_count": 142,
+    "visible_example_inventory_sha256": "e512688f1945ee23d594b856ce857d01e1b063a84bba5821c1889146133c2f0c",
+    "model_asset_count": 6,
+    "model_assets_match": true
+  },
+  "configurations": {
+    "control": {
+      "configuration_id": "operational-soft-fit-dev-v1-control",
+      "dense_recipe": "main-compatible",
+      "query_mode": "focused-v2",
+      "query_rewrites": [
+        "non-Windows file searches with an extension or filename pattern map to the corpus wording Find files by extension",
+        "Windows move requests that imply distinct drives map to the corpus wording Move a file or directory across drives"
+      ],
+      "candidate_budget": 8,
+      "ranking": "raw cosine distance minus 0.05 per shared query/candidate token",
+      "distance_cutoff": 0.6,
+      "example_selection": "retain same-page candidates in the top-k; display the top three after reranking",
+      "display_limit": 3,
+      "fusion": "dense candidate pool reranked by 0.05 per shared lexical token",
+      "abstention": "raw distance cutoff 0.60 plus scoped negation and unsupported-intent guards",
+      "operational_example_check": "off"
+    },
+    "treatment": {
+      "configuration_id": "operational-soft-fit-dev-v1-treatment",
+      "dense_recipe": "main-compatible",
+      "query_mode": "focused-v2",
+      "query_rewrites": [
+        "non-Windows file searches with an extension or filename pattern map to the corpus wording Find files by extension",
+        "Windows move requests that imply distinct drives map to the corpus wording Move a file or directory across drives"
+      ],
+      "candidate_budget": 8,
+      "ranking": "raw cosine distance minus 0.05 per shared query/candidate token plus 0.05 times the fraction of detected action/constraint rules without example-specific evidence",
+      "distance_cutoff": 0.6,
+      "example_selection": "retain same-page candidates in the top-k; display the top three after reranking",
+      "display_limit": 3,
+      "fusion": "dense candidate pool reranked by 0.05 per shared lexical token and bounded operational fit penalty",
+      "abstention": "raw distance cutoff 0.60 plus scoped negation and unsupported-intent guards; operational fit changes ranking only",
+      "operational_example_check": "source-backed-soft-fit-v1"
+    },
+    "treatment_delta": "adds 0.05 × fraction of detected action/constraint rules not evidenced by selected example; ranking only"
+  },
+  "metrics": {
+    "main_reference": {
+      "success_at_1": {
+        "count": 13,
+        "denominator": 29
+      },
+      "success_at_3": {
+        "count": 15,
+        "denominator": 29
+      },
+      "coverage": {
+        "count": 39,
+        "denominator": 60
+      },
+      "incorrect_answered_tasks": {
+        "count": 8,
+        "denominator": 23
+      },
+      "false_answers_on_unanswerable": {
+        "count": 16,
+        "denominator": 31
+      }
+    },
+    "control": {
+      "success_at_1": {
+        "count": 19,
+        "denominator": 29
+      },
+      "success_at_3": {
+        "count": 22,
+        "denominator": 29
+      },
+      "coverage": {
+        "count": 41,
+        "denominator": 60
+      },
+      "incorrect_answered_tasks": {
+        "count": 2,
+        "denominator": 24
+      },
+      "false_answers_on_unanswerable": {
+        "count": 17,
+        "denominator": 31
+      }
+    },
+    "treatment": {
+      "success_at_1": {
+        "count": 18,
+        "denominator": 29
+      },
+      "success_at_3": {
+        "count": 22,
+        "denominator": 29
+      },
+      "coverage": {
+        "count": 41,
+        "denominator": 60
+      },
+      "incorrect_answered_tasks": {
+        "count": 2,
+        "denominator": 24
+      },
+      "false_answers_on_unanswerable": {
+        "count": 17,
+        "denominator": 31
+      }
+    },
+    "treatment_minus_control": {
+      "success_at_1": -1,
+      "success_at_3": 0,
+      "coverage": 0,
+      "incorrect_answered_tasks": 0,
+      "false_answers": 0
+    },
+    "treatment_minus_main": {
+      "success_at_1": 5,
+      "success_at_3": 7,
+      "coverage": 2,
+      "incorrect_answered_tasks": -6,
+      "false_answers": 1
+    }
+  },
+  "platforms": {
+    "common": {
+      "answerable_tasks": 7,
+      "unsupported_tasks": 8,
+      "main": {
+        "success_at_1": 2,
+        "success_at_3": 2,
+        "coverage": 9,
+        "false_answers": 5
+      },
+      "control": {
+        "success_at_1": 3,
+        "success_at_3": 3,
+        "coverage": 9,
+        "false_answers": 5
+      },
+      "treatment": {
+        "success_at_1": 3,
+        "success_at_3": 3,
+        "coverage": 9,
+        "false_answers": 5
+      }
+    },
+    "linux": {
+      "answerable_tasks": 7,
+      "unsupported_tasks": 8,
+      "main": {
+        "success_at_1": 5,
+        "success_at_3": 6,
+        "coverage": 10,
+        "false_answers": 4
+      },
+      "control": {
+        "success_at_1": 5,
+        "success_at_3": 6,
+        "coverage": 9,
+        "false_answers": 3
+      },
+      "treatment": {
+        "success_at_1": 4,
+        "success_at_3": 6,
+        "coverage": 9,
+        "false_answers": 3
+      }
+    },
+    "osx": {
+      "answerable_tasks": 8,
+      "unsupported_tasks": 7,
+      "main": {
+        "success_at_1": 4,
+        "success_at_3": 5,
+        "coverage": 11,
+        "false_answers": 3
+      },
+      "control": {
+        "success_at_1": 7,
+        "success_at_3": 8,
+        "coverage": 13,
+        "false_answers": 5
+      },
+      "treatment": {
+        "success_at_1": 7,
+        "success_at_3": 8,
+        "coverage": 13,
+        "false_answers": 5
+      }
+    },
+    "windows": {
+      "answerable_tasks": 7,
+      "unsupported_tasks": 8,
+      "main": {
+        "success_at_1": 2,
+        "success_at_3": 2,
+        "coverage": 9,
+        "false_answers": 4
+      },
+      "control": {
+        "success_at_1": 4,
+        "success_at_3": 5,
+        "coverage": 10,
+        "false_answers": 4
+      },
+      "treatment": {
+        "success_at_1": 4,
+        "success_at_3": 5,
+        "coverage": 10,
+        "false_answers": 4
+      }
+    }
+  },
+  "resources": {
+    "control": {
+      "main": {
+        "fresh_process": {
+          "p95_ms": 97.956,
+          "peak_memory_bytes": 237814504,
+          "sample_count": 60
+        },
+        "warmed_query": {
+          "p95_ms": 97.901,
+          "peak_memory_bytes": 237421264,
+          "sample_count": 30,
+          "execution_failures": 0
+        }
+      },
+      "candidate": {
+        "fresh_process": {
+          "p95_ms": 94.503,
+          "peak_memory_bytes": 269402808,
+          "sample_count": 60
+        },
+        "warmed_query": {
+          "p95_ms": 104.848,
+          "peak_memory_bytes": 237896376,
+          "sample_count": 30,
+          "execution_failures": 0
+        }
+      }
+    },
+    "treatment": {
+      "main": {
+        "fresh_process": {
+          "p95_ms": 97.816,
+          "peak_memory_bytes": 237847248,
+          "sample_count": 60
+        },
+        "warmed_query": {
+          "p95_ms": 97.038,
+          "peak_memory_bytes": 236143288,
+          "sample_count": 30,
+          "execution_failures": 0
+        }
+      },
+      "candidate": {
+        "fresh_process": {
+          "p95_ms": 98.661,
+          "peak_memory_bytes": 268714680,
+          "sample_count": 60
+        },
+        "warmed_query": {
+          "p95_ms": 97.231,
+          "peak_memory_bytes": 237159096,
+          "sample_count": 30,
+          "execution_failures": 0
+        }
+      }
+    },
+    "treatment_candidate_vs_same_run_main_pct": {
+      "fresh_p95_ms": 0.864,
+      "fresh_peak_memory": 12.978,
+      "warmed_p95_ms": 0.199,
+      "warmed_peak_memory": 0.43
+    },
+    "within_twenty_percent_guardrail": true
+  },
+  "offline": {
+    "query_network_policy": "macOS sandbox-exec deny network*",
+    "control_gate_status": "complete",
+    "treatment_gate_status": "complete",
+    "control_warmed_cli_failures": 0,
+    "treatment_warmed_cli_failures": 0
+  },
+  "canonical_gates": {
+    "control": {
+      "decision": "inconclusive",
+      "reasons": [
+        "Success@1 regressed in: beb62b7e9d0e478f85052b777ebdf0c1",
+        "overall false_answers_on_unanswerable regressed",
+        "false_answers_on_unanswerable regressed on platform osx",
+        "dev-only evidence cannot make a release decision"
+      ]
+    },
+    "treatment": {
+      "decision": "inconclusive",
+      "reasons": [
+        "Success@1 regressed in: beb62b7e9d0e478f85052b777ebdf0c1",
+        "overall false_answers_on_unanswerable regressed",
+        "false_answers_on_unanswerable regressed on platform osx",
+        "dev-only evidence cannot make a release decision"
+      ]
+    },
+    "scope": "custom dev-only; inconclusive is not release approval"
+  },
+  "installed_product": {
+    "sample_path": "docs/reproducibility/artifacts/installed-v0.3.3-smoke-v1.json",
+    "sample_sha256": "09407df950ee9016e128bb4d1b3ff0e8b30e7204c27f824fa45efd4e8a22d373",
+    "database_sha256": "0218c1fd18dc6eb1c6b405356c92e47379286cec68f9fea1a70be896d5f71495",
+    "rows": 30205,
+    "scoring_limitation": "installed v0.3.3 uses a larger database and was not scored with labels for the pinned 142-example corpus"
+  },
+  "artifacts": {
+    "protocol": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-protocol.md",
+    "control_report": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-control.json",
+    "control_markdown": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-control.md",
+    "treatment_report": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-treatment.json",
+    "treatment_markdown": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-treatment.md",
+    "raw_prompt_pool": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-prompt-pool-raw.json",
+    "raw_independent_labels": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-independent-labels-raw.json",
+    "raw_label_audit": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-label-audit-raw.json",
+    "sort_adjudication": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-sort-adjudication.json"
+  }
+}

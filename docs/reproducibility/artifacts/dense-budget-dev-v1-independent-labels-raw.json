@@ -1,0 +1,1513 @@
+{
+  "metadata": {
+    "purpose": "development-only",
+    "source_name": "tldr-pages",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest_algorithm": "sha256",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "prompt_pool_sha256": "8eaee926302324bc194bd516b931fb8e2a3db36ecc352b19b173e7d7cbb5456f",
+    "audit_scope": "development-only; fresh pool and pinned manifest/source pages only",
+    "answerability_policy": "One individual source operational example must cover all requested operations. No multi-example composition, new options, page-prose-only recipes or documentation redirects. Documented substitutions in that same example description are allowed.",
+    "example_numbering": "1-based source order, including documentation redirects in positions; redirects excluded from valid operational examples."
+  },
+  "tasks": [
+    {
+      "task_id": "budget_dev_e0163528f25f408391d3394e8aa624b8",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU coreutils, capture text typed on standard input into interview-notes.txt until end of input. Use cat and give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "common/cat"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "common/cat",
+          "page_command": "cat",
+          "example_id": 5,
+          "description": "Write `stdin` to a file:",
+          "command_template": "cat - > {{path/to/file}}",
+          "source_line": 22,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "cat - > interview-notes.txt"
+      ],
+      "rationale": "Source explicitly captures stdin to a file.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/cat.md",
+          "example_ids": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_3f24c527ea084266ba35080a069a8598",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU coreutils, copy the file reached by the symlink current-policy into issued/, following the link instead of copying the link itself. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "common/cp"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "common/cp",
+          "page_command": "cp",
+          "example_id": 7,
+          "description": "Follow symbolic links before copying:",
+          "command_template": "cp {{[-L|--dereference]}} {{link}} {{path/to/target_directory}}",
+          "source_line": 30,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "cp -L current-policy issued/"
+      ],
+      "rationale": "Source explicitly follows symbolic links before copying.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/cp.md",
+          "example_ids": [
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_0a4a010b07154241b57a1b5514d00ca1",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU coreutils, copy drafts/legal/notice.txt into issued/ while retaining the drafts/legal path beneath issued/ and creating missing parent directories. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "common/cp"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "common/cp",
+          "page_command": "cp",
+          "example_id": 8,
+          "description": "Use the full path of source files, creating any missing intermediate directories when copying:",
+          "command_template": "cp --parents {{source/path/to/file}} {{path/to/target_file}}",
+          "source_line": 34,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "cp --parents drafts/legal/notice.txt issued/"
+      ],
+      "rationale": "Source explicitly preserves source path and creates missing directories.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/cp.md",
+          "example_ids": [
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_6a7709431b18480c9c692a40ee8be262",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session, encrypt interview-notes.txt with a passphrase before putting the encrypted file in issued/. Give a command that performs the encryption.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No encryption command or example appears in corpus.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/cp.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_b03248522b734ec3a02452033d01b7d4",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU coreutils, resume an interrupted copy of a large file at the last transferred byte instead of copying it again from the beginning. Source is disk-image.bin and destination is issued/disk-image.bin. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No copy resumption or transferred-offset option is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/cp.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_ca337db0155141cf9f8f93004c251e5d",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU find, list entries in ./staging whose size is greater than 700 kilobytes but less than 8 megabytes, searching no deeper than one level. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "common/find"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "common/find",
+          "page_command": "find",
+          "example_id": 5,
+          "description": "Find files matching a given size range, limiting the recursive depth to \"1\":",
+          "command_template": "find {{path/to/directory}} -maxdepth 1 -size {{+500k}} -size {{-10M}}",
+          "source_line": 23,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "find ./staging -maxdepth 1 -size +700k -size -8M"
+      ],
+      "rationale": "One example covers both size bounds and maximum depth.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/find.md",
+          "example_ids": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_408224da70ca4291bb2c0444091d612a",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU grep, find lines in arrivals.log matching either arrival or departure regardless of letter case, using an extended regular expression. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "common/grep"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "common/grep",
+          "page_command": "grep",
+          "example_id": 8,
+          "description": "Use extended `regex`es (supports ?, +, {}, (), and |), in case-insensitive mode:",
+          "command_template": "grep {{[-Ei|--extended-regexp --ignore-case]}} \"{{search_pattern}}\" {{path/to/file}}",
+          "source_line": 35,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "grep -Ei 'arrival|departure' arrivals.log"
+      ],
+      "rationale": "One example combines extended regular expressions and case-insensitive matching.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/grep.md",
+          "example_ids": [
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_b43ce9db8d154befae9a79add756ad6d",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session, search arrivals.log.gz directly for customs without first saving a decompressed file. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No compressed-file search or decompression example exists.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/grep.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_24903b6ad9e94d6bbebff0c7ac6ef459",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU grep, match the phrase customs approved even when customs and approved occur on consecutive lines in arrivals.log. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No multiline matching behavior is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/grep.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_951151b04a654fda85e43e36ce5b9847",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU find, locate files beneath ./staging owned by the account archivist. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No owner-account selection predicate is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/find.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_c0f6e544fa8e49eda6ccedb66875d04b",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with sed, run the editing program in normalize.sed on the standard output of build-inventory and display the transformed output. Give the pipeline.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "common/sed"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "common/sed",
+          "page_command": "sed",
+          "example_id": 2,
+          "description": "Execute a specific script [f]ile and print the result to `stdout`:",
+          "command_template": "{{command}} | sed -f {{path/to/script.sed}}",
+          "source_line": 11,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "build-inventory | sed -f normalize.sed"
+      ],
+      "rationale": "One example runs a script file on upstream stdout.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/sed.md",
+          "example_ids": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_efacfc7529f74e779cc5a0127b04bd10",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with sed, display only the first line emitted by build-inventory. Give the pipeline.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "common/sed"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "common/sed",
+          "page_command": "sed",
+          "example_id": 3,
+          "description": "Print just a first line to `stdout`:",
+          "command_template": "{{command}} | sed -n '1p'",
+          "source_line": 15,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "build-inventory | sed -n '1p'"
+      ],
+      "rationale": "One example emits only the first input line.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/sed.md",
+          "example_ids": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_dc8e0c9b0fe14657a3b53a11b2cbd1fd",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU sort, order colon-separated records in registry.txt by the third field numerically, breaking ties using the fourth field as numbers that may contain exponents. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "common/sort"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "common/sort",
+          "page_command": "sort",
+          "example_id": 6,
+          "description": "As above, but when items in the 3rd field are equal, sort by the 4th field by numbers with exponents:",
+          "command_template": "sort {{[-t|--field-separator]}} : {{[-k|--key]}} 3,3n {{[-k|--key]}} 4,4g /etc/passwd",
+          "source_line": 26,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "sort -t : -k 3,3n -k 4,4g registry.txt"
+      ],
+      "rationale": "One example supplies colon separation, bounded third numeric field and fourth exponent-capable tie-break field.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/sort.md",
+          "example_ids": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_1c39fabc53254a3b90af6a60d4cdff87",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU sort, sort semicolon-separated rows in registry.txt by the second field while keeping rows with equal keys in their original relative order. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Field sorting exists, but stable equal-key ordering via --stable/-s is absent.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/sort.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_227dd48337c74ec598d9c5766e27c300",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with sed, delete every line between BEGIN_PRIVATE and END_PRIVATE in the output of build-inventory, including both marker lines. Give the pipeline.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No range deletion or marker-boundary operation appears in any individual example.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/common/sed.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_b464fdd16bdc4bf7bcd0c1a884ee49b4",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, enumerate every installed package through APT. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "linux/apt"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "linux/apt",
+          "page_command": "apt",
+          "example_id": 8,
+          "description": "List all installed packages:",
+          "command_template": "apt list {{[-i|--installed]}}",
+          "source_line": 36,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "apt list --installed"
+      ],
+      "rationale": "One example enumerates installed packages.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/apt.md",
+          "example_ids": [
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_9d296e05ee4e4d609ae0464bb2e472c5",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, uninstall the package cowsay and remove its configuration files as well. Give the privileged APT command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "linux/apt"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "linux/apt",
+          "page_command": "apt",
+          "example_id": 6,
+          "description": "Remove a package (use `purge` instead to also remove configuration files):",
+          "command_template": "sudo apt remove {{package}}",
+          "source_line": 28,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "sudo apt purge cowsay"
+      ],
+      "rationale": "Example description explicitly instructs replacing remove with purge to remove configuration files.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/apt.md",
+          "example_ids": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_d5353dda678d4abc9d57b4faf5773fb0",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, install jq or bring it to the latest available package version if it is already installed. Give the privileged APT command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "linux/apt"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "linux/apt",
+          "page_command": "apt",
+          "example_id": 5,
+          "description": "Install a package, or update it to the latest version:",
+          "command_template": "sudo apt install {{package}}",
+          "source_line": 24,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "sudo apt install jq"
+      ],
+      "rationale": "One example installs or updates to the latest package version.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/apt.md",
+          "example_ids": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_2878969f1c8749c79fda23a56a63f49e",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, preview which packages APT would upgrade and which changes it would make, without changing the machine. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Upgrade exists, but simulation/preview option is absent.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/apt.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_06cd0bbe65c045a18846222650153fa8",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, list the packages that directly depend on jq, rather than jq's own dependencies. Give the native package-management command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Reverse-dependency lookup is absent.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/apt.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_8c395df506d14ebc8bd051412f62a47a",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, report used and free inode counts for mounted filesystems to investigate a machine that cannot create new files despite having free disk space. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "linux/df"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "linux/df",
+          "page_command": "df",
+          "example_id": 4,
+          "description": "Include statistics on the number of free inodes:",
+          "command_template": "df {{[-i|--inodes]}}",
+          "source_line": 19,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "df -i"
+      ],
+      "rationale": "Source inode-statistics example covers inode usage reporting.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/df.md",
+          "example_ids": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_43a453d4f4ae4eac86eb6fb01be33392",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, display system memory totals repeatedly with a two-second refresh interval. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "linux/free"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "linux/free",
+          "page_command": "free",
+          "example_id": 4,
+          "description": "Refresh the output every 2 seconds:",
+          "command_template": "free {{[-s|--seconds]}} 2",
+          "source_line": 18,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "free -s 2"
+      ],
+      "rationale": "Source refresh example supplies the two-second memory reporting interval.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/free.md",
+          "example_ids": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_3134e36db5cc450197479d6d51a8669a",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, display the memory totals for NUMA node 0 separately from the other nodes. Give the native command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No NUMA node selection or per-node memory tool is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/free.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_c7e04d505aad47bda1de14f7684228bc",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, print per-process swap consumption so I can identify which process has the most data swapped out. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Source describes system memory, with no per-process swap reporting.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/free.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_149f27d814834a4dab85c78c633192f9",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, show the read and write throughput of block devices once per second. Give the native monitoring command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No block-device throughput monitor is included.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/df.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_2bdb9e826e2f4fb399f663ba78c4afef",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, show the neighbor table containing IP-to-link-address mappings for local peers. Give the native ip command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "linux/ip"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "linux/ip",
+          "page_command": "ip",
+          "example_id": 5,
+          "description": "Show neighbors (ARP table):",
+          "command_template": "ip {{[n|neighbor]}}",
+          "source_line": 23,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "ip neighbor"
+      ],
+      "rationale": "Neighbor/ARP-table example covers local IP-to-link-address mappings.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/ip.md",
+          "example_ids": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_b9b351b719ba46f38dd627aaf73ef1ca",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux with systemd, query error-priority journal messages from the preceding boot. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "linux/journalctl"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "linux/journalctl",
+          "page_command": "journalctl",
+          "example_id": 2,
+          "description": "Show all messages with priority level 3 (errors) from the boot before last shutdown:",
+          "command_template": "journalctl {{[-b|--boot]}} -1 {{[-p|--priority]}} 3",
+          "source_line": 11,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "journalctl -b -1 -p 3"
+      ],
+      "rationale": "One example combines preceding boot and error priority.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/journalctl.md",
+          "example_ids": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_b7bb83d6f02c4be4a95a466726aef242",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux with systemd, configure collector.service to automatically restart five seconds after failure. Give the unit configuration and the commands needed to apply it.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Editing a unit is present, but restart policy, failure condition and five-second delay configuration are absent.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/systemctl.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_152eda2e5b84464a80f5cc0238bfdcd4",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, capture incoming TCP packets on enp2s0 whose destination port is 8443 and save the capture to collector.pcap. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No packet capture command, TCP filter or PCAP output example exists.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/ip.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_1c300b7dfce34e678e52d74ece077047",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux with systemd, export journal records for collector.service as newline-delimited JSON for a parser. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Unit filtering exists, but JSON output formatting is absent.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/linux/journalctl.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_808e1039471c4ae98e4e15017d4b5ad0",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, put the standard output of the existing command render-summary onto the system clipboard. Give the pipeline.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "osx/pbcopy"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "osx/pbcopy",
+          "page_command": "pbcopy",
+          "example_id": 2,
+          "description": "Place the results of a specific command in the clipboard:",
+          "command_template": "find . -type t -name \"*.png\" | pbcopy",
+          "source_line": 11,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "render-summary | pbcopy"
+      ],
+      "rationale": "Source description explicitly accepts results of a specific upstream command.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/pbcopy.md",
+          "example_ids": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_1cc17e90652e452fa95f17404e5cc1e7",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, print the current system clipboard text to Terminal without creating a file. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Page prose describes clipboard stdout, but neither individual example prints bare clipboard text to Terminal: #1 writes a file; #2 pipes through another command.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/pbpaste.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_9a5fa737ea2e4177bfe55eabad345732",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, place portrait.png on the system clipboard as an image so it can be pasted into Pages. Give a command using built-in macOS tools.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Clipboard text/stdin transfer examples do not document image clipboard representation.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/pbcopy.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_733878a5894e48629cfa6b6e36a2b657",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, continuously monitor the clipboard and print new text whenever its contents change. Give a built-in command or shell script.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No change detection loop or continuous clipboard monitor is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/pbpaste.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_d8a0c6c1c6614794b40467bdf8d0bea5",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, retrieve the clipboard's RTF representation instead of its plain-text representation. Give the built-in clipboard command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No RTF representation selector is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/pbpaste.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_0a8eca7066194d9a9776ee53d81903f2",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, list installed speech voices so I can choose a voice suitable for a French announcement. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "osx/say"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "osx/say",
+          "page_command": "say",
+          "example_id": 4,
+          "description": "List the available voices (different voices speak in different languages):",
+          "command_template": "say --voice \"?\"",
+          "source_line": 18,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "say --voice \"?\""
+      ],
+      "rationale": "Source lists available speech voices.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/say.md",
+          "example_ids": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_1c7c37bbd9a442d28a4d2c623ff6a814",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, speak Please take your seats using the Samantha voice at 155 words per minute. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "osx/say"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "osx/say",
+          "page_command": "say",
+          "example_id": 3,
+          "description": "Say a phrase with a custom voice and speech rate:",
+          "command_template": "say --voice {{voice}} --rate {{words_per_minute}} \"{{I'm sorry Dave, I can't let you do that.}}\"",
+          "source_line": 14,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "say --voice Samantha --rate 155 \"Please take your seats\""
+      ],
+      "rationale": "One example covers custom phrase, custom voice and speech rate.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/say.md",
+          "example_ids": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_c6162a7c5462447db2c0ed973d80e12b",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, synthesize Boarding has begun into a speech audio file named boarding.aiff. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "osx/say"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "osx/say",
+          "page_command": "say",
+          "example_id": 6,
+          "description": "Create an audio file of the spoken text:",
+          "command_template": "say --output-file {{filename.aiff}} \"{{Here's to the Crazy Ones.}}\"",
+          "source_line": 26,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "say --output-file boarding.aiff \"Boarding has begun\""
+      ],
+      "rationale": "One example creates an AIFF speech file from a phrase.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/say.md",
+          "example_ids": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_dc3177a873fd4e6baf8b06ff824afaa8",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, synthesize an SSML document in announcement.xml while honoring its break and emphasis tags. Give a command using the built-in speech engine.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No SSML interpretation or break/emphasis support is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/say.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_3f92dfb0953d4a05b1a3f770e776aadd",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, generate subtitles with word timestamps alongside synthesized speech for Please take your seats. Give a command using the built-in speech engine.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No subtitle output or word timestamp operation is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/say.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_103c9e974a774c51ab16c044d86d181b",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, capture the screen including the mouse pointer and save it as pointer-example.png. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "osx/screencapture"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "osx/screencapture",
+          "page_command": "screencapture",
+          "example_id": 2,
+          "description": "Take a screenshot including the mouse cursor:",
+          "command_template": "screencapture -C {{path/to/file.png}}",
+          "source_line": 10,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "screencapture -C pointer-example.png"
+      ],
+      "rationale": "One example includes mouse cursor in saved screenshot.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/screencapture.md",
+          "example_ids": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_37b4272a93e6480796964912adcf133d",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, open every .pdf file in the current directory using each file's associated application. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "osx/open"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "osx/open",
+          "page_command": "open",
+          "example_id": 6,
+          "description": "Open all the files of a given extension in the current directory with the associated application:",
+          "command_template": "open {{*.ext}}",
+          "source_line": 26,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "open *.pdf"
+      ],
+      "rationale": "One example opens every current-directory file with a chosen extension in its associated application.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/open.md",
+          "example_ids": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_9b565fb5dcae493498bf9c6ff7d12249",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, take a screenshot of the window belonging to process ID 4821 without manual selection. Give a command using built-in tools.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No automatic process-ID-to-window capture example exists.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/screencapture.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_f4e122d302d94ce6ad155a60dbd008b5",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, use Spotlight metadata to find files created in the last hour anywhere on the machine. Give the search command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Content and filename queries exist, but creation-time metadata attribute and relative-hour query syntax are absent.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/mdfind.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_983e2f0c0e2c4a0ab959015e30705813",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, close every open Preview window while keeping Preview running. Give a command using built-in tools.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "open launches/reveals; no command to close Preview windows while retaining its process is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/osx/open.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_d788b6e285654f6680a67e23acafbf13",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell with the tldr client installed, request the documentation for the original Unix cat program rather than the PowerShell alias. Give the tldr command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Exact tldr-help command appears in source example 1, but it is a documentation redirect, not an operational example; excluded by audit rule.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/cat.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_6cbc45e77b704e61a31f92fa2d1873b9",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell with the tldr client installed, request the help page for the native command behind the cat alias. Give the tldr command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Exact tldr-help command appears in source example 2, but it is a documentation redirect, not an operational example; excluded by audit rule.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/cat.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_aef32370465f47b9aaf7b38acbd9de85",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell with the tldr client installed, request the help page for the native command behind the move alias. Give the tldr command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Exact tldr-help command appears in source example 1, but it is a documentation redirect, not an operational example; excluded by audit rule.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/move.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_45f143b3a559479dbad57fc22e2600ec",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, report every command resolution candidate named cat, including aliases and executables, in resolution order. Give the native command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Alias prose exists, but no command enumerates all name-resolution candidates in order.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/cat.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_cb8b6979269b4b309a706520a257855e",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, temporarily remove the cat alias for this session so an installed executable of that name can be invoked directly. Give the native command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No alias-removal command is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/cat.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_98259e0d403741fc933faa31891b6fd6",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search all files in the current directory for spooler regardless of letter case. Give the text-search command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "windows/findstr"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "windows/findstr",
+          "page_command": "findstr",
+          "example_id": 4,
+          "description": "Find strings using a case-[i]nsensitive search:",
+          "command_template": "findstr /i \"{{string1 string2 ...}}\" *",
+          "source_line": 18,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "findstr /i \"spooler\" *"
+      ],
+      "rationale": "One example searches all current-directory files without case sensitivity.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md",
+          "example_ids": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_a8aded11f3064b88992374b63fd93083",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search all files in the current directory for spooler and prefix each matching line with its line number. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "windows/findstr"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "windows/findstr",
+          "page_command": "findstr",
+          "example_id": 7,
+          "description": "Display the line [n]umber before each matching line:",
+          "command_template": "findstr /n \"{{string1 string2 ...}}\" *",
+          "source_line": 30,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "findstr /n \"spooler\" *"
+      ],
+      "rationale": "One example prefixes matching lines with their line number.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md",
+          "example_ids": [
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_98684c4d969748089b34e7a7a1845069",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search print-errors.txt for jobs containing spooler and print just the total number of matching lines. Give the native command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No matching-line count command or count option is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_027aff962a764782b708631ade74102b",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), find spooler in a UTF-16 encoded text file print-errors.txt without converting the file first. Give a native command that handles that encoding.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No UTF-16 input handling is documented; cannot infer encoding support.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_351c9bd833d14e15a5373bdbf191c95d",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), extract only the matching text JOB followed by exactly four digits from print-errors.txt, omitting the rest of each line. Give the command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "Regex search emits lines; no only-matched-text output option is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_7940c2fd56e04b5284ec77dd2ea66b56",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), copy all .csv files from C:\\dispatch into E:\\dropbox without copying files of other extensions. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "windows/copy"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "windows/copy",
+          "page_command": "copy",
+          "example_id": 5,
+          "description": "Copy files with a specific extension:",
+          "command_template": "copy {{path\\to\\source_directory\\*.ext}} {{path\\to\\target_directory}}",
+          "source_line": 23,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "copy C:\\dispatch\\*.csv E:\\dropbox"
+      ],
+      "rationale": "One example filters source files by extension.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/copy.md",
+          "example_ids": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_1c8595f6115b44b7a11ffff234007506",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), rename C:\\dispatch\\manifest-draft.csv to C:\\dispatch\\manifest-final.csv; the target does not exist. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "windows/move"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "windows/move",
+          "page_command": "move",
+          "example_id": 2,
+          "description": "Rename a file or directory when the target is not an existing directory:",
+          "command_template": "move {{path\\to\\source}} {{path\\to\\target}}",
+          "source_line": 11,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "move C:\\dispatch\\manifest-draft.csv C:\\dispatch\\manifest-final.csv"
+      ],
+      "rationale": "One example explicitly renames when target is not an existing directory.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/move.md",
+          "example_ids": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_506924aaf2694c968cfef750b36fa083",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, list only files immediately inside the current directory, omitting its subdirectories. Give the command.",
+      "label": "answerable",
+      "answerable": true,
+      "page_ids": [
+        "windows/get-childitem"
+      ],
+      "valid_examples": [
+        {
+          "page_id": "windows/get-childitem",
+          "page_command": "Get-ChildItem",
+          "example_id": 3,
+          "description": "List only files in the current directory:",
+          "command_template": "Get-ChildItem -File",
+          "source_line": 15,
+          "operational": true
+        }
+      ],
+      "canonical_commands": [
+        "Get-ChildItem -File"
+      ],
+      "rationale": "One example lists only immediate files.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/get-childitem.md",
+          "example_ids": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_5a70f57a75914276a5f0a3d75bd32fb5",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), recursively list C:\\dispatch and show the combined byte total across every descendant directory. Give the native command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No recursive listing or combined descendant byte total is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/dir.md",
+          "example_ids": []
+        }
+      ]
+    },
+    {
+      "task_id": "budget_dev_37617341e6ba40af8bbbe203220e65b0",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, list symbolic links in C:\\dispatch and display each link's target path. Give the native command.",
+      "label": "unsupported",
+      "answerable": false,
+      "page_ids": [],
+      "valid_examples": [],
+      "canonical_commands": [],
+      "rationale": "No symlink filter or target-path projection is documented.",
+      "source_refs": [
+        {
+          "path": "tests/fixtures/tldr-evaluation-v2/pages/windows/get-childitem.md",
+          "example_ids": []
+        }
+      ]
+    }
+  ]
+}

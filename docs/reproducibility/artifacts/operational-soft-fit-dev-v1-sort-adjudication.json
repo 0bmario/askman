@@ -1,0 +1,26 @@
+{
+  "reviewer": "/root/adjudicate_sort_composite",
+  "review_type": "signed-source-review",
+  "source": "tests/fixtures/tldr-evaluation-v2/pages/common/sort.md",
+  "corpus": "manifest-v4",
+  "prompt": "In a Bash shell on Unix with GNU sort, sort queue-times.txt numerically and write the result back to queue-times.txt using the sorting command itself. Give the command.",
+  "label": "unsupported",
+  "rule": "At least one individual corpus operational example must itself satisfy all requested operations; examples cannot be synthesized or combined into an unshown command.",
+  "source_examples": [
+    {
+      "number": 4,
+      "description": "Sort a file using numeric rather than alphabetic order:",
+      "command": "sort {{[-n|--numeric-sort]}} {{path/to/file}}",
+      "assessment": "Supports numeric ordering; does not support writing back using sort."
+    },
+    {
+      "number": 8,
+      "description": "Sort a file, printing the output to the specified output file (can be used to sort a file in-place):",
+      "command": "sort {{[-o|--output]}} {{path/to/output_file}} {{path/to/input_file}}",
+      "assessment": "Supports in-place output; does not specify numeric ordering."
+    }
+  ],
+  "decision": "Examples #4 and #8 do not qualify together. Combining their flags would synthesize an unshown command. No individual example supports both numeric ordering and in-place output.",
+  "inspection_scope": "Only pinned sort.md source inspected; no evaluation labels, retrieval code or outputs, prior results, or holdout files inspected.",
+  "signed_by": "/root/adjudicate_sort_composite"
+}

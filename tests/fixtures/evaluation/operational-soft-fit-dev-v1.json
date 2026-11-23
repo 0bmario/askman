@@ -1,0 +1,942 @@
+{
+  "schema_version": 4,
+  "dataset_id": "askman-operational-compatibility-dev-v1",
+  "cohort_id": "soft-fit-dev-prompts-v1",
+  "split": "dev",
+  "split_id": "operational-family-dev-v1",
+  "split_policy": "development-only source-backed operational prompts; twelve families; five tasks per family; label counts fixed by independent source audit",
+  "scorer_version": "task-scorer-v1",
+  "task_count": 60,
+  "answerable_task_count": 29,
+  "unanswerable_task_count": 31,
+  "freeze_id": "askman-operational-soft-fit-dev-v1-freeze-2026-09-27",
+  "provenance": {
+    "intent_record": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-prompt-pool-raw.json",
+    "intent_record_sha256": "8e70b6e4e73d8a0c066d33e2a713899abc7ccd191e0201b7e5c5cad99ad5b202",
+    "authoring_method": "Prompt-only development pool authored from pinned parser-v4 source pages; no retrieval or candidate outputs were consulted.",
+    "independent_label_output": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-independent-labels-raw.json",
+    "independent_label_output_sha256": "6835b4706ee44225767be2fe932369f96ffd93318841b94ab7c2c8aa1c989370",
+    "independent_label_audit": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-label-audit-raw.json",
+    "independent_label_audit_sha256": "165622ee736b28227f02bc2969351e7a67b8140df26b4a8dbe1bdd82fa7eaade",
+    "adjudication": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-sort-adjudication.json",
+    "adjudication_sha256": "bff38f6420a40a638bcd3fff490e6fba380e55fc05ed4ec63c8f46bded4e4b2b",
+    "author_intended_labels_used": false,
+    "scope": "Development only. No retrieval runs, candidate outputs, prior task-level outcomes, or holdout contents were used in authoring or source labeling."
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "4",
+    "parser_version": "tldr-subset-v4",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json"
+  },
+  "tasks": [
+    {
+      "id": "dev_66fc786d876d4ba7b93dc61afc712c91",
+      "split": "dev",
+      "family": "32b63a99073448b0bdf3ae011c63577e",
+      "question": "In a Bash shell on Unix with GNU coreutils, join chapters/intro.txt and chapters/results.txt, in that order, into release.txt, replacing its existing contents. Give the command.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4d3c37d3247edb0edb4cb01aa08ae31b7e9baf06d44e985aff0a1f0e807ad8fc"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/common/cat.md#example-2"
+      ],
+      "source_related_refs": [],
+      "rationale": "Concatenation example writes ordered file operands with replacement redirection."
+    },
+    {
+      "id": "dev_75eac8f0c9b44ed1aea261f462e00f92",
+      "split": "dev",
+      "family": "32b63a99073448b0bdf3ae011c63577e",
+      "question": "In a Bash shell on Unix with GNU coreutils, add notices/license.txt and notices/credits.txt to the end of an existing release.txt without discarding its current text. Give the command.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-960cbf5056bae848f6fa5828c3c9dd960b95dff60228d904620f77c3d0b47f69"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/common/cat.md#example-3"
+      ],
+      "source_related_refs": [],
+      "rationale": "Append redirection explicitly preserves existing output text."
+    },
+    {
+      "id": "dev_75ede980094843339f5f19a29880f094",
+      "split": "dev",
+      "family": "32b63a99073448b0bdf3ae011c63577e",
+      "question": "In a Bash shell on Unix with GNU coreutils, copy each .svg file in the current directory into artwork/, asking before any existing file is overwritten. Give the command.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-13c8699b86f8979b78ad259f5ebcf17efb41517059d9ae59f9d4230b6b80b0e0"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/common/cp.md#example-6"
+      ],
+      "source_related_refs": [],
+      "rationale": "Extension glob and interactive overwrite prompt are explicit."
+    },
+    {
+      "id": "dev_d9b3d62d51ab49868a8af617657cf48f",
+      "split": "dev",
+      "family": "32b63a99073448b0bdf3ae011c63577e",
+      "question": "In a Bash shell on Unix with GNU coreutils, copy the entire package/ directory into backup/ while preserving ownership, permissions, timestamps, and hard-link relationships. Give the command.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Recursive copy is documented; archive/preservation of ownership, permissions, timestamps and hard links is absent."
+    },
+    {
+      "id": "dev_092c16d6323247649d0ae98abf7f1ca9",
+      "split": "dev",
+      "family": "32b63a99073448b0bdf3ae011c63577e",
+      "question": "In a Bash shell on Unix with GNU coreutils, display release.txt with a number beside every nonempty line, leaving blank lines unnumbered. Give the command.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "No operational example numbers nonempty lines; -b is absent."
+    },
+    {
+      "id": "dev_cb46dbcf3dda4a77b57586084a085eb7",
+      "split": "dev",
+      "family": "5722a11df4b84b89844aea00de7a0d5c",
+      "question": "In a Bash shell on Unix with GNU find, search ./workspace for .rb files while excluding every path under a directory named vendor. Give the command.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-72069b7f688efc1ad6e2e48ba1a29800dffdc9c7644f6e8bb17f77864ebda5f2"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/common/find.md#example-4"
+      ],
+      "source_related_refs": [],
+      "rationale": "Example explicitly excludes matching paths while filtering by extension."
+    },
+    {
+      "id": "dev_761615b42d4a4ab5aced0a7dfc5d9488",
+      "split": "dev",
+      "family": "5722a11df4b84b89844aea00de7a0d5c",
+      "question": "In a Bash shell on Unix with GNU grep, look for the literal text rate[0] in measurements.txt; the square brackets must not be interpreted as a regular expression. Give the command.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/common/grep.md#example-2"
+      ],
+      "source_related_refs": [],
+      "rationale": "Fixed-string search disables regular expressions."
+    },
+    {
+      "id": "dev_82234d6fb05947dd9a39e5ec58a234fc",
+      "split": "dev",
+      "family": "5722a11df4b84b89844aea00de7a0d5c",
+      "question": "In a Bash shell on Unix with GNU find, search ./workspace for .rb files and descend into directories reached through symbolic links. Give the command.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "No symlink-following -L option is documented in the pinned find page."
+    },
+    {
+      "id": "dev_ede6349ff5714da281cbe7738fef8335",
+      "split": "dev",
+      "family": "5722a11df4b84b89844aea00de7a0d5c",
+      "question": "In a Bash shell on Unix with GNU grep, report only the number of lines containing timeout in each of gateway.log and worker.log. Give the command.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "No count option -c/--count is documented."
+    },
+    {
+      "id": "dev_5b803defce544c7db8687fd8f5e4b96c",
+      "split": "dev",
+      "family": "5722a11df4b84b89844aea00de7a0d5c",
+      "question": "In a Bash shell on Unix with GNU grep, emit names of matching files beneath ./workspace separated by NUL bytes so filenames with newlines remain safe. Search for deprecated. Give the command.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Recursive search exists, but matching-filename-only and NUL-delimited output options are absent."
+    },
+    {
+      "id": "dev_d76930342faa4db2b29a436c2a0fd1ac",
+      "split": "dev",
+      "family": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "question": "In a Bash shell on Unix with sed, transform streamed output from generate-report by replacing every occurrence of pending with ready on each line, printing the transformed stream. Give the pipeline.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-72a428d0a15e820cacc86ef2c9453ad0ce9c0a99020cd0c0c2c6a9db91d28e39"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/common/sed.md#example-1"
+      ],
+      "source_related_refs": [],
+      "rationale": "Pipeline substitution applies globally to every input line."
+    },
+    {
+      "id": "dev_e971dd68e06843388dd4aca532c40089",
+      "split": "dev",
+      "family": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "question": "In a Bash shell on Unix with GNU sort, sort queue-times.txt numerically and write the result back to queue-times.txt using the sorting command itself. Give the command.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [
+        "example-9401e615e42aac59e1c88665393b3e85c5bd4766b64dd13b1d3e1f8fb044d20c",
+        "example-5b19239e07b5398803ab71677bcf14eb9a2c8698a34f6cf280a47deaaa13f842"
+      ],
+      "source_supporting_refs": [],
+      "source_related_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/common/sort.md#example-4",
+        "tests/fixtures/tldr-evaluation-v2/pages/common/sort.md#example-8"
+      ],
+      "rationale": "Examples #4 and #8 do not qualify together. Combining their flags would synthesize an unshown command. No individual example supports both numeric ordering and in-place output."
+    },
+    {
+      "id": "dev_1ed82fd506324a80a9a8041f7d2a8908",
+      "split": "dev",
+      "family": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "question": "In a Bash shell on Unix with GNU sort, produce sorted unique lines from attendee-names.txt. Give the command.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-4da8541e1d6bb3172db5aeb6d2a5d677f7ce07c1402b88cf3406b588c16ade24"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/common/sort.md#example-7"
+      ],
+      "source_related_refs": [],
+      "rationale": "Unique-line sorting is explicit."
+    },
+    {
+      "id": "dev_87bd2d6b4d1944c4bddfb9d7d48fbe56",
+      "split": "dev",
+      "family": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "question": "In a Bash shell on Unix with GNU sed, replace every occurrence of pending with ready directly inside queue.conf and retain the original as queue.conf.bak. Give the command.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Pinned sed page only transforms stdout or reads a script; in-place edit and backup suffix are absent."
+    },
+    {
+      "id": "dev_b110f3afdef74c46b0d76f263a7a6ec6",
+      "split": "dev",
+      "family": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "question": "In a Bash shell on Unix with GNU sort, order release-tags.txt by version numbers so v2.9 comes before v2.10. Give the command.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Version sorting -V/--version-sort is absent."
+    },
+    {
+      "id": "dev_f7c87f2011c64c5cbd06507c092b829e",
+      "split": "dev",
+      "family": "ba749ef366884d319d45a7a63780f9a1",
+      "question": "On Debian Linux in Bash, refresh APT package metadata before installing anything. Give the command including the needed privilege elevation.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/linux/apt.md#example-1"
+      ],
+      "source_related_refs": [],
+      "rationale": "Metadata update and sudo are explicit."
+    },
+    {
+      "id": "dev_5dbfa13ee14f45a7a781dfc806bcaa00",
+      "split": "dev",
+      "family": "ba749ef366884d319d45a7a63780f9a1",
+      "question": "On Debian Linux in Bash, show detailed APT information for the package imagemagick without installing it. Give the command.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/linux/apt.md#example-4"
+      ],
+      "source_related_refs": [],
+      "rationale": "Detailed package information is explicit."
+    },
+    {
+      "id": "dev_461a956acb1a4b63a496297981ceb316",
+      "split": "dev",
+      "family": "ba749ef366884d319d45a7a63780f9a1",
+      "question": "On Debian Linux in Bash, prevent the installed imagemagick package from being upgraded until I explicitly release that restriction. Give the native package-management command.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Package hold/release commands and apt-mark page are absent."
+    },
+    {
+      "id": "dev_e661dd01e5984036bb48f9a48717b06a",
+      "split": "dev",
+      "family": "ba749ef366884d319d45a7a63780f9a1",
+      "question": "On Debian Linux in Bash, download the imagemagick package archive into the current directory without installing the package. Give the native APT command.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Package archive download command is absent."
+    },
+    {
+      "id": "dev_1b7f401548ca4aa7b12a73629fbdea5e",
+      "split": "dev",
+      "family": "ba749ef366884d319d45a7a63780f9a1",
+      "question": "On Debian Linux in Bash, apply available security updates only while leaving all other available upgrades pending. Give a native package-management command that enforces that restriction.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Pinned apt upgrade upgrades all packages; no security-only enforcement is documented."
+    },
+    {
+      "id": "dev_6e2f494c75d2456180f574627c0797fa",
+      "split": "dev",
+      "family": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "question": "On a Linux machine using systemd, show only failed socket units so I can investigate a listener outage. Give the command.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-c271943f3dad6797361b9e6b7fefb432da846eb2bf306addf579d49fab7474ba"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/linux/systemctl.md#example-7"
+      ],
+      "source_related_refs": [],
+      "rationale": "Unit-type and failed-state filters are explicitly combined."
+    },
+    {
+      "id": "dev_cfa2434ffd024d089006cf856683d48d",
+      "split": "dev",
+      "family": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "question": "On a Linux machine using systemd, display journal messages from sync-agent.service since that service most recently started. Give the Bash command.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/linux/journalctl.md#example-4"
+      ],
+      "source_related_refs": [],
+      "rationale": "Invocation ID selects journal messages for the latest service invocation."
+    },
+    {
+      "id": "dev_1a4f65ff521943c0a6703b8f0c46324a",
+      "split": "dev",
+      "family": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "question": "On a Linux machine using systemd, refresh the manager after changing a unit file so it discovers the updated definition. Give the command.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-011841c17bb47a0959c6f904421fe8999ec8524178684750864e7d14b518fafc"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/linux/systemctl.md#example-5"
+      ],
+      "source_related_refs": [],
+      "rationale": "Manager reload discovers changed unit files."
+    },
+    {
+      "id": "dev_e1af2f2d0a56499499416c21fc6aa553",
+      "split": "dev",
+      "family": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "question": "On a Linux machine using systemd, produce a graphical dependency diagram for sync-agent.service. Give the native systemd command.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "No graphical dependency command or systemd-analyze source page is present."
+    },
+    {
+      "id": "dev_b17ce8a9a1024ad0937d604aca8087b1",
+      "split": "dev",
+      "family": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "question": "On a Linux machine using systemd, persistently limit sync-agent.service to one quarter of one CPU through a command-line unit property change. Give the command.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "set-property, CPUQuota and persistent unit property changes are absent."
+    },
+    {
+      "id": "dev_70b9de336dd14e9c879969d8db2accd0",
+      "split": "dev",
+      "family": "049bbef2936a4281849dd0a9bcc78126",
+      "question": "On Linux in Bash, show filesystem usage for the filesystem containing /srv/ingest rather than listing every filesystem. Give the command.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9c3f58af214e9a579b9f6943bc021cdb16a28ef87eba18ff5d7bde38affe3e85"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/linux/df.md#example-3"
+      ],
+      "source_related_refs": [],
+      "rationale": "Path operand selects the containing filesystem."
+    },
+    {
+      "id": "dev_05f47dcff2ce4e8ba9531345a127fb0c",
+      "split": "dev",
+      "family": "049bbef2936a4281849dd0a9bcc78126",
+      "question": "On Linux in Bash, show a compact list of network interfaces with their network-layer addresses. Give the native ip command.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-ef62103b925561455cb9f469ad93401cde3ef4e7c8a41a30279a69a8ce2a4f9e"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/linux/ip.md#example-2"
+      ],
+      "source_related_refs": [],
+      "rationale": "Brief network-layer addresses are explicit."
+    },
+    {
+      "id": "dev_ba423d6ccffc465b8953dbdc1c310acf",
+      "split": "dev",
+      "family": "049bbef2936a4281849dd0a9bcc78126",
+      "question": "On Linux in Bash, list the ten directories under /srv/ingest that consume the most disk space, with readable sizes. Give the command.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "df reports filesystem usage, not directory sizes; no du page or top-directory recipe exists."
+    },
+    {
+      "id": "dev_52b0e04c8df8466288318d0efe8837de",
+      "split": "dev",
+      "family": "049bbef2936a4281849dd0a9bcc78126",
+      "question": "On Linux in Bash, measure the resident memory used by the process with PID 7312 rather than total system memory. Give the command.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "free documents system memory; no per-process resident-memory command exists in the corpus."
+    },
+    {
+      "id": "dev_5424e0463c254689a09162bc1d4a294d",
+      "split": "dev",
+      "family": "049bbef2936a4281849dd0a9bcc78126",
+      "question": "On Debian Linux in Bash, persist a default route via 192.0.2.1 on enp4s0 so it survives reboot; assume systemd-networkd manages that interface. Give the configuration and activation steps.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Runtime default-route addition exists, but systemd-networkd configuration and reboot persistence are absent."
+    },
+    {
+      "id": "dev_8142e52eb87b4298bb103a5dfddbaf11",
+      "split": "dev",
+      "family": "ca9873f90e604121b6678f02cc10e425",
+      "question": "On macOS in the native zsh shell, put the complete contents of draft-message.txt onto the system clipboard. Give the command.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/osx/pbcopy.md#example-1"
+      ],
+      "source_related_refs": [],
+      "rationale": "File contents are redirected to clipboard stdin."
+    },
+    {
+      "id": "dev_fc2c95c2c6d14aa29111357d658b48a9",
+      "split": "dev",
+      "family": "ca9873f90e604121b6678f02cc10e425",
+      "question": "On macOS in the native zsh shell, save the current system clipboard text to captured-message.txt, replacing any existing file. Give the command.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8c222f364f31888667827b5e955c16f956fa15c4c469184050efe56b247ee614"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/osx/pbpaste.md#example-1"
+      ],
+      "source_related_refs": [],
+      "rationale": "Clipboard stdout is redirected to a replacing output file."
+    },
+    {
+      "id": "dev_43a43c4773f44cd0858ff5748c898ba6",
+      "split": "dev",
+      "family": "ca9873f90e604121b6678f02cc10e425",
+      "question": "On macOS in the native zsh shell, filter the current clipboard text for lines containing invoice and print those lines in Terminal. Give the pipeline.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0c35c6716b085f5e02bfb833a3a66ddd6fe9d7a66107f6a526b2dbdd025a3069"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/osx/pbpaste.md#example-2"
+      ],
+      "source_related_refs": [],
+      "rationale": "Clipboard pipeline example explicitly uses grep."
+    },
+    {
+      "id": "dev_ed0b66bc29c24bde934cf83284de84de",
+      "split": "dev",
+      "family": "ca9873f90e604121b6678f02cc10e425",
+      "question": "On macOS in the native zsh shell, retrieve the clipboard entry immediately preceding the current one using built-in command-line tools. Give the command.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Page reads only the current clipboard; previous-entry history is absent."
+    },
+    {
+      "id": "dev_253586f1eb274416af963184889095f3",
+      "split": "dev",
+      "family": "ca9873f90e604121b6678f02cc10e425",
+      "question": "On macOS in the native zsh shell, put fragment.html onto the system clipboard as rich HTML so pasting into a rich-text editor preserves formatting. Give a command using built-in macOS tools.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Plain stdin-to-clipboard examples do not establish rich HTML preservation; no HTML format conversion recipe exists."
+    },
+    {
+      "id": "dev_dbdb601763d0446dbeb06ada56342e09",
+      "split": "dev",
+      "family": "f110b7753e724685a36322e249d6c664",
+      "question": "On macOS in the native zsh shell, capture the screen to rehearsal.png after a delay of seven seconds. Give the command.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-de64dda539bedf85793c294db045de42f64d51d1d8eb5caac45dd1d87aab70bf"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/osx/screencapture.md#example-5"
+      ],
+      "source_related_refs": [],
+      "rationale": "Timed screenshot option is explicit."
+    },
+    {
+      "id": "dev_b80eeaf2475540759cf3fe159062d42b",
+      "split": "dev",
+      "family": "f110b7753e724685a36322e249d6c664",
+      "question": "On macOS in the native zsh shell, read the text in narration.txt aloud using the built-in speech tool. Give the command.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-37cdfdfe2d6c22084e82141bb12c6bbf98f22ec017b221c38c1939fa7bd5b201"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/osx/say.md#example-2"
+      ],
+      "source_related_refs": [],
+      "rationale": "Input-file speech is explicit."
+    },
+    {
+      "id": "dev_e4f4e47dcc07487c8104848eb6308ebd",
+      "split": "dev",
+      "family": "f110b7753e724685a36322e249d6c664",
+      "question": "On macOS in the native zsh shell, record the screen and microphone audio together into rehearsal.mp4 using the built-in capture tool. Give the command.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Video recording is documented, but microphone/audio capture options are absent."
+    },
+    {
+      "id": "dev_bb2e0318a22a4fd18c08de03f5b3b278",
+      "split": "dev",
+      "family": "f110b7753e724685a36322e249d6c664",
+      "question": "On macOS in the native zsh shell, synthesize the phrase Welcome to the rehearsal directly into an MP3 file named greeting.mp3, without a separate conversion step. Give the command.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Audio output example targets AIFF; direct MP3 encoding is unsupported by the pinned example."
+    },
+    {
+      "id": "dev_f806e6ca5f0a4fc3ad8d9c38e50f4443",
+      "split": "dev",
+      "family": "f110b7753e724685a36322e249d6c664",
+      "question": "On macOS in the native zsh shell, open notes.txt in TextEdit and keep the shell command waiting until that editor session closes. Give the command.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Application launch is documented, but waiting for an editor session via -W is absent."
+    },
+    {
+      "id": "dev_3b81790fac064c949363000b3c164ab4",
+      "split": "dev",
+      "family": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "question": "On macOS in the native zsh shell, use Spotlight to find files containing the text launch checklist only within /Users/alex/Projects. Give the command.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-00bbff7f142bf20c7bcc5c53a7c669908fc51cbb59b00f400567fcd2a0055549"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/osx/mdfind.md#example-3"
+      ],
+      "source_related_refs": [],
+      "rationale": "Content search restricted to one directory is explicit."
+    },
+    {
+      "id": "dev_91ddb622255649f3bdaced9a6812f064",
+      "split": "dev",
+      "family": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "question": "On macOS in the native zsh shell, reveal /Users/alex/Projects/launch.pdf in Finder with that file selected. Give the command.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/osx/open.md#example-5"
+      ],
+      "source_related_refs": [],
+      "rationale": "Reveal/select file in Finder is explicit."
+    },
+    {
+      "id": "dev_a8f8bacf2d3745bf88d8f518b5606b89",
+      "split": "dev",
+      "family": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "question": "On macOS in the native zsh shell, start a new application instance using the bundle identifier com.apple.TextEdit. Give the command.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-fe9c05ef58c170bfcfd1374cae3526ebdb01ca4808b9729134ebace26c357ba2"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/osx/open.md#example-7"
+      ],
+      "source_related_refs": [],
+      "rationale": "New instance and bundle identifier are explicitly combined."
+    },
+    {
+      "id": "dev_9f8e0de85d3e41e4bdf90b55a72c5e89",
+      "split": "dev",
+      "family": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "question": "On macOS in the native zsh shell, rebuild the Spotlight index for the startup volume because searches are stale. Give the native command.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "mdfind only queries the index; rebuilding via mdutil is absent."
+    },
+    {
+      "id": "dev_111e44a794844d4b8b04108b0ec44223",
+      "split": "dev",
+      "family": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "question": "On macOS in the native zsh shell, keep a Spotlight search for files named launch.pdf running and report updates when matching files appear or disappear. Give the command.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Filename query is documented, but live search/update reporting via -live is absent."
+    },
+    {
+      "id": "dev_9c63bfa431bd4e6da97a1d2803bf3181",
+      "split": "dev",
+      "family": "63cb71cbafd94b539d89042bc5c4ad09",
+      "question": "In native Windows Command Prompt (cmd.exe), copy C:\\handoff\\agenda.txt into D:\\inbox\\ while retaining its filename. Give the command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-7bffdbfb02ff267c8816e9d6c1fe7369913762eaa645622919a9ffc89e1cea8b",
+        "example-d618ff9680fc746c36140ae801d0275fbf049ae30a49a60dccca4bcd28de4dba"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/windows/copy.md#example-1",
+        "tests/fixtures/tldr-evaluation-v2/pages/windows/copy.md#example-2"
+      ],
+      "source_related_refs": [],
+      "rationale": "Generic copy-to-location and explicit copy-to-directory both support this invocation."
+    },
+    {
+      "id": "dev_d9f2e58cf6224e2d9fa107b24ba8fd57",
+      "split": "dev",
+      "family": "63cb71cbafd94b539d89042bc5c4ad09",
+      "question": "In native Windows Command Prompt (cmd.exe), move C:\\handoff\\agenda.txt into D:\\inbox\\ and always ask before overwriting an existing file. Give the command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-a7feb3a93c27eb17f637a76744525635c5348b8cf36f1164be50a4bf01f537cf"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/windows/move.md#example-6"
+      ],
+      "source_related_refs": [],
+      "rationale": "The overwrite confirmation example explicitly documents /-Y."
+    },
+    {
+      "id": "dev_64995033a07642b3aebd69d1f09d0785",
+      "split": "dev",
+      "family": "63cb71cbafd94b539d89042bc5c4ad09",
+      "question": "In native Windows Command Prompt (cmd.exe), copy C:\\handoff and all its subdirectories into D:\\inbox, including empty directories. Give the native command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "copy page lacks recursive tree copying and empty-directory inclusion; xcopy/robocopy pages are absent."
+    },
+    {
+      "id": "dev_96396720a12c4f31872641d54332e0f2",
+      "split": "dev",
+      "family": "63cb71cbafd94b539d89042bc5c4ad09",
+      "question": "In native Windows Command Prompt (cmd.exe), copy C:\\handoff\\agenda.txt to D:\\inbox\\agenda.txt while preserving its NTFS permissions. Give the native command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "No NTFS ACL preservation option or suitable native copy command is documented."
+    },
+    {
+      "id": "dev_a625dd3375b446b0b8d55140d3fefdbb",
+      "split": "dev",
+      "family": "63cb71cbafd94b539d89042bc5c4ad09",
+      "question": "In native Windows Command Prompt (cmd.exe), compare the SHA-256 hashes of C:\\handoff\\agenda.txt and D:\\inbox\\agenda.txt to verify the copy. Give the native commands.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Corpus has no native SHA-256 hashing command or comparison recipe."
+    },
+    {
+      "id": "dev_04be067d38ad4d84a1d135e78ff42096",
+      "split": "dev",
+      "family": "823861f9273b4cdcafb85e8fe5ca9082",
+      "question": "In native Windows Command Prompt (cmd.exe), search every .txt file in the current directory for the exact phrase payment overdue, treating the space as part of one literal phrase. Give the command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md#example-6"
+      ],
+      "source_related_refs": [],
+      "rationale": "/c literal phrase example preserves the internal space."
+    },
+    {
+      "id": "dev_7ae173044d974c07aa42d5e92a0a1f70",
+      "split": "dev",
+      "family": "823861f9273b4cdcafb85e8fe5ca9082",
+      "question": "In native Windows Command Prompt (cmd.exe), search all files beneath the current directory recursively for failed. Give the native text-search command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-a057373ff643fe0023f9f7455b1119a1785629e82599e16c31fb91557733a8cb"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md#example-3"
+      ],
+      "source_related_refs": [],
+      "rationale": "Recursive text search is explicit."
+    },
+    {
+      "id": "dev_4ad2f57d877644a39a87fada71243f2f",
+      "split": "dev",
+      "family": "823861f9273b4cdcafb85e8fe5ca9082",
+      "question": "In native Windows Command Prompt (cmd.exe), search files in the current directory for failed but output only filenames containing a match. Give the command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-ef87c19e056c3915d0d682e5076e58ba59f94e405517ac83af9f4d9e5df5cfc0"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md#example-8"
+      ],
+      "source_related_refs": [],
+      "rationale": "Matching-filenames-only output is explicit."
+    },
+    {
+      "id": "dev_4dd91bac0f8b40a0b638be579aea4cba",
+      "split": "dev",
+      "family": "823861f9273b4cdcafb85e8fe5ca9082",
+      "question": "In native Windows Command Prompt (cmd.exe), search audit.txt for failed and include two surrounding lines before and after each match. Give a native command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "No surrounding-context option exists in the pinned cmd findstr examples; common grep cannot satisfy native cmd."
+    },
+    {
+      "id": "dev_36eea3f1be3145e3a2eca1af875b7d7f",
+      "split": "dev",
+      "family": "823861f9273b4cdcafb85e8fe5ca9082",
+      "question": "In native Windows Command Prompt (cmd.exe), search audit.txt for failed and stop after the first five matching lines. Give a native command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "No result-limit option or native cmd recipe to stop after five matching lines exists."
+    },
+    {
+      "id": "dev_01b9dfd24d6e489d8f109f95000cc3e9",
+      "split": "dev",
+      "family": "006f336ec75c43e4aa6506727dd85bcd",
+      "question": "In native Windows PowerShell, list only directories immediately within the current directory. Give the command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-c69f9f2ef51fdde5ea10fad22fa2f1a8f13cee435b2ce9354b69eed777c0be59"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/windows/get-childitem.md#example-2"
+      ],
+      "source_related_refs": [],
+      "rationale": "Immediate directory-only listing is explicit."
+    },
+    {
+      "id": "dev_305339475a024d53b121c5186bdff608",
+      "split": "dev",
+      "family": "006f336ec75c43e4aa6506727dd85bcd",
+      "question": "In native Windows Command Prompt (cmd.exe), list the current directory entries ordered by date and time with the oldest first. Give the command.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-0bf2884bddad6e8bb2a68899d4e1487c2af856b4736e9922ab104889df1aa408"
+      ],
+      "related_example_ids": [],
+      "source_supporting_refs": [
+        "tests/fixtures/tldr-evaluation-v2/pages/windows/dir.md#example-6"
+      ],
+      "source_related_refs": [],
+      "rationale": "Date/time sorting oldest first is explicit."
+    },
+    {
+      "id": "dev_c4420818e4bb48d5808b72806ee76313",
+      "split": "dev",
+      "family": "006f336ec75c43e4aa6506727dd85bcd",
+      "question": "In native Windows PowerShell, list only files under C:\\handoff recursively and display each full path and byte size. Give the command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "File and path filters exist, but recursion and FullName/Length projection are absent."
+    },
+    {
+      "id": "dev_543d642d71c24cbea28f4b31ef2333b9",
+      "split": "dev",
+      "family": "006f336ec75c43e4aa6506727dd85bcd",
+      "question": "In native Windows Command Prompt (cmd.exe), list only directories in the current folder with bare names and no extra columns. Give the command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Bare output is documented, but directory-only attribute filtering /ad is absent."
+    },
+    {
+      "id": "dev_67186c85488d4837b420441c99c63d5a",
+      "split": "dev",
+      "family": "006f336ec75c43e4aa6506727dd85bcd",
+      "question": "In native Windows PowerShell without GNU coreutils installed, print just the final twenty lines of C:\\handoff\\audit.txt using the native file-content command. Give the command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "related_example_ids": [],
+      "source_supporting_refs": [],
+      "source_related_refs": [],
+      "rationale": "Windows cat page only redirects documentation and checks version; no Get-Content -Tail operational example exists."
+    }
+  ]
+}

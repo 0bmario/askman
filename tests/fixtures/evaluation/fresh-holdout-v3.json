@@ -1,0 +1,701 @@
+{
+  "schema_version": 4,
+  "dataset_id": "askman-retrieval-fresh-holdout-v3",
+  "split_id": "fresh-holdout-v3",
+  "cohort_id": "askman-retrieval-fresh-holdout-v3",
+  "freeze_id": "fresh-holdout-v3-freeze-2026-09-27",
+  "split": "holdout",
+  "split_policy": "60 source-labeled tasks; one task per unique family; 15 per platform; 30 answerable and 30 abstain; disjoint from checked development datasets",
+  "task_count": 60,
+  "answerable_task_count": 30,
+  "unanswerable_task_count": 30,
+  "scorer_version": "task-scorer-v1",
+  "corpus": {
+    "artifact_kind": "askman.tldr-subset",
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "parser_version": "tldr-subset-v4",
+    "schema_version": 4,
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef"
+  },
+  "platform_ambiguity": "Platform values follow corpus page directories. Common tasks are labeled against common-page examples; Linux, macOS, and Windows tasks use their platform page with common fallback.",
+  "provenance": {
+    "authoring_method": "100 prompt-only tasks drafted from the pinned corpus inventory, with 20 supplemental likely-unsupported requests; no retrieval or candidate output was inspected",
+    "prompt_pool": "tests/fixtures/evaluation/fresh-holdout-v3-prompts.json",
+    "prompt_pool_sha256": "dbb07784cab867d9e20a0328199a1484f466aef4d2c36e5ea14704e35d5dee77",
+    "labeling_method": "Separate label audit against the pinned parser-v4 matching database; exact example IDs checked for task-platform eligibility; unsupported tasks have empty acceptable IDs",
+    "labeler_intermediate_sha256": "7dade6b1f010502f8c0a6229298e4431c1cdf14d917c59d4864b657d84897435",
+    "retrieval_inspected_during_authoring_or_labeling": false,
+    "development_disjointness_checked_against": [
+      "dev-only-extension-v1.json",
+      "frozen-dev-v1.json",
+      "frozen-dev-v2.json",
+      "frozen-dev-v2-expanded.json"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "fresh-v3-clean-common-013",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-cp-extension-interactive",
+      "question": "Copy all `.conf` files into another folder and ask before overwriting.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-13c8699b86f8979b78ad259f5ebcf17efb41517059d9ae59f9d4230b6b80b0e0"
+      ],
+      "rationale": "Pinned common/cp example 'Copy all files with a specific extension ... in interactive mode' covers the extension filter and overwrite prompt."
+    },
+    {
+      "id": "fresh-v3-clean-common-009",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-find-exclude-site-packages",
+      "question": "Locate Python files while excluding paths under `site-packages`.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-72069b7f688efc1ad6e2e48ba1a29800dffdc9c7644f6e8bb17f77864ebda5f2"
+      ],
+      "rationale": "Pinned common/find example 'Find files matching a given pattern, excluding specific paths' uses `*.py` and excludes site-packages paths."
+    },
+    {
+      "id": "fresh-v3-clean-common-010",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-find-exec-line-count",
+      "question": "For each `.txt` file in a tree, print its line count.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-e16b86c8a06212d4e22ae6ac815b678ea96ed7fa03663a872cce397b804f0a85"
+      ],
+      "rationale": "Pinned common/find example 'Run a command for each file' combines an extension filter with `wc -l`."
+    },
+    {
+      "id": "fresh-v3-clean-common-001",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-find-ext-csv-reports",
+      "question": "Find every `.csv` file below the `reports` directory.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "Pinned common/find example 'Find files by extension' supports a `.csv` name filter under a chosen directory."
+    },
+    {
+      "id": "fresh-v3-clean-common-005",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-find-ext-log-workspace",
+      "question": "Find files with the `.log` suffix beneath the current workspace.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "Pinned common/find example 'Find files by extension' supports a `.log` name filter under a chosen workspace directory."
+    },
+    {
+      "id": "fresh-v3-clean-common-003",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-find-ext-markdown-notes",
+      "question": "Locate all Markdown files under `notes`, including nested folders.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "Pinned common/find example 'Find files by extension' supports a Markdown suffix search under a chosen directory tree."
+    },
+    {
+      "id": "fresh-v3-clean-common-004",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-find-ext-png-assets",
+      "question": "Look for `.png` files anywhere inside the asset directory.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "Pinned common/find example 'Find files by extension' supports a `.png` name filter under a chosen directory."
+    },
+    {
+      "id": "fresh-v3-clean-common-002",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-find-ext-toml-project",
+      "question": "Search a project tree for files whose names end in `.toml`.",
+      "platform": "common",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "Pinned common/find example 'Find files by extension' supports a `.toml` name filter under a chosen directory."
+    },
+    {
+      "id": "fresh-v3-clean-common-018",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-unsupported-change-owner",
+      "question": "Change a file so another user account owns it.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no file-ownership change example."
+    },
+    {
+      "id": "fresh-v3-clean-common-016",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-unsupported-cpu-temperature",
+      "question": "Show the current CPU temperature from a shell.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages (cat, cp, find, grep, sed, sort) contain no CPU-temperature example."
+    },
+    {
+      "id": "fresh-v3-clean-common-017",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-unsupported-create-zip",
+      "question": "Create a compressed ZIP archive from a directory.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no ZIP or archive-creation example."
+    },
+    {
+      "id": "fresh-v3-clean-common-020",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-unsupported-list-open-ports",
+      "question": "List listening TCP ports together with the process using each one.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no listening-port and process lookup example."
+    },
+    {
+      "id": "fresh-v3-clean-common-019",
+      "split": "holdout",
+      "family": "fresh-v3-clean-common-unsupported-start-web-server",
+      "question": "Serve the current folder over HTTP for a quick local preview.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no command for serving a directory over HTTP."
+    },
+    {
+      "id": "fresh-v3-supp-common-002",
+      "split": "holdout",
+      "family": "fresh-v3-supp-common-login-name",
+      "question": "Show the login name of the current user.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no login-name or current-user identity example."
+    },
+    {
+      "id": "fresh-v3-supp-common-001",
+      "split": "holdout",
+      "family": "fresh-v3-supp-common-working-directory",
+      "question": "Print the absolute path of the current working directory.",
+      "platform": "common",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned common pages contain no command for printing the current working directory."
+    },
+    {
+      "id": "fresh-v3-clean-linux-006",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-apt-inspect-package",
+      "question": "Show detailed metadata for the `ripgrep` package.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-3361b1ecf86583a27532ca13f6d759f054da6534169346204e061c8cf5edd9fb"
+      ],
+      "rationale": "Pinned linux/apt example 'Show detailed information about a package' covers package metadata lookup."
+    },
+    {
+      "id": "fresh-v3-clean-linux-007",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-apt-install-package",
+      "question": "Install `tree` on a Debian-based Linux system.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-e1d50ec8bcbdbb1cde2d2d97c841c00ee709fc61c9e125b61d5e6e1cea601d16"
+      ],
+      "rationale": "Pinned linux/apt example 'Install a package' covers installing a named package."
+    },
+    {
+      "id": "fresh-v3-clean-linux-004",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-apt-refresh-index",
+      "question": "Refresh Debian's package lists before installing anything.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-abeeeec14691630cd2bbb82659839005eb339a0e35a5c4c36f10ec358cab835d"
+      ],
+      "rationale": "Pinned linux/apt example 'Update the list of available packages and versions' covers refreshing package lists."
+    },
+    {
+      "id": "fresh-v3-clean-linux-005",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-apt-search-description",
+      "question": "Search Debian packages by a word in their name or description.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-bde8009e70f67dba9b35b180a98ad54adb48c31577caf4c4494aa5ba1e09c904"
+      ],
+      "rationale": "Pinned linux/apt example 'Search packages by name or description' covers the requested package search."
+    },
+    {
+      "id": "fresh-v3-clean-linux-001",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-find-ext-csv-linux",
+      "question": "On Linux, find all `.csv` files below the data directory.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "Pinned common/find example 'Find files by extension' supports a `.csv` filter; Linux uses this common page as fallback."
+    },
+    {
+      "id": "fresh-v3-clean-linux-003",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-find-ext-log-linux",
+      "question": "Locate every `.log` file under `/var/tmp` on this Linux machine.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "Pinned common/find example 'Find files by extension' supports a `.log` filter; Linux uses this common page as fallback."
+    },
+    {
+      "id": "fresh-v3-clean-linux-002",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-find-ext-python-linux",
+      "question": "Search a Linux directory tree for files ending in `.py`.",
+      "platform": "linux",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8cf1e46e2765d3ba5e150fb891b7d7d1f9d8ac8cf4af04d09a40970be870a49d"
+      ],
+      "rationale": "Pinned common/find example 'Find files by extension' supports a `.py` filter; Linux uses this common page as fallback."
+    },
+    {
+      "id": "fresh-v3-clean-linux-020",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-unsupported-linux-docker-run",
+      "question": "Start a detached Docker container from the `redis` image.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no Docker container launch example."
+    },
+    {
+      "id": "fresh-v3-clean-linux-017",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-unsupported-linux-firewall",
+      "question": "Add a firewall rule that allows incoming traffic on port 8443.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no firewall-rule example."
+    },
+    {
+      "id": "fresh-v3-clean-linux-019",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-unsupported-linux-kill-process",
+      "question": "Terminate every process whose name matches `worker`.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no process-name termination example."
+    },
+    {
+      "id": "fresh-v3-clean-linux-018",
+      "split": "holdout",
+      "family": "fresh-v3-clean-linux-unsupported-linux-smb-mount",
+      "question": "Mount a remote SMB share as a local directory.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no remote SMB mount example."
+    },
+    {
+      "id": "fresh-v3-supp-linux-004",
+      "split": "holdout",
+      "family": "fresh-v3-supp-linux-kernel-modules",
+      "question": "List the kernel modules currently loaded on Linux.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no loaded-kernel-module listing example."
+    },
+    {
+      "id": "fresh-v3-supp-linux-002",
+      "split": "holdout",
+      "family": "fresh-v3-supp-linux-smart-health",
+      "question": "Show the SMART health status of `/dev/sda` on Linux.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no SMART disk-health example."
+    },
+    {
+      "id": "fresh-v3-supp-linux-003",
+      "split": "holdout",
+      "family": "fresh-v3-supp-linux-swap-file",
+      "question": "Create and activate a swap file at `/swapfile` on Linux.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no swap-file creation or activation example."
+    },
+    {
+      "id": "fresh-v3-supp-linux-001",
+      "split": "holdout",
+      "family": "fresh-v3-supp-linux-usb-devices",
+      "question": "List the USB devices currently connected to this Linux machine.",
+      "platform": "linux",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Linux pages contain no USB-device listing example."
+    },
+    {
+      "id": "fresh-v3-clean-osx-005",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-mdfind-content-term",
+      "question": "Use Spotlight to find files containing the phrase `release notes`.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-453abcea6ea8baded3debf3c7dc4ded44ee04405706cd1c95f4eb11faaab182c"
+      ],
+      "rationale": "Pinned osx/mdfind example 'Find a file by its content' covers a Spotlight content query."
+    },
+    {
+      "id": "fresh-v3-clean-osx-006",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-mdfind-only-folder",
+      "question": "Search file contents for `invoice` only inside `~/Documents/Finance`.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-00bbff7f142bf20c7bcc5c53a7c669908fc51cbb59b00f400567fcd2a0055549"
+      ],
+      "rationale": "Pinned osx/mdfind example 'Find a file containing a string, in a given directory' covers a scoped content query."
+    },
+    {
+      "id": "fresh-v3-clean-osx-007",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-open-associated-file",
+      "question": "Open `budget.xlsx` with its associated Mac application.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-581bde77466c1cc287befc4fdfd2b11c57f6c10b1f2fc35b0b26fba700dd47ce"
+      ],
+      "rationale": "Pinned osx/open example 'Open a file with the associated application' covers opening the named file."
+    },
+    {
+      "id": "fresh-v3-clean-osx-010",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-open-extension-files",
+      "question": "Open every `.csv` file in the current folder with its default application.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-feeb38c3a5624b69a03318a433f44b55f3c057ec51658accda7ad92bb6cb9ba4"
+      ],
+      "rationale": "Pinned osx/open example 'Open all the files of a given extension in the current directory' covers the `.csv` wildcard."
+    },
+    {
+      "id": "fresh-v3-clean-osx-011",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-pbcopy-file",
+      "question": "Put the contents of `notes.txt` on the macOS clipboard.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-56f42cbff7f80d5747e0f6ea69fcce789d33442a6338a9b477c43ab96984423b"
+      ],
+      "rationale": "Pinned osx/pbcopy example 'Place the contents of a specific file in the clipboard' covers this file-to-clipboard action."
+    },
+    {
+      "id": "fresh-v3-clean-osx-012",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-pbpaste-to-file",
+      "question": "Save the current clipboard text into `clipboard.txt`.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-8c222f364f31888667827b5e955c16f956fa15c4c469184050efe56b247ee614"
+      ],
+      "rationale": "Pinned osx/pbpaste example 'Write the contents of the clipboard to a file' covers saving clipboard text."
+    },
+    {
+      "id": "fresh-v3-clean-osx-014",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-say-custom-voice-rate",
+      "question": "Speak `Meeting starts now` using a chosen Mac voice and a slower rate.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-ec44c763687e9e1158242b809efff5730f320a7cfa1a884737b8f6e38676f54d"
+      ],
+      "rationale": "Pinned osx/say example 'Say a phrase with a custom voice and speech rate' covers the requested voice and rate controls."
+    },
+    {
+      "id": "fresh-v3-clean-osx-015",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-screencapture-selected-area",
+      "question": "Capture a rectangular area selected with the mouse and save it as `region.png`.",
+      "platform": "osx",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-9bc5ba41e0eb5a49d3d6ba0b8f745482bb8fe2f16c9b118e95b297297e006536"
+      ],
+      "rationale": "Pinned osx/screencapture example 'Take a screenshot of a selected rectangular area' covers the selected-region capture."
+    },
+    {
+      "id": "fresh-v3-clean-osx-016",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-unsupported-mac-bluetooth-pair",
+      "question": "Pair a new Bluetooth headset from the macOS command line.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no Bluetooth pairing example."
+    },
+    {
+      "id": "fresh-v3-clean-osx-018",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-unsupported-mac-change-volume",
+      "question": "Set the Mac's output volume to 30 percent from Terminal.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no system output-volume control example."
+    },
+    {
+      "id": "fresh-v3-clean-osx-019",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-unsupported-mac-create-apfs-volume",
+      "question": "Create a new APFS volume on the attached disk.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no APFS-volume creation example."
+    },
+    {
+      "id": "fresh-v3-clean-osx-017",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-unsupported-mac-install-homebrew",
+      "question": "Install a package from the Homebrew repository.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no Homebrew package-install example."
+    },
+    {
+      "id": "fresh-v3-clean-osx-020",
+      "split": "holdout",
+      "family": "fresh-v3-clean-osx-unsupported-mac-list-fonts",
+      "question": "Print a list of all fonts installed for every user on this Mac.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no installed-font listing example."
+    },
+    {
+      "id": "fresh-v3-supp-osx-002",
+      "split": "holdout",
+      "family": "fresh-v3-supp-osx-default-shell",
+      "question": "Set the current user's default shell to `/bin/zsh` on macOS.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no default-shell configuration example."
+    },
+    {
+      "id": "fresh-v3-supp-osx-001",
+      "split": "holdout",
+      "family": "fresh-v3-supp-osx-filevault",
+      "question": "Enable FileVault full-disk encryption from the macOS command line.",
+      "platform": "osx",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned macOS pages contain no FileVault or disk-encryption example."
+    },
+    {
+      "id": "fresh-v3-clean-windows-006",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-copy-extension-csv",
+      "question": "Copy all `.csv` files from one Windows folder into another.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-40787df1cf3b3fb9e70fd2f9272c026f8a24c6b0d2207b37cc37c449a674cf7a"
+      ],
+      "rationale": "Pinned windows/copy example 'Copy files with a specific extension' covers `.csv` file matching."
+    },
+    {
+      "id": "fresh-v3-clean-windows-007",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-copy-extension-images",
+      "question": "Copy every `.jpg` file from the source directory to the target directory.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-40787df1cf3b3fb9e70fd2f9272c026f8a24c6b0d2207b37cc37c449a674cf7a"
+      ],
+      "rationale": "Pinned windows/copy example 'Copy files with a specific extension' covers `.jpg` file matching."
+    },
+    {
+      "id": "fresh-v3-clean-windows-002",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-move-another-drive-file",
+      "question": "Transfer a file from `E:\\incoming` to a folder on the `F:` drive.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "rationale": "Pinned windows/move example 'Move a file or directory across drives' covers moving between drive letters."
+    },
+    {
+      "id": "fresh-v3-clean-windows-001",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-move-c-drive-to-d-drive-file",
+      "question": "Move `C:\\logs\\app.txt` to `D:\\archive\\app.txt` from Command Prompt.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "rationale": "Pinned windows/move example 'Move a file or directory across drives' covers this `C:` to `D:` move."
+    },
+    {
+      "id": "fresh-v3-clean-windows-003",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-move-cross-drive-directory",
+      "question": "Move a directory from `C:` onto `D:` using the Windows command line.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "rationale": "Pinned windows/move example 'Move a file or directory across drives' explicitly covers cross-drive directory moves."
+    },
+    {
+      "id": "fresh-v3-clean-windows-005",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-move-cross-drive-no-prompt",
+      "question": "Move a file across drives and replace an existing destination without a prompt.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26",
+        "example-27ab83042189abdf6441a8e35bf82d93bff77b26dcc7fa77213f04a0b68be934"
+      ],
+      "rationale": "Pinned windows/move examples cover the cross-drive move and `/Y` suppression of overwrite confirmation."
+    },
+    {
+      "id": "fresh-v3-clean-windows-004",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-move-drive-letter-relocation",
+      "question": "Relocate `C:\\temp\\data.csv` to `D:\\backup\\data.csv`.",
+      "platform": "windows",
+      "answerable": true,
+      "acceptable_example_ids": [
+        "example-781d337f2d134ba976aee58e750ffe80bc17fca8c311389e2122fcd94e700d26"
+      ],
+      "rationale": "Pinned windows/move example 'Move a file or directory across drives' covers relocating the file to another drive."
+    },
+    {
+      "id": "fresh-v3-clean-windows-017",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-unsupported-windows-acl",
+      "question": "Grant the `Analysts` group read access to a folder using a Windows CLI command.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no folder ACL permission-grant example."
+    },
+    {
+      "id": "fresh-v3-clean-windows-019",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-unsupported-windows-firewall",
+      "question": "Create an inbound Windows Firewall exception for TCP port 8443.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no Windows Firewall rule example."
+    },
+    {
+      "id": "fresh-v3-clean-windows-018",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-unsupported-windows-map-drive",
+      "question": "Map the `\\\\fileserver\\shared` network location to drive `Z:`.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no network-share drive-mapping example."
+    },
+    {
+      "id": "fresh-v3-clean-windows-020",
+      "split": "holdout",
+      "family": "fresh-v3-clean-windows-unsupported-windows-scheduled-task",
+      "question": "Create a scheduled task that runs a script every weekday morning.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no scheduled-task creation example."
+    },
+    {
+      "id": "fresh-v3-supp-windows-001",
+      "split": "holdout",
+      "family": "fresh-v3-supp-windows-bitlocker",
+      "question": "Enable BitLocker on the Windows system drive from PowerShell.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no BitLocker-enablement example."
+    },
+    {
+      "id": "fresh-v3-supp-windows-004",
+      "split": "holdout",
+      "family": "fresh-v3-supp-windows-optional-features",
+      "question": "List the optional Windows features installed on this PC.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no optional-Windows-features listing example."
+    },
+    {
+      "id": "fresh-v3-supp-windows-003",
+      "split": "holdout",
+      "family": "fresh-v3-supp-windows-remote-desktop",
+      "question": "Enable Remote Desktop so another computer can connect to this Windows PC.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no Remote Desktop configuration example."
+    },
+    {
+      "id": "fresh-v3-supp-windows-002",
+      "split": "holdout",
+      "family": "fresh-v3-supp-windows-restore-point",
+      "question": "Create a Windows system restore point named `BeforeUpdate` using PowerShell.",
+      "platform": "windows",
+      "answerable": false,
+      "acceptable_example_ids": [],
+      "rationale": "The pinned Windows pages contain no system restore-point example."
+    }
+  ]
+}

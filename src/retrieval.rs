@@ -68,7 +68,7 @@ fn run_validated_candidate(
                 &query,
                 target_os.as_str(),
                 DENSE_CANDIDATE_BUDGET,
-                DenseQueryMode::FocusedIntentRulesV1,
+                DenseQueryMode::FocusedIntentRulesV2,
                 platform_explicit,
                 true,
             )?,

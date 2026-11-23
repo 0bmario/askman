@@ -103,3 +103,59 @@ independent validation and does not authorize promotion. See
 [`retrieval-v2-approach-review.md`](../retrieval-v2-approach-review.md) for
 the cohort pin and full variant reports. Any fresh holdout score still
 requires explicit authorization.
+
+## Amendment (2026-09-26): authorized lexical candidate holdout v2 result
+
+After explicit authorization, candidate ba74692cf79fa9c294f685fbade8f9315aeacdd1
+was scored once on fresh holdout v2. Holdout Success@1 improved 12/30 to 15/30
+and Success@3 13/30 to 17/30. Incorrect answered tasks fell 9/22 to 3/20;
+false answers tied at 5/30. The one-sided 95% paired-bootstrap lower bound was
+0.0, and common-platform Success@3 regressed 4/7 to 3/7. The combined gate
+also found one negative Success@1 family. The canonical decision is
+inconclusive; keep main shipped. Offline execution had no failures and all
+measured latency and memory phases stayed within the 20% limits. Do not tune
+from this consumed split. The immutable report is
+[main-vs-retrieval-v2-focused-fresh-holdout-v2.json](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v2.json)
+with its
+[rendered report](../reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v2.md).
+
+## Amendment (2026-09-27): source-backed query rewrite candidate, before holdout
+
+At selection time, the new candidate had only development evidence. On the
+frozen dev-extension cohort, exact CLI scoring measured main/candidate Success@1
+13/30→22/30, Success@3 21/30→27/30, incorrect answered 3/24→2/29, and false
+answers 0/30→0/30. No platform, network-denied execution, latency, or memory
+condition exceeded its gate. Fresh-process memory was 7.2% above main on the
+custom cohort and 19.8% above main on default dev, within the 20% ceiling. On
+the original dev split it measured Success@1 18/30→28/30 and
+Success@3 23/30→30/30, with false answers tied at 1/30. Both results are
+development evidence, not independent validation. The canonical gate remains
+inconclusive by design. At this point v3 was frozen and awaited explicit
+authorization for its one canonical run.
+
+The extension-cohort report is
+[main-vs-dev-extension-v1-focused-v2-query-rules-native-platform.json](../reproducibility/artifacts/main-vs-dev-extension-v1-focused-v2-query-rules-native-platform.json);
+the original-dev report is
+[main-vs-retrieval-v2-focused-v2-query-rules-default-dev.json](../reproducibility/artifacts/main-vs-retrieval-v2-focused-v2-query-rules-default-dev.json).
+The then-unscored freeze is documented in
+[`fresh-holdout-v3-freeze.md`](../reproducibility/fresh-holdout-v3-freeze.md).
+
+## Amendment (2026-09-27): authorized fresh holdout v3 result
+
+After explicit authorization, the focused query-rule candidate was scored once
+against installed main on fresh holdout v3 and the identical pinned corpus.
+Holdout Success@1 improved 12/30→18/30 and Success@3 16/30→22/30; false
+answers tied at 0/30. The holdout one-sided 95% paired-bootstrap lower bound
+was 6.7 pp. The combined development-plus-holdout lower bound was 16.7 pp.
+The canonical decision is **inconclusive**: common-platform holdout Success@3
+regressed 5/8→4/8, incorrect answered tasks rose 1/6→1/5, and one extension
+family regressed at Success@1. The readiness validator failed on the
+common-platform Success@3 guard. Offline operation, latency, memory, and false
+answer checks passed; main remains shipped.
+
+Holdout v3 is consumed; do not tune from its results or score it again. The
+immutable report is
+[`main-vs-retrieval-v2-focused-query-rules-fresh-holdout-v3.json`](../reproducibility/artifacts/main-vs-retrieval-v2-focused-query-rules-fresh-holdout-v3.json)
+with its
+[rendered report](../reproducibility/artifacts/main-vs-retrieval-v2-focused-query-rules-fresh-holdout-v3.md).
+The freeze record preserves the input hashes and freeze-time manifest state.

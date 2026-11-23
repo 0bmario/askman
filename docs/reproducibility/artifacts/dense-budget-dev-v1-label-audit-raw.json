@@ -1,0 +1,121 @@
+{
+  "purpose": "development-only",
+  "prompt_pool_path": "/tmp/askman-budget-dev-prompts-blind.json",
+  "prompt_pool_sha256_before": "8eaee926302324bc194bd516b931fb8e2a3db36ecc352b19b173e7d7cbb5456f",
+  "prompt_pool_sha256_after": "8eaee926302324bc194bd516b931fb8e2a3db36ecc352b19b173e7d7cbb5456f",
+  "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+  "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+  "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+  "source_manifest_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+  "source_digest_validation": "Declared pinned source digest matches prompt metadata; each manifest-listed page independently hashed below. Aggregate digest algorithm not specified in manifest; aggregate not reconstructed.",
+  "source_page_sha256": {
+    "pages/common/cat.md": "db25e6c94318558a3fc929b953eefe98cb2d75bb320dc6a9e36539c15e35a008",
+    "pages/common/cp.md": "7a29de4cf8350f0b8c7bdddfe071b8c1248c4e0bace4319ab99558f5f188441f",
+    "pages/common/find.md": "10738e0614736cd0517824c151b7a4d6c9e5c6a5c7e92bd6638b26e9684ae119",
+    "pages/common/grep.md": "402fcadd3b7ec9b7122160550de6871e05ed948f1215b26ff0f289e3d9ae6d74",
+    "pages/common/sed.md": "e58a0db2d4c251d7a1f12011119e3063379d7fd73a81cb0880de13ba360fdee2",
+    "pages/common/sort.md": "d19edca317a3f84246468f62efae3232e304231c082b038e3ff54addbbe1d9e9",
+    "pages/linux/apt.md": "b8108e7ef67e3efe9ec301c7e4f0a0561d9b3df03377fbfa923b2a4bfdb72375",
+    "pages/linux/df.md": "e94986a77469503535fd08acc2d9124a7a29061c2bfb9deefd6a3749ba13cc2c",
+    "pages/linux/free.md": "8db0bb2ce33794ac5334aecb2d615b597299a65f52805b035e53aae675ea200e",
+    "pages/linux/ip.md": "ec74450f88aaeedf1b643cb6fd17e7316e7f6011872b03089f9ab0054d521564",
+    "pages/linux/journalctl.md": "62c1c22136545fd394af2d19783ad805e0c891f763e63b80419e298a7c84f2d8",
+    "pages/linux/systemctl.md": "d057d9227d5f673b4e4005f447a620a81dadc0b79770ccca3ccba3335da7385a",
+    "pages/osx/mdfind.md": "d7ed163713994882cfe5c9bf2afd4a983243518d5b1bc3a699b12718cd210b44",
+    "pages/osx/open.md": "0c0833c497d315075428e287ab5fb4e11fcb1c6f21cf7ff14c9f4a7e6f0b6c38",
+    "pages/osx/pbcopy.md": "ab4355defd31062ae660ecaaace1ebf6130d8e8770df00f321a4a51048fcb7f0",
+    "pages/osx/pbpaste.md": "ecc3128ee995b9639ab8aaf4fc5488f5cd099b21e4fc6072bddd87c5e954ccee",
+    "pages/osx/say.md": "c387c1aa1555ad989682a8db3881ca13ed058cf74c9e4bda80acf2fdff8eb44e",
+    "pages/osx/screencapture.md": "f19fb97f3d00fd45e918fcd47ccf6584985ba8be922d1b8f51f4c0b48f0e9c97",
+    "pages/windows/cat.md": "1064425b3c25a278478002ef5940de9debe2710f1f8d6b391375a4cefe086d00",
+    "pages/windows/copy.md": "a726a51862c2c0750c3d68b9577c0b983d35402a592aa658d32c47f7c9767329",
+    "pages/windows/dir.md": "46db460a3fa5b41f488a41d36bf7165f83bffabbaf6c9f71859305b6b51ad839",
+    "pages/windows/findstr.md": "bb29c4fdfa626ba6a9aa194cc6863d258a03e82324001e6b34f85e3f68a3bd44",
+    "pages/windows/get-childitem.md": "a2999d42f650f14229b6cbef510e221d6059f5d8bbcf007f6a411b546cabf798",
+    "pages/windows/move.md": "2b919f5b40507a186eb526aab113015d811c836f5d7c82e59c50d7520cc1a13c"
+  },
+  "labels_path": "/tmp/askman-budget-dev-labels-blind.json",
+  "checks": {
+    "task_count": 60,
+    "unique_task_count": 60,
+    "family_count": 12,
+    "tasks_per_family": {
+      "6a7de120cd484640a33ee6e16fdd3839": 5,
+      "c4792170a64846e5a1b813ec0203fd7d": 5,
+      "0e5b3b499bd74b3aa8bc2cb4c0a38f0d": 5,
+      "9df0dcd9649f48daabbc0bb257a4a78a": 5,
+      "f85e0207fb8c4b199771b6e58563bf0d": 5,
+      "1a4e9adf0ce74b4f845d692798a14b59": 5,
+      "a8342bab79c64eb9ae7804496802b0f2": 5,
+      "de467238082b4c25bab8d0db77ba875a": 5,
+      "4addbcd762474a11b07074b6aa37ed8b": 5,
+      "ab480a38588b4c7e853e3a46f1823b45": 5,
+      "0d80175810984ad7bfe142762d7a0447": 5,
+      "46a0c178dc554de59eadee7c6f40b10b": 5
+    },
+    "tasks_per_platform": {
+      "common": 15,
+      "linux": 15,
+      "osx": 15,
+      "windows": 15
+    },
+    "pool_unchanged": true,
+    "manifest_sha256_matches_pool": true,
+    "source_digest_matches_pool": true,
+    "source_revision_matches_pool": true,
+    "valid_example_ids_in_range": true,
+    "answerable_examples_operational": true
+  },
+  "answerability_counts": {
+    "answerable": 26,
+    "unsupported": 34
+  },
+  "answerability_by_platform": {
+    "common": {
+      "answerable": 8,
+      "unsupported": 7
+    },
+    "linux": {
+      "answerable": 7,
+      "unsupported": 8
+    },
+    "osx": {
+      "answerable": 6,
+      "unsupported": 9
+    },
+    "windows": {
+      "unsupported": 10,
+      "answerable": 5
+    }
+  },
+  "material_label_notes": [
+    {
+      "task_id": "budget_dev_9d296e05ee4e4d609ae0464bb2e472c5",
+      "note": "apt #6 description explicitly permits purge substitution; code template uses remove."
+    },
+    {
+      "task_id": "budget_dev_1cc17e90652e452fa95f17404e5cc1e7",
+      "note": "Bare pbpaste is supported by prose but absent as an individual operational example, so unsupported under strict rule."
+    },
+    {
+      "task_ids": [
+        "budget_dev_d788b6e285654f6680a67e23acafbf13",
+        "budget_dev_6cbc45e77b704e61a31f92fa2d1873b9",
+        "budget_dev_aef32370465f47b9aaf7b38acbd9de85"
+      ],
+      "note": "Exact commands are documentation redirects, excluded from operational evidence."
+    },
+    {
+      "task_id": "budget_dev_f4e122d302d94ce6ad155a60dbd008b5",
+      "note": "Generic query placeholder cannot supply unshown metadata creation-time/time-relative syntax."
+    }
+  ],
+  "excluded_sources": [
+    "previous prompt/task rows",
+    "previous labels",
+    "retrieval implementation",
+    "retrieval commands/results",
+    "candidate outputs",
+    "holdout artifacts"
+  ]
+}

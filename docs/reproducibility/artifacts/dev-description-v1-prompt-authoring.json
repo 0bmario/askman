@@ -1,0 +1,673 @@
+{
+  "schema_version": 1,
+  "purpose": "development-only draft prompt pool",
+  "source_corpus": {
+    "pages_root": "tests/fixtures/tldr-evaluation-v2/pages",
+    "manifest": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef"
+  },
+  "example_ordinal_base": 1,
+  "family_definition": "A single scenario with five natural-language phrasings.",
+  "tasks": [
+    {
+      "id": "description-dev-draft-001",
+      "platform": "common",
+      "family": "preserve_source_folders",
+      "phrasing": 1,
+      "answerability": "supported",
+      "prompt": "Copy reports/2026/summary.txt into the backup and recreate that folder path there.",
+      "rationale": "Copy while reproducing the source path and creating missing intermediate directories.",
+      "source": {
+        "page": "pages/common/cp.md",
+        "example_ordinal": 8
+      }
+    },
+    {
+      "id": "description-dev-draft-002",
+      "platform": "common",
+      "family": "preserve_source_folders",
+      "phrasing": 2,
+      "answerability": "supported",
+      "prompt": "Put src/assets/logo.svg in an archive folder, keeping its source folders underneath.",
+      "rationale": "Copy while reproducing the source path and creating missing intermediate directories.",
+      "source": {
+        "page": "pages/common/cp.md",
+        "example_ordinal": 8
+      }
+    },
+    {
+      "id": "description-dev-draft-003",
+      "platform": "common",
+      "family": "preserve_source_folders",
+      "phrasing": 3,
+      "answerability": "supported",
+      "prompt": "When copying config/team/app.ini to a new root, create the same intermediate folders.",
+      "rationale": "Copy while reproducing the source path and creating missing intermediate directories.",
+      "source": {
+        "page": "pages/common/cp.md",
+        "example_ordinal": 8
+      }
+    },
+    {
+      "id": "description-dev-draft-004",
+      "platform": "common",
+      "family": "preserve_source_folders",
+      "phrasing": 4,
+      "answerability": "supported",
+      "prompt": "Back up notes/project/draft.txt without flattening its folder hierarchy.",
+      "rationale": "Copy while reproducing the source path and creating missing intermediate directories.",
+      "source": {
+        "page": "pages/common/cp.md",
+        "example_ordinal": 8
+      }
+    },
+    {
+      "id": "description-dev-draft-005",
+      "platform": "common",
+      "family": "preserve_source_folders",
+      "phrasing": 5,
+      "answerability": "supported",
+      "prompt": "Copy a nested file to another root and build any missing folders along its original path.",
+      "rationale": "Copy while reproducing the source path and creating missing intermediate directories.",
+      "source": {
+        "page": "pages/common/cp.md",
+        "example_ordinal": 8
+      }
+    },
+    {
+      "id": "description-dev-draft-006",
+      "platform": "common",
+      "family": "literal_punctuation_search",
+      "phrasing": 1,
+      "answerability": "supported",
+      "prompt": "Find lines containing the exact text [draft]. in this file.",
+      "rationale": "Search a file for literal punctuation rather than interpreting a regular expression.",
+      "source": {
+        "page": "pages/common/grep.md",
+        "example_ordinal": 2
+      }
+    },
+    {
+      "id": "description-dev-draft-007",
+      "platform": "common",
+      "family": "literal_punctuation_search",
+      "phrasing": 2,
+      "answerability": "supported",
+      "prompt": "Search a file for a+b exactly, treating the punctuation as ordinary text.",
+      "rationale": "Search a file for literal punctuation rather than interpreting a regular expression.",
+      "source": {
+        "page": "pages/common/grep.md",
+        "example_ordinal": 2
+      }
+    },
+    {
+      "id": "description-dev-draft-008",
+      "platform": "common",
+      "family": "literal_punctuation_search",
+      "phrasing": 3,
+      "answerability": "supported",
+      "prompt": "Locate the literal string price$ in a text file.",
+      "rationale": "Search a file for literal punctuation rather than interpreting a regular expression.",
+      "source": {
+        "page": "pages/common/grep.md",
+        "example_ordinal": 2
+      }
+    },
+    {
+      "id": "description-dev-draft-009",
+      "platform": "common",
+      "family": "literal_punctuation_search",
+      "phrasing": 4,
+      "answerability": "supported",
+      "prompt": "Show lines containing x.y verbatim, with the dot matching only a dot.",
+      "rationale": "Search a file for literal punctuation rather than interpreting a regular expression.",
+      "source": {
+        "page": "pages/common/grep.md",
+        "example_ordinal": 2
+      }
+    },
+    {
+      "id": "description-dev-draft-010",
+      "platform": "common",
+      "family": "literal_punctuation_search",
+      "phrasing": 5,
+      "answerability": "supported",
+      "prompt": "Search for the exact text item[0] without giving the brackets special meaning.",
+      "rationale": "Search a file for literal punctuation rather than interpreting a regular expression.",
+      "source": {
+        "page": "pages/common/grep.md",
+        "example_ordinal": 2
+      }
+    },
+    {
+      "id": "description-dev-draft-011",
+      "platform": "common",
+      "family": "quoted_csv_sort",
+      "phrasing": 1,
+      "answerability": "unsupported",
+      "prompt": "Sort this CSV by its second column, correctly handling commas inside quoted cells.",
+      "rationale": "No example parses CSV quoting; field-separated sorting cannot distinguish commas inside quoted fields."
+    },
+    {
+      "id": "description-dev-draft-012",
+      "platform": "common",
+      "family": "quoted_csv_sort",
+      "phrasing": 2,
+      "answerability": "unsupported",
+      "prompt": "Order CSV records by the second field without splitting quoted values at their commas.",
+      "rationale": "No example parses CSV quoting; field-separated sorting cannot distinguish commas inside quoted fields."
+    },
+    {
+      "id": "description-dev-draft-013",
+      "platform": "common",
+      "family": "quoted_csv_sort",
+      "phrasing": 3,
+      "answerability": "unsupported",
+      "prompt": "Alphabetize the second column of a CSV whose quoted cells contain commas.",
+      "rationale": "No example parses CSV quoting; field-separated sorting cannot distinguish commas inside quoted fields."
+    },
+    {
+      "id": "description-dev-draft-014",
+      "platform": "common",
+      "family": "quoted_csv_sort",
+      "phrasing": 4,
+      "answerability": "unsupported",
+      "prompt": "Sort a CSV on column two using real CSV quoting rules.",
+      "rationale": "No example parses CSV quoting; field-separated sorting cannot distinguish commas inside quoted fields."
+    },
+    {
+      "id": "description-dev-draft-015",
+      "platform": "common",
+      "family": "quoted_csv_sort",
+      "phrasing": 5,
+      "answerability": "unsupported",
+      "prompt": "Reorder CSV rows by their second cell while respecting embedded commas in quotes.",
+      "rationale": "No example parses CSV quoting; field-separated sorting cannot distinguish commas inside quoted fields."
+    },
+    {
+      "id": "description-dev-draft-016",
+      "platform": "linux",
+      "family": "current_service_run_logs",
+      "phrasing": 1,
+      "answerability": "supported",
+      "prompt": "Show a service logs only from its current run, excluding earlier restarts.",
+      "rationale": "Select the service current invocation instead of all historical messages for that unit.",
+      "source": {
+        "page": "pages/linux/journalctl.md",
+        "example_ordinal": 4
+      }
+    },
+    {
+      "id": "description-dev-draft-017",
+      "platform": "linux",
+      "family": "current_service_run_logs",
+      "phrasing": 2,
+      "answerability": "supported",
+      "prompt": "Get the journal entries produced since this service last started.",
+      "rationale": "Select the service current invocation instead of all historical messages for that unit.",
+      "source": {
+        "page": "pages/linux/journalctl.md",
+        "example_ordinal": 4
+      }
+    },
+    {
+      "id": "description-dev-draft-018",
+      "platform": "linux",
+      "family": "current_service_run_logs",
+      "phrasing": 3,
+      "answerability": "supported",
+      "prompt": "Read only this service latest invocation logs.",
+      "rationale": "Select the service current invocation instead of all historical messages for that unit.",
+      "source": {
+        "page": "pages/linux/journalctl.md",
+        "example_ordinal": 4
+      }
+    },
+    {
+      "id": "description-dev-draft-019",
+      "platform": "linux",
+      "family": "current_service_run_logs",
+      "phrasing": 4,
+      "answerability": "supported",
+      "prompt": "The service restarted several times; show messages from the run active now.",
+      "rationale": "Select the service current invocation instead of all historical messages for that unit.",
+      "source": {
+        "page": "pages/linux/journalctl.md",
+        "example_ordinal": 4
+      }
+    },
+    {
+      "id": "description-dev-draft-020",
+      "platform": "linux",
+      "family": "current_service_run_logs",
+      "phrasing": 5,
+      "answerability": "supported",
+      "prompt": "Limit a service journal output to its most recent start.",
+      "rationale": "Select the service current invocation instead of all historical messages for that unit.",
+      "source": {
+        "page": "pages/linux/journalctl.md",
+        "example_ordinal": 4
+      }
+    },
+    {
+      "id": "description-dev-draft-021",
+      "platform": "linux",
+      "family": "compact_link_details",
+      "phrasing": 1,
+      "answerability": "supported",
+      "prompt": "Show a compact interface list with hardware addresses and link state.",
+      "rationale": "Brief link-layer interface listing, distinct from brief network-address information.",
+      "source": {
+        "page": "pages/linux/ip.md",
+        "example_ordinal": 3
+      }
+    },
+    {
+      "id": "description-dev-draft-022",
+      "platform": "linux",
+      "family": "compact_link_details",
+      "phrasing": 2,
+      "answerability": "supported",
+      "prompt": "Give one short row per network interface showing its MAC address and state.",
+      "rationale": "Brief link-layer interface listing, distinct from brief network-address information.",
+      "source": {
+        "page": "pages/linux/ip.md",
+        "example_ordinal": 3
+      }
+    },
+    {
+      "id": "description-dev-draft-023",
+      "platform": "linux",
+      "family": "compact_link_details",
+      "phrasing": 3,
+      "answerability": "supported",
+      "prompt": "List interfaces briefly at the link layer so I can see their hardware addresses.",
+      "rationale": "Brief link-layer interface listing, distinct from brief network-address information.",
+      "source": {
+        "page": "pages/linux/ip.md",
+        "example_ordinal": 3
+      }
+    },
+    {
+      "id": "description-dev-draft-024",
+      "platform": "linux",
+      "family": "compact_link_details",
+      "phrasing": 4,
+      "answerability": "supported",
+      "prompt": "I need a concise summary of interface names, MAC addresses, and whether links are up.",
+      "rationale": "Brief link-layer interface listing, distinct from brief network-address information.",
+      "source": {
+        "page": "pages/linux/ip.md",
+        "example_ordinal": 3
+      }
+    },
+    {
+      "id": "description-dev-draft-025",
+      "platform": "linux",
+      "family": "compact_link_details",
+      "phrasing": 5,
+      "answerability": "supported",
+      "prompt": "Print the short interface view focused on link state and physical addresses.",
+      "rationale": "Brief link-layer interface listing, distinct from brief network-address information.",
+      "source": {
+        "page": "pages/linux/ip.md",
+        "example_ordinal": 3
+      }
+    },
+    {
+      "id": "description-dev-draft-026",
+      "platform": "linux",
+      "family": "per_process_memory_ranking",
+      "phrasing": 1,
+      "answerability": "unsupported",
+      "prompt": "Show which processes are using the most RAM, largest first.",
+      "rationale": "Memory examples report system totals; none enumerate or rank individual processes."
+    },
+    {
+      "id": "description-dev-draft-027",
+      "platform": "linux",
+      "family": "per_process_memory_ranking",
+      "phrasing": 2,
+      "answerability": "unsupported",
+      "prompt": "List running programs ordered by their memory consumption.",
+      "rationale": "Memory examples report system totals; none enumerate or rank individual processes."
+    },
+    {
+      "id": "description-dev-draft-028",
+      "platform": "linux",
+      "family": "per_process_memory_ranking",
+      "phrasing": 3,
+      "answerability": "unsupported",
+      "prompt": "Find the ten processes taking up the most physical memory.",
+      "rationale": "Memory examples report system totals; none enumerate or rank individual processes."
+    },
+    {
+      "id": "description-dev-draft-029",
+      "platform": "linux",
+      "family": "per_process_memory_ranking",
+      "phrasing": 4,
+      "answerability": "unsupported",
+      "prompt": "Rank individual processes by resident RAM usage.",
+      "rationale": "Memory examples report system totals; none enumerate or rank individual processes."
+    },
+    {
+      "id": "description-dev-draft-030",
+      "platform": "linux",
+      "family": "per_process_memory_ranking",
+      "phrasing": 5,
+      "answerability": "unsupported",
+      "prompt": "Display memory use per process and put the biggest consumers at the top.",
+      "rationale": "Memory examples report system totals; none enumerate or rank individual processes."
+    },
+    {
+      "id": "description-dev-draft-031",
+      "platform": "osx",
+      "family": "reveal_file_in_finder",
+      "phrasing": 1,
+      "answerability": "supported",
+      "prompt": "Show this PDF selected in its folder in Finder.",
+      "rationale": "Reveal and select an existing file in Finder rather than launch its associated application.",
+      "source": {
+        "page": "pages/osx/open.md",
+        "example_ordinal": 5
+      }
+    },
+    {
+      "id": "description-dev-draft-032",
+      "platform": "osx",
+      "family": "reveal_file_in_finder",
+      "phrasing": 2,
+      "answerability": "supported",
+      "prompt": "Reveal a file location in Finder so I can see it highlighted.",
+      "rationale": "Reveal and select an existing file in Finder rather than launch its associated application.",
+      "source": {
+        "page": "pages/osx/open.md",
+        "example_ordinal": 5
+      }
+    },
+    {
+      "id": "description-dev-draft-033",
+      "platform": "osx",
+      "family": "reveal_file_in_finder",
+      "phrasing": 3,
+      "answerability": "supported",
+      "prompt": "Take me to the folder containing this image and select the image.",
+      "rationale": "Reveal and select an existing file in Finder rather than launch its associated application.",
+      "source": {
+        "page": "pages/osx/open.md",
+        "example_ordinal": 5
+      }
+    },
+    {
+      "id": "description-dev-draft-034",
+      "platform": "osx",
+      "family": "reveal_file_in_finder",
+      "phrasing": 4,
+      "answerability": "supported",
+      "prompt": "Locate this document in Finder instead of displaying its contents.",
+      "rationale": "Reveal and select an existing file in Finder rather than launch its associated application.",
+      "source": {
+        "page": "pages/osx/open.md",
+        "example_ordinal": 5
+      }
+    },
+    {
+      "id": "description-dev-draft-035",
+      "platform": "osx",
+      "family": "reveal_file_in_finder",
+      "phrasing": 5,
+      "answerability": "supported",
+      "prompt": "Bring up Finder with this particular file selected.",
+      "rationale": "Reveal and select an existing file in Finder rather than launch its associated application.",
+      "source": {
+        "page": "pages/osx/open.md",
+        "example_ordinal": 5
+      }
+    },
+    {
+      "id": "description-dev-draft-036",
+      "platform": "osx",
+      "family": "screenshot_to_clipboard",
+      "phrasing": 1,
+      "answerability": "unsupported",
+      "prompt": "Take a screenshot directly onto the clipboard without creating a file.",
+      "rationale": "Screenshot examples save files or open Preview; none put an image directly on the clipboard."
+    },
+    {
+      "id": "description-dev-draft-037",
+      "platform": "osx",
+      "family": "screenshot_to_clipboard",
+      "phrasing": 2,
+      "answerability": "unsupported",
+      "prompt": "Capture the screen as a clipboard image ready to paste.",
+      "rationale": "Screenshot examples save files or open Preview; none put an image directly on the clipboard."
+    },
+    {
+      "id": "description-dev-draft-038",
+      "platform": "osx",
+      "family": "screenshot_to_clipboard",
+      "phrasing": 3,
+      "answerability": "unsupported",
+      "prompt": "Put a new screenshot in the clipboard from the terminal.",
+      "rationale": "Screenshot examples save files or open Preview; none put an image directly on the clipboard."
+    },
+    {
+      "id": "description-dev-draft-039",
+      "platform": "osx",
+      "family": "screenshot_to_clipboard",
+      "phrasing": 4,
+      "answerability": "unsupported",
+      "prompt": "Capture my display and keep the image only in the clipboard.",
+      "rationale": "Screenshot examples save files or open Preview; none put an image directly on the clipboard."
+    },
+    {
+      "id": "description-dev-draft-040",
+      "platform": "osx",
+      "family": "screenshot_to_clipboard",
+      "phrasing": 5,
+      "answerability": "unsupported",
+      "prompt": "Make a screenshot I can paste immediately, with no saved image file.",
+      "rationale": "Screenshot examples save files or open Preview; none put an image directly on the clipboard."
+    },
+    {
+      "id": "description-dev-draft-041",
+      "platform": "osx",
+      "family": "audio_transcription",
+      "phrasing": 1,
+      "answerability": "unsupported",
+      "prompt": "Turn the speech in this audio file into written text.",
+      "rationale": "Speech examples convert text to audio; no example recognizes speech from existing audio."
+    },
+    {
+      "id": "description-dev-draft-042",
+      "platform": "osx",
+      "family": "audio_transcription",
+      "phrasing": 2,
+      "answerability": "unsupported",
+      "prompt": "Transcribe a recorded meeting from an audio file.",
+      "rationale": "Speech examples convert text to audio; no example recognizes speech from existing audio."
+    },
+    {
+      "id": "description-dev-draft-043",
+      "platform": "osx",
+      "family": "audio_transcription",
+      "phrasing": 3,
+      "answerability": "unsupported",
+      "prompt": "Produce a text transcript of this voice recording.",
+      "rationale": "Speech examples convert text to audio; no example recognizes speech from existing audio."
+    },
+    {
+      "id": "description-dev-draft-044",
+      "platform": "osx",
+      "family": "audio_transcription",
+      "phrasing": 4,
+      "answerability": "unsupported",
+      "prompt": "Recognize the spoken words in an existing sound file.",
+      "rationale": "Speech examples convert text to audio; no example recognizes speech from existing audio."
+    },
+    {
+      "id": "description-dev-draft-045",
+      "platform": "osx",
+      "family": "audio_transcription",
+      "phrasing": 5,
+      "answerability": "unsupported",
+      "prompt": "Convert a saved audio recording of someone speaking into a transcript.",
+      "rationale": "Speech examples convert text to audio; no example recognizes speech from existing audio."
+    },
+    {
+      "id": "description-dev-draft-046",
+      "platform": "windows",
+      "family": "literal_multiword_text_search",
+      "phrasing": 1,
+      "answerability": "supported",
+      "prompt": "Search the text files for the exact phrase access denied including its space.",
+      "rationale": "Find a literal phrase including spaces in text files, distinct from searching alternative words.",
+      "source": {
+        "page": "pages/windows/findstr.md",
+        "example_ordinal": 6
+      }
+    },
+    {
+      "id": "description-dev-draft-047",
+      "platform": "windows",
+      "family": "literal_multiword_text_search",
+      "phrasing": 2,
+      "answerability": "supported",
+      "prompt": "Find the complete phrase connection timed out in every text file here.",
+      "rationale": "Find a literal phrase including spaces in text files, distinct from searching alternative words.",
+      "source": {
+        "page": "pages/windows/findstr.md",
+        "example_ordinal": 6
+      }
+    },
+    {
+      "id": "description-dev-draft-048",
+      "platform": "windows",
+      "family": "literal_multiword_text_search",
+      "phrasing": 3,
+      "answerability": "supported",
+      "prompt": "Show matches for service unavailable as one literal phrase in the text files.",
+      "rationale": "Find a literal phrase including spaces in text files, distinct from searching alternative words.",
+      "source": {
+        "page": "pages/windows/findstr.md",
+        "example_ordinal": 6
+      }
+    },
+    {
+      "id": "description-dev-draft-049",
+      "platform": "windows",
+      "family": "literal_multiword_text_search",
+      "phrasing": 4,
+      "answerability": "supported",
+      "prompt": "Look through the text files for the exact words disk is full together.",
+      "rationale": "Find a literal phrase including spaces in text files, distinct from searching alternative words.",
+      "source": {
+        "page": "pages/windows/findstr.md",
+        "example_ordinal": 6
+      }
+    },
+    {
+      "id": "description-dev-draft-050",
+      "platform": "windows",
+      "family": "literal_multiword_text_search",
+      "phrasing": 5,
+      "answerability": "supported",
+      "prompt": "Match the literal phrase account locked in text files, keeping the words together.",
+      "rationale": "Find a literal phrase including spaces in text files, distinct from searching alternative words.",
+      "source": {
+        "page": "pages/windows/findstr.md",
+        "example_ordinal": 6
+      }
+    },
+    {
+      "id": "description-dev-draft-051",
+      "platform": "windows",
+      "family": "recursive_copy_with_empty_folders",
+      "phrasing": 1,
+      "answerability": "unsupported",
+      "prompt": "Copy an entire folder tree, including every empty subfolder.",
+      "rationale": "Copy examples cover files and wildcards; none recursively copy a directory tree including empty folders."
+    },
+    {
+      "id": "description-dev-draft-052",
+      "platform": "windows",
+      "family": "recursive_copy_with_empty_folders",
+      "phrasing": 2,
+      "answerability": "unsupported",
+      "prompt": "Duplicate this directory recursively and keep its empty directories.",
+      "rationale": "Copy examples cover files and wildcards; none recursively copy a directory tree including empty folders."
+    },
+    {
+      "id": "description-dev-draft-053",
+      "platform": "windows",
+      "family": "recursive_copy_with_empty_folders",
+      "phrasing": 3,
+      "answerability": "unsupported",
+      "prompt": "Back up all files and subfolders, even folders with nothing inside.",
+      "rationale": "Copy examples cover files and wildcards; none recursively copy a directory tree including empty folders."
+    },
+    {
+      "id": "description-dev-draft-054",
+      "platform": "windows",
+      "family": "recursive_copy_with_empty_folders",
+      "phrasing": 4,
+      "answerability": "unsupported",
+      "prompt": "Copy a folder and all descendants while preserving empty folders.",
+      "rationale": "Copy examples cover files and wildcards; none recursively copy a directory tree including empty folders."
+    },
+    {
+      "id": "description-dev-draft-055",
+      "platform": "windows",
+      "family": "recursive_copy_with_empty_folders",
+      "phrasing": 5,
+      "answerability": "unsupported",
+      "prompt": "Mirror this directory structure into a new location, retaining empty subdirectories.",
+      "rationale": "Copy examples cover files and wildcards; none recursively copy a directory tree including empty folders."
+    },
+    {
+      "id": "description-dev-draft-056",
+      "platform": "windows",
+      "family": "recent_directory_filter",
+      "phrasing": 1,
+      "answerability": "unsupported",
+      "prompt": "List only folders modified during the last seven days.",
+      "rationale": "Directory examples list or sort items; none filter directories by a modification-time cutoff."
+    },
+    {
+      "id": "description-dev-draft-057",
+      "platform": "windows",
+      "family": "recent_directory_filter",
+      "phrasing": 2,
+      "answerability": "unsupported",
+      "prompt": "Show directories changed within the past week.",
+      "rationale": "Directory examples list or sort items; none filter directories by a modification-time cutoff."
+    },
+    {
+      "id": "description-dev-draft-058",
+      "platform": "windows",
+      "family": "recent_directory_filter",
+      "phrasing": 3,
+      "answerability": "unsupported",
+      "prompt": "Find folders whose modification time is newer than a week ago.",
+      "rationale": "Directory examples list or sort items; none filter directories by a modification-time cutoff."
+    },
+    {
+      "id": "description-dev-draft-059",
+      "platform": "windows",
+      "family": "recent_directory_filter",
+      "phrasing": 4,
+      "answerability": "unsupported",
+      "prompt": "Display only recently modified directories, using a seven-day cutoff.",
+      "rationale": "Directory examples list or sort items; none filter directories by a modification-time cutoff."
+    },
+    {
+      "id": "description-dev-draft-060",
+      "platform": "windows",
+      "family": "recent_directory_filter",
+      "phrasing": 5,
+      "answerability": "unsupported",
+      "prompt": "Filter the folder listing to directories touched in the last week.",
+      "rationale": "Directory examples list or sort items; none filter directories by a modification-time cutoff."
+    }
+  ]
+}

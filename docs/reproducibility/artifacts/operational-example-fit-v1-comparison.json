@@ -1,0 +1,400 @@
+{
+  "cohort": {
+    "answerable": 28,
+    "cohort_id": "compatibility-dev-prompts-v1",
+    "dataset_id": "askman-operational-compatibility-dev-v1",
+    "dataset_sha256": "ab34155b640eb1227df53cc8e7ad3e5c034b71b2aa65f85670fa4f9b99b0c964",
+    "families": 12,
+    "freeze_id": "askman-operational-compatibility-dev-v2-freeze-2026-09-27",
+    "freeze_manifest_sha256": "4019229886e09a7e70ac07b587b57740380cbdfae3616019a25e3236aace869f",
+    "platform_distribution": {
+      "common": {
+        "answerable": 7,
+        "tasks": 15,
+        "unanswerable": 8
+      },
+      "linux": {
+        "answerable": 7,
+        "tasks": 15,
+        "unanswerable": 8
+      },
+      "osx": {
+        "answerable": 8,
+        "tasks": 15,
+        "unanswerable": 7
+      },
+      "windows": {
+        "answerable": 6,
+        "tasks": 15,
+        "unanswerable": 9
+      }
+    },
+    "task_count": 60,
+    "unanswerable": 32
+  },
+  "control_candidate": {
+    "coverage": {
+      "count": 49,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 23,
+      "denominator": 32
+    },
+    "incorrect_answered_tasks": {
+      "count": 1,
+      "denominator": 26
+    },
+    "success_at_1": {
+      "count": 23,
+      "denominator": 28
+    },
+    "success_at_3": {
+      "count": 25,
+      "denominator": 28
+    }
+  },
+  "controlled_factor": {
+    "control_config": "operational-example-fit-v1-control-config.json",
+    "control_config_sha256": "c944e5fc4459a370f16a797cf18d7af0a8ef79b63ed7446718d4fed976f44a4d",
+    "fixed": "same bundle and 142 visible examples; same main-compatible embeddings, focused-v2 query mode/rewrites, candidate budget, platform selection, distance cutoff, lexical reranking, abstention guards, and top-three limit",
+    "only_behavioral_change": "ASKMAN_OPERATIONAL_EXAMPLE_CHECK: off -> source-backed-fit-v1",
+    "treatment_config": "operational-example-fit-v1-treatment-config.json",
+    "treatment_config_sha256": "49ea8e8979e25e0d49ce573bfc293fcb7f4db6f8bfe7229c3078151f9c651ed9"
+  },
+  "evidence_id": "operational-example-fit-v1-one-factor-dev-comparison",
+  "gate_decisions": {
+    "control_vs_main": {
+      "decision": "inconclusive",
+      "family_regressions": [],
+      "overall_success_at_1_gain": 0.1428571428571428,
+      "passed": false,
+      "positive_family_count": 4,
+      "reasons": [
+        "dev-only evidence cannot make a release decision"
+      ],
+      "thresholds": {
+        "maximum_latency_or_memory_regression": 0.2,
+        "minimum_success_at_1_gain": 0.05
+      }
+    },
+    "treatment_vs_main": {
+      "decision": "inconclusive",
+      "family_regressions": [
+        "opcompat-v1-F04",
+        "opcompat-v1-F06",
+        "opcompat-v1-F07",
+        "opcompat-v1-F11"
+      ],
+      "overall_success_at_1_gain": -0.1071428571428572,
+      "passed": false,
+      "positive_family_count": 2,
+      "reasons": [
+        "overall Success@1 gain is below five percentage points",
+        "Success@1 regressed in: opcompat-v1-F04, opcompat-v1-F06, opcompat-v1-F07, opcompat-v1-F11",
+        "overall Success@3 regressed",
+        "success_at_3 regressed on platform common",
+        "success_at_3 regressed on platform linux",
+        "success_at_3 regressed on platform windows",
+        "paired bootstrap one-sided 95% lower bound is not above zero",
+        "dev-only evidence cannot make a release decision"
+      ],
+      "thresholds": {
+        "maximum_latency_or_memory_regression": 0.2,
+        "minimum_success_at_1_gain": 0.05
+      }
+    }
+  },
+  "inputs": {
+    "bundle_id": "matching-bundle-v2:38242507ec57eb92a64f9fd96831d49ccc318378f4e644b06c3e302f7b8c0157",
+    "bundle_manifest_sha256": "0f1673515aab3eda50c1e7bed13c6a8e50d204d943f78a8be5815329de11276d",
+    "dataset_sha256": "ab34155b640eb1227df53cc8e7ad3e5c034b71b2aa65f85670fa4f9b99b0c964",
+    "model_assets_match": true,
+    "scorer_sha256": "f1da9807343832411db3d70d6b747a62911c36e6627f9f731982ed8742bc2874",
+    "scratch_main_database_matches_pinned_release_digest": false,
+    "scratch_main_database_sha256": "d8b83e0e6fc9329d65bf3c5ef42c946babbdc2bdb1897b266ed654814c00d095",
+    "visible_example_count": 142,
+    "visible_example_inventory_sha256": "e512688f1945ee23d594b856ce857d01e1b063a84bba5821c1889146133c2f0c"
+  },
+  "label_independence": "Answerability and support IDs came from a blind source audit completed before retrieval. This is independent labeling, not independent candidate validation.",
+  "limitations": [
+    "Development-only results. The canonical --dev-only gate does not make a release decision.",
+    "The control-to-treatment comparison is one-factor but the runner does not emit task-level paired candidate outcomes; only aggregate counts are compared here.",
+    "The installed v0.3.3 product uses a larger, different database and is characterized separately in retrieval-v2-approach-review.md; these 142-row labels cannot score that database.",
+    "No holdout dataset, labels, query outputs, or score was accessed."
+  ],
+  "main_reference": {
+    "coverage": {
+      "count": 50,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 24,
+      "denominator": 32
+    },
+    "incorrect_answered_tasks": {
+      "count": 5,
+      "denominator": 26
+    },
+    "success_at_1": {
+      "count": 19,
+      "denominator": 28
+    },
+    "success_at_3": {
+      "count": 21,
+      "denominator": 28
+    }
+  },
+  "metadata_correction": "Raw prompt/audit metadata confused source digest with literal manifest-file SHA. Frozen dataset uses literal manifest SHA; prompt text and labels are unchanged. V1 preflight freeze is preserved unscored; v2 freezes the corrected validator and records zero gate runs at freeze.",
+  "offline_and_execution": {
+    "control_execution_failures": 0,
+    "query_downloads": false,
+    "query_network_policy": "macOS sandbox-exec deny network*",
+    "treatment_execution_failures": 0
+  },
+  "performance": {
+    "fresh_process": {
+      "control_candidate": {
+        "p50_ms": 84.199,
+        "p95_ms": 88.142,
+        "peak_memory_bytes": 271074000
+      },
+      "main": {
+        "p50_ms": 85.764,
+        "p95_ms": 95.244,
+        "peak_memory_bytes": 238174904
+      },
+      "treatment_candidate": {
+        "p50_ms": 83.867,
+        "p95_ms": 86.074,
+        "peak_memory_bytes": 252854968
+      },
+      "treatment_vs_control_percent": {
+        "p50_ms": -0.39,
+        "p95_ms": -2.35,
+        "peak_memory_bytes": -6.72
+      },
+      "treatment_vs_main_percent": {
+        "p50_ms": -2.21,
+        "p95_ms": -9.63,
+        "peak_memory_bytes": 6.16
+      }
+    },
+    "warmed_query": {
+      "control_candidate": {
+        "p50_ms": 84.001,
+        "p95_ms": 87.004,
+        "peak_memory_bytes": 236274384
+      },
+      "main": {
+        "p50_ms": 84.885,
+        "p95_ms": 87.396,
+        "peak_memory_bytes": 236143288
+      },
+      "treatment_candidate": {
+        "p50_ms": 83.599,
+        "p95_ms": 86.611,
+        "peak_memory_bytes": 237290192
+      },
+      "treatment_vs_control_percent": {
+        "p50_ms": -0.48,
+        "p95_ms": -0.45,
+        "peak_memory_bytes": 0.43
+      },
+      "treatment_vs_main_percent": {
+        "p50_ms": -1.51,
+        "p95_ms": -0.9,
+        "peak_memory_bytes": 0.49
+      }
+    }
+  },
+  "platform_results": {
+    "common": {
+      "control": {
+        "coverage": {
+          "count": 12,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 5,
+          "denominator": 8
+        },
+        "success_at_1": {
+          "count": 6,
+          "denominator": 7
+        },
+        "success_at_3": {
+          "count": 7,
+          "denominator": 7
+        }
+      },
+      "treatment": {
+        "coverage": {
+          "count": 6,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 1,
+          "denominator": 8
+        },
+        "success_at_1": {
+          "count": 5,
+          "denominator": 7
+        },
+        "success_at_3": {
+          "count": 5,
+          "denominator": 7
+        }
+      }
+    },
+    "linux": {
+      "control": {
+        "coverage": {
+          "count": 14,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 7,
+          "denominator": 8
+        },
+        "success_at_1": {
+          "count": 6,
+          "denominator": 7
+        },
+        "success_at_3": {
+          "count": 7,
+          "denominator": 7
+        }
+      },
+      "treatment": {
+        "coverage": {
+          "count": 7,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 2,
+          "denominator": 8
+        },
+        "success_at_1": {
+          "count": 4,
+          "denominator": 7
+        },
+        "success_at_3": {
+          "count": 5,
+          "denominator": 7
+        }
+      }
+    },
+    "osx": {
+      "control": {
+        "coverage": {
+          "count": 11,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 5,
+          "denominator": 7
+        },
+        "success_at_1": {
+          "count": 5,
+          "denominator": 8
+        },
+        "success_at_3": {
+          "count": 5,
+          "denominator": 8
+        }
+      },
+      "treatment": {
+        "coverage": {
+          "count": 4,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 7
+        },
+        "success_at_1": {
+          "count": 4,
+          "denominator": 8
+        },
+        "success_at_3": {
+          "count": 4,
+          "denominator": 8
+        }
+      }
+    },
+    "windows": {
+      "control": {
+        "coverage": {
+          "count": 12,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 6,
+          "denominator": 9
+        },
+        "success_at_1": {
+          "count": 6,
+          "denominator": 6
+        },
+        "success_at_3": {
+          "count": 6,
+          "denominator": 6
+        }
+      },
+      "treatment": {
+        "coverage": {
+          "count": 4,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 0,
+          "denominator": 9
+        },
+        "success_at_1": {
+          "count": 3,
+          "denominator": 6
+        },
+        "success_at_3": {
+          "count": 3,
+          "denominator": 6
+        }
+      }
+    }
+  },
+  "recommendation": "Reject source-backed-fit-v1 for promotion. Its false-answer reduction is outweighed by lower Success@1, lower Success@3, and much lower coverage across every platform. Keep shipped main. A different candidate requires a fresh development cohort; do not retune this filter on this cohort.",
+  "source_reports": {
+    "control": "operational-example-fit-v1-control.json",
+    "treatment": "operational-example-fit-v1-treatment.json"
+  },
+  "status": "complete_development_only",
+  "treatment_candidate": {
+    "coverage": {
+      "count": 21,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 3,
+      "denominator": 32
+    },
+    "incorrect_answered_tasks": {
+      "count": 1,
+      "denominator": 18
+    },
+    "success_at_1": {
+      "count": 16,
+      "denominator": 28
+    },
+    "success_at_3": {
+      "count": 17,
+      "denominator": 28
+    }
+  },
+  "treatment_minus_control": {
+    "coverage_tasks": -28,
+    "false_answers": -20,
+    "incorrect_answered_tasks": 0,
+    "success_at_1_tasks": -7,
+    "success_at_3_tasks": -8
+  }
+}

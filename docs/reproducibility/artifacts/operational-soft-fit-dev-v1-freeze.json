@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "freeze_id": "askman-operational-soft-fit-dev-v1-freeze-2026-09-27",
+  "status": "frozen_dev_only",
+  "split": "dev",
+  "dataset_id": "askman-operational-compatibility-dev-v1",
+  "cohort_id": "soft-fit-dev-prompts-v1",
+  "dataset_path": "tests/fixtures/evaluation/operational-soft-fit-dev-v1.json",
+  "dataset_schema_version": 4,
+  "dataset_sha256": "418ac923013146d3b60d920aba50a5d9f69afd3da1c658495c226b648a772daa",
+  "task_count": 60,
+  "answerable_task_count": 29,
+  "unanswerable_task_count": 31,
+  "family_count": 12,
+  "families": [
+    "006f336ec75c43e4aa6506727dd85bcd",
+    "049bbef2936a4281849dd0a9bcc78126",
+    "1a0eaa86d98f49d8a1603c041f1afef2",
+    "32b63a99073448b0bdf3ae011c63577e",
+    "5722a11df4b84b89844aea00de7a0d5c",
+    "63cb71cbafd94b539d89042bc5c4ad09",
+    "75ae6a8ad3b54a3b965318238ac62d9f",
+    "823861f9273b4cdcafb85e8fe5ca9082",
+    "ba749ef366884d319d45a7a63780f9a1",
+    "beb62b7e9d0e478f85052b777ebdf0c1",
+    "ca9873f90e604121b6678f02cc10e425",
+    "f110b7753e724685a36322e249d6c664"
+  ],
+  "platform_distribution": {
+    "common": {
+      "tasks": 15,
+      "answerable": 7,
+      "unanswerable": 8
+    },
+    "linux": {
+      "tasks": 15,
+      "answerable": 7,
+      "unanswerable": 8
+    },
+    "osx": {
+      "tasks": 15,
+      "answerable": 8,
+      "unanswerable": 7
+    },
+    "windows": {
+      "tasks": 15,
+      "answerable": 7,
+      "unanswerable": 8
+    }
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "4",
+    "parser_version": "tldr-subset-v4",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json"
+  },
+  "prompt_pool_sha256": "8e70b6e4e73d8a0c066d33e2a713899abc7ccd191e0201b7e5c5cad99ad5b202",
+  "independent_label_output_sha256": "6835b4706ee44225767be2fe932369f96ffd93318841b94ab7c2c8aa1c989370",
+  "independent_label_audit_sha256": "165622ee736b28227f02bc2969351e7a67b8140df26b4a8dbe1bdd82fa7eaade",
+  "label_adjudication_sha256": "bff38f6420a40a638bcd3fff490e6fba380e55fc05ed4ec63c8f46bded4e4b2b",
+  "candidate_source_sha256": {
+    "src/lib.rs": "847a729a4ae0ea071b367611f6bc6d2991fb1cf17490276c361a5c328eadc78c",
+    "src/operational_fit.rs": "49595fc02fe9cdd076b70ed6eba2907518dd21db7c77c100ebada39319a81fbb",
+    "src/retrieval.rs": "057e415ea3f62c17ea54e3189c88ace5ad7752e50f580cb542efc3720d2a774e",
+    "src/dense.rs": "b447eec504ab4784f9bc6ee082c43b1b9f7679729e2be6cd161bc2ea95844524",
+    "scripts/evaluate_retrieval.py": "f1da9807343832411db3d70d6b747a62911c36e6627f9f731982ed8742bc2874"
+  },
+  "protocol_path": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-protocol.md",
+  "protocol_sha256": "4cd9f91e4ded9334729d8411683606dc75260fff53e0ae2a2ba6ee6077ce7006",
+  "control_configuration_path": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-control-config.json",
+  "control_configuration_sha256": "513256b83c2f44dc007579dd19c052f074149fa07c1501f0ad48dd74faae85f1",
+  "treatment_configuration_path": "docs/reproducibility/artifacts/operational-soft-fit-dev-v1-treatment-config.json",
+  "treatment_configuration_sha256": "100ac72ce39661129acc8fbe44a8b0c7cc3ae9740608369465bdbd557a2be9a1",
+  "holdout_accessed": false,
+  "authorization_required_before_holdout_scoring": true,
+  "development_gate_runs_at_freeze": 0,
+  "release_gate_runs_at_freeze": 0,
+  "label_adjudication": "The independent auditor initially treated one numeric in-place sort prompt as answerable by composing source examples 4 and 8. A separate source-only review applied the frozen individual-example rule and marked it unsupported. The raw audit is preserved; only the frozen dataset adopts the corrected label. Final counts are 29 answerable and 31 unsupported."
+}

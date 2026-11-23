@@ -25,7 +25,7 @@ from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SUPPORTED_DATASET_SCHEMA_VERSIONS = {1, 2, 3}
+SUPPORTED_DATASET_SCHEMA_VERSIONS = {1, 2, 3, 4}
 EVALUATION_V2_DATASET_ID = "askman-evaluation-v2"
 EVALUATION_V2_SCHEMA_VERSION = 2
 DEV_EXTENSION_DATASET_ID = "askman-dev-extension-v1"
@@ -34,6 +34,13 @@ DEV_EXTENSION_SPLIT_ID = "scenario-family-dev-extension-v1"
 DEV_EXTENSION_SPLIT_POLICY = (
     "development-only cohort; twelve new scenario families; five tasks per "
     "family; thirty answerable and thirty unanswerable tasks"
+)
+OPERATIONAL_COMPATIBILITY_DATASET_ID = "askman-operational-compatibility-dev-v1"
+OPERATIONAL_COMPATIBILITY_SCHEMA_VERSION = 4
+OPERATIONAL_COMPATIBILITY_SPLIT_ID = "operational-family-dev-v1"
+OPERATIONAL_COMPATIBILITY_SPLIT_POLICY = (
+    "development-only source-backed operational prompts; twelve families; "
+    "five tasks per family; label counts fixed by independent source audit"
 )
 EVALUATION_V2_SPLIT_ID = "scenario-family-split-v2"
 EVALUATION_V2_SPLIT_POLICY = (
@@ -72,6 +79,11 @@ DATASET_PROFILES = {
         "tasks_per_family": 5,
         "answerable_task_count": 30,
         "unanswerable_task_count": 30,
+    },
+    OPERATIONAL_COMPATIBILITY_SCHEMA_VERSION: {
+        "task_count": 60,
+        "family_count": 12,
+        "tasks_per_family": 5,
     },
 }
 HYBRID_MAX_CANDIDATES = 12
@@ -243,9 +255,18 @@ class DenseClient:
         model_cache: Path,
         query_mode: str | None = None,
     ) -> None:
-        if query_mode not in {None, "raw", "expanded-dev", "focused-v1"}:
+        if query_mode not in {
+            None,
+            "raw",
+            "expanded-dev",
+            "focused-v1",
+            "focused-extension-v2",
+            "focused-cross-drive-v2",
+            "focused-v2",
+        }:
             raise ValueError(
-                "dense query mode must be raw, expanded-dev, or focused-v1"
+                "dense query mode must be raw, expanded-dev, focused-v1, "
+                "focused-extension-v2, focused-cross-drive-v2, or focused-v2"
             )
         started = time.perf_counter()
         environment = None
@@ -302,6 +323,7 @@ class DenseClient:
         limit: int = MAX_DISPLAYED_RESULTS,
         *,
         include_same_page_examples: bool = False,
+        platform_explicit: bool | None = None,
     ) -> list[Candidate]:
         if self.process.stdin is None or self.process.stdout is None:
             raise RuntimeError("dense helper is not connected")
@@ -312,7 +334,11 @@ class DenseClient:
                 "query": question,
                 "platform": platform,
                 "limit": limit,
-                "platform_explicit": platform != "common",
+                "platform_explicit": (
+                    platform != "common"
+                    if platform_explicit is None
+                    else platform_explicit
+                ),
                 "include_same_page_examples": include_same_page_examples,
             }
         )
@@ -961,6 +987,9 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
         raise ValueError("unsupported scorer version")
     is_evaluation_v2 = schema_version == EVALUATION_V2_SCHEMA_VERSION
     is_dev_extension = schema_version == DEV_EXTENSION_SCHEMA_VERSION
+    is_operational_compatibility = (
+        schema_version == OPERATIONAL_COMPATIBILITY_SCHEMA_VERSION
+    )
     if is_evaluation_v2 and dataset.get("dataset_id") != EVALUATION_V2_DATASET_ID:
         raise ValueError("schema 2 datasets must use the evaluation-v2 dataset ID")
     if is_evaluation_v2:
@@ -981,6 +1010,16 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
         provenance = dataset.get("provenance")
         if not isinstance(provenance, dict) or not provenance.get("intent_record"):
             raise ValueError("development-extension dataset is missing provenance metadata")
+    if is_operational_compatibility:
+        if dataset.get("dataset_id") != OPERATIONAL_COMPATIBILITY_DATASET_ID:
+            raise ValueError("schema 4 datasets must use the operational-compatibility dataset ID")
+        if dataset.get("split_id") != OPERATIONAL_COMPATIBILITY_SPLIT_ID:
+            raise ValueError("operational-compatibility dataset has the wrong split ID")
+        if dataset.get("split_policy") != OPERATIONAL_COMPATIBILITY_SPLIT_POLICY:
+            raise ValueError("operational-compatibility dataset has the wrong split policy")
+        provenance = dataset.get("provenance")
+        if not isinstance(provenance, dict) or not provenance.get("intent_record"):
+            raise ValueError("operational-compatibility dataset is missing provenance metadata")
     if dataset.get("split") != expected_split:
         raise ValueError(f"dataset split must be {expected_split}")
     profile = DATASET_PROFILES[schema_version]
@@ -1074,20 +1113,27 @@ def validate_dataset(dataset: dict[str, Any], expected_split: str) -> None:
     has_cross_split_family = any(len(splits) != 1 for splits in families.values())
     if has_cross_split_family:
         raise ValueError("scenario families must not cross the dev/holdout split")
-    if is_evaluation_v2 or is_dev_extension:
+    if is_evaluation_v2 or is_dev_extension or is_operational_compatibility:
         answerable_count = sum(task["answerable"] for task in tasks)
         unanswerable_count = len(tasks) - answerable_count
-        label = "development-extension" if is_dev_extension else "evaluation-v2"
+        label = (
+            "operational-compatibility"
+            if is_operational_compatibility
+            else "development-extension"
+            if is_dev_extension
+            else "evaluation-v2"
+        )
         if dataset.get("answerable_task_count") != answerable_count:
             raise ValueError(f"{label} answerable task count is inconsistent")
         if dataset.get("unanswerable_task_count") != unanswerable_count:
             raise ValueError(f"{label} unanswerable task count is inconsistent")
-        if answerable_count != profile["answerable_task_count"]:
-            raise ValueError(f"each {label} split must contain exactly 30 answerable tasks")
-        if unanswerable_count != profile["unanswerable_task_count"]:
-            raise ValueError(
-                f"each {label} split must contain exactly 30 unanswerable tasks"
-            )
+        if not is_operational_compatibility:
+            if answerable_count != profile["answerable_task_count"]:
+                raise ValueError(f"each {label} split must contain exactly 30 answerable tasks")
+            if unanswerable_count != profile["unanswerable_task_count"]:
+                raise ValueError(
+                    f"each {label} split must contain exactly 30 unanswerable tasks"
+                )
 
 
 def validate_dataset_pair(
@@ -1154,7 +1200,7 @@ def validate_artifact(
         "source_digest": actual.get("source_digest"),
     }
     for key, expected in frozen.items():
-        if key in {"manifest_sha256", "corpus_id"}:
+        if key in {"manifest_sha256", "manifest_path", "corpus_id"}:
             continue
         if checks.get(key) != expected:
             raise ValueError(

@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "freeze_id": "askman-dev-description-v3-freeze-2026-09-27",
+  "status": "frozen_dev_only",
+  "split": "dev",
+  "dataset_id": "askman-dev-extension-v1",
+  "cohort_id": "askman-dev-description-v1",
+  "dataset_path": "tests/fixtures/evaluation/dev-description-v3.json",
+  "dataset_schema_version": 3,
+  "dataset_sha256": "df691502e66e851b3ad20d090c05085ddffe16072851731133f405ae2541ec7c",
+  "task_count": 60,
+  "answerable_task_count": 30,
+  "unanswerable_task_count": 30,
+  "family_count": 12,
+  "families": [
+    "descdev-v1-common-literal-punctuation-search",
+    "descdev-v1-common-preserve-source-folders",
+    "descdev-v1-common-quoted-csv-sort",
+    "descdev-v1-linux-compact-link-details",
+    "descdev-v1-linux-current-service-run-logs",
+    "descdev-v1-linux-per-process-memory-ranking",
+    "descdev-v1-osx-audio-transcription",
+    "descdev-v1-osx-reveal-file-in-finder",
+    "descdev-v1-osx-screenshot-to-clipboard",
+    "descdev-v1-windows-literal-multiword-text-search",
+    "descdev-v1-windows-recent-directory-filter",
+    "descdev-v1-windows-recursive-copy-with-empty-folders"
+  ],
+  "platform_distribution": {
+    "common": {
+      "tasks": 15,
+      "answerable": 10,
+      "unanswerable": 5
+    },
+    "linux": {
+      "tasks": 15,
+      "answerable": 10,
+      "unanswerable": 5
+    },
+    "osx": {
+      "tasks": 15,
+      "answerable": 5,
+      "unanswerable": 10
+    },
+    "windows": {
+      "tasks": 15,
+      "answerable": 5,
+      "unanswerable": 10
+    }
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "4",
+    "parser_version": "tldr-subset-v4",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json"
+  },
+  "label_audit_path": "docs/reproducibility/artifacts/dev-description-v1-label-audit.json",
+  "label_audit_sha256": "c586183fb372f519ac905971d187145ac8b01bfac81979680616fb23e8ceeb24",
+  "label_audit_input_dataset_sha256": "b1e586e7a83d9c42b5c694fab3a1a9da6c00d6df6f987380d5232ed0d0d46617",
+  "intent_record_path": "docs/reproducibility/artifacts/dev-description-v1-prompt-authoring.json",
+  "intent_record_sha256": "3488cafa69e15a8bf3532d4a2a2ec67efa8b51f19d6c88710ae80e50ae5402c1",
+  "holdout_accessed": false,
+  "authorization_required_before_holdout_scoring": true,
+  "development_gate_runs_at_freeze": 0,
+  "release_gate_runs_at_freeze": 0,
+  "supersedes_unscored_freeze_id": "askman-dev-description-v1-freeze-2026-09-27",
+  "preflight_correction": "The v1 freeze lacked corpus.manifest_path; the v2 attempt used unregistered schema-3 identity metadata. Both stopped before retrieval. V3 restores schema-3 identity and includes the pinned parser manifest.",
+  "supersedes_unscored_freeze_ids": [
+    "askman-dev-description-v1-freeze-2026-09-27",
+    "askman-dev-description-v2-freeze-2026-09-27"
+  ]
+}

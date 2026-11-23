@@ -1,0 +1,602 @@
+[
+  {
+    "id": "fresh-v3-clean-common-013",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-cp-extension-interactive",
+    "question": "Copy all `.conf` files into another folder and ask before overwriting."
+  },
+  {
+    "id": "fresh-v3-clean-common-014",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-cp-follow-symlink",
+    "question": "Copy the content reached through a symbolic link into a destination folder."
+  },
+  {
+    "id": "fresh-v3-clean-common-012",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-cp-many-to-target-dir",
+    "question": "Copy several named files into one folder with the destination directory specified first."
+  },
+  {
+    "id": "fresh-v3-clean-common-011",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-cp-recursive-tree",
+    "question": "Copy a directory tree and all of its nested contents to a backup location."
+  },
+  {
+    "id": "fresh-v3-clean-common-006",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-case-insensitive-directory",
+    "question": "Find directories with `lib` in the name, ignoring letter case."
+  },
+  {
+    "id": "fresh-v3-clean-common-009",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-exclude-site-packages",
+    "question": "Locate Python files while excluding paths under `site-packages`."
+  },
+  {
+    "id": "fresh-v3-clean-common-010",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-exec-line-count",
+    "question": "For each `.txt` file in a tree, print its line count."
+  },
+  {
+    "id": "fresh-v3-clean-common-001",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-ext-csv-reports",
+    "question": "Find every `.csv` file below the `reports` directory."
+  },
+  {
+    "id": "fresh-v3-clean-common-005",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-ext-log-workspace",
+    "question": "Find files with the `.log` suffix beneath the current workspace."
+  },
+  {
+    "id": "fresh-v3-clean-common-003",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-ext-markdown-notes",
+    "question": "Locate all Markdown files under `notes`, including nested folders."
+  },
+  {
+    "id": "fresh-v3-clean-common-004",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-ext-png-assets",
+    "question": "Look for `.png` files anywhere inside the asset directory."
+  },
+  {
+    "id": "fresh-v3-clean-common-002",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-ext-toml-project",
+    "question": "Search a project tree for files whose names end in `.toml`."
+  },
+  {
+    "id": "fresh-v3-clean-common-007",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-name-or-path-pattern",
+    "question": "Search below `src` for either a matching path pattern or a matching filename."
+  },
+  {
+    "id": "fresh-v3-clean-common-008",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-find-size-and-depth",
+    "question": "Find files between 500 KB and 10 MB directly inside one directory."
+  },
+  {
+    "id": "fresh-v3-clean-common-015",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-grep-fixed-literal",
+    "question": "Search a file for the literal text `a+b`, treating the plus sign as an ordinary character."
+  },
+  {
+    "id": "fresh-v3-clean-common-018",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-unsupported-change-owner",
+    "question": "Change a file so another user account owns it."
+  },
+  {
+    "id": "fresh-v3-clean-common-016",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-unsupported-cpu-temperature",
+    "question": "Show the current CPU temperature from a shell."
+  },
+  {
+    "id": "fresh-v3-clean-common-017",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-unsupported-create-zip",
+    "question": "Create a compressed ZIP archive from a directory."
+  },
+  {
+    "id": "fresh-v3-clean-common-020",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-unsupported-list-open-ports",
+    "question": "List listening TCP ports together with the process using each one."
+  },
+  {
+    "id": "fresh-v3-clean-common-019",
+    "platform": "common",
+    "family": "fresh-v3-clean-common-unsupported-start-web-server",
+    "question": "Serve the current folder over HTTP for a quick local preview."
+  },
+  {
+    "id": "fresh-v3-supp-common-005",
+    "platform": "common",
+    "family": "fresh-v3-supp-common-command-path",
+    "question": "Show which executable would run when I enter `python3`."
+  },
+  {
+    "id": "fresh-v3-supp-common-003",
+    "platform": "common",
+    "family": "fresh-v3-supp-common-hostname",
+    "question": "Display this machine's hostname."
+  },
+  {
+    "id": "fresh-v3-supp-common-002",
+    "platform": "common",
+    "family": "fresh-v3-supp-common-login-name",
+    "question": "Show the login name of the current user."
+  },
+  {
+    "id": "fresh-v3-supp-common-004",
+    "platform": "common",
+    "family": "fresh-v3-supp-common-sha256-checksum",
+    "question": "Calculate the SHA-256 checksum of `release.bin`."
+  },
+  {
+    "id": "fresh-v3-supp-common-001",
+    "platform": "common",
+    "family": "fresh-v3-supp-common-working-directory",
+    "question": "Print the absolute path of the current working directory."
+  },
+  {
+    "id": "fresh-v3-clean-linux-006",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-apt-inspect-package",
+    "question": "Show detailed metadata for the `ripgrep` package."
+  },
+  {
+    "id": "fresh-v3-clean-linux-007",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-apt-install-package",
+    "question": "Install `tree` on a Debian-based Linux system."
+  },
+  {
+    "id": "fresh-v3-clean-linux-004",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-apt-refresh-index",
+    "question": "Refresh Debian's package lists before installing anything."
+  },
+  {
+    "id": "fresh-v3-clean-linux-008",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-apt-remove-keep-config",
+    "question": "Remove a Debian package while leaving its configuration files behind."
+  },
+  {
+    "id": "fresh-v3-clean-linux-005",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-apt-search-description",
+    "question": "Search Debian packages by a word in their name or description."
+  },
+  {
+    "id": "fresh-v3-clean-linux-009",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-apt-upgrade-everything",
+    "question": "Upgrade all installed Debian packages to their latest available versions."
+  },
+  {
+    "id": "fresh-v3-clean-linux-011",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-df-containing-directory",
+    "question": "Check which filesystem contains `/home/alex/projects`."
+  },
+  {
+    "id": "fresh-v3-clean-linux-010",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-df-human-readable",
+    "question": "Display disk usage for every mounted filesystem in readable units."
+  },
+  {
+    "id": "fresh-v3-clean-linux-001",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-find-ext-csv-linux",
+    "question": "On Linux, find all `.csv` files below the data directory."
+  },
+  {
+    "id": "fresh-v3-clean-linux-003",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-find-ext-log-linux",
+    "question": "Locate every `.log` file under `/var/tmp` on this Linux machine."
+  },
+  {
+    "id": "fresh-v3-clean-linux-002",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-find-ext-python-linux",
+    "question": "Search a Linux directory tree for files ending in `.py`."
+  },
+  {
+    "id": "fresh-v3-clean-linux-012",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-free-human-memory",
+    "question": "Show Linux memory totals in human-readable units."
+  },
+  {
+    "id": "fresh-v3-clean-linux-013",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-ip-brief-interfaces",
+    "question": "List network interfaces with brief link-layer details."
+  },
+  {
+    "id": "fresh-v3-clean-linux-014",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-ip-routes",
+    "question": "Display the Linux routing table."
+  },
+  {
+    "id": "fresh-v3-clean-linux-016",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-journalctl-time-window",
+    "question": "Show system journal messages between a start time and an end time."
+  },
+  {
+    "id": "fresh-v3-clean-linux-015",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-systemctl-failed-units",
+    "question": "List systemd units that have failed."
+  },
+  {
+    "id": "fresh-v3-clean-linux-020",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-unsupported-linux-docker-run",
+    "question": "Start a detached Docker container from the `redis` image."
+  },
+  {
+    "id": "fresh-v3-clean-linux-017",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-unsupported-linux-firewall",
+    "question": "Add a firewall rule that allows incoming traffic on port 8443."
+  },
+  {
+    "id": "fresh-v3-clean-linux-019",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-unsupported-linux-kill-process",
+    "question": "Terminate every process whose name matches `worker`."
+  },
+  {
+    "id": "fresh-v3-clean-linux-018",
+    "platform": "linux",
+    "family": "fresh-v3-clean-linux-unsupported-linux-smb-mount",
+    "question": "Mount a remote SMB share as a local directory."
+  },
+  {
+    "id": "fresh-v3-supp-linux-005",
+    "platform": "linux",
+    "family": "fresh-v3-supp-linux-daily-cron-job",
+    "question": "Schedule `/home/alex/backup.sh` to run daily at 02:00 on Linux."
+  },
+  {
+    "id": "fresh-v3-supp-linux-004",
+    "platform": "linux",
+    "family": "fresh-v3-supp-linux-kernel-modules",
+    "question": "List the kernel modules currently loaded on Linux."
+  },
+  {
+    "id": "fresh-v3-supp-linux-002",
+    "platform": "linux",
+    "family": "fresh-v3-supp-linux-smart-health",
+    "question": "Show the SMART health status of `/dev/sda` on Linux."
+  },
+  {
+    "id": "fresh-v3-supp-linux-003",
+    "platform": "linux",
+    "family": "fresh-v3-supp-linux-swap-file",
+    "question": "Create and activate a swap file at `/swapfile` on Linux."
+  },
+  {
+    "id": "fresh-v3-supp-linux-001",
+    "platform": "linux",
+    "family": "fresh-v3-supp-linux-usb-devices",
+    "question": "List the USB devices currently connected to this Linux machine."
+  },
+  {
+    "id": "fresh-v3-clean-osx-005",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-mdfind-content-term",
+    "question": "Use Spotlight to find files containing the phrase `release notes`."
+  },
+  {
+    "id": "fresh-v3-clean-osx-004",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-mdfind-ext-log",
+    "question": "Locate files with `.log` in their names on macOS."
+  },
+  {
+    "id": "fresh-v3-clean-osx-003",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-mdfind-ext-markdown",
+    "question": "Search this Mac for documents named with an `.md` extension."
+  },
+  {
+    "id": "fresh-v3-clean-osx-001",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-mdfind-ext-pdf",
+    "question": "Find Mac files whose names end with `.pdf`."
+  },
+  {
+    "id": "fresh-v3-clean-osx-002",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-mdfind-ext-png",
+    "question": "Use Spotlight from the terminal to locate `.png` image files by name."
+  },
+  {
+    "id": "fresh-v3-clean-osx-006",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-mdfind-only-folder",
+    "question": "Search file contents for `invoice` only inside `~/Documents/Finance`."
+  },
+  {
+    "id": "fresh-v3-clean-osx-007",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-open-associated-file",
+    "question": "Open `budget.xlsx` with its associated Mac application."
+  },
+  {
+    "id": "fresh-v3-clean-osx-008",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-open-bundle-id",
+    "question": "Launch the Mac application with bundle identifier `com.example.Editor`."
+  },
+  {
+    "id": "fresh-v3-clean-osx-010",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-open-extension-files",
+    "question": "Open every `.csv` file in the current folder with its default application."
+  },
+  {
+    "id": "fresh-v3-clean-osx-009",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-open-reveal-finder",
+    "question": "Reveal `/Users/sam/Downloads/report.pdf` in Finder."
+  },
+  {
+    "id": "fresh-v3-clean-osx-011",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-pbcopy-file",
+    "question": "Put the contents of `notes.txt` on the macOS clipboard."
+  },
+  {
+    "id": "fresh-v3-clean-osx-013",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-pbpaste-pipeline-search",
+    "question": "Pass clipboard contents through `grep` to find lines mentioning `TODO`."
+  },
+  {
+    "id": "fresh-v3-clean-osx-012",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-pbpaste-to-file",
+    "question": "Save the current clipboard text into `clipboard.txt`."
+  },
+  {
+    "id": "fresh-v3-clean-osx-014",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-say-custom-voice-rate",
+    "question": "Speak `Meeting starts now` using a chosen Mac voice and a slower rate."
+  },
+  {
+    "id": "fresh-v3-clean-osx-015",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-screencapture-selected-area",
+    "question": "Capture a rectangular area selected with the mouse and save it as `region.png`."
+  },
+  {
+    "id": "fresh-v3-clean-osx-016",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-unsupported-mac-bluetooth-pair",
+    "question": "Pair a new Bluetooth headset from the macOS command line."
+  },
+  {
+    "id": "fresh-v3-clean-osx-018",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-unsupported-mac-change-volume",
+    "question": "Set the Mac's output volume to 30 percent from Terminal."
+  },
+  {
+    "id": "fresh-v3-clean-osx-019",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-unsupported-mac-create-apfs-volume",
+    "question": "Create a new APFS volume on the attached disk."
+  },
+  {
+    "id": "fresh-v3-clean-osx-017",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-unsupported-mac-install-homebrew",
+    "question": "Install a package from the Homebrew repository."
+  },
+  {
+    "id": "fresh-v3-clean-osx-020",
+    "platform": "osx",
+    "family": "fresh-v3-clean-osx-unsupported-mac-list-fonts",
+    "question": "Print a list of all fonts installed for every user on this Mac."
+  },
+  {
+    "id": "fresh-v3-supp-osx-002",
+    "platform": "osx",
+    "family": "fresh-v3-supp-osx-default-shell",
+    "question": "Set the current user's default shell to `/bin/zsh` on macOS."
+  },
+  {
+    "id": "fresh-v3-supp-osx-001",
+    "platform": "osx",
+    "family": "fresh-v3-supp-osx-filevault",
+    "question": "Enable FileVault full-disk encryption from the macOS command line."
+  },
+  {
+    "id": "fresh-v3-supp-osx-004",
+    "platform": "osx",
+    "family": "fresh-v3-supp-osx-loaded-kernel-extensions",
+    "question": "List the kernel extensions currently loaded on this Mac."
+  },
+  {
+    "id": "fresh-v3-supp-osx-003",
+    "platform": "osx",
+    "family": "fresh-v3-supp-osx-trackpad-tap-to-click",
+    "question": "Enable tap-to-click for the Mac trackpad from Terminal."
+  },
+  {
+    "id": "fresh-v3-supp-osx-005",
+    "platform": "osx",
+    "family": "fresh-v3-supp-osx-vpn-profile",
+    "question": "Configure a VPN connection from a `.mobileconfig` profile on macOS."
+  },
+  {
+    "id": "fresh-v3-clean-windows-006",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-copy-extension-csv",
+    "question": "Copy all `.csv` files from one Windows folder into another."
+  },
+  {
+    "id": "fresh-v3-clean-windows-007",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-copy-extension-images",
+    "question": "Copy every `.jpg` file from the source directory to the target directory."
+  },
+  {
+    "id": "fresh-v3-clean-windows-009",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-dir-bare-list",
+    "question": "Print only file and directory names, without the usual listing details."
+  },
+  {
+    "id": "fresh-v3-clean-windows-008",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-dir-hidden-items",
+    "question": "Show the contents of a Windows folder, including hidden entries."
+  },
+  {
+    "id": "fresh-v3-clean-windows-010",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-dir-oldest-first",
+    "question": "List files in date order with the oldest entries first."
+  },
+  {
+    "id": "fresh-v3-clean-windows-012",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-findstr-case-insensitive",
+    "question": "Search Windows files for `warning` without regard to uppercase or lowercase."
+  },
+  {
+    "id": "fresh-v3-clean-windows-015",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-findstr-line-numbers",
+    "question": "Show matching lines with their line numbers for the word `TODO`."
+  },
+  {
+    "id": "fresh-v3-clean-windows-011",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-findstr-recursive",
+    "question": "Search every file under the current tree for the text `timeout`."
+  },
+  {
+    "id": "fresh-v3-clean-windows-014",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-findstr-regex",
+    "question": "Search files for lines that match the regular expression `error[0-9]+`."
+  },
+  {
+    "id": "fresh-v3-clean-windows-013",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-findstr-spaced-phrase",
+    "question": "Find the exact phrase `build failed` in all `.txt` files."
+  },
+  {
+    "id": "fresh-v3-clean-windows-016",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-get-childitem-directories",
+    "question": "In PowerShell, list only the directories in the current location."
+  },
+  {
+    "id": "fresh-v3-clean-windows-002",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-move-another-drive-file",
+    "question": "Transfer a file from `E:\\incoming` to a folder on the `F:` drive."
+  },
+  {
+    "id": "fresh-v3-clean-windows-001",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-move-c-drive-to-d-drive-file",
+    "question": "Move `C:\\logs\\app.txt` to `D:\\archive\\app.txt` from Command Prompt."
+  },
+  {
+    "id": "fresh-v3-clean-windows-003",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-move-cross-drive-directory",
+    "question": "Move a directory from `C:` onto `D:` using the Windows command line."
+  },
+  {
+    "id": "fresh-v3-clean-windows-005",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-move-cross-drive-no-prompt",
+    "question": "Move a file across drives and replace an existing destination without a prompt."
+  },
+  {
+    "id": "fresh-v3-clean-windows-004",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-move-drive-letter-relocation",
+    "question": "Relocate `C:\\temp\\data.csv` to `D:\\backup\\data.csv`."
+  },
+  {
+    "id": "fresh-v3-clean-windows-017",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-unsupported-windows-acl",
+    "question": "Grant the `Analysts` group read access to a folder using a Windows CLI command."
+  },
+  {
+    "id": "fresh-v3-clean-windows-019",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-unsupported-windows-firewall",
+    "question": "Create an inbound Windows Firewall exception for TCP port 8443."
+  },
+  {
+    "id": "fresh-v3-clean-windows-018",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-unsupported-windows-map-drive",
+    "question": "Map the `\\\\fileserver\\shared` network location to drive `Z:`."
+  },
+  {
+    "id": "fresh-v3-clean-windows-020",
+    "platform": "windows",
+    "family": "fresh-v3-clean-windows-unsupported-windows-scheduled-task",
+    "question": "Create a scheduled task that runs a script every weekday morning."
+  },
+  {
+    "id": "fresh-v3-supp-windows-001",
+    "platform": "windows",
+    "family": "fresh-v3-supp-windows-bitlocker",
+    "question": "Enable BitLocker on the Windows system drive from PowerShell."
+  },
+  {
+    "id": "fresh-v3-supp-windows-004",
+    "platform": "windows",
+    "family": "fresh-v3-supp-windows-optional-features",
+    "question": "List the optional Windows features installed on this PC."
+  },
+  {
+    "id": "fresh-v3-supp-windows-003",
+    "platform": "windows",
+    "family": "fresh-v3-supp-windows-remote-desktop",
+    "question": "Enable Remote Desktop so another computer can connect to this Windows PC."
+  },
+  {
+    "id": "fresh-v3-supp-windows-002",
+    "platform": "windows",
+    "family": "fresh-v3-supp-windows-restore-point",
+    "question": "Create a Windows system restore point named `BeforeUpdate` using PowerShell."
+  },
+  {
+    "id": "fresh-v3-supp-windows-005",
+    "platform": "windows",
+    "family": "fresh-v3-supp-windows-update-deferral",
+    "question": "Defer Windows feature updates for 30 days."
+  }
+]

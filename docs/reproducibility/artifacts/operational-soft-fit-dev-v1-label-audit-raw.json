@@ -1,0 +1,108 @@
+{
+  "purpose": "development-only",
+  "prompt_pool_path": "/tmp/askman-soft-fit-dev-prompts-blind.json",
+  "prompt_pool_sha256_before": "8e70b6e4e73d8a0c066d33e2a713899abc7ccd191e0201b7e5c5cad99ad5b202",
+  "prompt_pool_sha256_after": "8e70b6e4e73d8a0c066d33e2a713899abc7ccd191e0201b7e5c5cad99ad5b202",
+  "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+  "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+  "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+  "source_pages_read": [
+    "pages/common/cat.md",
+    "pages/common/cp.md",
+    "pages/common/find.md",
+    "pages/common/grep.md",
+    "pages/common/sed.md",
+    "pages/common/sort.md",
+    "pages/linux/apt.md",
+    "pages/linux/df.md",
+    "pages/linux/free.md",
+    "pages/linux/ip.md",
+    "pages/linux/journalctl.md",
+    "pages/linux/systemctl.md",
+    "pages/osx/mdfind.md",
+    "pages/osx/open.md",
+    "pages/osx/pbcopy.md",
+    "pages/osx/pbpaste.md",
+    "pages/osx/say.md",
+    "pages/osx/screencapture.md",
+    "pages/windows/cat.md",
+    "pages/windows/copy.md",
+    "pages/windows/dir.md",
+    "pages/windows/findstr.md",
+    "pages/windows/get-childitem.md",
+    "pages/windows/move.md"
+  ],
+  "labels_path": "/tmp/askman-soft-fit-dev-labels-blind.json",
+  "checks": {
+    "task_count": 60,
+    "unique_task_count": 60,
+    "family_count": 12,
+    "tasks_per_family": {
+      "32b63a99073448b0bdf3ae011c63577e": 5,
+      "5722a11df4b84b89844aea00de7a0d5c": 5,
+      "75ae6a8ad3b54a3b965318238ac62d9f": 5,
+      "ba749ef366884d319d45a7a63780f9a1": 5,
+      "beb62b7e9d0e478f85052b777ebdf0c1": 5,
+      "049bbef2936a4281849dd0a9bcc78126": 5,
+      "ca9873f90e604121b6678f02cc10e425": 5,
+      "f110b7753e724685a36322e249d6c664": 5,
+      "1a0eaa86d98f49d8a1603c041f1afef2": 5,
+      "63cb71cbafd94b539d89042bc5c4ad09": 5,
+      "823861f9273b4cdcafb85e8fe5ca9082": 5,
+      "006f336ec75c43e4aa6506727dd85bcd": 5
+    },
+    "tasks_per_platform": {
+      "common": 15,
+      "linux": 15,
+      "osx": 15,
+      "windows": 15
+    },
+    "pool_unchanged": true,
+    "manifest_digest_matches_pool_metadata": true,
+    "valid_example_ids_in_range": true
+  },
+  "answerability_counts": {
+    "answerable": 30,
+    "unsupported": 30
+  },
+  "answerability_by_platform": {
+    "common": {
+      "answerable": 8,
+      "unsupported": 7
+    },
+    "linux": {
+      "answerable": 7,
+      "unsupported": 8
+    },
+    "osx": {
+      "answerable": 8,
+      "unsupported": 7
+    },
+    "windows": {
+      "answerable": 7,
+      "unsupported": 8
+    }
+  },
+  "material_label_notes": [
+    {
+      "task_id": "dev_e971dd68e06843388dd4aca532c40089",
+      "note": "Numeric sort in place requires composition of common/sort examples 4 and 8."
+    },
+    {
+      "task_id": "dev_9c63bfa431bd4e6da97a1d2803bf3181",
+      "note": "Windows copy examples 1 and 2 both materialize the same valid command with a directory target."
+    },
+    {
+      "task_id": "dev_d9f2e58cf6224e2d9fa107b24ba8fd57",
+      "note": "windows/move overwrite prompt is example 6 because source redirect example 1 remains in numbering."
+    }
+  ],
+  "excluded_sources": [
+    "retrieval implementations",
+    "retrieval commands",
+    "prior task rows",
+    "candidate outputs",
+    "previous cohort labels/results",
+    "holdout artifacts"
+  ]
+}

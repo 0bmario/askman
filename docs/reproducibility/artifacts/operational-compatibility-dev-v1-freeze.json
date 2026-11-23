@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "freeze_id": "askman-operational-compatibility-dev-v1-freeze-2026-09-27",
+  "status": "frozen_dev_only",
+  "split": "dev",
+  "dataset_id": "askman-operational-compatibility-dev-v1",
+  "cohort_id": "compatibility-dev-prompts-v1",
+  "dataset_path": "tests/fixtures/evaluation/operational-compatibility-dev-v1.json",
+  "dataset_schema_version": 4,
+  "dataset_sha256": "831eeed61ac852e66af0a1cb46740170759d899cb4701a186fb0005e4197120d",
+  "task_count": 60,
+  "answerable_task_count": 28,
+  "unanswerable_task_count": 32,
+  "family_count": 12,
+  "families": [
+    "opcompat-v1-F01",
+    "opcompat-v1-F02",
+    "opcompat-v1-F03",
+    "opcompat-v1-F04",
+    "opcompat-v1-F05",
+    "opcompat-v1-F06",
+    "opcompat-v1-F07",
+    "opcompat-v1-F08",
+    "opcompat-v1-F09",
+    "opcompat-v1-F10",
+    "opcompat-v1-F11",
+    "opcompat-v1-F12"
+  ],
+  "platform_distribution": {
+    "common": {
+      "tasks": 15,
+      "answerable": 7,
+      "unanswerable": 8
+    },
+    "linux": {
+      "tasks": 15,
+      "answerable": 7,
+      "unanswerable": 8
+    },
+    "osx": {
+      "tasks": 15,
+      "answerable": 8,
+      "unanswerable": 7
+    },
+    "windows": {
+      "tasks": 15,
+      "answerable": 6,
+      "unanswerable": 9
+    }
+  },
+  "corpus": {
+    "corpus_id": "e1cb966e711d73c42d75e79834be7e4dc17264ef:651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "artifact_kind": "askman.tldr-subset",
+    "schema_version": "4",
+    "parser_version": "tldr-subset-v4",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json"
+  },
+  "prompt_input_sha256": "4f7e732ab577ed9e9a6253c0780592b3d1357c2f9f393bd26896943210ddd5cb",
+  "author_draft_sha256": "18346a9e616d88d269480d52603e92b32389d46bf8c3d5c4819059ba5016322f",
+  "independent_label_output_sha256": "1728b72ee91d35a85e83313da09659d4d7cb59547b6ab8c953dfa2af87c12497",
+  "label_audit_sha256": "8837fec644bd1a2371320799ffbfe86412d47d1c125dba82f581e7404a37c806",
+  "candidate_source_sha256": {
+    "src/operational_fit.rs": "663320ed1d027d777145a5f04971098ee9d04da3d0b8571e583d4d659871c909",
+    "src/retrieval.rs": "d897ee906d7b0bad45d38f46bc00f053e9b8b447930176035de13d97f889a14d",
+    "scripts/evaluate_retrieval.py": "276ab5c647e2c120c8fa9e6bbb5bb239aa7a6a4205bc530bc144ba39673b5c53",
+    "scripts/run_release_gate.py": "419304f6b86042a6c660c942d8c94ca610227389d01bccf6c3c580eac34662c5"
+  },
+  "control_configuration_path": "docs/reproducibility/artifacts/operational-example-fit-v1-control-config.json",
+  "control_configuration_sha256": "c944e5fc4459a370f16a797cf18d7af0a8ef79b63ed7446718d4fed976f44a4d",
+  "treatment_configuration_path": "docs/reproducibility/artifacts/operational-example-fit-v1-treatment-config.json",
+  "treatment_configuration_sha256": "49ea8e8979e25e0d49ce573bfc293fcb7f4db6f8bfe7229c3078151f9c651ed9",
+  "holdout_accessed": false,
+  "authorization_required_before_holdout_scoring": true,
+  "development_gate_runs_at_freeze": 0,
+  "release_gate_runs_at_freeze": 0,
+  "preflight_correction": "Independent labels overrode the author draft count plan: 28 supported and 32 rejected. The corpus metadata SHA field was corrected from the source digest to the literal manifest-file SHA. No retrieval outcomes were seen before this freeze."
+}

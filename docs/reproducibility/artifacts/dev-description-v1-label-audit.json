@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "dataset": "/tmp/askman-description-dev-dataset.json",
+  "dataset_sha256": "b1e586e7a83d9c42b5c694fab3a1a9da6c00d6df6f987380d5232ed0d0d46617",
+  "corpus_source_pages_checked": 24,
+  "corpus_examples_checked": 142,
+  "source_page_hash_and_content_checks": "passed for all manifest pages against matching.db",
+  "harness_checks": [
+    "validate_dataset(dev): passed",
+    "validate_artifact(parser-v4, manifest-v4): passed",
+    "validate_labels(platform eligibility): passed"
+  ],
+  "counts": {
+    "tasks": 60,
+    "answerable": 30,
+    "abstain": 30,
+    "platforms": {
+      "common": 15,
+      "linux": 15,
+      "osx": 15,
+      "windows": 15
+    },
+    "families": 12,
+    "tasks_per_family": 5,
+    "unique_example_ids": 6
+  },
+  "family_audit": {
+    "descdev-v1-common-preserve-source-folders": {
+      "platform": "common",
+      "answerable": true,
+      "source": {
+        "page": "pages/common/cp.md",
+        "example_ordinal": 8
+      },
+      "acceptable_example_ids": [
+        "example-9b5d6d53a8a23ea03fe7bc1aa1eb50e505ca44f0329e9e53ea99d5286e87ff0b"
+      ],
+      "source_example": {
+        "platform": "common",
+        "example_id": "example-9b5d6d53a8a23ea03fe7bc1aa1eb50e505ca44f0329e9e53ea99d5286e87ff0b",
+        "description": "Use the full path of source files, creating any missing intermediate directories when copying:",
+        "command": "cp --parents {{source/path/to/file}} {{path/to/target_file}}"
+      },
+      "rationale": "pages/common/cp.md example 8 documents cp --parents: retain the source path and create missing intermediate directories. Other copy examples do not preserve the full source folder path."
+    },
+    "descdev-v1-common-literal-punctuation-search": {
+      "platform": "common",
+      "answerable": true,
+      "source": {
+        "page": "pages/common/grep.md",
+        "example_ordinal": 2
+      },
+      "acceptable_example_ids": [
+        "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5"
+      ],
+      "source_example": {
+        "platform": "common",
+        "example_id": "example-76f2d329d91d6a6ac8b1ff660eae27a36e5968889bbe20b3a6dab74a221a52b5",
+        "description": "Search for an exact string (disables `regex`es):",
+        "command": "grep {{[-F|--fixed-strings]}} \"{{exact_string}}\" {{path/to/file}}"
+      },
+      "rationale": "pages/common/grep.md example 2 disables regex interpretation with fixed-strings and matches literal punctuation in a file. Other grep examples use regex patterns or add behavior not requested."
+    },
+    "descdev-v1-common-quoted-csv-sort": {
+      "platform": "common",
+      "answerable": false,
+      "source": null,
+      "acceptable_example_ids": [],
+      "source_example": null,
+      "rationale": "Pinned common pages are cat, cp, find, grep, sed, and sort. sort.md examples 5-6 split fields at a single separator and do not parse quoted CSV cells. No selected example implements CSV-aware column sorting."
+    },
+    "descdev-v1-linux-current-service-run-logs": {
+      "platform": "linux",
+      "answerable": true,
+      "source": {
+        "page": "pages/linux/journalctl.md",
+        "example_ordinal": 4
+      },
+      "acceptable_example_ids": [
+        "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52"
+      ],
+      "source_example": {
+        "platform": "linux",
+        "example_id": "example-1701ba64bdde6b5279e26c70c9d8a21f4f44ae584c2ec202143006693cf82b52",
+        "description": "Show logs for a given unit since the last time it started:",
+        "command": "journalctl _SYSTEMD_INVOCATION_ID=$(systemctl show --value --property=InvocationID {{unit}})"
+      },
+      "rationale": "pages/linux/journalctl.md example 4 filters by the current systemd InvocationID, selecting messages since the unit last started. Unit-only and boot/time filters do not isolate the current invocation."
+    },
+    "descdev-v1-linux-compact-link-details": {
+      "platform": "linux",
+      "answerable": true,
+      "source": {
+        "page": "pages/linux/ip.md",
+        "example_ordinal": 3
+      },
+      "acceptable_example_ids": [
+        "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0"
+      ],
+      "source_example": {
+        "platform": "linux",
+        "example_id": "example-34de4d063a289daafeed55dcd340d3c45678bbb3d75c2b0e48a71feb3e46a6f0",
+        "description": "List interfaces with brief link layer info:",
+        "command": "ip {{[-br|-brief]}} {{[l|link]}}"
+      },
+      "rationale": "pages/linux/ip.md example 3 lists brief link-layer information, including interface names, hardware addresses, and link state. Its brief address example shows network-layer addresses instead."
+    },
+    "descdev-v1-linux-per-process-memory-ranking": {
+      "platform": "linux",
+      "answerable": false,
+      "source": null,
+      "acceptable_example_ids": [],
+      "source_example": null,
+      "rationale": "Pinned Linux pages are apt, df, free, ip, journalctl, and systemctl, plus eligible common pages. free.md reports system-wide memory totals; no selected example enumerates or ranks process RAM consumption."
+    },
+    "descdev-v1-osx-reveal-file-in-finder": {
+      "platform": "osx",
+      "answerable": true,
+      "source": {
+        "page": "pages/osx/open.md",
+        "example_ordinal": 5
+      },
+      "acceptable_example_ids": [
+        "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c"
+      ],
+      "source_example": {
+        "platform": "osx",
+        "example_id": "example-9331d0a2aff965799fd3340d9f276dfb2242f1901c04cdbd2720aa32fd83839c",
+        "description": "[R]eveal a file in Finder:",
+        "command": "open -R {{path/to/file}}"
+      },
+      "rationale": "pages/osx/open.md example 5 uses open -R to reveal the given file in Finder. Opening a file normally launches its associated application; opening the current directory does not select the given file."
+    },
+    "descdev-v1-osx-screenshot-to-clipboard": {
+      "platform": "osx",
+      "answerable": false,
+      "source": null,
+      "acceptable_example_ids": [],
+      "source_example": null,
+      "rationale": "pages/osx/screencapture.md examples save captures to files or open Preview; none captures directly to the clipboard. pbcopy.md copies stdin/file data and has no screenshot image capture example. No selected example meets direct image capture without a saved file."
+    },
+    "descdev-v1-osx-audio-transcription": {
+      "platform": "osx",
+      "answerable": false,
+      "source": null,
+      "acceptable_example_ids": [],
+      "source_example": null,
+      "rationale": "pages/osx/say.md converts supplied text to speech, including speech audio-file creation. No selected common or macOS example recognizes speech from existing audio or produces a transcript."
+    },
+    "descdev-v1-windows-literal-multiword-text-search": {
+      "platform": "windows",
+      "answerable": true,
+      "source": {
+        "page": "pages/windows/findstr.md",
+        "example_ordinal": 6
+      },
+      "acceptable_example_ids": [
+        "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41"
+      ],
+      "source_example": {
+        "platform": "windows",
+        "example_id": "example-33e978f338bfe6d25ec35fa14476769f6bcf228766626c548dbbbc8e0f508e41",
+        "description": "Find a literal string (containing spaces) in all text files:",
+        "command": "findstr /c:\"{{string1 string2 ...}}\" *.txt"
+      },
+      "rationale": "pages/windows/findstr.md example 6 uses /c to match a literal string containing spaces in *.txt. Other findstr examples treat space-separated words as alternatives or use regex; common grep is excluded by the requested built-in Command Prompt command."
+    },
+    "descdev-v1-windows-recursive-copy-with-empty-folders": {
+      "platform": "windows",
+      "answerable": false,
+      "source": null,
+      "acceptable_example_ids": [],
+      "source_example": null,
+      "rationale": "pages/windows/copy.md examples copy files or wildcard matches, with no recursive tree-copy operation or preservation of empty directories. Common cp.md examples 3-4 describe recursive copying but are not built-in Windows Command Prompt commands. No selected example meets the requested built-in cmd operation."
+    },
+    "descdev-v1-windows-recent-directory-filter": {
+      "platform": "windows",
+      "answerable": false,
+      "source": null,
+      "acceptable_example_ids": [],
+      "source_example": null,
+      "rationale": "pages/windows/get-childitem.md example 2 lists directories but has no modification-time cutoff; dir.md example 6 sorts by date without filtering. Common find.md example 7 selects items modified today and executes a command, but is not a PowerShell cmdlet. No selected example filters directories by a seven-day cutoff using a cmdlet."
+    }
+  },
+  "changed_prompt_count": 15,
+  "changed_prompts": [
+    {
+      "draft_id": "description-dev-draft-046",
+      "id": "description-dev-v1-046",
+      "original_question": "Search the text files for the exact phrase access denied including its space.",
+      "question": "Using a built-in Command Prompt command, search the text files for the exact phrase access denied including its space.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-047",
+      "id": "description-dev-v1-047",
+      "original_question": "Find the complete phrase connection timed out in every text file here.",
+      "question": "In Windows Command Prompt, find the complete phrase connection timed out in every text file here with a built-in command.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-048",
+      "id": "description-dev-v1-048",
+      "original_question": "Show matches for service unavailable as one literal phrase in the text files.",
+      "question": "Show matches for service unavailable as one literal phrase in the text files using a built-in Command Prompt command.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-049",
+      "id": "description-dev-v1-049",
+      "original_question": "Look through the text files for the exact words disk is full together.",
+      "question": "Use a built-in Windows Command Prompt command to look through the text files for the exact words disk is full together.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-050",
+      "id": "description-dev-v1-050",
+      "original_question": "Match the literal phrase account locked in text files, keeping the words together.",
+      "question": "Match the literal phrase account locked in text files, keeping the words together, with a built-in Command Prompt command.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-051",
+      "id": "description-dev-v1-051",
+      "original_question": "Copy an entire folder tree, including every empty subfolder.",
+      "question": "Using a built-in Windows Command Prompt command, copy an entire folder tree, including every empty subfolder.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-052",
+      "id": "description-dev-v1-052",
+      "original_question": "Duplicate this directory recursively and keep its empty directories.",
+      "question": "Duplicate this directory recursively and keep its empty directories using a built-in Command Prompt command.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-053",
+      "id": "description-dev-v1-053",
+      "original_question": "Back up all files and subfolders, even folders with nothing inside.",
+      "question": "Back up all files and subfolders, even folders with nothing inside, with a built-in Windows Command Prompt command.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-054",
+      "id": "description-dev-v1-054",
+      "original_question": "Copy a folder and all descendants while preserving empty folders.",
+      "question": "Use a built-in Command Prompt command to copy a folder and all descendants while preserving empty folders.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-055",
+      "id": "description-dev-v1-055",
+      "original_question": "Mirror this directory structure into a new location, retaining empty subdirectories.",
+      "question": "Copy this directory structure into a new location, retaining empty subdirectories, with a built-in Windows Command Prompt command.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-056",
+      "id": "description-dev-v1-056",
+      "original_question": "List only folders modified during the last seven days.",
+      "question": "Use a PowerShell cmdlet to list only folders modified during the last seven days.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-057",
+      "id": "description-dev-v1-057",
+      "original_question": "Show directories changed within the past week.",
+      "question": "Show directories changed within the past week using a PowerShell cmdlet.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-058",
+      "id": "description-dev-v1-058",
+      "original_question": "Find folders whose modification time is newer than a week ago.",
+      "question": "Find folders whose modification time is newer than a week ago with a PowerShell cmdlet.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-059",
+      "id": "description-dev-v1-059",
+      "original_question": "Display only recently modified directories, using a seven-day cutoff.",
+      "question": "Display only recently modified directories, using a seven-day cutoff, with a PowerShell cmdlet.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    },
+    {
+      "draft_id": "description-dev-draft-060",
+      "id": "description-dev-v1-060",
+      "original_question": "Filter the folder listing to directories touched in the last week.",
+      "question": "Use a PowerShell cmdlet to filter the folder listing to directories touched in the last week.",
+      "reason": "Require the native shell command explicitly; common fallback pages are eligible on Windows, so platform alone does not exclude GNU commands. For copy-tree phrasing 5, replace mirror with copy to avoid implying deletion of destination-only files."
+    }
+  ],
+  "rejected_prompts": [],
+  "dev_overlap": [
+    {
+      "dataset": "tests/fixtures/evaluation/frozen-dev-v1.json",
+      "task_count": 30,
+      "exact_question_matches": [],
+      "normalized_question_matches": [],
+      "family_name_matches": []
+    },
+    {
+      "dataset": "tests/fixtures/evaluation/frozen-dev-v2.json",
+      "task_count": 60,
+      "exact_question_matches": [],
+      "normalized_question_matches": [],
+      "family_name_matches": []
+    },
+    {
+      "dataset": "tests/fixtures/evaluation/frozen-dev-v2-expanded.json",
+      "task_count": 60,
+      "exact_question_matches": [],
+      "normalized_question_matches": [],
+      "family_name_matches": []
+    },
+    {
+      "dataset": "tests/fixtures/evaluation/dev-only-extension-v1.json",
+      "task_count": 60,
+      "exact_question_matches": [],
+      "normalized_question_matches": [],
+      "family_name_matches": []
+    }
+  ],
+  "semantic_overlap_review": "No identical scenario family observed in the four allowed dev datasets. Broad feature adjacency exists: file copying/searching, logs/processes, screenshots/audio. Requested constraints differ (source-path preservation, literal punctuation/multiword matching, current invocation, brief link layer, per-process RAM ranking, direct screenshot clipboard, audio transcription, recursive empty-directory copying, directory age filtering).",
+  "not_inspected": "No holdout files/reports, prior retrieval outcomes, or candidate output; no retrieval executed."
+}

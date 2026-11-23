@@ -45,5 +45,7 @@ results, not independent validation.
   embedding input exactly; focused query rules supply the measured dev lift.
 
 All runs use the same pinned parser records. This file records development
-evidence only; the fresh holdout remains frozen and unscored pending explicit
-authorization.
+evidence only. At this report's creation, fresh holdout v2 was frozen but
+unscored; it was later scored once after explicit authorization. See the
+independent report at
+[main-vs-retrieval-v2-focused-fresh-holdout-v2.md](main-vs-retrieval-v2-focused-fresh-holdout-v2.md).

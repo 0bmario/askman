@@ -1,0 +1,683 @@
+{
+  "artifact_type": "development_only_retrieval_prompt_cohort",
+  "status": "draft",
+  "cohort_name": "compatibility-dev-prompts-v1",
+  "corpus": {
+    "manifest": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "parser_version": "tldr-subset-v4",
+    "source_name": "tldr-pages",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "manifest_sha256": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "language": "en"
+  },
+  "provenance": {
+    "access_scope": "Used only manifest-v4.json and the source pages listed in that manifest, enumerated in allowed_sources.",
+    "allowed_sources": [
+      "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+      "tests/fixtures/tldr-evaluation-v2/pages/common/cat.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/common/cp.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/common/find.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/common/grep.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/common/sed.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/common/sort.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/linux/apt.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/linux/df.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/linux/free.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/linux/ip.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/linux/journalctl.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/linux/systemctl.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/osx/mdfind.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/osx/open.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/osx/pbcopy.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/osx/pbpaste.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/osx/say.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/osx/screencapture.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/windows/cat.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/windows/copy.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/windows/dir.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/windows/findstr.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/windows/get-childitem.md",
+      "tests/fixtures/tldr-evaluation-v2/pages/windows/move.md"
+    ],
+    "excluded_material": "No existing development datasets, retrieval/evaluation reports, candidate outputs, ADR result sections, or holdout files/results were inspected or used.",
+    "retrieval_run_performed": false,
+    "content_note": "Prompts are drafts grounded in the pinned corpus examples; answerability labels are cohort-balancing metadata, not acceptable-example identifiers."
+  },
+  "balance": {
+    "task_count": 60,
+    "family_count": 12,
+    "tasks_per_family": 5,
+    "answerability": {
+      "answerable": 30,
+      "abstain": 30
+    },
+    "platforms": {
+      "common": {
+        "total": 15,
+        "answerable": 8,
+        "abstain": 7
+      },
+      "linux": {
+        "total": 15,
+        "answerable": 7,
+        "abstain": 8
+      },
+      "osx": {
+        "total": 15,
+        "answerable": 8,
+        "abstain": 7
+      },
+      "windows": {
+        "total": 15,
+        "answerable": 7,
+        "abstain": 8
+      }
+    },
+    "families": {
+      "F01": {
+        "total": 5,
+        "answerable": 3,
+        "abstain": 2
+      },
+      "F02": {
+        "total": 5,
+        "answerable": 3,
+        "abstain": 2
+      },
+      "F03": {
+        "total": 5,
+        "answerable": 3,
+        "abstain": 2
+      },
+      "F04": {
+        "total": 5,
+        "answerable": 3,
+        "abstain": 2
+      },
+      "F05": {
+        "total": 5,
+        "answerable": 2,
+        "abstain": 3
+      },
+      "F06": {
+        "total": 5,
+        "answerable": 2,
+        "abstain": 3
+      },
+      "F07": {
+        "total": 5,
+        "answerable": 2,
+        "abstain": 3
+      },
+      "F08": {
+        "total": 5,
+        "answerable": 2,
+        "abstain": 3
+      },
+      "F09": {
+        "total": 5,
+        "answerable": 3,
+        "abstain": 2
+      },
+      "F10": {
+        "total": 5,
+        "answerable": 2,
+        "abstain": 3
+      },
+      "F11": {
+        "total": 5,
+        "answerable": 3,
+        "abstain": 2
+      },
+      "F12": {
+        "total": 5,
+        "answerable": 2,
+        "abstain": 3
+      }
+    }
+  },
+  "families": [
+    {
+      "family_id": "F01",
+      "name": "Discovery by name, text, or package",
+      "intent": "Test whether retrieval finds an operational example matching the requested discovery mode and its search key."
+    },
+    {
+      "family_id": "F02",
+      "name": "Scope work to a chosen location or resource",
+      "intent": "Test whether the example applies to the requested path, directory, filesystem, or named unit, including the requested scope boundary."
+    },
+    {
+      "family_id": "F03",
+      "name": "Filter results to matching content or attributes",
+      "intent": "Test whether retrieval supports the requested match semantics and any case, type, or time filters."
+    },
+    {
+      "family_id": "F04",
+      "name": "Keep output narrow and easy to scan",
+      "intent": "Test whether a retrieved example can produce the requested concise form or exact result subset."
+    },
+    {
+      "family_id": "F05",
+      "name": "Send data or an operation to a destination",
+      "intent": "Test whether the example supports the requested destination and preserves the stated source or destination behavior."
+    },
+    {
+      "family_id": "F06",
+      "name": "Respect existing state and overwrite behavior",
+      "intent": "Test whether the example supports the requested interaction, replacement, or preservation constraint."
+    },
+    {
+      "family_id": "F07",
+      "name": "Inspect an item or apply an action to it",
+      "intent": "Distinguish examples that reveal, list, or print an item from those that open, modify, or control it."
+    },
+    {
+      "family_id": "F08",
+      "name": "Honor time and ordering requirements",
+      "intent": "Test whether the requested chronological, numeric, or delayed behavior is actually shown."
+    },
+    {
+      "family_id": "F09",
+      "name": "Choose a representation, format, or unit",
+      "intent": "Test whether the retrieved operation supports the requested output representation or measurement units."
+    },
+    {
+      "family_id": "F10",
+      "name": "Use streams, pipelines, and follow behavior",
+      "intent": "Test whether the example supports the requested stdin, stdout, clipboard, pipeline, or live-follow flow."
+    },
+    {
+      "family_id": "F11",
+      "name": "Operate on a named platform resource or item",
+      "intent": "Test whether the specific platform operation and target semantics match the requested action."
+    },
+    {
+      "family_id": "F12",
+      "name": "Gather a constrained inventory or diagnostic",
+      "intent": "Test whether a retrieved example covers the requested inventory, diagnostic filter, and output constraints."
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "dev-001",
+      "family_id": "F01",
+      "platform": "common",
+      "answerability": "answerable",
+      "intent": "Print one file's contents.",
+      "prompt": "I just need the raw contents of one file in my terminal. What command should I run?"
+    },
+    {
+      "task_id": "dev-002",
+      "family_id": "F01",
+      "platform": "linux",
+      "answerability": "answerable",
+      "intent": "Search Debian package names and descriptions.",
+      "prompt": "Before installing anything on Debian, how can I search package names and descriptions for \"ripgrep\"?"
+    },
+    {
+      "task_id": "dev-003",
+      "family_id": "F01",
+      "platform": "osx",
+      "answerability": "answerable",
+      "intent": "Find a file by name through Spotlight.",
+      "prompt": "On macOS, find a file by its name through Spotlight's index; I know the filename but not its folder."
+    },
+    {
+      "task_id": "dev-004",
+      "family_id": "F01",
+      "platform": "windows",
+      "answerability": "abstain",
+      "intent": "Find file names recursively while excluding hidden directories.",
+      "prompt": "On Windows, find files by their filename pattern recursively, while excluding hidden directories."
+    },
+    {
+      "task_id": "dev-005",
+      "family_id": "F01",
+      "platform": "common",
+      "answerability": "abstain",
+      "intent": "Find matching paths and rank them by total size.",
+      "prompt": "In this directory tree, list matching file paths ordered by their total size, largest first."
+    },
+    {
+      "task_id": "dev-006",
+      "family_id": "F02",
+      "platform": "linux",
+      "answerability": "answerable",
+      "intent": "Show status for one named systemd service.",
+      "prompt": "What command shows me the status of the named systemd service \"nginx\"?"
+    },
+    {
+      "task_id": "dev-007",
+      "family_id": "F02",
+      "platform": "osx",
+      "answerability": "answerable",
+      "intent": "Limit Spotlight content search to one directory.",
+      "prompt": "On macOS, use Spotlight to find items containing \"quarterly report\", but restrict results to ~/Documents."
+    },
+    {
+      "task_id": "dev-008",
+      "family_id": "F02",
+      "platform": "windows",
+      "answerability": "answerable",
+      "intent": "List items under a specified PowerShell path.",
+      "prompt": "In PowerShell, list the items under D:\\Projects rather than the current folder."
+    },
+    {
+      "task_id": "dev-009",
+      "family_id": "F02",
+      "platform": "common",
+      "answerability": "abstain",
+      "intent": "Measure a directory's own size, excluding other filesystem contents.",
+      "prompt": "Show the amount of disk space consumed by ~/Downloads itself, excluding the filesystem's other directories."
+    },
+    {
+      "task_id": "dev-010",
+      "family_id": "F02",
+      "platform": "linux",
+      "answerability": "abstain",
+      "intent": "Filter a unit's logs by its running interval and follow only until it stops.",
+      "prompt": "Show only the journal entries for nginx that were emitted while its service was active, and follow them until it stops."
+    },
+    {
+      "task_id": "dev-011",
+      "family_id": "F03",
+      "platform": "osx",
+      "answerability": "answerable",
+      "intent": "Find indexed file content matching a phrase.",
+      "prompt": "On macOS, use the search index to find files whose contents mention \"invoice overdue\"."
+    },
+    {
+      "task_id": "dev-012",
+      "family_id": "F03",
+      "platform": "windows",
+      "answerability": "answerable",
+      "intent": "Search files for a phrase without case sensitivity.",
+      "prompt": "Find the phrase \"connection refused\" across files in this Windows folder, ignoring letter case."
+    },
+    {
+      "task_id": "dev-013",
+      "family_id": "F03",
+      "platform": "common",
+      "answerability": "answerable",
+      "intent": "Search a log using a case-insensitive extended regular expression.",
+      "prompt": "Search this log with an extended regular expression, without regard to letter case."
+    },
+    {
+      "task_id": "dev-014",
+      "family_id": "F03",
+      "platform": "linux",
+      "answerability": "abstain",
+      "intent": "Filter installed packages by regex and sort by installation date.",
+      "prompt": "On Debian, list only installed packages matching a regular expression and sort them by installation date."
+    },
+    {
+      "task_id": "dev-015",
+      "family_id": "F03",
+      "platform": "osx",
+      "answerability": "abstain",
+      "intent": "Combine Spotlight content, file type, and recent-modification filters.",
+      "prompt": "Use Spotlight to return PDFs whose text contains both \"budget\" and \"approved\", modified in the past seven days."
+    },
+    {
+      "task_id": "dev-016",
+      "family_id": "F04",
+      "platform": "windows",
+      "answerability": "answerable",
+      "intent": "Print a bare directory listing.",
+      "prompt": "For a quick inventory, print just the names of the current folder's contents, with no details."
+    },
+    {
+      "task_id": "dev-017",
+      "family_id": "F04",
+      "platform": "common",
+      "answerability": "answerable",
+      "intent": "Print only text matched by grep.",
+      "prompt": "From a file, show only the substring that matched the search, not the full matching line."
+    },
+    {
+      "task_id": "dev-018",
+      "family_id": "F04",
+      "platform": "linux",
+      "answerability": "answerable",
+      "intent": "Show brief link-layer interface information.",
+      "prompt": "Show the network interfaces in brief link-layer form, rather than their full details."
+    },
+    {
+      "task_id": "dev-019",
+      "family_id": "F04",
+      "platform": "osx",
+      "answerability": "abstain",
+      "intent": "Add a total match count to a Spotlight result list.",
+      "prompt": "Use Spotlight to list matching paths and include a total match count on the first line."
+    },
+    {
+      "task_id": "dev-020",
+      "family_id": "F04",
+      "platform": "windows",
+      "answerability": "abstain",
+      "intent": "Limit a bare listing to its first ten entries.",
+      "prompt": "List only the first ten filenames from this folder, without any headings or metadata."
+    },
+    {
+      "task_id": "dev-021",
+      "family_id": "F05",
+      "platform": "common",
+      "answerability": "answerable",
+      "intent": "Concatenate inputs into a separate output file.",
+      "prompt": "Concatenate these two files into a new output file, leaving the inputs untouched."
+    },
+    {
+      "task_id": "dev-022",
+      "family_id": "F05",
+      "platform": "linux",
+      "answerability": "answerable",
+      "intent": "Edit a named systemd unit file.",
+      "prompt": "I need to edit a systemd unit file for a service; what command opens that unit file for editing?"
+    },
+    {
+      "task_id": "dev-023",
+      "family_id": "F05",
+      "platform": "osx",
+      "answerability": "abstain",
+      "intent": "Capture the selected window directly to clipboard as PNG.",
+      "prompt": "Capture only the currently selected macOS window directly into the clipboard as a PNG."
+    },
+    {
+      "task_id": "dev-024",
+      "family_id": "F05",
+      "platform": "windows",
+      "answerability": "abstain",
+      "intent": "Move into a destination directory that may need creation.",
+      "prompt": "On Windows, move a file into a destination directory and create the directory if it doesn't exist."
+    },
+    {
+      "task_id": "dev-025",
+      "family_id": "F05",
+      "platform": "common",
+      "answerability": "abstain",
+      "intent": "Copy a directory tree while preserving links and silently replacing files.",
+      "prompt": "Copy a directory tree while preserving symbolic links, and replace existing destination files without prompting."
+    },
+    {
+      "task_id": "dev-026",
+      "family_id": "F06",
+      "platform": "linux",
+      "answerability": "answerable",
+      "intent": "Remove a package while retaining its configuration.",
+      "prompt": "Remove a Debian package but leave its configuration files on the machine."
+    },
+    {
+      "task_id": "dev-027",
+      "family_id": "F06",
+      "platform": "osx",
+      "answerability": "answerable",
+      "intent": "Launch a new app instance by bundle identifier.",
+      "prompt": "Open a new instance of a Mac application by its bundle identifier, even if another instance is running."
+    },
+    {
+      "task_id": "dev-028",
+      "family_id": "F06",
+      "platform": "windows",
+      "answerability": "abstain",
+      "intent": "Replace a moved file while automatically retaining a backup.",
+      "prompt": "Move a Windows file over an existing file, keeping a backup copy of the old version automatically."
+    },
+    {
+      "task_id": "dev-029",
+      "family_id": "F06",
+      "platform": "common",
+      "answerability": "abstain",
+      "intent": "Show a diff before an interactive copy write.",
+      "prompt": "Copy a file with common cp, show a diff, and ask before writing the changes."
+    },
+    {
+      "task_id": "dev-030",
+      "family_id": "F06",
+      "platform": "linux",
+      "answerability": "abstain",
+      "intent": "Preview service dependencies before conditional package removal.",
+      "prompt": "On Debian, remove a package only if no running service depends on it, and explain which services would be affected first."
+    },
+    {
+      "task_id": "dev-031",
+      "family_id": "F07",
+      "platform": "osx",
+      "answerability": "answerable",
+      "intent": "Reveal a file in Finder without opening it.",
+      "prompt": "Reveal this file in Finder without opening it: ~/Desktop/notes.txt."
+    },
+    {
+      "task_id": "dev-032",
+      "family_id": "F07",
+      "platform": "windows",
+      "answerability": "answerable",
+      "intent": "Show the current directory contents.",
+      "prompt": "Show me the contents of the current Windows directory."
+    },
+    {
+      "task_id": "dev-033",
+      "family_id": "F07",
+      "platform": "common",
+      "answerability": "abstain",
+      "intent": "Edit a file in place with sed while retaining a backup.",
+      "prompt": "Using common sed, replace matching text in the original file itself and leave a backup copy."
+    },
+    {
+      "task_id": "dev-034",
+      "family_id": "F07",
+      "platform": "linux",
+      "answerability": "abstain",
+      "intent": "Preview all changes and dependencies before enabling a service.",
+      "prompt": "Before enabling the nginx service at boot, preview every unit and dependency that would change."
+    },
+    {
+      "task_id": "dev-035",
+      "family_id": "F07",
+      "platform": "osx",
+      "answerability": "abstain",
+      "intent": "Check whether an app is running and launch only if absent.",
+      "prompt": "On a Mac, check whether \"Safari\" is already running and launch it only when it is not."
+    },
+    {
+      "task_id": "dev-036",
+      "family_id": "F08",
+      "platform": "windows",
+      "answerability": "answerable",
+      "intent": "Order a Windows directory listing oldest first.",
+      "prompt": "In Windows Command Prompt, list the directory sorted by date and time with the oldest entries first."
+    },
+    {
+      "task_id": "dev-037",
+      "family_id": "F08",
+      "platform": "common",
+      "answerability": "answerable",
+      "intent": "Sort values numerically.",
+      "prompt": "Sort these values numerically rather than alphabetically, so 10 comes after 2."
+    },
+    {
+      "task_id": "dev-038",
+      "family_id": "F08",
+      "platform": "linux",
+      "answerability": "abstain",
+      "intent": "Show a unit's journal in local-time chronological order.",
+      "prompt": "For one systemd service, show journal entries in chronological order with timestamps converted to my local timezone."
+    },
+    {
+      "task_id": "dev-039",
+      "family_id": "F08",
+      "platform": "osx",
+      "answerability": "abstain",
+      "intent": "Record a delayed screen video with requested frame rate and audio.",
+      "prompt": "After a five-second delay, record a screen video at 30 frames per second with audio."
+    },
+    {
+      "task_id": "dev-040",
+      "family_id": "F08",
+      "platform": "windows",
+      "answerability": "abstain",
+      "intent": "Combine newest-first order, directory grouping, and today's date filter.",
+      "prompt": "List files newest-first, grouped with directories first, and only those changed today."
+    },
+    {
+      "task_id": "dev-041",
+      "family_id": "F09",
+      "platform": "common",
+      "answerability": "answerable",
+      "intent": "Sort without case affecting order.",
+      "prompt": "Sort these lines case-insensitively so that capitalization doesn't affect their order."
+    },
+    {
+      "task_id": "dev-042",
+      "family_id": "F09",
+      "platform": "linux",
+      "answerability": "answerable",
+      "intent": "Display memory use in readable units.",
+      "prompt": "Show memory usage in human-readable units like MB or GB."
+    },
+    {
+      "task_id": "dev-043",
+      "family_id": "F09",
+      "platform": "osx",
+      "answerability": "answerable",
+      "intent": "Speak text with a selected voice and rate.",
+      "prompt": "Have my Mac speak this phrase using a chosen voice and a specified speaking rate."
+    },
+    {
+      "task_id": "dev-044",
+      "family_id": "F09",
+      "platform": "windows",
+      "answerability": "abstain",
+      "intent": "Format sizes as IEC units and emit JSON.",
+      "prompt": "On Windows, list file sizes in human-readable IEC units and emit the result as JSON."
+    },
+    {
+      "task_id": "dev-045",
+      "family_id": "F09",
+      "platform": "common",
+      "answerability": "abstain",
+      "intent": "Add line numbers and colorized filenames with cat.",
+      "prompt": "Print each line with its line number and colorize the filename using the common cat command."
+    },
+    {
+      "task_id": "dev-046",
+      "family_id": "F10",
+      "platform": "linux",
+      "answerability": "answerable",
+      "intent": "Follow the latest journal lines as new entries arrive.",
+      "prompt": "Follow the latest 25 system journal entries and keep displaying new messages as they arrive."
+    },
+    {
+      "task_id": "dev-047",
+      "family_id": "F10",
+      "platform": "osx",
+      "answerability": "answerable",
+      "intent": "Pipe clipboard contents into grep.",
+      "prompt": "Read the current macOS clipboard and pass its contents to grep to find \"TODO\"."
+    },
+    {
+      "task_id": "dev-048",
+      "family_id": "F10",
+      "platform": "windows",
+      "answerability": "abstain",
+      "intent": "Filter piped output by ordered phrases and emit only a count.",
+      "prompt": "Filter a Windows command's piped output by three phrases in order, then print only the match count."
+    },
+    {
+      "task_id": "dev-049",
+      "family_id": "F10",
+      "platform": "common",
+      "answerability": "abstain",
+      "intent": "Write stdin atomically only when the destination is absent.",
+      "prompt": "Write standard input to a new common-platform file only if that file does not already exist, doing it atomically."
+    },
+    {
+      "task_id": "dev-050",
+      "family_id": "F10",
+      "platform": "linux",
+      "answerability": "abstain",
+      "intent": "Redact addresses from journal output in a pipeline.",
+      "prompt": "Pipe journal entries through a filter that redacts IP addresses before showing them."
+    },
+    {
+      "task_id": "dev-051",
+      "family_id": "F11",
+      "platform": "osx",
+      "answerability": "answerable",
+      "intent": "Launch an app by its bundle identifier.",
+      "prompt": "Launch the macOS app registered under bundle identifier com.apple.Safari."
+    },
+    {
+      "task_id": "dev-052",
+      "family_id": "F11",
+      "platform": "windows",
+      "answerability": "answerable",
+      "intent": "Rename a file by moving it to an unused target name.",
+      "prompt": "Rename a Windows file to a new name on the same drive, where that destination name doesn't already exist."
+    },
+    {
+      "task_id": "dev-053",
+      "family_id": "F11",
+      "platform": "common",
+      "answerability": "answerable",
+      "intent": "Copy a file while preserving its source path hierarchy.",
+      "prompt": "Copy a file and preserve its full source path beneath the destination, creating intermediate directories as needed."
+    },
+    {
+      "task_id": "dev-054",
+      "family_id": "F11",
+      "platform": "linux",
+      "answerability": "abstain",
+      "intent": "Conditionally restart a failed unit and preserve its previous state.",
+      "prompt": "Restart the named systemd service only if it has failed, and record the previous state."
+    },
+    {
+      "task_id": "dev-055",
+      "family_id": "F11",
+      "platform": "osx",
+      "answerability": "abstain",
+      "intent": "Look up an already-running app's bundle ID without launching another copy.",
+      "prompt": "Reveal an app's bundle identifier for an already-running Mac application without launching another copy."
+    },
+    {
+      "task_id": "dev-056",
+      "family_id": "F12",
+      "platform": "windows",
+      "answerability": "answerable",
+      "intent": "Include hidden items in a PowerShell listing.",
+      "prompt": "In PowerShell, include hidden items in the listing for the current directory."
+    },
+    {
+      "task_id": "dev-057",
+      "family_id": "F12",
+      "platform": "common",
+      "answerability": "answerable",
+      "intent": "Run a command for each file modified today.",
+      "prompt": "Find files modified today and run a command once for each matching file."
+    },
+    {
+      "task_id": "dev-058",
+      "family_id": "F12",
+      "platform": "linux",
+      "answerability": "abstain",
+      "intent": "Combine readable filesystem and inode statistics with a usage threshold.",
+      "prompt": "Show filesystem usage in human-readable form with inode counts, but include only mounts above 90% full."
+    },
+    {
+      "task_id": "dev-059",
+      "family_id": "F12",
+      "platform": "osx",
+      "answerability": "abstain",
+      "intent": "Record screen video, capture cursor, and save a separate audio track.",
+      "prompt": "Record a screen video that includes the mouse cursor and save a separate audio track."
+    },
+    {
+      "task_id": "dev-060",
+      "family_id": "F12",
+      "platform": "windows",
+      "answerability": "abstain",
+      "intent": "Combine recursion, hidden-only, date, and size filters.",
+      "prompt": "Recursively list only hidden Windows files modified today that are larger than 1 MB."
+    }
+  ]
+}

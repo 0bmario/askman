@@ -1,0 +1,373 @@
+{
+  "metadata": {
+    "purpose": "development-only",
+    "source_name": "tldr-pages",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "source_digest_algorithm": "sha256",
+    "source_digest": "651cf2818c3a375cbe5f54b65844f0dff381585c09f6603ec26f901da214f3f9",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85"
+  },
+  "tasks": [
+    {
+      "task_id": "budget_dev_e0163528f25f408391d3394e8aa624b8",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU coreutils, capture text typed on standard input into interview-notes.txt until end of input. Use cat and give the command."
+    },
+    {
+      "task_id": "budget_dev_3f24c527ea084266ba35080a069a8598",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU coreutils, copy the file reached by the symlink current-policy into issued/, following the link instead of copying the link itself. Give the command."
+    },
+    {
+      "task_id": "budget_dev_0a4a010b07154241b57a1b5514d00ca1",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU coreutils, copy drafts/legal/notice.txt into issued/ while retaining the drafts/legal path beneath issued/ and creating missing parent directories. Give the command."
+    },
+    {
+      "task_id": "budget_dev_6a7709431b18480c9c692a40ee8be262",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session, encrypt interview-notes.txt with a passphrase before putting the encrypted file in issued/. Give a command that performs the encryption."
+    },
+    {
+      "task_id": "budget_dev_b03248522b734ec3a02452033d01b7d4",
+      "family_id": "6a7de120cd484640a33ee6e16fdd3839",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU coreutils, resume an interrupted copy of a large file at the last transferred byte instead of copying it again from the beginning. Source is disk-image.bin and destination is issued/disk-image.bin. Give the command."
+    },
+    {
+      "task_id": "budget_dev_ca337db0155141cf9f8f93004c251e5d",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU find, list entries in ./staging whose size is greater than 700 kilobytes but less than 8 megabytes, searching no deeper than one level. Give the command."
+    },
+    {
+      "task_id": "budget_dev_408224da70ca4291bb2c0444091d612a",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU grep, find lines in arrivals.log matching either arrival or departure regardless of letter case, using an extended regular expression. Give the command."
+    },
+    {
+      "task_id": "budget_dev_b43ce9db8d154befae9a79add756ad6d",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session, search arrivals.log.gz directly for customs without first saving a decompressed file. Give the command."
+    },
+    {
+      "task_id": "budget_dev_24903b6ad9e94d6bbebff0c7ac6ef459",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU grep, match the phrase customs approved even when customs and approved occur on consecutive lines in arrivals.log. Give the command."
+    },
+    {
+      "task_id": "budget_dev_951151b04a654fda85e43e36ce5b9847",
+      "family_id": "c4792170a64846e5a1b813ec0203fd7d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU find, locate files beneath ./staging owned by the account archivist. Give the command."
+    },
+    {
+      "task_id": "budget_dev_c0f6e544fa8e49eda6ccedb66875d04b",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with sed, run the editing program in normalize.sed on the standard output of build-inventory and display the transformed output. Give the pipeline."
+    },
+    {
+      "task_id": "budget_dev_efacfc7529f74e779cc5a0127b04bd10",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with sed, display only the first line emitted by build-inventory. Give the pipeline."
+    },
+    {
+      "task_id": "budget_dev_dc8e0c9b0fe14657a3b53a11b2cbd1fd",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU sort, order colon-separated records in registry.txt by the third field numerically, breaking ties using the fourth field as numbers that may contain exponents. Give the command."
+    },
+    {
+      "task_id": "budget_dev_1c39fabc53254a3b90af6a60d4cdff87",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with GNU sort, sort semicolon-separated rows in registry.txt by the second field while keeping rows with equal keys in their original relative order. Give the command."
+    },
+    {
+      "task_id": "budget_dev_227dd48337c74ec598d9c5766e27c300",
+      "family_id": "0e5b3b499bd74b3aa8bc2cb4c0a38f0d",
+      "platform": "common",
+      "prompt": "For a Unix Bash session with sed, delete every line between BEGIN_PRIVATE and END_PRIVATE in the output of build-inventory, including both marker lines. Give the pipeline."
+    },
+    {
+      "task_id": "budget_dev_b464fdd16bdc4bf7bcd0c1a884ee49b4",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, enumerate every installed package through APT. Give the command."
+    },
+    {
+      "task_id": "budget_dev_9d296e05ee4e4d609ae0464bb2e472c5",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, uninstall the package cowsay and remove its configuration files as well. Give the privileged APT command."
+    },
+    {
+      "task_id": "budget_dev_d5353dda678d4abc9d57b4faf5773fb0",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, install jq or bring it to the latest available package version if it is already installed. Give the privileged APT command."
+    },
+    {
+      "task_id": "budget_dev_2878969f1c8749c79fda23a56a63f49e",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, preview which packages APT would upgrade and which changes it would make, without changing the machine. Give the command."
+    },
+    {
+      "task_id": "budget_dev_06cd0bbe65c045a18846222650153fa8",
+      "family_id": "9df0dcd9649f48daabbc0bb257a4a78a",
+      "platform": "linux",
+      "prompt": "In Bash on Ubuntu Linux, list the packages that directly depend on jq, rather than jq's own dependencies. Give the native package-management command."
+    },
+    {
+      "task_id": "budget_dev_8c395df506d14ebc8bd051412f62a47a",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, report used and free inode counts for mounted filesystems to investigate a machine that cannot create new files despite having free disk space. Give the command."
+    },
+    {
+      "task_id": "budget_dev_43a453d4f4ae4eac86eb6fb01be33392",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, display system memory totals repeatedly with a two-second refresh interval. Give the command."
+    },
+    {
+      "task_id": "budget_dev_3134e36db5cc450197479d6d51a8669a",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, display the memory totals for NUMA node 0 separately from the other nodes. Give the native command."
+    },
+    {
+      "task_id": "budget_dev_c7e04d505aad47bda1de14f7684228bc",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, print per-process swap consumption so I can identify which process has the most data swapped out. Give the command."
+    },
+    {
+      "task_id": "budget_dev_149f27d814834a4dab85c78c633192f9",
+      "family_id": "f85e0207fb8c4b199771b6e58563bf0d",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, show the read and write throughput of block devices once per second. Give the native monitoring command."
+    },
+    {
+      "task_id": "budget_dev_2bdb9e826e2f4fb399f663ba78c4afef",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, show the neighbor table containing IP-to-link-address mappings for local peers. Give the native ip command."
+    },
+    {
+      "task_id": "budget_dev_b9b351b719ba46f38dd627aaf73ef1ca",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux with systemd, query error-priority journal messages from the preceding boot. Give the command."
+    },
+    {
+      "task_id": "budget_dev_b7bb83d6f02c4be4a95a466726aef242",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux with systemd, configure collector.service to automatically restart five seconds after failure. Give the unit configuration and the commands needed to apply it."
+    },
+    {
+      "task_id": "budget_dev_152eda2e5b84464a80f5cc0238bfdcd4",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux, capture incoming TCP packets on enp2s0 whose destination port is 8443 and save the capture to collector.pcap. Give the command."
+    },
+    {
+      "task_id": "budget_dev_1c300b7dfce34e678e52d74ece077047",
+      "family_id": "1a4e9adf0ce74b4f845d692798a14b59",
+      "platform": "linux",
+      "prompt": "In Bash on Linux with systemd, export journal records for collector.service as newline-delimited JSON for a parser. Give the command."
+    },
+    {
+      "task_id": "budget_dev_808e1039471c4ae98e4e15017d4b5ad0",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, put the standard output of the existing command render-summary onto the system clipboard. Give the pipeline."
+    },
+    {
+      "task_id": "budget_dev_1cc17e90652e452fa95f17404e5cc1e7",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, print the current system clipboard text to Terminal without creating a file. Give the command."
+    },
+    {
+      "task_id": "budget_dev_9a5fa737ea2e4177bfe55eabad345732",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, place portrait.png on the system clipboard as an image so it can be pasted into Pages. Give a command using built-in macOS tools."
+    },
+    {
+      "task_id": "budget_dev_733878a5894e48629cfa6b6e36a2b657",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, continuously monitor the clipboard and print new text whenever its contents change. Give a built-in command or shell script."
+    },
+    {
+      "task_id": "budget_dev_d8a0c6c1c6614794b40467bdf8d0bea5",
+      "family_id": "a8342bab79c64eb9ae7804496802b0f2",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, retrieve the clipboard's RTF representation instead of its plain-text representation. Give the built-in clipboard command."
+    },
+    {
+      "task_id": "budget_dev_0a8eca7066194d9a9776ee53d81903f2",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, list installed speech voices so I can choose a voice suitable for a French announcement. Give the command."
+    },
+    {
+      "task_id": "budget_dev_1c7c37bbd9a442d28a4d2c623ff6a814",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, speak Please take your seats using the Samantha voice at 155 words per minute. Give the command."
+    },
+    {
+      "task_id": "budget_dev_c6162a7c5462447db2c0ed973d80e12b",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, synthesize Boarding has begun into a speech audio file named boarding.aiff. Give the command."
+    },
+    {
+      "task_id": "budget_dev_dc3177a873fd4e6baf8b06ff824afaa8",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, synthesize an SSML document in announcement.xml while honoring its break and emphasis tags. Give a command using the built-in speech engine."
+    },
+    {
+      "task_id": "budget_dev_3f92dfb0953d4a05b1a3f770e776aadd",
+      "family_id": "de467238082b4c25bab8d0db77ba875a",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, generate subtitles with word timestamps alongside synthesized speech for Please take your seats. Give a command using the built-in speech engine."
+    },
+    {
+      "task_id": "budget_dev_103c9e974a774c51ab16c044d86d181b",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, capture the screen including the mouse pointer and save it as pointer-example.png. Give the command."
+    },
+    {
+      "task_id": "budget_dev_37b4272a93e6480796964912adcf133d",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, open every .pdf file in the current directory using each file's associated application. Give the command."
+    },
+    {
+      "task_id": "budget_dev_9b565fb5dcae493498bf9c6ff7d12249",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, take a screenshot of the window belonging to process ID 4821 without manual selection. Give a command using built-in tools."
+    },
+    {
+      "task_id": "budget_dev_f4e122d302d94ce6ad155a60dbd008b5",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, use Spotlight metadata to find files created in the last hour anywhere on the machine. Give the search command."
+    },
+    {
+      "task_id": "budget_dev_983e2f0c0e2c4a0ab959015e30705813",
+      "family_id": "4addbcd762474a11b07074b6aa37ed8b",
+      "platform": "osx",
+      "prompt": "In the native macOS zsh shell, close every open Preview window while keeping Preview running. Give a command using built-in tools."
+    },
+    {
+      "task_id": "budget_dev_d788b6e285654f6680a67e23acafbf13",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell with the tldr client installed, request the documentation for the original Unix cat program rather than the PowerShell alias. Give the tldr command."
+    },
+    {
+      "task_id": "budget_dev_6cbc45e77b704e61a31f92fa2d1873b9",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell with the tldr client installed, request the help page for the native command behind the cat alias. Give the tldr command."
+    },
+    {
+      "task_id": "budget_dev_aef32370465f47b9aaf7b38acbd9de85",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell with the tldr client installed, request the help page for the native command behind the move alias. Give the tldr command."
+    },
+    {
+      "task_id": "budget_dev_45f143b3a559479dbad57fc22e2600ec",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, report every command resolution candidate named cat, including aliases and executables, in resolution order. Give the native command."
+    },
+    {
+      "task_id": "budget_dev_cb8b6979269b4b309a706520a257855e",
+      "family_id": "ab480a38588b4c7e853e3a46f1823b45",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, temporarily remove the cat alias for this session so an installed executable of that name can be invoked directly. Give the native command."
+    },
+    {
+      "task_id": "budget_dev_98259e0d403741fc933faa31891b6fd6",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search all files in the current directory for spooler regardless of letter case. Give the text-search command."
+    },
+    {
+      "task_id": "budget_dev_a8aded11f3064b88992374b63fd93083",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search all files in the current directory for spooler and prefix each matching line with its line number. Give the command."
+    },
+    {
+      "task_id": "budget_dev_98684c4d969748089b34e7a7a1845069",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search print-errors.txt for jobs containing spooler and print just the total number of matching lines. Give the native command."
+    },
+    {
+      "task_id": "budget_dev_027aff962a764782b708631ade74102b",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), find spooler in a UTF-16 encoded text file print-errors.txt without converting the file first. Give a native command that handles that encoding."
+    },
+    {
+      "task_id": "budget_dev_351c9bd833d14e15a5373bdbf191c95d",
+      "family_id": "0d80175810984ad7bfe142762d7a0447",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), extract only the matching text JOB followed by exactly four digits from print-errors.txt, omitting the rest of each line. Give the command."
+    },
+    {
+      "task_id": "budget_dev_7940c2fd56e04b5284ec77dd2ea66b56",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), copy all .csv files from C:\\dispatch into E:\\dropbox without copying files of other extensions. Give the command."
+    },
+    {
+      "task_id": "budget_dev_1c8595f6115b44b7a11ffff234007506",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), rename C:\\dispatch\\manifest-draft.csv to C:\\dispatch\\manifest-final.csv; the target does not exist. Give the command."
+    },
+    {
+      "task_id": "budget_dev_506924aaf2694c968cfef750b36fa083",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, list only files immediately inside the current directory, omitting its subdirectories. Give the command."
+    },
+    {
+      "task_id": "budget_dev_5a70f57a75914276a5f0a3d75bd32fb5",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), recursively list C:\\dispatch and show the combined byte total across every descendant directory. Give the native command."
+    },
+    {
+      "task_id": "budget_dev_37617341e6ba40af8bbbe203220e65b0",
+      "family_id": "46a0c178dc554de59eadee7c6f40b10b",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, list symbolic links in C:\\dispatch and display each link's target path. Give the native command."
+    }
+  ]
+}

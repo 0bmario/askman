@@ -1,0 +1,371 @@
+{
+  "metadata": {
+    "purpose": "development-only",
+    "source_name": "tldr-pages",
+    "source_revision": "e1cb966e711d73c42d75e79834be7e4dc17264ef",
+    "manifest_path": "tests/fixtures/tldr-evaluation-v2/manifest-v4.json",
+    "manifest_sha256": "3548a0b5b4190c144354f1ee7cc505bdae3c3c877a7d409bb32a94900c637b85"
+  },
+  "tasks": [
+    {
+      "task_id": "dev_66fc786d876d4ba7b93dc61afc712c91",
+      "family_id": "32b63a99073448b0bdf3ae011c63577e",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU coreutils, join chapters/intro.txt and chapters/results.txt, in that order, into release.txt, replacing its existing contents. Give the command."
+    },
+    {
+      "task_id": "dev_75eac8f0c9b44ed1aea261f462e00f92",
+      "family_id": "32b63a99073448b0bdf3ae011c63577e",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU coreutils, add notices/license.txt and notices/credits.txt to the end of an existing release.txt without discarding its current text. Give the command."
+    },
+    {
+      "task_id": "dev_75ede980094843339f5f19a29880f094",
+      "family_id": "32b63a99073448b0bdf3ae011c63577e",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU coreutils, copy each .svg file in the current directory into artwork/, asking before any existing file is overwritten. Give the command."
+    },
+    {
+      "task_id": "dev_d9b3d62d51ab49868a8af617657cf48f",
+      "family_id": "32b63a99073448b0bdf3ae011c63577e",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU coreutils, copy the entire package/ directory into backup/ while preserving ownership, permissions, timestamps, and hard-link relationships. Give the command."
+    },
+    {
+      "task_id": "dev_092c16d6323247649d0ae98abf7f1ca9",
+      "family_id": "32b63a99073448b0bdf3ae011c63577e",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU coreutils, display release.txt with a number beside every nonempty line, leaving blank lines unnumbered. Give the command."
+    },
+    {
+      "task_id": "dev_cb46dbcf3dda4a77b57586084a085eb7",
+      "family_id": "5722a11df4b84b89844aea00de7a0d5c",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU find, search ./workspace for .rb files while excluding every path under a directory named vendor. Give the command."
+    },
+    {
+      "task_id": "dev_761615b42d4a4ab5aced0a7dfc5d9488",
+      "family_id": "5722a11df4b84b89844aea00de7a0d5c",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU grep, look for the literal text rate[0] in measurements.txt; the square brackets must not be interpreted as a regular expression. Give the command."
+    },
+    {
+      "task_id": "dev_82234d6fb05947dd9a39e5ec58a234fc",
+      "family_id": "5722a11df4b84b89844aea00de7a0d5c",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU find, search ./workspace for .rb files and descend into directories reached through symbolic links. Give the command."
+    },
+    {
+      "task_id": "dev_ede6349ff5714da281cbe7738fef8335",
+      "family_id": "5722a11df4b84b89844aea00de7a0d5c",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU grep, report only the number of lines containing timeout in each of gateway.log and worker.log. Give the command."
+    },
+    {
+      "task_id": "dev_5b803defce544c7db8687fd8f5e4b96c",
+      "family_id": "5722a11df4b84b89844aea00de7a0d5c",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU grep, emit names of matching files beneath ./workspace separated by NUL bytes so filenames with newlines remain safe. Search for deprecated. Give the command."
+    },
+    {
+      "task_id": "dev_d76930342faa4db2b29a436c2a0fd1ac",
+      "family_id": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with sed, transform streamed output from generate-report by replacing every occurrence of pending with ready on each line, printing the transformed stream. Give the pipeline."
+    },
+    {
+      "task_id": "dev_e971dd68e06843388dd4aca532c40089",
+      "family_id": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU sort, sort queue-times.txt numerically and write the result back to queue-times.txt using the sorting command itself. Give the command."
+    },
+    {
+      "task_id": "dev_1ed82fd506324a80a9a8041f7d2a8908",
+      "family_id": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU sort, produce sorted unique lines from attendee-names.txt. Give the command."
+    },
+    {
+      "task_id": "dev_87bd2d6b4d1944c4bddfb9d7d48fbe56",
+      "family_id": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU sed, replace every occurrence of pending with ready directly inside queue.conf and retain the original as queue.conf.bak. Give the command."
+    },
+    {
+      "task_id": "dev_b110f3afdef74c46b0d76f263a7a6ec6",
+      "family_id": "75ae6a8ad3b54a3b965318238ac62d9f",
+      "platform": "common",
+      "prompt": "In a Bash shell on Unix with GNU sort, order release-tags.txt by version numbers so v2.9 comes before v2.10. Give the command."
+    },
+    {
+      "task_id": "dev_f7c87f2011c64c5cbd06507c092b829e",
+      "family_id": "ba749ef366884d319d45a7a63780f9a1",
+      "platform": "linux",
+      "prompt": "On Debian Linux in Bash, refresh APT package metadata before installing anything. Give the command including the needed privilege elevation."
+    },
+    {
+      "task_id": "dev_5dbfa13ee14f45a7a781dfc806bcaa00",
+      "family_id": "ba749ef366884d319d45a7a63780f9a1",
+      "platform": "linux",
+      "prompt": "On Debian Linux in Bash, show detailed APT information for the package imagemagick without installing it. Give the command."
+    },
+    {
+      "task_id": "dev_461a956acb1a4b63a496297981ceb316",
+      "family_id": "ba749ef366884d319d45a7a63780f9a1",
+      "platform": "linux",
+      "prompt": "On Debian Linux in Bash, prevent the installed imagemagick package from being upgraded until I explicitly release that restriction. Give the native package-management command."
+    },
+    {
+      "task_id": "dev_e661dd01e5984036bb48f9a48717b06a",
+      "family_id": "ba749ef366884d319d45a7a63780f9a1",
+      "platform": "linux",
+      "prompt": "On Debian Linux in Bash, download the imagemagick package archive into the current directory without installing the package. Give the native APT command."
+    },
+    {
+      "task_id": "dev_1b7f401548ca4aa7b12a73629fbdea5e",
+      "family_id": "ba749ef366884d319d45a7a63780f9a1",
+      "platform": "linux",
+      "prompt": "On Debian Linux in Bash, apply available security updates only while leaving all other available upgrades pending. Give a native package-management command that enforces that restriction."
+    },
+    {
+      "task_id": "dev_6e2f494c75d2456180f574627c0797fa",
+      "family_id": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "platform": "linux",
+      "prompt": "On a Linux machine using systemd, show only failed socket units so I can investigate a listener outage. Give the command."
+    },
+    {
+      "task_id": "dev_cfa2434ffd024d089006cf856683d48d",
+      "family_id": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "platform": "linux",
+      "prompt": "On a Linux machine using systemd, display journal messages from sync-agent.service since that service most recently started. Give the Bash command."
+    },
+    {
+      "task_id": "dev_1a4f65ff521943c0a6703b8f0c46324a",
+      "family_id": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "platform": "linux",
+      "prompt": "On a Linux machine using systemd, refresh the manager after changing a unit file so it discovers the updated definition. Give the command."
+    },
+    {
+      "task_id": "dev_e1af2f2d0a56499499416c21fc6aa553",
+      "family_id": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "platform": "linux",
+      "prompt": "On a Linux machine using systemd, produce a graphical dependency diagram for sync-agent.service. Give the native systemd command."
+    },
+    {
+      "task_id": "dev_b17ce8a9a1024ad0937d604aca8087b1",
+      "family_id": "beb62b7e9d0e478f85052b777ebdf0c1",
+      "platform": "linux",
+      "prompt": "On a Linux machine using systemd, persistently limit sync-agent.service to one quarter of one CPU through a command-line unit property change. Give the command."
+    },
+    {
+      "task_id": "dev_70b9de336dd14e9c879969d8db2accd0",
+      "family_id": "049bbef2936a4281849dd0a9bcc78126",
+      "platform": "linux",
+      "prompt": "On Linux in Bash, show filesystem usage for the filesystem containing /srv/ingest rather than listing every filesystem. Give the command."
+    },
+    {
+      "task_id": "dev_05f47dcff2ce4e8ba9531345a127fb0c",
+      "family_id": "049bbef2936a4281849dd0a9bcc78126",
+      "platform": "linux",
+      "prompt": "On Linux in Bash, show a compact list of network interfaces with their network-layer addresses. Give the native ip command."
+    },
+    {
+      "task_id": "dev_ba423d6ccffc465b8953dbdc1c310acf",
+      "family_id": "049bbef2936a4281849dd0a9bcc78126",
+      "platform": "linux",
+      "prompt": "On Linux in Bash, list the ten directories under /srv/ingest that consume the most disk space, with readable sizes. Give the command."
+    },
+    {
+      "task_id": "dev_52b0e04c8df8466288318d0efe8837de",
+      "family_id": "049bbef2936a4281849dd0a9bcc78126",
+      "platform": "linux",
+      "prompt": "On Linux in Bash, measure the resident memory used by the process with PID 7312 rather than total system memory. Give the command."
+    },
+    {
+      "task_id": "dev_5424e0463c254689a09162bc1d4a294d",
+      "family_id": "049bbef2936a4281849dd0a9bcc78126",
+      "platform": "linux",
+      "prompt": "On Debian Linux in Bash, persist a default route via 192.0.2.1 on enp4s0 so it survives reboot; assume systemd-networkd manages that interface. Give the configuration and activation steps."
+    },
+    {
+      "task_id": "dev_8142e52eb87b4298bb103a5dfddbaf11",
+      "family_id": "ca9873f90e604121b6678f02cc10e425",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, put the complete contents of draft-message.txt onto the system clipboard. Give the command."
+    },
+    {
+      "task_id": "dev_fc2c95c2c6d14aa29111357d658b48a9",
+      "family_id": "ca9873f90e604121b6678f02cc10e425",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, save the current system clipboard text to captured-message.txt, replacing any existing file. Give the command."
+    },
+    {
+      "task_id": "dev_43a43c4773f44cd0858ff5748c898ba6",
+      "family_id": "ca9873f90e604121b6678f02cc10e425",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, filter the current clipboard text for lines containing invoice and print those lines in Terminal. Give the pipeline."
+    },
+    {
+      "task_id": "dev_ed0b66bc29c24bde934cf83284de84de",
+      "family_id": "ca9873f90e604121b6678f02cc10e425",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, retrieve the clipboard entry immediately preceding the current one using built-in command-line tools. Give the command."
+    },
+    {
+      "task_id": "dev_253586f1eb274416af963184889095f3",
+      "family_id": "ca9873f90e604121b6678f02cc10e425",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, put fragment.html onto the system clipboard as rich HTML so pasting into a rich-text editor preserves formatting. Give a command using built-in macOS tools."
+    },
+    {
+      "task_id": "dev_dbdb601763d0446dbeb06ada56342e09",
+      "family_id": "f110b7753e724685a36322e249d6c664",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, capture the screen to rehearsal.png after a delay of seven seconds. Give the command."
+    },
+    {
+      "task_id": "dev_b80eeaf2475540759cf3fe159062d42b",
+      "family_id": "f110b7753e724685a36322e249d6c664",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, read the text in narration.txt aloud using the built-in speech tool. Give the command."
+    },
+    {
+      "task_id": "dev_e4f4e47dcc07487c8104848eb6308ebd",
+      "family_id": "f110b7753e724685a36322e249d6c664",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, record the screen and microphone audio together into rehearsal.mp4 using the built-in capture tool. Give the command."
+    },
+    {
+      "task_id": "dev_bb2e0318a22a4fd18c08de03f5b3b278",
+      "family_id": "f110b7753e724685a36322e249d6c664",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, synthesize the phrase Welcome to the rehearsal directly into an MP3 file named greeting.mp3, without a separate conversion step. Give the command."
+    },
+    {
+      "task_id": "dev_f806e6ca5f0a4fc3ad8d9c38e50f4443",
+      "family_id": "f110b7753e724685a36322e249d6c664",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, open notes.txt in TextEdit and keep the shell command waiting until that editor session closes. Give the command."
+    },
+    {
+      "task_id": "dev_3b81790fac064c949363000b3c164ab4",
+      "family_id": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, use Spotlight to find files containing the text launch checklist only within /Users/alex/Projects. Give the command."
+    },
+    {
+      "task_id": "dev_91ddb622255649f3bdaced9a6812f064",
+      "family_id": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, reveal /Users/alex/Projects/launch.pdf in Finder with that file selected. Give the command."
+    },
+    {
+      "task_id": "dev_a8f8bacf2d3745bf88d8f518b5606b89",
+      "family_id": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, start a new application instance using the bundle identifier com.apple.TextEdit. Give the command."
+    },
+    {
+      "task_id": "dev_9f8e0de85d3e41e4bdf90b55a72c5e89",
+      "family_id": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, rebuild the Spotlight index for the startup volume because searches are stale. Give the native command."
+    },
+    {
+      "task_id": "dev_111e44a794844d4b8b04108b0ec44223",
+      "family_id": "1a0eaa86d98f49d8a1603c041f1afef2",
+      "platform": "osx",
+      "prompt": "On macOS in the native zsh shell, keep a Spotlight search for files named launch.pdf running and report updates when matching files appear or disappear. Give the command."
+    },
+    {
+      "task_id": "dev_9c63bfa431bd4e6da97a1d2803bf3181",
+      "family_id": "63cb71cbafd94b539d89042bc5c4ad09",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), copy C:\\handoff\\agenda.txt into D:\\inbox\\ while retaining its filename. Give the command."
+    },
+    {
+      "task_id": "dev_d9f2e58cf6224e2d9fa107b24ba8fd57",
+      "family_id": "63cb71cbafd94b539d89042bc5c4ad09",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), move C:\\handoff\\agenda.txt into D:\\inbox\\ and always ask before overwriting an existing file. Give the command."
+    },
+    {
+      "task_id": "dev_64995033a07642b3aebd69d1f09d0785",
+      "family_id": "63cb71cbafd94b539d89042bc5c4ad09",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), copy C:\\handoff and all its subdirectories into D:\\inbox, including empty directories. Give the native command."
+    },
+    {
+      "task_id": "dev_96396720a12c4f31872641d54332e0f2",
+      "family_id": "63cb71cbafd94b539d89042bc5c4ad09",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), copy C:\\handoff\\agenda.txt to D:\\inbox\\agenda.txt while preserving its NTFS permissions. Give the native command."
+    },
+    {
+      "task_id": "dev_a625dd3375b446b0b8d55140d3fefdbb",
+      "family_id": "63cb71cbafd94b539d89042bc5c4ad09",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), compare the SHA-256 hashes of C:\\handoff\\agenda.txt and D:\\inbox\\agenda.txt to verify the copy. Give the native commands."
+    },
+    {
+      "task_id": "dev_04be067d38ad4d84a1d135e78ff42096",
+      "family_id": "823861f9273b4cdcafb85e8fe5ca9082",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search every .txt file in the current directory for the exact phrase payment overdue, treating the space as part of one literal phrase. Give the command."
+    },
+    {
+      "task_id": "dev_7ae173044d974c07aa42d5e92a0a1f70",
+      "family_id": "823861f9273b4cdcafb85e8fe5ca9082",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search all files beneath the current directory recursively for failed. Give the native text-search command."
+    },
+    {
+      "task_id": "dev_4ad2f57d877644a39a87fada71243f2f",
+      "family_id": "823861f9273b4cdcafb85e8fe5ca9082",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search files in the current directory for failed but output only filenames containing a match. Give the command."
+    },
+    {
+      "task_id": "dev_4dd91bac0f8b40a0b638be579aea4cba",
+      "family_id": "823861f9273b4cdcafb85e8fe5ca9082",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search audit.txt for failed and include two surrounding lines before and after each match. Give a native command."
+    },
+    {
+      "task_id": "dev_36eea3f1be3145e3a2eca1af875b7d7f",
+      "family_id": "823861f9273b4cdcafb85e8fe5ca9082",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), search audit.txt for failed and stop after the first five matching lines. Give a native command."
+    },
+    {
+      "task_id": "dev_01b9dfd24d6e489d8f109f95000cc3e9",
+      "family_id": "006f336ec75c43e4aa6506727dd85bcd",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, list only directories immediately within the current directory. Give the command."
+    },
+    {
+      "task_id": "dev_305339475a024d53b121c5186bdff608",
+      "family_id": "006f336ec75c43e4aa6506727dd85bcd",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), list the current directory entries ordered by date and time with the oldest first. Give the command."
+    },
+    {
+      "task_id": "dev_c4420818e4bb48d5808b72806ee76313",
+      "family_id": "006f336ec75c43e4aa6506727dd85bcd",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell, list only files under C:\\handoff recursively and display each full path and byte size. Give the command."
+    },
+    {
+      "task_id": "dev_543d642d71c24cbea28f4b31ef2333b9",
+      "family_id": "006f336ec75c43e4aa6506727dd85bcd",
+      "platform": "windows",
+      "prompt": "In native Windows Command Prompt (cmd.exe), list only directories in the current folder with bare names and no extra columns. Give the command."
+    },
+    {
+      "task_id": "dev_67186c85488d4837b420441c99c63d5a",
+      "family_id": "006f336ec75c43e4aa6506727dd85bcd",
+      "platform": "windows",
+      "prompt": "In native Windows PowerShell without GNU coreutils installed, print just the final twenty lines of C:\\handoff\\audit.txt using the native file-content command. Give the command."
+    }
+  ]
+}

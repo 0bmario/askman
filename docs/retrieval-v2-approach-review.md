@@ -6,21 +6,30 @@ Historical v2 evidence includes two dev-only paired gates and one authorized
 canonical run; the broad candidate failed its independent holdout. The smaller
 candidate was selected on dev only. It was later scored once against fresh
 holdout v1 with explicit authorization; the independent gate was inconclusive
-and the candidate is not approved.
+and the candidate is not approved. It was later scored once on fresh holdout
+v2 after explicit user authorization; that independent gate was also
+inconclusive. Neither consumed holdout was used for tuning.
 
 ## Recommendation
 
-Keep shipped Askman as the product baseline. The current candidate is
-main-compatible dense retrieval with focused query rules, same-page example
-selection, a raw-distance cutoff of 0.60, and a 0.05 lexical-overlap rerank on
-the dense top-eight pool. It is the best measured variant on a newly frozen
-dev-only cohort: Success@1 15/30 vs main 13/30 and Success@3 22/30 vs 21/30,
-with no measured safety, platform, offline, latency, or memory regressions.
-The paired-bootstrap lower bound is 0.0, so this is not independent evidence
-and the candidate is not approved for release. RRF remains out because it
-showed no additional value. Validate this candidate on a new unseen holdout
-only after explicit authorization; do not reuse or tune from consumed
-holdouts.
+Keep shipped Askman as the product baseline. The latest development candidate
+adds two narrow source-backed query rewrites to the main-compatible dense
+path: file-extension search and Windows moves across distinct drives. On the
+new dev extension cohort, the canonical CLI gate measured 22/30 vs main 13/30
+Success@1 and 27/30 vs 21/30 Success@3, with false answers tied at 0/30. The
+original dev cohort measured 28/30 vs 18/30 Success@1 and 30/30 vs 23/30
+Success@3, with false answers tied at 1/30. These are development results;
+the extension cohort selected the new rules, and the original cohort has
+already been used in candidate work. One authorized independent holdout run
+improved Success@1 and Success@3 but failed common-platform and family
+guardrails; the candidate is not releasable. RRF remains out because controlled
+ablations showed no additional value.
+
+A later one-factor hard check of requested actions and constraints against
+retrieved examples reduced false answers on new dev data but regressed
+Success@1, Success@3, and coverage. Reject that filter too; it is not part of
+the development candidate. The latest independent result still applies only
+to the query-rewrite candidate, and shipped main remains the product choice.
 
 ## Earlier focused candidate — dev only
 
@@ -74,6 +83,27 @@ changes. Preserve the complete gate evidence at
 [`main-vs-retrieval-v2-focused-fresh-holdout-v1.json`](reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.json)
 and
 [`rendered report`](reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v1.md).
+
+## Authorized lexical-candidate holdout v2 result
+
+Candidate ba74692cf79fa9c294f685fbade8f9315aeacdd1 was scored once after
+explicit authorization against the frozen v2 holdout and the identical pinned
+142-record corpus. On the default dev split, Success@1 improved 18/30 to 28/30
+and Success@3 23/30 to 30/30. On the independent holdout, Success@1 improved
+12/30 to 15/30 and Success@3 13/30 to 17/30. Holdout incorrect answered tasks
+fell 9/22 to 3/20; false answers tied at 5/30.
+
+The independent one-sided 95% paired-bootstrap lower bound was 0.0, and
+common-platform Success@3 fell 4/7 to 3/7. The combined gate also found one
+negative Success@1 family. The release decision is inconclusive, so main
+remains shipped. Network-denied execution had no failures; measured p95
+latency and peak memory stayed within 20% of main. The readiness validator
+recognizes the v2 frozen inputs and rejects promotion because the independent
+gate conditions do not pass. Do not tune from this consumed holdout. Its
+dataset and manifest were not changed. The full result is
+[main-vs-retrieval-v2-focused-fresh-holdout-v2.json](reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v2.json)
+with its
+[rendered report](reproducibility/artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v2.md).
 
 ## Earlier broad-candidate matched-corpus results
 
@@ -294,7 +324,7 @@ commands that no single TLDR example demonstrates. This product retrieves
 examples; its current contract does not synthesize new commands. Missing
 support is a corpus/product-scope issue, not necessarily a ranking bug.
 
-## Selected retrieval path
+## Earlier focused retrieval path — historical (2026-09-26)
 
 The product path validates the active immutable bundle and its
 main-compatible recipe, embeds the query with `FocusedIntentRulesV1` (five
@@ -385,18 +415,224 @@ Full paired CLI artifacts: [focused baseline](reproducibility/artifacts/main-vs-
 1. Candidate implementation, dev-only paired reports, controlled ablations,
    installed-product sample, and the authorized fresh-holdout report are
    recorded.
-2. Candidate `3494a11` did not pass independent validation. The new lexical
-   candidate has only dev evidence and must not be promoted yet. Do not tune
-   from either consumed holdout. Holdout v2 is frozen for candidate `ba74692`
-   and remains unscored; proceed only after explicit scoring authorization.
-   See the [holdout v2 freeze record](reproducibility/fresh-holdout-v2-freeze.md).
+2. Candidates `3494a11` and `ba74692` did not pass independent
+   validation. Both fresh holdouts are consumed. Do not tune from them. A new
+   candidate needs a fresh unseen holdout and explicit authorization before
+   scoring. See the [holdout v2 freeze record](reproducibility/fresh-holdout-v2-freeze.md).
 3. The exact paired gate uses the 142-record pinned evaluation corpus. The
    installed 0.3.3 database is a different, larger corpus; its sampled behavior
    and stored-row inventory were reported separately. Full-source parsing
    recall for the installed database remains unmeasured.
 
-The lexical candidate has no measured regression on the new paired dev cohort,
-but its bootstrap lower bound is zero and there is no independent result for
-this candidate. Shipped main remains the product baseline. A passing
-development fixture alone does not establish improvement for the installed
+The previous focused lexical candidate (`ba74692`) improved on both dev
+cohorts and holdout v2 but failed the independent bootstrap and no-regression
+conditions. Those results did not validate or tune the newer query-rule
+candidate. Its independent v3 result is recorded below and also fails release
+guardrails. Shipped main remains the product baseline. A passing benchmark
+result does not establish improvement on the separately sampled installed-
 product corpus.
+
+## Latest query-rule candidate — development selection (2026-09-27)
+
+The source review found pinned operational examples that matched two dev
+extension families the focused-v1 candidate missed. Controlled dense ablations
+held embedding text, corpus, selection, cutoff, lexical rerank, display limit,
+and guards fixed. Extension-only measured 19/30 Success@1 and 24/30 Success@3;
+cross-drive-only measured 18/30 and 25/30; the combined mode measured 22/30 and
+27/30, with 0/30 false answers for all modes. Focused-v1 measured 15/30,
+22/30, and 0/30. The targeted extension family moved from 0/5 to 4/5 Success@1;
+the Windows cross-drive family moved from 2/5 to 5/5. Full internal outcomes:
+[`focused query rewrite ablation`](reproducibility/artifacts/focused-query-rewrites-dev-extension-v1-native-platform.md).
+
+The exact CLI comparison used the same 142 parser-v4 records as installed main.
+On the dev-extension cohort, main/candidate measured Success@1 13/30→22/30,
+Success@3 21/30→27/30, coverage 24/60→29/60, incorrect answered 3/24→2/29,
+and false answers 0/30→0/30. Success@1/Success@3 improved or tied on every
+platform. The paired bootstrap one-sided 95% lower bound was 16.7 pp; the
+runner still returns `inconclusive` because this is dev-only data. On the
+previously inspected default dev split, main/candidate measured Success@1
+18/30→28/30, Success@3 23/30→30/30, and false answers 1/30→1/30. Neither cohort
+is independent validation.
+
+Both final gate reruns passed network-denied execution, latency, and memory
+conditions. On the custom cohort, fresh p95 was 87.916/87.063 ms and peak
+memory 253,461,200/236,339,896 B (candidate/main); warmed p95 was
+86.624/89.515 ms and memory 236,536,504/236,798,672 B. On default dev, fresh
+p95 was 86.645/86.747 ms and peak memory 283,067,136/236,339,920 B; warmed
+p95 was 90.365/86.950 ms and memory 237,732,536/236,470,968 B. Fresh default
+memory is 19.8% higher, within the 20% gate limit but with little headroom.
+Corpus-record equivalence passed for all 142 records.
+
+An initial candidate restricted the extension rewrite to the abstract
+`common` platform. The CLI maps common tasks to the host OS, so that rule did
+not fire on macOS. The corrected rule covers Linux/macOS shared-page selection
+and excludes Windows. The first gate artifact remains preserved as an
+exploratory scope check:
+[`initial platform scope`](reproducibility/artifacts/main-vs-dev-extension-v1-focused-v2-query-rules.md).
+
+Before the authorized v3 run, this candidate had not been scored on a holdout;
+the v1 and v2 outcomes were not used to choose these rules. The v3 freeze and
+its scoring history are in the
+[holdout v3 record](reproducibility/fresh-holdout-v3-freeze.md).
+
+## Authorized fresh holdout v3 result (2026-09-27)
+
+The canonical run compared this candidate with installed main on the pinned
+142-record corpus. On v3, Success@1 improved 12/30→18/30 and Success@3
+16/30→22/30; false answers tied at 0/30. The one-sided 95% paired-bootstrap
+lower bound on holdout Success@1 gain was 6.7 pp. Across dev plus holdout,
+Success@1 was 30/60→46/60 and Success@3 39/60→52/60. The combined bootstrap
+lower bound was 16.7 pp. Treat the development figures as development evidence;
+only v3 is independent evidence.
+
+The gate is **inconclusive**, not a release pass: common-platform holdout
+Success@3 fell 5/8→4/8, incorrect answered tasks rose 1/6→1/5, and the
+`fresh-v3-clean-common-find-ext-markdown-notes` family fell 1/1→0/1 at
+Success@1. False answers, offline operation, latency, and memory passed; both
+CLI runs completed. The readiness validator rejected the report on the
+common-platform Success@3 regression. Keep installed main shipped.
+
+Holdout v3 is consumed. Its frozen prompt pool, dataset, and manifest remain
+unchanged; the report is preserved at
+[`main-vs-retrieval-v2-focused-query-rules-fresh-holdout-v3.md`](reproducibility/artifacts/main-vs-retrieval-v2-focused-query-rules-fresh-holdout-v3.md).
+Do not tune from v3 or score it again. Further development must use development
+evidence without using v3 outcomes; independent evaluation of any later
+candidate requires a new unseen holdout and explicit authorization.
+
+## Description-only embedding A/B — development rejection (2026-09-27)
+
+The next one-factor experiment compared main-compatible example text with
+example-description-only vectors. Both arms used the same frozen 60-task
+development cohort and identical 142 parser-v4 records. The separate label
+audit checked 24 source pages, 142 indexed examples (139 operational rows),
+platform eligibility, and exact accepted example IDs before retrieval. The two
+earlier freeze attempts are preserved; neither reached query execution. The
+final freeze passed dataset, corpus, and label validation.
+
+The installed-main CLI/data snapshot scored 11/30 Success@1, 15/30
+Success@3, 26/30 false answers, and 2/17 incorrect answered. The
+main-compatible control candidate tied Success@1, fell to 14/30 Success@3,
+and lowered false answers to 23/30 and incorrect answered to 1/15. The
+description-only candidate fell to 9/30 Success@1 and 14/30 Success@3, raised
+false answers to 29/30, and raised incorrect answered to 9/23. Against the
+control it lost two first results, tied top-three results, added six false
+answers, and regressed incorrect answered rate from 1/15 to 9/23. Linux and
+macOS Success@3 regressed; Windows gains did not offset safety and platform
+losses. Reject description-only without tuning.
+
+Network-denied CLI execution had no failures. Latency and memory stayed within
+the 20% limit, although treatment fresh-process peak memory reached
+282,755,816 B versus main 238,027,496 B (+18.8%). These runs are development
+evidence, not independent validation. No holdout dataset, labels, reports, or
+results were accessed; the dev-only gate read benchmark freeze manifest
+metadata only. V3's result applies only to the focused query-rule candidate.
+Keep shipped main. Any next independent score needs a new unseen holdout and
+fresh explicit authorization. Full details: [comparison](reproducibility/artifacts/description-embedding-dev-v3-comparison.md),
+[machine-readable report](reproducibility/artifacts/description-embedding-dev-v3-comparison.json),
+[protocol](reproducibility/artifacts/description-embedding-dev-v3-protocol.md).
+
+## Source-backed operational-example fit filter — development rejection (2026-09-27)
+
+The next one-factor experiment tested whether explicit query actions and
+constraints could be checked against each retrieved example before display.
+Control and treatment kept the same parser-v4 records, main-compatible
+embedding text, focused-v2 rewrites, candidate budget, platform selection,
+0.60 raw-distance cutoff, lexical 0.05 reranking, abstention guards, and
+top-three limit. Treatment added only the source-backed example-fit filter.
+
+The blind source audit found 28 supported and 32 unsupported tasks, not the
+author draft's planned 30/30. Those independent labels were used. The v1 freeze
+stopped during preflight before any CLI query; its raw artifacts remain
+preserved. The final v2 freeze corrected the corpus-manifest SHA metadata,
+passed source-ID/platform validation, and was scored once by the canonical
+development-only gate. No holdout data was accessed.
+
+| Run | Success@1 | Success@3 | Coverage | Incorrect answered | False answers |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Main reference | 19/28 | 21/28 | 50/60 | 5/26 | 24/32 |
+| Fixed-retrieval control | 23/28 | 25/28 | 49/60 | 1/26 | 23/32 |
+| Hard-fit filter | 16/28 | 17/28 | 21/60 | 1/18 | 3/32 |
+
+Treatment lost seven first-result and eight top-three tasks versus control,
+while abstaining on 28 additional prompts. Success@1 fell on all four
+platforms; Success@3 regressed on common, Linux, and Windows relative to main.
+Both runs completed under network denial with zero CLI failures. Latency and
+memory stayed inside the 20% limits. Quality rejects the filter despite its
+false-answer reduction; keep it off and keep shipped main.
+
+This is development evidence from independently audited labels, not
+independent candidate validation. Do not tune the filter on this cohort. A
+soft constraint-aware reranker was the next hypothesis at that point; it was
+later tested on a fresh cohort and rejected, as recorded below. Any release
+claim still requires a new unseen holdout and explicit authorization.
+
+The actual installed v0.3.3 sample remains separate: its larger 30,205-row
+database cannot be scored with these 142-example corpus labels. The recorded
+installed sample and hash-verified inventory remain the evidence for actual
+product behavior. Full new experiment details:
+[comparison](reproducibility/artifacts/operational-example-fit-v1-comparison.md),
+[control](reproducibility/artifacts/operational-example-fit-v1-control.md),
+[treatment](reproducibility/artifacts/operational-example-fit-v1-treatment.md),
+[protocol](reproducibility/artifacts/operational-example-fit-v1-protocol.md).
+
+## Bounded soft-fit reranking — development rejection (2026-09-27)
+
+A new 60-prompt cohort was authored and source-audited before either run.
+The final labels contain 29 answerable and 31 unsupported tasks, 12 families,
+and 15 tasks per platform. An independent source-only review marked one
+numeric in-place sort prompt unsupported: the pinned page has separate
+numeric-sort and in-place-output examples, but no single example covers both.
+Raw prompts, initial labels, audit, and correction are preserved. The frozen
+dataset SHA-256 is
+`418ac923013146d3b60d920aba50a5d9f69afd3da1c658495c226b648a772daa`.
+
+The one-factor treatment added a 0.05 × unsupported-rule-fraction penalty to
+the existing lexical-adjusted distance; all query rewrites, embeddings,
+candidate selection, cutoff, abstention, and display behavior stayed fixed.
+On the same 142 parser-v4 records, the main reference, control, and treatment
+measured:
+
+| Run | Success@1 | Success@3 | Coverage | Incorrect answered | False answers |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Main reference | 13/29 | 15/29 | 39/60 | 8/23 | 16/31 |
+| Control | 19/29 | 22/29 | 41/60 | 2/24 | 17/31 |
+| Soft-fit | 18/29 | 22/29 | 41/60 | 2/24 | 17/31 |
+
+Treatment lost one Success@1 task vs control, tied Success@3, and regressed
+Linux Success@1 from 5/7 to 4/7. It changed neither coverage nor false-answer
+count. Control’s first-result and top-three gains over main came with one
+additional false answer, so this ranking-only adjustment cannot meet the
+full guardrails. Reject it. Both canonical dev-only gates completed under
+network denial without CLI failures; resources stayed within 20%. Neither run
+is independent validation. Holdout data was not accessed.
+
+The actual installed v0.3.3 sample is separate: its database contains 30,205
+rows and cannot be scored with these 142-record labels. See the
+[installed-product sample](reproducibility/artifacts/installed-v0.3.3-smoke-v1.json).
+Full controlled results, run configurations, hashes, and the frozen protocol
+are in the [comparison](reproducibility/artifacts/operational-soft-fit-dev-v1-comparison.md),
+[control](reproducibility/artifacts/operational-soft-fit-dev-v1-control.md),
+[treatment](reproducibility/artifacts/operational-soft-fit-dev-v1-treatment.md),
+and [freeze](reproducibility/artifacts/operational-soft-fit-dev-v1-freeze.json).
+
+## Dense candidate-budget test — development rejection (2026-09-27)
+
+A new source-audited cohort compared budgets 8 and 16 with all other retrieval
+settings fixed. Budget 16 exactly tied budget 8: both scored 20/26 Success@1,
+21/26 Success@3, 44/60 coverage, 22/34 false answers, and 1/22 incorrect
+supported answers. Source-built main measured 16/26, 17/26, 46/60, 24/34, and
+5/22. The candidate control is a broader focused-v2 working-tree configuration;
+its gains over main cannot be attributed to candidate budget. Both candidate
+arms also had two fewer covered prompts than main, all on Windows.
+
+Reject budget 16; retain budget 8. Offline and resource checks passed, but the
+wider pool added no quality value. Both canonical runs are dev-only and
+inconclusive for release. The actual installed product was not scored with
+these 142-record labels. No holdout data was accessed. An aggregate-only
+GPT-6-Sol review found no further ranking factor justified by recorded
+evidence, so stop speculative tuning until a concrete hypothesis and fresh
+cohort exist. The dev cohort is fully inspected and closed to tuning. See the
+[comparison](reproducibility/artifacts/dense-budget-dev-v1-comparison.md),
+[protocol](reproducibility/artifacts/dense-budget-dev-v1-protocol.md),
+[freeze](reproducibility/artifacts/dense-budget-dev-v1-freeze.json), and
+[freeze correction](reproducibility/artifacts/dense-budget-dev-v1-freeze-correction.md).

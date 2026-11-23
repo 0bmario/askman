@@ -1,0 +1,17 @@
+{
+  "configuration_id": "operational-soft-fit-dev-v1-treatment",
+  "dense_recipe": "main-compatible",
+  "query_mode": "focused-v2",
+  "query_rewrites": [
+    "non-Windows file searches with an extension or filename pattern map to the corpus wording Find files by extension",
+    "Windows move requests that imply distinct drives map to the corpus wording Move a file or directory across drives"
+  ],
+  "candidate_budget": 8,
+  "ranking": "raw cosine distance minus 0.05 per shared query/candidate token plus 0.05 times the fraction of detected action/constraint rules without example-specific evidence",
+  "distance_cutoff": 0.6,
+  "example_selection": "retain same-page candidates in the top-k; display the top three after reranking",
+  "display_limit": 3,
+  "fusion": "dense candidate pool reranked by 0.05 per shared lexical token and bounded operational fit penalty",
+  "abstention": "raw distance cutoff 0.60 plus scoped negation and unsupported-intent guards; operational fit changes ranking only",
+  "operational_example_check": "source-backed-soft-fit-v1"
+}

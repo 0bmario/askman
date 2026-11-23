@@ -35,9 +35,13 @@ BOOTSTRAP_SEED = 33_031
 MIN_SUCCESS_AT_1_GAIN = 0.05
 MAX_REGRESSION = 0.20
 DEFAULT_RETRIEVAL_CONFIGURATION = {
-    "configuration_id": "focused-same-page-cutoff-060-lexical-005-v1",
+    "configuration_id": "focused-v2-same-page-cutoff-060-lexical-005-v1",
     "dense_recipe": "main-compatible",
-    "query_mode": "focused-v1",
+    "query_mode": "focused-v2",
+    "query_rewrites": [
+        "non-Windows file searches with an extension or filename pattern map to the corpus wording Find files by extension",
+        "Windows move requests that imply distinct drives map to the corpus wording Move a file or directory across drives",
+    ],
     "candidate_budget": 8,
     "ranking": (
         "raw cosine distance minus 0.05 per shared query/candidate token"
@@ -50,7 +54,8 @@ DEFAULT_RETRIEVAL_CONFIGURATION = {
     "fusion": (
         "dense candidate pool reranked by 0.05 per shared lexical token"
     ),
-    "abstention": "raw distance cutoff 0.60 plus scoped negation guards",
+    "abstention": "raw distance cutoff 0.60 plus scoped negation and unsupported-intent guards",
+    "operational_example_check": "off",
 }
 FROZEN_MANIFEST_SHA256 = (
     "4f258311db08cad15c1473c77ff6d98e2fa3b0044990fcdfcbc8110f96fc46dc"
@@ -78,14 +83,57 @@ FRESH_HOLDOUT_FREEZES = {
             "8019c67c7ff13f6a9d06159ea0cf12cc3914011c69686fa2b5c93270f879797d"
         ),
     },
+    "fresh-holdout-v3-freeze-2026-09-27": {
+        "manifest_sha256": (
+            "0b8e0c1b96cd68f0bccd86de34c2edc4150a370666808aa4b90dc9ae7812e89a"
+        ),
+        "dataset_sha256": (
+            "b4f25cccf30f5b05232c09d6b1c91e0b914b82e206edb9256a74847b7ed4450d"
+        ),
+    },
 }
-DEV_EXTENSION_FREEZE_ID = "askman-dev-extension-v1-freeze-2026-09-26"
-DEV_EXTENSION_MANIFEST_SHA256 = (
-    "9dcf13de29e6b0969344e6b2c64b298f9550ac320dad67dfca4a8a9ad9a096d5"
-)
-DEV_EXTENSION_DATASET_SHA256 = (
-    "6c113bed013be3f532a8287c58a4f257347585c2be963d6c3b475d41ecc49905"
-)
+CUSTOM_DEV_FREEZES = {
+    "askman-dev-extension-v1-freeze-2026-09-26": {
+        "manifest_sha256": (
+            "9dcf13de29e6b0969344e6b2c64b298f9550ac320dad67dfca4a8a9ad9a096d5"
+        ),
+        "dataset_sha256": (
+            "6c113bed013be3f532a8287c58a4f257347585c2be963d6c3b475d41ecc49905"
+        ),
+    },
+    "askman-dev-description-v3-freeze-2026-09-27": {
+        "manifest_sha256": (
+            "d57c7aaf8dfad686c73e551090b0346b97ca2949d7eedae2ca683e95f10d1cb4"
+        ),
+        "dataset_sha256": (
+            "df691502e66e851b3ad20d090c05085ddffe16072851731133f405ae2541ec7c"
+        ),
+    },
+    "askman-operational-compatibility-dev-v2-freeze-2026-09-27": {
+        "manifest_sha256": (
+            "4019229886e09a7e70ac07b587b57740380cbdfae3616019a25e3236aace869f"
+        ),
+        "dataset_sha256": (
+            "ab34155b640eb1227df53cc8e7ad3e5c034b71b2aa65f85670fa4f9b99b0c964"
+        ),
+    },
+    "askman-operational-soft-fit-dev-v1-freeze-2026-09-27": {
+        "manifest_sha256": (
+            "093aefd39bc81f91fb66a99322d0e761d7eabbb51589639ebcfd57bab0607ac1"
+        ),
+        "dataset_sha256": (
+            "418ac923013146d3b60d920aba50a5d9f69afd3da1c658495c226b648a772daa"
+        ),
+    },
+    "askman-dense-budget-dev-v1-freeze-2026-09-27": {
+        "manifest_sha256": (
+            "fe9c0b309522798ab6ec2c5f82fed9909f97ac9eb2d7e3d44974bf495e1cd727"
+        ),
+        "dataset_sha256": (
+            "cdb3c6567c5575b007ad0581d0f84d66fcf8237b3f6a8d839dfdddd7d01c0297"
+        ),
+    },
+}
 # Deterministic evaluation-corpus DB rebuilt by the main importer at
 # 8bd9fa296ea7e2f461202091f2ade47221bc8a0e from the frozen e1cb... snapshot.
 # This pins the main retrieval vectors for the 142-example evaluation corpus.
@@ -203,11 +251,15 @@ def validate_custom_dev_freeze(
     dataset_override: Path | None,
     repo: Path,
 ) -> tuple[dict[str, Any], Path]:
-    if sha256_file(manifest_path) != DEV_EXTENSION_MANIFEST_SHA256:
-        raise ValueError("custom development freeze manifest digest is not pinned")
+    if not manifest_path.is_file():
+        raise ValueError(f"custom development freeze manifest is missing: {manifest_path}")
     manifest = load_json(manifest_path)
-    if manifest.get("freeze_id") != DEV_EXTENSION_FREEZE_ID:
+    freeze_id = manifest.get("freeze_id")
+    expected_digests = CUSTOM_DEV_FREEZES.get(freeze_id)
+    if expected_digests is None:
         raise ValueError("custom development freeze ID is not pinned")
+    if sha256_file(manifest_path) != expected_digests["manifest_sha256"]:
+        raise ValueError("custom development freeze manifest digest is not pinned")
     if manifest.get("status") != "frozen_dev_only" or manifest.get("split") != "dev":
         raise ValueError("custom development manifest must describe a frozen dev-only split")
     if manifest.get("authorization_required_before_holdout_scoring") is not True:
@@ -227,9 +279,9 @@ def validate_custom_dev_freeze(
         raise ValueError("custom development dataset path differs from its freeze manifest")
     if not dataset_path.is_file():
         raise ValueError(f"custom development dataset is missing: {dataset_path}")
-    if manifest.get("dataset_sha256") != DEV_EXTENSION_DATASET_SHA256:
+    if manifest.get("dataset_sha256") != expected_digests["dataset_sha256"]:
         raise ValueError("custom development dataset digest is not pinned by its manifest")
-    if sha256_file(dataset_path) != DEV_EXTENSION_DATASET_SHA256:
+    if sha256_file(dataset_path) != expected_digests["dataset_sha256"]:
         raise ValueError("custom development dataset digest differs from its freeze")
 
     corpus = manifest.get("corpus")
@@ -439,8 +491,11 @@ def validate_independent_dataset_pair(
 def validate_custom_dev_dataset(
     dataset: dict[str, Any], freeze: dict[str, Any]
 ) -> None:
-    if dataset.get("schema_version") != evaluator.DEV_EXTENSION_SCHEMA_VERSION:
-        raise ValueError("custom development data must use schema 3")
+    if dataset.get("schema_version") not in {
+        evaluator.DEV_EXTENSION_SCHEMA_VERSION,
+        evaluator.OPERATIONAL_COMPATIBILITY_SCHEMA_VERSION,
+    }:
+        raise ValueError("custom development data must use a registered schema")
     evaluator.validate_dataset(dataset, "dev")
     if dataset.get("freeze_id") != freeze.get("freeze_id"):
         raise ValueError("custom development dataset freeze ID differs from its manifest")
@@ -1708,6 +1763,8 @@ def run_cli(
             "RUST_BACKTRACE": "0",
         }
     )
+    environment.pop("ASKMAN_OPERATIONAL_EXAMPLE_CHECK", None)
+    environment.pop("ASKMAN_DENSE_CANDIDATE_BUDGET", None)
     if runtime_environment is None:
         environment["ASKMAN_DATA_DIR"] = str(data_dir)
     else:
@@ -2161,12 +2218,12 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument(
         "--allow-custom-dev-dataset",
         action="store_true",
-        help="validate the pinned schema-3 dev extension; requires --dev-only",
+        help="validate a pinned schema-3 or schema-4 dev extension; requires --dev-only",
     )
     result.add_argument(
         "--custom-dev-manifest",
         type=Path,
-        help="manifest for the pinned schema-3 development extension",
+        help="manifest for the pinned schema-3 or schema-4 development extension",
     )
     result.add_argument(
         "--candidate-config",
@@ -2332,6 +2389,22 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "configuration_id"
         ].strip():
             raise ValueError("candidate configuration is missing its configuration_id")
+    operational_example_check = candidate_configuration.get(
+        "operational_example_check", "off"
+    )
+    if operational_example_check not in {
+        "off",
+        "source-backed-fit-v1",
+        "source-backed-soft-fit-v1",
+    }:
+        raise ValueError("candidate configuration has an unsupported operational example check")
+    candidate_budget = candidate_configuration.get("candidate_budget", 8)
+    if (
+        isinstance(candidate_budget, bool)
+        or not isinstance(candidate_budget, int)
+        or candidate_budget not in {8, 16}
+    ):
+        raise ValueError("candidate configuration dense candidate budget must be 8 or 16")
     if freeze.get("benchmark_id") != "askman-evaluation-v2":
         raise ValueError("freeze manifest is not the frozen evaluation-v2 manifest")
     if freeze.get("splits", {}).get("dev", {}).get("sha256") != FROZEN_DEV_DATASET_SHA256:
@@ -2360,7 +2433,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         main_data_runtime_dir, main_runtime_environment = stage_main_data(
             main_data_dir, scratch
         )
-        candidate_runtime_environment = {"ASKMAN_DATA_DIR": str(candidate_data_dir)}
+        candidate_runtime_environment = {
+            "ASKMAN_DATA_DIR": str(candidate_data_dir),
+            "ASKMAN_OPERATIONAL_EXAMPLE_CHECK": operational_example_check,
+            "ASKMAN_DENSE_CANDIDATE_BUDGET": str(candidate_budget),
+        }
         quality: dict[str, Any] = {}
         all_main_outcomes: list[dict[str, Any]] = []
         all_candidate_outcomes: list[dict[str, Any]] = []

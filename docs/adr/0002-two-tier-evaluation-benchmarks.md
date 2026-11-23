@@ -90,17 +90,130 @@ but the one-sided 95% paired-bootstrap lower bound is zero. Keep main shipped.
 Any independent claim needs another unseen holdout and fresh explicit
 authorization before scoring; neither consumed holdout is reusable.
 
-## Amendment (2026-09-26): fresh holdout v2 frozen, not scored
+## Amendment (2026-09-26): fresh holdout v2 frozen and scored once
 
 A new 60-task holdout was authored and frozen for candidate
 `ba74692cf79fa9c294f685fbade8f9315aeacdd1`. It uses the parser-v4 142-record
 corpus, has 30 answerable and 30 abstention tasks, 15 per platform, and is
 disjoint from the default dev split. Prompts were frozen before a separate
-source-ID label audit. No retrieval or candidate scoring has run. Dataset
-SHA-256 is
+source-ID label audit. After explicit user authorization, the candidate was
+scored once by the canonical gate. Holdout Success@1 improved 12/30 to 15/30
+and Success@3 13/30 to 17/30; false answers tied at 5/30. The one-sided 95%
+paired-bootstrap lower bound was zero, and common-platform Success@3
+regressed, so the independent decision is inconclusive. The split is
+consumed; do not tune from or reuse it. Dataset SHA-256 is
 `8019c67c7ff13f6a9d06159ea0cf12cc3914011c69686fa2b5c93270f879797d`; freeze
 manifest SHA-256 is
 `c45464cf3591a49372ef1a455648e7e03b3849b7798c8d1b5d0cdd4daec5d4cb`. The
-canonical runner pins this freeze. Require explicit user authorization before
-the one requested candidate run. Full provenance is in
+canonical runner and readiness validator pin this freeze. Frozen inputs
+remain unchanged; manifest status records freeze-time state. The split is
+consumed. Require a new unseen split and explicit authorization before
+evaluating another candidate. Full provenance and scoring record are in
 [`fresh-holdout-v2-freeze.md`](../reproducibility/fresh-holdout-v2-freeze.md).
+
+## Amendment (2026-09-27): source-audited Description cohort
+
+A new 60-task development cohort was authored and labeled against the pinned
+parser-v4 source pages and exact operational example IDs before retrieval. It
+has 30 answerable and 30 abstention tasks, 12 families, and 15 tasks per
+platform; the family audit covers 24 pages and all 142 indexed examples. Its
+dataset SHA-256 is
+`df691502e66e851b3ad20d090c05085ddffe16072851731133f405ae2541ec7c`; freeze
+manifest SHA-256 is
+`d57c7aaf8dfad686c73e551090b0346b97ca2949d7eedae2ca683e95f10d1cb4`.
+
+Two earlier freeze attempts are preserved but were not scored: one lacked the
+pinned parser-manifest path, and one used unregistered schema identity values.
+The final freeze corrected those fields without changing task rows. The
+canonical runner validates this custom schema-3 cohort only under
+`--dev-only`; holdout access still requires explicit authorization. The
+Description A/B is development evidence only and does not establish
+independent improvement. See the [cohort audit](../reproducibility/artifacts/dev-description-v1-label-audit.json)
+and [A/B comparison](../reproducibility/artifacts/description-embedding-dev-v3-comparison.md).
+
+## Amendment (2026-09-27): query rewrite development candidate
+
+The frozen `askman-dev-extension-v1` cohort identified two source-backed gaps:
+file-extension search and Windows cross-drive moves. A controlled ablation
+isolated each rewrite and their combination on the same 142 parser-v4 records.
+The combined mode measured 22/30 Success@1, 27/30 Success@3, and 0/30 false
+answers; focused-v1 measured 15/30, 22/30, and 0/30. The exact paired CLI gate
+against installed main measured 13/30→22/30 Success@1 and 21/30→27/30
+Success@3. These rules were selected using this development cohort, so the
+result is exploratory and cannot count as independent validation. The
+original development split was rerun as a regression check; it is previously
+inspected development data. Neither consumed holdout can be reused. At this
+stage, fresh holdout v3 was frozen and unscored pending explicit authorization;
+its later result is recorded below.
+See
+[`focused-query-rewrites-dev-extension-v1-native-platform.md`](../reproducibility/artifacts/focused-query-rewrites-dev-extension-v1-native-platform.md)
+and the paired gates linked from the approach review.
+
+## Amendment (2026-09-27): fresh holdout v3 scored once
+
+After explicit user authorization, the focused query-rule candidate was
+compared once with installed main on the frozen v3 dataset and pinned corpus.
+Holdout Success@1 improved 12/30→18/30 and Success@3 16/30→22/30; false
+answers tied at 0/30. The holdout bootstrap lower bound was 6.7 pp. However,
+common-platform Success@3 fell 5/8→4/8 and incorrect answered tasks rose
+1/6→1/5, so the release gate remains inconclusive. This split is consumed;
+do not tune from or reuse it. The freeze manifest remains unchanged, with its
+counters describing freeze-time state. See the
+[v3 freeze and score record](../reproducibility/fresh-holdout-v3-freeze.md)
+and the [canonical report](../reproducibility/artifacts/main-vs-retrieval-v2-focused-query-rules-fresh-holdout-v3.md).
+Any later independent evaluation requires a new unseen split and explicit
+authorization.
+
+## Amendment (2026-09-27): operational-compatibility development schema
+
+The runner now accepts a registered schema-4 development-only cohort for
+source-backed operational prompts. This cohort has 60 tasks, 12 families,
+and 15 tasks per platform; its independent source audit labels 28 supported
+and 32 unsupported prompts. Family groups may mix platforms and answerability,
+so schema 4 validates family size and split isolation without requiring the
+schema-3 30/30 label balance. It remains limited to `--dev-only` and cannot
+authorize release or access holdout labels.
+
+Frozen dataset SHA-256:
+`ab34155b640eb1227df53cc8e7ad3e5c034b71b2aa65f85670fa4f9b99b0c964`.
+Freeze manifest SHA-256:
+`4019229886e09a7e70ac07b587b57740380cbdfae3616019a25e3236aace869f`.
+The earlier v1 preflight freeze remains preserved but unscored; v2 is the
+registered freeze used by the one-factor experiment. Prompt text and blind
+labels were retained; only the corpus manifest SHA metadata was corrected to
+the literal manifest-file digest. The label audit is independent labeling,
+not independent candidate validation. See the
+[experiment comparison](../reproducibility/artifacts/operational-example-fit-v1-comparison.md)
+and [freeze provenance](../reproducibility/artifacts/operational-compatibility-dev-v2-freeze.json).
+
+## Amendment (2026-09-27): fresh soft-fit development cohort
+
+A new 60-task source-backed development cohort was authored for the bounded
+soft-fit experiment. It has 12 new families, 15 prompts per platform, and 29
+answerable / 31 unsupported labels after an independent source-only
+adjudication. The adjudication rejected a numeric in-place sort task because
+no individual example covered both operations; the raw audit and correction
+remain preserved. The pinned parser-v4 corpus has 24 pages and 142 operational
+examples. Dataset SHA-256 is
+`418ac923013146d3b60d920aba50a5d9f69afd3da1c658495c226b648a772daa`; freeze
+manifest SHA-256 is
+`093aefd39bc81f91fb66a99322d0e761d7eabbb51589639ebcfd57bab0607ac1`.
+
+The canonical runner accepts this registered schema-4 custom cohort only with
+`--dev-only`. Control and treatment ran on identical corpus records; no
+holdout dataset, labels, or query outputs were accessed. Both reports are
+development-only and cannot approve release. See the [comparison](../reproducibility/artifacts/operational-soft-fit-dev-v1-comparison.md),
+[freeze](../reproducibility/artifacts/operational-soft-fit-dev-v1-freeze.json),
+and [label audit](../reproducibility/artifacts/operational-soft-fit-dev-v1-label-audit-raw.json).
+
+## Amendment (2026-09-27): dense-budget development evaluation
+
+The schema-4 operational development format was used for a new 60-prompt,
+12-family cohort with 26 answerable and 34 unsupported labels. The fresh
+blind source audit and exact example IDs were frozen before retrieval. Its
+canonical control and treatment runs used the same pinned corpus records and
+`--dev-only`; no holdout was read or scored. The wider-budget treatment tied
+the control, so budget 8 remains the setting. This is development evidence,
+not independent validation. The result cohort is fully inspected and is
+closed to further tuning. Frozen artifacts and the build-hash correction are
+linked from the [comparison](../reproducibility/artifacts/dense-budget-dev-v1-comparison.md).

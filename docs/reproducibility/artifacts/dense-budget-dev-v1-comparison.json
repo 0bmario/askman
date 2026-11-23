@@ -1,0 +1,441 @@
+{
+  "schema_version": 1,
+  "experiment_id": "dense-budget-dev-v1",
+  "evidence_scope": "development-only; not independent validation or release decision",
+  "freeze_id": "askman-dense-budget-dev-v1-freeze-2026-09-27",
+  "freeze_manifest_sha256": "fe9c0b309522798ab6ec2c5f82fed9909f97ac9eb2d7e3d44974bf495e1cd727",
+  "dataset_sha256": "cdb3c6567c5575b007ad0581d0f84d66fcf8237b3f6a8d839dfdddd7d01c0297",
+  "holdout_accessed": false,
+  "main_reference": "source-built from main at commit 8bd9fa296ea7e2f461202091f2ade47221bc8a0e; installed product is separate",
+  "candidate_commit": "03e60bc72d191154d7d3f6c13a3e8afb06f4b1ee",
+  "candidate_working_tree_source_sha256": "fe1e84b11b3ef861f1bafd5306bd863922334709a4d03bd4c4a8dc915e407d8d",
+  "candidate_binary_sha256": "affea3983ac89afb79f05d5ef43e456834d470a9b5444f204b53271804b412c4",
+  "configs_differ_only_by_candidate_budget": true,
+  "control_budget": 8,
+  "treatment_budget": 16,
+  "control": {
+    "success_at_1": {
+      "count": 20,
+      "denominator": 26
+    },
+    "success_at_3": {
+      "count": 21,
+      "denominator": 26
+    },
+    "coverage": {
+      "count": 44,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 22,
+      "denominator": 34
+    },
+    "incorrect_answered_tasks": {
+      "count": 1,
+      "denominator": 22
+    }
+  },
+  "treatment": {
+    "success_at_1": {
+      "count": 20,
+      "denominator": 26
+    },
+    "success_at_3": {
+      "count": 21,
+      "denominator": 26
+    },
+    "coverage": {
+      "count": 44,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 22,
+      "denominator": 34
+    },
+    "incorrect_answered_tasks": {
+      "count": 1,
+      "denominator": 22
+    }
+  },
+  "main_source_build": {
+    "success_at_1": {
+      "count": 16,
+      "denominator": 26
+    },
+    "success_at_3": {
+      "count": 17,
+      "denominator": 26
+    },
+    "coverage": {
+      "count": 46,
+      "denominator": 60
+    },
+    "false_answers_on_unanswerable": {
+      "count": 24,
+      "denominator": 34
+    },
+    "incorrect_answered_tasks": {
+      "count": 5,
+      "denominator": 22
+    }
+  },
+  "deltas": {
+    "treatment_minus_control_success_at_1_tasks": 0,
+    "treatment_minus_main_success_at_1_tasks": 4,
+    "treatment_minus_control_success_at_3_tasks": 0,
+    "treatment_minus_control_coverage_tasks": 0,
+    "treatment_minus_control_false_answers": 0,
+    "treatment_minus_control_incorrect_answered": 0
+  },
+  "per_platform": {
+    "common": {
+      "control": {
+        "success_at_1": {
+          "count": 6,
+          "denominator": 8
+        },
+        "success_at_3": {
+          "count": 7,
+          "denominator": 8
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 2,
+          "denominator": 7
+        },
+        "incorrect_answered_tasks": {
+          "count": 1,
+          "denominator": 8
+        }
+      },
+      "treatment": {
+        "success_at_1": {
+          "count": 6,
+          "denominator": 8
+        },
+        "success_at_3": {
+          "count": 7,
+          "denominator": 8
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 2,
+          "denominator": 7
+        },
+        "incorrect_answered_tasks": {
+          "count": 1,
+          "denominator": 8
+        }
+      },
+      "main_source_build": {
+        "success_at_1": {
+          "count": 6,
+          "denominator": 8
+        },
+        "success_at_3": {
+          "count": 7,
+          "denominator": 8
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 2,
+          "denominator": 7
+        },
+        "incorrect_answered_tasks": {
+          "count": 1,
+          "denominator": 8
+        }
+      }
+    },
+    "linux": {
+      "control": {
+        "success_at_1": {
+          "count": 5,
+          "denominator": 7
+        },
+        "success_at_3": {
+          "count": 5,
+          "denominator": 7
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 5,
+          "denominator": 8
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "treatment": {
+        "success_at_1": {
+          "count": 5,
+          "denominator": 7
+        },
+        "success_at_3": {
+          "count": 5,
+          "denominator": 7
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 5,
+          "denominator": 8
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 5
+        }
+      },
+      "main_source_build": {
+        "success_at_1": {
+          "count": 4,
+          "denominator": 7
+        },
+        "success_at_3": {
+          "count": 4,
+          "denominator": 7
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 5,
+          "denominator": 8
+        },
+        "incorrect_answered_tasks": {
+          "count": 1,
+          "denominator": 5
+        }
+      }
+    },
+    "osx": {
+      "control": {
+        "success_at_1": {
+          "count": 6,
+          "denominator": 6
+        },
+        "success_at_3": {
+          "count": 6,
+          "denominator": 6
+        },
+        "coverage": {
+          "count": 14,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 8,
+          "denominator": 9
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 6
+        }
+      },
+      "treatment": {
+        "success_at_1": {
+          "count": 6,
+          "denominator": 6
+        },
+        "success_at_3": {
+          "count": 6,
+          "denominator": 6
+        },
+        "coverage": {
+          "count": 14,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 8,
+          "denominator": 9
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 6
+        }
+      },
+      "main_source_build": {
+        "success_at_1": {
+          "count": 5,
+          "denominator": 6
+        },
+        "success_at_3": {
+          "count": 5,
+          "denominator": 6
+        },
+        "coverage": {
+          "count": 14,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 8,
+          "denominator": 9
+        },
+        "incorrect_answered_tasks": {
+          "count": 1,
+          "denominator": 6
+        }
+      }
+    },
+    "windows": {
+      "control": {
+        "success_at_1": {
+          "count": 3,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 3,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 7,
+          "denominator": 10
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 3
+        }
+      },
+      "treatment": {
+        "success_at_1": {
+          "count": 3,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 3,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 10,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 7,
+          "denominator": 10
+        },
+        "incorrect_answered_tasks": {
+          "count": 0,
+          "denominator": 3
+        }
+      },
+      "main_source_build": {
+        "success_at_1": {
+          "count": 1,
+          "denominator": 5
+        },
+        "success_at_3": {
+          "count": 1,
+          "denominator": 5
+        },
+        "coverage": {
+          "count": 12,
+          "denominator": 15
+        },
+        "false_answers_on_unanswerable": {
+          "count": 9,
+          "denominator": 10
+        },
+        "incorrect_answered_tasks": {
+          "count": 2,
+          "denominator": 3
+        }
+      }
+    }
+  },
+  "performance": {
+    "fresh_process": {
+      "p95_ms": {
+        "treatment": 90.298,
+        "references": {
+          "control": 95.994,
+          "control_main": 92.435,
+          "treatment_main": 93.3
+        },
+        "within_20_percent_all": true
+      },
+      "peak_memory_bytes": {
+        "treatment": 254034616,
+        "references": {
+          "control": 282837736,
+          "control_main": 237634232,
+          "treatment_main": 237503232
+        },
+        "within_20_percent_all": true
+      }
+    },
+    "warmed_query": {
+      "p95_ms": {
+        "treatment": 88.146,
+        "references": {
+          "control": 88.958,
+          "control_main": 93.882,
+          "treatment_main": 89.15
+        },
+        "within_20_percent_all": true
+      },
+      "peak_memory_bytes": {
+        "treatment": 237470416,
+        "references": {
+          "control": 237732536,
+          "control_main": 236372664,
+          "treatment_main": 236618424
+        },
+        "within_20_percent_all": true
+      }
+    }
+  },
+  "cli_failures_under_network_denial": false,
+  "preregistered_criteria": {
+    "success_at_1_plus_2_vs_control": false,
+    "success_at_1_plus_2_vs_source_main": true,
+    "success_at_3_not_lower_aggregate_vs_control_or_main": true,
+    "success_at_1_and_3_not_lower_per_platform_vs_control_or_main": true,
+    "coverage_not_lower_vs_control_or_main": false,
+    "false_answers_not_higher_vs_control_or_main": true,
+    "incorrect_answered_not_higher_vs_control_or_main": true,
+    "zero_cli_failures_under_network_denial": true,
+    "fresh_and_warm_performance_within_20_percent_of_all_refs": true,
+    "main_source_build_metrics_consistent_between_runs": true,
+    "candidate_source_and_binary_identical_between_arms": true
+  },
+  "decision": "reject-budget-16",
+  "decision_basis": "At least one preregistered development criterion failed; do not tune on this cohort.",
+  "run_statuses": {
+    "control": "complete",
+    "treatment": "complete",
+    "canonical_gate_decision": "inconclusive because both runs were dev-only"
+  },
+  "freeze_integrity_note": {
+    "frozen_working_tree_source_hash_field": "b95c3482177bbd688741683354cea1d8e8531fee7bbc7904006375b7f8500e28",
+    "gate_report_working_tree_source_hash": "fe1e84b11b3ef861f1bafd5306bd863922334709a4d03bd4c4a8dc915e407d8d",
+    "individual_frozen_candidate_source_files_match": true,
+    "omitted_build_config": ".cargo/config.toml",
+    "omitted_build_config_sha256": "40c0d5ddbcd899fa7f3bcbf40374ca0ebd1421f044504bfe2bfda76c72bcdb09",
+    "note": "The freeze manifest aggregate source hash was computed without .cargo/config.toml. The canonical reports give the same complete working-tree source hash and binary hash in both arms. See dense-budget-dev-v1-freeze-correction.md; frozen inputs preserved.",
+    "correction_path": "docs/reproducibility/artifacts/dense-budget-dev-v1-freeze-correction.md"
+  },
+  "development_data_inspection": {
+    "task_level_failure_sample_printed_after_both_runs": true,
+    "changes_after_inspection": false,
+    "cohort_closed_to_further_tuning": true
+  }
+}

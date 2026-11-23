@@ -1,9 +1,10 @@
 # Fresh holdout v2 freeze
 
-Frozen 2026-09-26T18:24:29Z. Status: **unscored**. Candidate commit
-`ba74692cf79fa9c294f685fbade8f9315aeacdd1` is the intended evaluation target.
-No candidate or release gate has accessed this split. Get explicit user
-authorization before scoring it.
+Frozen 2026-09-26T18:24:29Z. At freeze time, status was **unscored**.
+Candidate commit `ba74692cf79fa9c294f685fbade8f9315aeacdd1` was the intended
+evaluation target. The candidate was later evaluated once after explicit user
+authorization. Frozen inputs remain unchanged; manifest counters preserve
+freeze-time state.
 
 ## Contents and provenance
 
@@ -36,8 +37,18 @@ and
 The prompt-only authoring pool is preserved at
 [`fresh-holdout-v2-prompts.json`](../../tests/fixtures/evaluation/fresh-holdout-v2-prompts.json).
 
-## Scoring state
+## Scoring record
 
-The split is frozen and unscored. Both candidate and release-gate run counts
-are zero. Do not open it with a candidate until the user explicitly authorizes
-one canonical run.
+The split was scored once against main by the canonical release gate, using
+candidate ba74692cf79fa9c294f685fbade8f9315aeacdd1. Holdout Success@1 was
+12/30 to 15/30 and Success@3 13/30 to 17/30. Incorrect answered tasks were
+9/22 to 3/20; false answers tied at 5/30. The one-sided 95% paired-bootstrap
+lower bound was 0.0; common-platform Success@3 regressed. The independent
+decision is inconclusive. The split is consumed and must not be reused or used
+to tune a candidate.
+
+The complete paired report is
+[main-vs-retrieval-v2-focused-fresh-holdout-v2.json](artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v2.json)
+with a
+[rendered report](artifacts/main-vs-retrieval-v2-focused-fresh-holdout-v2.md).
+The frozen dataset, prompt pool, and manifest were not changed.
