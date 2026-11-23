@@ -93,6 +93,8 @@ mod tests {
 
     #[test]
     fn test_highlight_command() {
+        // Without a terminal (CI, piped test output) `colored` emits no codes.
+        colored::control::set_override(true);
         let cmd = "chmod +x {{file}} && ls -la";
         let highlighted = highlight_command(cmd);
 
