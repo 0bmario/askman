@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7] - 2026-11-24
+
+### Changed
+- Pages for the target platform (`--osx`, `--windows`, `--linux`, or the host default) now rank above near-tied cross-platform pages. For example, `--windows kill a process` returns `taskkill` instead of `fkill`, and `--windows clear dns cache` returns `ipconfig` instead of `resolvconf`.
+- Removed the boost for pages that link to GNU, kernel.org and similar man-page sites. It applied mostly to Linux pages, so it pushed Linux answers onto macOS and Windows queries.
+- On the askman evaluation set, dev top-1 rises from 32/70 to 37/70 and wrong-platform answers drop from 8 to 3. Query time and download size are unchanged.
+
 ## [0.3.6] - 2026-11-24
 
 ### Changed
