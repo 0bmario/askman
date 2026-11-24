@@ -3,6 +3,7 @@ use anyhow::Result;
 use askman::{cli, db, embed, format, media_coverage, search};
 use clap::Parser;
 use colored::*;
+use std::io::Write;
 
 fn main() -> Result<()> {
     // Required: register sqlite-vec extension before opening any connection
@@ -57,6 +58,18 @@ fn try_semantic_search(
         sorted.clear();
     }
 
+    // A reader that closes early (`askman ... | head -1`) is not an error.
+    match print_results(&mut std::io::stdout().lock(), &sorted, verbose) {
+        Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
+        result => Ok(result?),
+    }
+}
+
+fn print_results(
+    out: &mut impl Write,
+    sorted: &[(String, search::CmdData)],
+    verbose: bool,
+) -> std::io::Result<()> {
     for (i, (cmd, data)) in sorted.iter().enumerate().take(3) {
         let mut show_count = if i == 0 { data.examples.len() } else { 0 };
 
@@ -72,21 +85,22 @@ fn try_semantic_search(
             }
         }
 
-        println!("{}", cmd.bold().green());
+        writeln!(out, "{}", cmd.bold().green())?;
         if verbose {
             let rules = if data.heuristics.is_empty() {
                 "none".to_string()
             } else {
                 data.heuristics.join(", ")
             };
-            println!(
+            writeln!(
+                out,
                 "{}",
                 format!(
                     "(Distance: {:.4} | Raw: {:.4} | Rules: {})",
                     data.adjusted_score, data.raw_distance, rules
                 )
                 .bright_black()
-            );
+            )?;
         }
 
         // Clean up description (strip "More information" links)
@@ -95,21 +109,21 @@ fn try_semantic_search(
         } else {
             &data.description
         };
-        println!("{}", clean_desc);
+        writeln!(out, "{}", clean_desc)?;
 
         if show_count > 0 && !data.examples.is_empty() {
-            println!("\n{}", "Examples:".underline());
+            writeln!(out, "\n{}", "Examples:".underline())?;
             for (ex_desc, ex_cmd) in data.examples.iter().take(show_count) {
-                println!("  {}", ex_desc);
-                println!("   {}", format::highlight_command(ex_cmd));
-                println!();
+                writeln!(out, "  {}", ex_desc)?;
+                writeln!(out, "   {}", format::highlight_command(ex_cmd))?;
+                writeln!(out)?;
             }
         }
-        println!();
+        writeln!(out)?;
     }
 
     if sorted.is_empty() {
-        println!("No good matches found.");
+        writeln!(out, "No good matches found.")?;
     }
 
     Ok(())
