@@ -37,6 +37,9 @@ pub type CmdMap = HashMap<String, CmdData>;
 /// See: https://alexgarcia.xyz/sqlite-vec/api-reference.html#vec_distance_cosine
 const MAX_DISTANCE: f64 = 1.10;
 
+/// Score multiplier for pages tagged with the target OS, so they beat near-tied `common` pages.
+const TARGET_OS_FACTOR: f64 = 0.9;
+
 pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> TargetOs {
     match (linux, osx, windows) {
         (true, _, _) => TargetOs::Linux,
@@ -52,13 +55,22 @@ pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> TargetOs {
 
 /// Pure scoring function: adjusts raw distance based on command name heuristics.
 /// Returns `None` if the result should be filtered out (score above threshold).
-pub fn adjust_score(cmd: &str, raw_distance: f64) -> Option<(f64, Vec<String>)> {
+pub fn adjust_score(
+    cmd: &str,
+    is_target_os: bool,
+    raw_distance: f64,
+) -> Option<(f64, Vec<String>)> {
     if raw_distance > MAX_DISTANCE {
         return None;
     }
 
     let mut applied_heuristics = Vec::new();
     let mut score = raw_distance;
+
+    if is_target_os {
+        applied_heuristics.push(format!("target_os ({TARGET_OS_FACTOR}x)"));
+        score *= TARGET_OS_FACTOR;
+    }
 
     // Heuristic to prefer basic unix commands over niche variants
     if cmd == "grep" || (cmd.len() <= 3 && !cmd.starts_with('q') && !cmd.starts_with('z')) {
@@ -85,7 +97,7 @@ pub fn perform_search(
     let q_blob = q_vec.as_bytes();
 
     let mut stmt = conn.prepare(
-        "SELECT command, description, example_desc, example_cmd, distance
+        "SELECT command, os = ?2, description, example_desc, example_cmd, distance
          FROM pages_vec
          WHERE (os = 'common' OR os = ?2) AND embedding MATCH ?1
          ORDER BY distance
@@ -95,19 +107,20 @@ pub fn perform_search(
     let results = stmt.query_map(params![q_blob, target_os.as_str()], |row| {
         Ok((
             row.get::<_, String>(0)?,
-            row.get::<_, String>(1)?,
+            row.get::<_, bool>(1)?,
             row.get::<_, String>(2)?,
             row.get::<_, String>(3)?,
-            row.get::<_, f64>(4)?,
+            row.get::<_, String>(4)?,
+            row.get::<_, f64>(5)?,
         ))
     })?;
 
     let mut command_map: CmdMap = HashMap::new();
 
     for result in results {
-        let (cmd, desc, ex_desc, ex_cmd, raw_distance) = result?;
+        let (cmd, is_target_os, desc, ex_desc, ex_cmd, raw_distance) = result?;
 
-        let (adjusted_score, heuristics) = match adjust_score(&cmd, raw_distance) {
+        let (adjusted_score, heuristics) = match adjust_score(&cmd, is_target_os, raw_distance) {
             Some(s) => s,
             None => {
                 continue;
@@ -170,45 +183,51 @@ mod tests {
 
     #[test]
     fn test_filters_out_high_distance() {
-        assert!(adjust_score("ls", 1.50).is_none());
-        assert!(adjust_score("ls", 1.11).is_none());
+        assert!(adjust_score("ls", false, 1.50).is_none());
+        assert!(adjust_score("ls", false, 1.11).is_none());
     }
 
     #[test]
     fn test_accepts_low_distance() {
-        assert!(adjust_score("ls", 0.5).is_some());
+        assert!(adjust_score("ls", false, 0.5).is_some());
     }
 
     #[test]
     fn test_core_command_boosted() {
-        let (ls_score, _) = adjust_score("ls", 0.5).unwrap();
+        let (ls_score, _) = adjust_score("ls", false, 0.5).unwrap();
         // 'ls' is <= 3 chars, not q/z prefix -> boosted by 0.67x (lower distance)
         assert!((ls_score - 0.335).abs() < 0.001);
     }
 
     #[test]
     fn test_grep_boosted() {
-        let (grep_score, _) = adjust_score("grep", 0.5).unwrap();
+        let (grep_score, _) = adjust_score("grep", false, 0.5).unwrap();
         assert!((grep_score - 0.335).abs() < 0.001);
     }
 
     #[test]
     fn test_niche_variant_penalized() {
-        let (zgrep_score, _) = adjust_score("zgrep", 0.5).unwrap();
+        let (zgrep_score, _) = adjust_score("zgrep", false, 0.5).unwrap();
         // starts with 'z' AND ends with "grep" -> penalized by 1.33x
         assert!((zgrep_score - 0.665).abs() < 0.001);
     }
 
     #[test]
     fn test_hyphenated_command_penalized() {
-        let (score, _) = adjust_score("docker-cp", 0.5).unwrap();
+        let (score, _) = adjust_score("docker-cp", false, 0.5).unwrap();
         assert!((score - 0.665).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_target_os_page_boosted() {
+        let (score, _) = adjust_score("curl", true, 0.5).unwrap();
+        assert!((score - 0.5 * TARGET_OS_FACTOR).abs() < 0.001);
     }
 
     #[test]
     fn test_normal_command_no_modifier() {
         // 'curl' is 4 chars, no special prefix/suffix -> no boost or penalty
-        let (score, _) = adjust_score("curl", 0.5).unwrap();
+        let (score, _) = adjust_score("curl", false, 0.5).unwrap();
         assert!((score - 0.5).abs() < 0.001);
     }
 }
