@@ -16,9 +16,12 @@
 
 ## Commands database
 
-The database lives under its own release tag (`db-v1`), and `DB_URL` / `DB_SHA256` in `src/db.rs` pin which one a binary
-downloads. To ship new data, upload it to a new `db-vN` release and update both
-constants in the same commit.
+The database lives under its own release tag (`db-v1`), and `DB_FILE` / `DB_URL` / `DB_SHA256` in `src/db.rs` pin which one a binary
+downloads. To ship new data, upload it to a new `db-vN` release and update all three
+constants in the same commit. `DB_FILE` must be a new name (for example `commands-v2.db`):
+askman downloads a database only when its file is missing, so a new name is what makes
+existing installs fetch it. The old file stays in the data directory; mention
+`askman --clean` in the CHANGELOG entry.
 
 The Release workflow still copies `db-v1`'s `commands.db` into each app
 release, because askman 0.3.3 and older download it from

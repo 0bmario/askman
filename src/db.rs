@@ -5,7 +5,11 @@ use sha2::{Digest, Sha256};
 use std::io::Write;
 
 // The database is published under its own release tag so app releases never
-// change which data a binary downloads. Bump both values together.
+// change which data a binary downloads. Bump all three values together: a new
+// file name per pinned database is what makes existing installs download it,
+// because a database is only downloaded when its file is missing.
+// db-v1 keeps the original name so current installs don't download it again.
+pub const DB_FILE: &str = "commands.db";
 const DB_URL: &str = "https://github.com/0bmario/askman/releases/download/db-v1/commands.db";
 const DB_SHA256: &str = "0218c1fd18dc6eb1c6b405356c92e47379286cec68f9fea1a70be896d5f71495";
 use std::path::{Path, PathBuf};
@@ -28,19 +32,19 @@ pub fn get_app_dir() -> Result<PathBuf> {
     Ok(path)
 }
 
-/// Resolves commands.db path. Falls back to downloading from GitHub on first run.
+/// Resolves the pinned database path. Falls back to downloading from GitHub on first run.
 pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
     // Check next to executable first (backward compat for local dev installs)
     if let Ok(exe_path) = std::env::current_exe()
         && let Some(dir) = exe_path.parent()
     {
-        let local_db_path = dir.join("commands.db");
+        let local_db_path = dir.join(DB_FILE);
         if local_db_path.exists() {
             return Ok(local_db_path);
         }
     }
 
-    let global_db_path = app_dir.join("commands.db");
+    let global_db_path = app_dir.join(DB_FILE);
 
     if global_db_path.exists() {
         ensure_valid_schema(&global_db_path)?;
@@ -63,7 +67,7 @@ pub fn get_db_path(app_dir: &Path) -> Result<PathBuf> {
             .unwrap()
             .progress_chars("#>-"));
 
-        let tmp_db_path = global_db_path.with_extension("db.tmp");
+        let tmp_db_path = app_dir.join(format!("{DB_FILE}.tmp"));
         let result: Result<(), anyhow::Error> = {
             use std::io::Read;
 
