@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.6] - 2026-11-24
+
+### Changed
+- Queries are embedded with the int8-quantized AllMiniLM-L6-v2 model. First run downloads 23 MB instead of 90 MB, and a query takes about 20 ms less (p95 83-86 ms vs 103-111 ms on an M2 Pro). Aggregate scores on the askman evaluation set are unchanged (dev top-1 32/70, top-3 53/70); a few individual answers change, for example `ssh into a server` now returns `ssh`.
+- Existing installs download the new model once. The old model stays in the data directory's `models/` folder; `askman --clean` removes it.
+
 ## [0.3.5] - 2026-11-23
 
 ### Fixed
