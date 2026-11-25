@@ -16,6 +16,22 @@ const OS_OVERRIDES: &[(&str, &str)] = &[
     ("spectacle", "linux"),
     // Debian's resolv.conf manager; macOS and Windows have no resolvconf.
     ("resolvconf", "linux"),
+    // sway and its tools: Wayland compositor and helpers (wlroots protocols); no macOS or Windows build.
+    ("sway", "linux"),
+    ("swaymsg", "linux"),
+    ("swaybg", "linux"),
+    ("swayidle", "linux"),
+    ("swaylock", "linux"),
+    ("waybar", "linux"),
+    ("wlsunset", "linux"),
+    // i3 targets "GNU/Linux and BSD operating systems" (i3wm.org).
+    ("i3", "linux"),
+    ("i3-msg", "linux"),
+    ("i3-nagbar", "linux"),
+    // Linux Audit daemon, needs Linux kernel >= 5.15 (macOS's BSM auditd is a different tool).
+    ("auditd", "linux"),
+    // Windows PowerShell 5.1 uses the full .NET Framework, "which only runs on Windows".
+    ("powershell", "windows"),
 ];
 
 /// The `os` tag stored for a page: its override if it has one, else its tldr folder.
@@ -296,6 +312,7 @@ mod tests {
     fn test_page_os_overrides_misfiled_pages_only() {
         assert_eq!(page_os("spectacle", "common"), "linux");
         assert_eq!(page_os("resolvconf", "common"), "linux");
+        assert_eq!(page_os("powershell", "common"), "windows");
         assert_eq!(page_os("ls", "common"), "common");
         assert_eq!(page_os("dscacheutil", "osx"), "osx");
     }
