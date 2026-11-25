@@ -36,15 +36,15 @@ jobs:
       - name: Build askman and the eval ranker
         run: cargo build --bin askman --example rank
 
-      # db-v1 and the query model live under this HOME; restored from cache, fetched only on a miss.
+      # db-v2 and the query model live under this HOME; restored from cache, fetched only on a miss.
       - name: Cache askman data
         id: askman-data
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/askman-home
-          key: askman-data-db-v1-AllMiniLML6V2Q-${{ runner.os }}
+          key: askman-data-db-v2-AllMiniLML6V2Q-${{ runner.os }}
 
-      - name: Fetch db-v1 and the query model
+      - name: Fetch db-v2 and the query model
         if: steps.askman-data.outputs.cache-hit != 'true'
         run: HOME="$RUNNER_TEMP/askman-home" ./target/debug/askman list files
 
