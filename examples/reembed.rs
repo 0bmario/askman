@@ -7,6 +7,8 @@
 //!   reembed <EmbeddingModel> <source.db> <target.db>   write a re-embedded copy
 //!   reembed <EmbeddingModel> <source.db> --verify <n>  compare every n-th row's
 //!                                                      new vector with the stored one
+//!   reembed <EmbeddingModel> <source.db> --verify-from <rowid>  the same for every
+//!                                                      row from <rowid> on
 use anyhow::{Context, Result, bail};
 use askman::db;
 use fastembed::{AutoDevicePolicy, EmbeddingModel, TextEmbedding, TextInitOptions};
@@ -62,8 +64,7 @@ fn cosine(a: &[f32], b: &[f32]) -> f32 {
     dot / (norm(a) * norm(b))
 }
 
-fn verify(model: &mut TextEmbedding, rows: &[Row], every: usize) -> Result<()> {
-    let sample: Vec<&Row> = rows.iter().step_by(every).collect();
+fn verify(model: &mut TextEmbedding, sample: Vec<&Row>) -> Result<()> {
     let texts: Vec<String> = sample.iter().map(|r| r.embedding_text()).collect();
     let mut max_difference = 0f32;
     for (row, vector) in sample.iter().zip(model.embed(&texts, Some(ONE_TEXT_PER_CALL))?) {
@@ -130,8 +131,14 @@ fn main() -> Result<()> {
         .with_context(|| format!("failed to load {model_name}"))?;
     let rows = read_rows(&Connection::open(source_path)?)?;
     match rest {
-        [flag, every] if flag == "--verify" => verify(&mut model, &rows, every.parse()?),
+        [flag, every] if flag == "--verify" => {
+            verify(&mut model, rows.iter().step_by(every.parse()?).collect())
+        }
+        [flag, first] if flag == "--verify-from" => {
+            let first: i64 = first.parse()?;
+            verify(&mut model, rows.iter().filter(|r| r.rowid >= first).collect())
+        }
         [target_path] => write_copy(&mut model, &rows, target_path),
-        _ => bail!("expected <target.db> or --verify <n>"),
+        _ => bail!("expected <target.db>, --verify <n> or --verify-from <rowid>"),
     }
 }
