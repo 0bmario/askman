@@ -102,7 +102,7 @@ jobs:
           path: release-assets
 
       # askman 0.3.3 and older download releases/latest/download/commands.db.
-      # Newer binaries use the pinned db-v1 release instead.
+      # Newer binaries download their own pinned db-vN release instead.
       - name: Attach commands database for older binaries
         env:
           GH_TOKEN: ${{ github.token }}

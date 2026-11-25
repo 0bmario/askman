@@ -5,7 +5,7 @@
 ### Changed
 - New commands database (db-v2). `--osx flush dns` now answers `dscacheutil`, and `--windows view the event log` answers `wevtutil`. `spectacle` and `resolvconf` no longer appear for macOS and Windows queries.
 - On the askman evaluation set, dev top-1 rises from 37/70 to 39/70 and wrong-platform answers drop from 3 to 1. Query time and download size are unchanged.
-- Existing installs download the new database once (59.8 MB). The old `commands.db` stays in the data directory; `askman --clean` removes it.
+- Existing installs download the new database once (59.8 MB). The old `commands.db` stays in the data directory. To remove it, run `askman --clean`: it deletes the whole data directory, so the next query downloads the current database and model again.
 
 ### Fixed
 - askman exits quietly when its output is closed early, for example `askman ... | head` (#65).
