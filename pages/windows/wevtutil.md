@@ -27,7 +27,7 @@
 
 `wevtutil {{[epl|export-log]}} {{System}} {{path\to\file.evtx}}`
 
-- Clear a log, saving a backup of its events first:
+- Delete all events from a log, saving a backup of them first:
 
 `wevtutil {{[cl|clear-log]}} {{Application}} /bu:{{path\to\backup.evtx}}`
 

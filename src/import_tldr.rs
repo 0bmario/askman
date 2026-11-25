@@ -106,6 +106,11 @@ fn main() -> Result<()> {
 
     // askman's own pages fill gaps in tldr; once tldr has a page, its version wins.
     let askman_pages_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("pages");
+    anyhow::ensure!(
+        askman_pages_dir.is_dir(),
+        "askman pages not found at {}",
+        askman_pages_dir.display()
+    );
     for os_type in OS_TYPES {
         let dir = askman_pages_dir.join(os_type);
         if !dir.exists() {
