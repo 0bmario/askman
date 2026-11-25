@@ -9,7 +9,7 @@ repository = "https://github.com/0bmario/askman"
 readme = "README.md"
 keywords = ["cli", "tldr", "semantic-search", "terminal", "commands"]
 categories = ["command-line-utilities"]
-include = ["src/**/*", "README.md", "LICENSE", "CHANGELOG.md"]
+include = ["src/**/*", "pages/**/*", "README.md", "LICENSE", "CHANGELOG.md"]
 
 [dependencies]
 anyhow = "1.0.98"
