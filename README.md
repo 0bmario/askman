@@ -33,7 +33,7 @@ with the bundled runtime instead:
 LIBONNXRUNTIME_NO_PKG_CONFIG=1 cargo install askman --force
 ```
 
-On first run, `askman` downloads a small embedding model and the `commands.db` asset. After that, lookups run offline.
+On first run, `askman` downloads a small embedding model and the commands database (`commands-v2.db`). After that, lookups run offline.
 
 ## Usage
 
@@ -75,4 +75,4 @@ Thanks to the [tldr-pages](https://github.com/tldr-pages/tldr) project. The comm
 cargo run --bin import_tldr --features dev
 ```
 
-This fetches the latest tldr pages, extracts them, and builds a fresh `commands.db` for your system. It also imports the pages in `pages/` that tldr does not have yet.
+This fetches the latest tldr pages, extracts them, and builds a fresh `commands-v2.db` for your system. It also imports the pages in `pages/` that tldr does not have yet.

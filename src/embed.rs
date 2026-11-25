@@ -4,7 +4,7 @@ use std::path::Path;
 
 pub fn init_model(app_dir: &Path) -> Result<TextEmbedding> {
     let cache_dir = app_dir.join("models");
-    // The int8 query encoder matches the fp32 vectors in commands.db (built by
+    // The int8 query encoder matches the fp32 vectors in the commands database (built by
     // import_tldr with AllMiniLML6V2) on the eval set, at a quarter of the download.
     let embed_options = InitOptions::new(EmbeddingModel::AllMiniLML6V2Q)
         .with_show_download_progress(true)

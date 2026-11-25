@@ -1,11 +1,11 @@
-"""Score askman retrieval on the eval set against the installed commands.db.
+"""Score askman retrieval on the eval set against the installed commands database.
 
 Usage:
   cargo build --release --example rank
   python3 eval/score.py [--split dev|check|check-v1|all] [--rank target/release/examples/rank]
 
 askman-eval-v2.json holds 100 real-style queries scored against the shipped
-commands.db (db-v1): 70 `dev`, 15 held-back `check` (fresh in v2), and the
+database (db-v2): 70 `dev`, 15 held-back `check` (fresh in v2), and the
 15 v1 check queries as `check-v1` (spent: scored for 0.3.6, E1 and E2).
 - accept: commands counted as correct (lowercase); empty means the right answer
   is "No good matches found."
