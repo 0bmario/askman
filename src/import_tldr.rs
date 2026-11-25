@@ -52,7 +52,7 @@ fn main() -> Result<()> {
     let pages_dir = download_tldr_pages()?;
 
     println!("Initializing embedding model...");
-    let embed_options = TextInitOptions::new(EmbeddingModel::AllMiniLML6V2)
+    let embed_options = TextInitOptions::new(EmbeddingModel::SnowflakeArcticEmbedXS)
         .with_show_download_progress(true)
         .with_cache_dir(app_dir.join("models"));
     let mut model = TextEmbedding::try_new(embed_options)?;
