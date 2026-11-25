@@ -9,7 +9,7 @@
 //!                                                      new vector with the stored one
 use anyhow::{Context, Result, bail};
 use askman::db;
-use fastembed::{EmbeddingModel, TextEmbedding, TextInitOptions};
+use fastembed::{AutoDevicePolicy, EmbeddingModel, TextEmbedding, TextInitOptions};
 use rusqlite::{Connection, params};
 use zerocopy::IntoBytes;
 
@@ -126,7 +126,7 @@ fn main() -> Result<()> {
     };
     db::register_sqlite_vec();
     let model_kind: EmbeddingModel = model_name.parse().map_err(anyhow::Error::msg)?;
-    let mut model = TextEmbedding::try_new(TextInitOptions::new(model_kind))
+    let mut model = TextEmbedding::try_new(TextInitOptions::new(model_kind).with_auto_device(AutoDevicePolicy::PreferCPU))
         .with_context(|| format!("failed to load {model_name}"))?;
     let rows = read_rows(&Connection::open(source_path)?)?;
     match rest {

@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use fastembed::{EmbeddingModel, TextEmbedding, TextInitOptions};
+use fastembed::{AutoDevicePolicy, EmbeddingModel, TextEmbedding, TextInitOptions};
 use std::path::Path;
 
 /// snowflake-arctic-embed expects this prefix on queries (not on documents) for
@@ -11,6 +11,9 @@ pub fn init_model(app_dir: &Path) -> Result<TextEmbedding> {
     // The int8 query encoder is paired with the fp32 SnowflakeArcticEmbedXS
     // vectors in commands.db, at a quarter of the fp32 download.
     let embed_options = TextInitOptions::new(EmbeddingModel::SnowflakeArcticEmbedXSQ)
+        // ort's default on macOS registers CoreML, which recompiles the model in
+        // every process (~350 ms per query); fastembed 4.8 ran on the CPU.
+        .with_auto_device(AutoDevicePolicy::PreferCPU)
         .with_show_download_progress(true)
         .with_cache_dir(cache_dir.clone());
     TextEmbedding::try_new(embed_options).with_context(|| {
