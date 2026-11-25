@@ -75,4 +75,4 @@ Thanks to the [tldr-pages](https://github.com/tldr-pages/tldr) project. The comm
 cargo run --bin import_tldr --features dev
 ```
 
-This fetches the latest tldr pages, extracts them, and builds a fresh `commands.db` for your system.
+This fetches the latest tldr pages, extracts them, and builds a fresh `commands.db` for your system. It also imports the pages in `pages/` that tldr does not have yet.
