@@ -29,6 +29,11 @@ zune-jpeg = "=0.4.13"
 indicatif = "0.18.4"
 sha2 = "0.10.9"
 
+# Scratch: examples/startup_bench.rs only, at the versions fastembed 4.8 already locks.
+[dev-dependencies]
+ort = { version = "=2.0.0-rc.9", default-features = false }
+tokenizers = { version = "=0.21.1", default-features = false, features = ["onig"] }
+
 [[bin]]
 name = "askman"
 path = "src/main.rs"
