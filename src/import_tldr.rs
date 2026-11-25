@@ -57,7 +57,7 @@ fn main() -> Result<()> {
         .with_cache_dir(app_dir.join("models"));
     let model = TextEmbedding::try_new(embed_options)?;
 
-    let db_path = app_dir.join("commands.db");
+    let db_path = app_dir.join(db::DB_FILE);
     let conn = Connection::open(&db_path).context("Failed to open database")?;
 
     conn.execute("DROP TABLE IF EXISTS pages_vec", [])?;
