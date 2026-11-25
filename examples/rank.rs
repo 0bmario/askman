@@ -9,14 +9,14 @@ fn main() -> anyhow::Result<()> {
     db::register_sqlite_vec();
     let app_dir = db::get_app_dir()?;
     let conn = db::get_connection(&db::get_db_path(&app_dir)?)?;
-    let embedder = embed::init_model(&app_dir)?;
+    let mut embedder = embed::init_model(&app_dir)?;
     for line in std::io::stdin().lock().lines() {
         let line = line?;
         let (os, query) = line
             .split_once('\t')
             .ok_or_else(|| anyhow::anyhow!("expected `os<TAB>query`, got {line:?}"))?;
         let target_os = search::get_target_os(os == "linux", os == "osx", os == "windows");
-        let q_vec = embed::embed_query(&embedder, query)?;
+        let q_vec = embed::embed_query(&mut embedder, query)?;
         let mut ranked = search::perform_search(&conn, &q_vec, target_os)?;
         if !media_coverage::allows_answer(query, target_os) {
             ranked.clear();

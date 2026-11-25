@@ -1,12 +1,12 @@
 use anyhow::{Context, Result};
-use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
+use fastembed::{EmbeddingModel, TextInitOptions, TextEmbedding};
 use std::path::Path;
 
 pub fn init_model(app_dir: &Path) -> Result<TextEmbedding> {
     let cache_dir = app_dir.join("models");
     // The int8 query encoder matches the fp32 vectors in commands.db (built by
     // import_tldr with AllMiniLML6V2) on the eval set, at a quarter of the download.
-    let embed_options = InitOptions::new(EmbeddingModel::AllMiniLML6V2Q)
+    let embed_options = TextInitOptions::new(EmbeddingModel::AllMiniLML6V2Q)
         .with_show_download_progress(true)
         .with_cache_dir(cache_dir.clone());
     TextEmbedding::try_new(embed_options).with_context(|| {
@@ -17,7 +17,7 @@ pub fn init_model(app_dir: &Path) -> Result<TextEmbedding> {
     })
 }
 
-pub fn embed_query(embedder: &TextEmbedding, query: &str) -> Result<Vec<f32>> {
+pub fn embed_query(embedder: &mut TextEmbedding, query: &str) -> Result<Vec<f32>> {
     let q_vec = embedder.embed(vec![query], None)?[0].clone();
     Ok(q_vec)
 }

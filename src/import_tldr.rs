@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
+use fastembed::{EmbeddingModel, TextInitOptions, TextEmbedding};
 use rusqlite::{Connection, params};
 use std::fs;
 use std::io::Write;
@@ -52,10 +52,10 @@ fn main() -> Result<()> {
     let pages_dir = download_tldr_pages()?;
 
     println!("Initializing embedding model...");
-    let embed_options = InitOptions::new(EmbeddingModel::AllMiniLML6V2)
+    let embed_options = TextInitOptions::new(EmbeddingModel::AllMiniLML6V2)
         .with_show_download_progress(true)
         .with_cache_dir(app_dir.join("models"));
-    let model = TextEmbedding::try_new(embed_options)?;
+    let mut model = TextEmbedding::try_new(embed_options)?;
 
     let db_path = app_dir.join("commands.db");
     let conn = Connection::open(&db_path).context("Failed to open database")?;
@@ -80,7 +80,7 @@ fn main() -> Result<()> {
         let dir = pages_dir.join(os_type);
         if dir.exists() {
             println!("Processing directory: {}", os_type);
-            count += process_directory(&dir, os_type, &conn, &model)?;
+            count += process_directory(&dir, os_type, &conn, &mut model)?;
         } else {
             println!("Directory {} not found. Skipping...", os_type);
         }
@@ -100,7 +100,7 @@ fn process_directory(
     dir_path: &Path,
     os_tag: &str,
     conn: &Connection,
-    model: &TextEmbedding,
+    model: &mut TextEmbedding,
 ) -> Result<usize> {
     let entries = fs::read_dir(dir_path)
         .with_context(|| format!("Failed to read directory: {}", dir_path.display()))?;
@@ -341,8 +341,8 @@ mod tests {
         )?;
 
         // test embedding model
-        let model = TextEmbedding::try_new(
-            InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(false),
+        let mut model = TextEmbedding::try_new(
+            TextInitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(false),
         )?;
 
         let test_data = vec![

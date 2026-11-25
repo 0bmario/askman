@@ -50,8 +50,8 @@ fn try_semantic_search(
     target_os: search::TargetOs,
     verbose: bool,
 ) -> Result<()> {
-    let embedder = embed::init_model(app_dir)?;
-    let q_vec = embed::embed_query(&embedder, query)?;
+    let mut embedder = embed::init_model(app_dir)?;
+    let q_vec = embed::embed_query(&mut embedder, query)?;
     let mut sorted = search::perform_search(conn, &q_vec, target_os)?;
     if !media_coverage::allows_answer(query, target_os) {
         sorted.clear();
