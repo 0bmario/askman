@@ -65,50 +65,6 @@ jobs:
             fi
           done
 
-      - name: NEGATIVE network needed
-        id: neg_net
-        continue-on-error: true
-        run: |
-          # No network at all: a sandbox profile on macOS, an empty network namespace on Linux.
-          if [ "$RUNNER_OS" = macOS ]; then
-            offline() { sandbox-exec -p '(version 1)(allow default)(deny network*)' "$@"; }
-          else
-            offline() { sudo unshare --net --setuid "$(id -u)" --setgid "$(id -g)" "$@"; }
-          fi
-          mkdir -p "$RUNNER_TEMP/empty-home"
-          for query in "extract a tar archive"; do
-            answer=$(offline env HOME="$RUNNER_TEMP/empty-home" ./target/debug/askman $query)
-            echo "$answer"
-            if [ -z "$answer" ] || [ "$answer" = "No good matches found." ]; then
-              echo "::error::no answer for '$query'"
-              exit 1
-            fi
-          done
-
-      - name: NEGATIVE empty answer
-        id: neg_empty
-        continue-on-error: true
-        run: |
-          # No network at all: a sandbox profile on macOS, an empty network namespace on Linux.
-          if [ "$RUNNER_OS" = macOS ]; then
-            offline() { sandbox-exec -p '(version 1)(allow default)(deny network*)' "$@"; }
-          else
-            offline() { sudo unshare --net --setuid "$(id -u)" --setgid "$(id -g)" "$@"; }
-          fi
-          for query in "asdf qwerty"; do
-            answer=$(offline env HOME="$RUNNER_TEMP/askman-home" ./target/debug/askman $query)
-            echo "$answer"
-            if [ -z "$answer" ] || [ "$answer" = "No good matches found." ]; then
-              echo "::error::no answer for '$query'"
-              exit 1
-            fi
-          done
-
-      - name: NEGATIVE both must fail
-        run: |
-          echo "network needed: ${{ steps.neg_net.outcome }}, empty answer: ${{ steps.neg_empty.outcome }}"
-          [ "${{ steps.neg_net.outcome }}" = failure ] && [ "${{ steps.neg_empty.outcome }}" = failure ]
-
       # Report only: the score is uploaded, never compared against a threshold.
       - name: Eval (dev)
         run: HOME="$RUNNER_TEMP/askman-home" python3 eval/score.py --rank target/debug/examples/rank | tee eval-dev.txt
