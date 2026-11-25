@@ -8,6 +8,24 @@ use zerocopy::IntoBytes;
 
 use askman::db;
 
+const OS_TYPES: [&str; 4] = ["common", "linux", "osx", "windows"];
+
+/// Pages tldr files under the wrong folder; db-v1 tagged them by folder (#59).
+const OS_OVERRIDES: &[(&str, &str)] = &[
+    // KDE's screenshot tool, only packaged for Linux desktops.
+    ("spectacle", "linux"),
+    // Debian's resolv.conf manager; macOS and Windows have no resolvconf.
+    ("resolvconf", "linux"),
+];
+
+/// The `os` tag stored for a page: its override if it has one, else its tldr folder.
+fn page_os<'a>(command: &str, folder_os: &'a str) -> &'a str {
+    OS_OVERRIDES
+        .iter()
+        .find(|(name, _)| *name == command)
+        .map_or(folder_os, |(_, os)| os)
+}
+
 /// Downloads and extracts the tldr-pages repo zip into a temp directory.
 /// Returns the path to the extracted `pages/` folder (e.g. /tmp/askman_tldr/tldr-main/pages).
 fn download_tldr_pages() -> Result<PathBuf> {
@@ -76,13 +94,33 @@ fn main() -> Result<()> {
     )?;
 
     let mut count = 0;
-    for os_type in ["common", "linux", "osx", "windows"] {
+    for os_type in OS_TYPES {
         let dir = pages_dir.join(os_type);
         if dir.exists() {
             println!("Processing directory: {}", os_type);
             count += process_directory(&dir, os_type, &conn, &model)?;
         } else {
             println!("Directory {} not found. Skipping...", os_type);
+        }
+    }
+
+    // askman's own pages fill gaps in tldr; once tldr has a page, its version wins.
+    let askman_pages_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("pages");
+    for os_type in OS_TYPES {
+        let dir = askman_pages_dir.join(os_type);
+        if !dir.exists() {
+            continue;
+        }
+        for path in markdown_files(&dir)? {
+            let file_name = path.file_name().unwrap();
+            let tldr_has_page = OS_TYPES
+                .iter()
+                .any(|tldr_os| pages_dir.join(tldr_os).join(file_name).exists());
+            if tldr_has_page {
+                println!("Skipping askman page {}: tldr has it", path.display());
+                continue;
+            }
+            count += import_page(&path, os_type, &conn, &model)?;
         }
     }
 
@@ -95,70 +133,100 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-/// Reads all .md files in a tldr directory, embeds each example, and inserts into SQLite.
+/// The .md files in a directory, in `read_dir` order.
+fn markdown_files(dir_path: &Path) -> Result<Vec<PathBuf>> {
+    let mut paths = Vec::new();
+    for entry in fs::read_dir(dir_path)
+        .with_context(|| format!("Failed to read directory: {}", dir_path.display()))?
+    {
+        let path = entry?.path();
+        if path.extension().and_then(|s| s.to_str()) == Some("md") {
+            paths.push(path);
+        }
+    }
+    Ok(paths)
+}
+
+/// Imports every page in a tldr directory.
 fn process_directory(
     dir_path: &Path,
     os_tag: &str,
     conn: &Connection,
     model: &TextEmbedding,
 ) -> Result<usize> {
-    let entries = fs::read_dir(dir_path)
-        .with_context(|| format!("Failed to read directory: {}", dir_path.display()))?;
+    let mut count = 0;
+    for path in markdown_files(dir_path)? {
+        count += import_page(&path, os_tag, conn, model)?;
+    }
+    Ok(count)
+}
+
+/// The text embedded for one example (the format db-v1 was built with).
+fn embedding_text(
+    command: &str,
+    description: &str,
+    example_desc: &str,
+    example_cmd: &str,
+) -> String {
+    format!(
+        "Task: {}. Command: {}. Description: {}. Example: {} {}",
+        example_desc, command, description, example_desc, example_cmd
+    )
+}
+
+/// Embeds each example of one page and inserts it into SQLite.
+fn import_page(
+    path: &Path,
+    folder_os: &str,
+    conn: &Connection,
+    model: &TextEmbedding,
+) -> Result<usize> {
+    let content = fs::read_to_string(path)
+        .with_context(|| format!("Failed to read file: {}", path.display()))?;
+
+    let (command, description, examples) = parse_tldr(&content, path);
+    let os_tag = page_os(&command, folder_os);
 
     let mut count = 0;
-
-    for entry in entries {
-        let entry = entry?;
-        let path = entry.path();
-
-        if path.extension().and_then(|s| s.to_str()) != Some("md") {
+    for example in examples.split("\n\n") {
+        let lines: Vec<&str> = example.lines().collect();
+        if lines.len() < 2 {
             continue;
         }
 
-        let content = fs::read_to_string(&path)
-            .with_context(|| format!("Failed to read file: {}", path.display()))?;
+        let example_desc = lines[0];
+        let example_cmd = lines[1];
 
-        // parse tldr page
-        let (command, description, examples) = parse_tldr(&content, &path);
-
-        for example in examples.split("\n\n") {
-            let lines: Vec<&str> = example.lines().collect();
-            if lines.len() < 2 {
-                continue;
-            }
-
-            let example_desc = lines[0];
-            let example_cmd = lines[1];
-
-            // generate embedding for this specific example
-            let embedding_text = format!(
-                "Task: {}. Command: {}. Description: {}. Example: {} {}",
-                example_desc, command, description, example_desc, example_cmd
-            );
-
-            let embeddings = model
-                .embed(vec![embedding_text], None)
-                .with_context(|| format!("Failed to create embedding for command: {}", command))?;
-
-            let embedding_vec = &embeddings[0];
-            let embedding_blob = embedding_vec.as_bytes();
-
-            // insert using the vec0 table
-            conn.execute(
-                "INSERT INTO pages_vec(command, os, description, example_desc, example_cmd, embedding)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![
-                    command,
-                    os_tag,
-                    description,
+        let embeddings = model
+            .embed(
+                vec![embedding_text(
+                    &command,
+                    &description,
                     example_desc,
                     example_cmd,
-                    embedding_blob
-                ],
-            )?;
+                )],
+                None,
+            )
+            .with_context(|| format!("Failed to create embedding for command: {}", command))?;
 
-            count += 1;
-        }
+        let embedding_vec = &embeddings[0];
+        let embedding_blob = embedding_vec.as_bytes();
+
+        // insert using the vec0 table
+        conn.execute(
+            "INSERT INTO pages_vec(command, os, description, example_desc, example_cmd, embedding)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![
+                command,
+                os_tag,
+                description,
+                example_desc,
+                example_cmd,
+                embedding_blob
+            ],
+        )?;
+
+        count += 1;
     }
 
     Ok(count)
@@ -216,6 +284,16 @@ mod tests {
     use super::*;
     use rusqlite::Connection;
     use std::fs;
+
+    // --- page_os ---
+
+    #[test]
+    fn test_page_os_overrides_misfiled_pages_only() {
+        assert_eq!(page_os("spectacle", "common"), "linux");
+        assert_eq!(page_os("resolvconf", "common"), "linux");
+        assert_eq!(page_os("ls", "common"), "common");
+        assert_eq!(page_os("dscacheutil", "osx"), "osx");
+    }
 
     // --- parse_tldr ---
 
