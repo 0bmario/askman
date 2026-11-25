@@ -33,6 +33,10 @@ impl Row {
     }
 }
 
+/// import_tldr embedded one text per call. Larger batches pad every text to the
+/// longest one and drove the ONNX runtime past 30 GB of memory.
+const ONE_TEXT_PER_CALL: usize = 1;
+
 fn read_rows(source: &Connection) -> Result<Vec<Row>> {
     let mut stmt = source.prepare(
         "SELECT rowid, command, os, description, example_desc, example_cmd, embedding
@@ -62,7 +66,7 @@ fn verify(model: &mut TextEmbedding, rows: &[Row], every: usize) -> Result<()> {
     let sample: Vec<&Row> = rows.iter().step_by(every).collect();
     let texts: Vec<String> = sample.iter().map(|r| r.embedding_text()).collect();
     let mut max_difference = 0f32;
-    for (row, vector) in sample.iter().zip(model.embed(&texts, None)?) {
+    for (row, vector) in sample.iter().zip(model.embed(&texts, Some(ONE_TEXT_PER_CALL))?) {
         let stored: Vec<f32> = row
             .embedding
             .chunks_exact(4)
@@ -93,7 +97,7 @@ fn write_copy(model: &mut TextEmbedding, rows: &[Row], target_path: &str) -> Res
     let transaction = target.transaction()?;
     for batch in rows.chunks(256) {
         let texts: Vec<String> = batch.iter().map(|r| r.embedding_text()).collect();
-        for (row, vector) in batch.iter().zip(model.embed(&texts, None)?) {
+        for (row, vector) in batch.iter().zip(model.embed(&texts, Some(ONE_TEXT_PER_CALL))?) {
             transaction.execute(
                 "INSERT INTO pages_vec(rowid, command, os, description, example_desc, example_cmd, embedding)
                  VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
