@@ -9,9 +9,9 @@
 
 `Restart-Computer`
 
-- Restart several computers:
+- Restart several remote computers:
 
-`Restart-Computer -ComputerName {{Server01}}, {{Server02}}, localhost`
+`Restart-Computer -ComputerName {{Server01}}, {{Server02}}`
 
 - Force an immediate restart of remote computers:
 

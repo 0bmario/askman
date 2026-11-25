@@ -9,16 +9,12 @@
 
 - Grant a user Delete and Write DAC permissions on a file:
 
-`icacls {{path\to\file}} /grant {{User1}}:(d,wdac)`
+`icacls {{path\to\file}} /grant "{{User1}}:(d,wdac)"`
 
 - Save the permissions of all files in a directory and its subdirectories to a file:
 
-`icacls {{path\to\directory}}\* /save {{aclfile}} /t`
+`icacls {{path\to\directory}}\* /save {{path\to\aclfile}} /t`
 
 - Restore saved permissions to the files in a directory:
 
-`icacls {{path\to\directory}}\ /restore {{aclfile}}`
-
-- Replace the permissions of files with the default inherited ones, in all subdirectories:
-
-`icacls {{path\to\directory}}\* /reset /t`
+`icacls {{path\to\directory}}\ /restore {{path\to\aclfile}}`

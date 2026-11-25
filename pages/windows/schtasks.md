@@ -11,7 +11,7 @@
 
 `schtasks /query /fo LIST /v`
 
-- Schedule a program to run every 20 minutes (only administrators can schedule tasks):
+- Schedule a program to run every 20 minutes:
 
 `schtasks /create /sc minute /mo 20 /tn "{{task_name}}" /tr {{path\to\program}}`
 
@@ -30,7 +30,3 @@
 - Delete a scheduled task:
 
 `schtasks /delete /tn "{{task_name}}"`
-
-- Delete all scheduled tasks on the computer, including other users' tasks, without confirmation:
-
-`schtasks /delete /tn * /f`

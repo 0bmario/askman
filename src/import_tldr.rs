@@ -34,8 +34,11 @@ const OS_OVERRIDES: &[(&str, &str)] = &[
     ("powershell", "windows"),
 ];
 
-/// The `os` tag stored for a page: its override if it has one, else its tldr folder.
+/// The `os` tag stored for a page: its override if it is filed under `common`, else its tldr folder.
 fn page_os<'a>(command: &str, folder_os: &'a str) -> &'a str {
+    if folder_os != "common" {
+        return folder_os;
+    }
     OS_OVERRIDES
         .iter()
         .find(|(name, _)| *name == command)
@@ -313,6 +316,7 @@ mod tests {
         assert_eq!(page_os("spectacle", "common"), "linux");
         assert_eq!(page_os("resolvconf", "common"), "linux");
         assert_eq!(page_os("powershell", "common"), "windows");
+        assert_eq!(page_os("auditd", "osx"), "osx");
         assert_eq!(page_os("ls", "common"), "common");
         assert_eq!(page_os("dscacheutil", "osx"), "osx");
     }
