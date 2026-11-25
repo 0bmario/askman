@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "database": "db-v1 sha256 0218c1fd18dc6eb1c6b405356c92e47379286cec68f9fea1a70be896d5f71495",
  "rules": "A hit is a ranked page whose command is in accept (case-insensitive). Tune on dev only; score check once per ship decision.",
  "foreign": {
@@ -837,7 +837,7 @@
   },
   {
    "id": "q071",
-   "split": "check",
+   "split": "check-v1",
    "platform": "osx",
    "target": "osx",
    "query": "show hidden files in finder",
@@ -847,7 +847,7 @@
   },
   {
    "id": "q072",
-   "split": "check",
+   "split": "check-v1",
    "platform": "osx",
    "target": "osx",
    "query": "mount a disk image",
@@ -857,7 +857,7 @@
   },
   {
    "id": "q073",
-   "split": "check",
+   "split": "check-v1",
    "platform": "osx",
    "target": "osx",
    "query": "list usb devices",
@@ -868,7 +868,7 @@
   },
   {
    "id": "q074",
-   "split": "check",
+   "split": "check-v1",
    "platform": "linux",
    "target": "linux",
    "query": "show memory usage",
@@ -879,7 +879,7 @@
   },
   {
    "id": "q075",
-   "split": "check",
+   "split": "check-v1",
    "platform": "linux",
    "target": "linux",
    "query": "enable a service at boot",
@@ -890,7 +890,7 @@
   },
   {
    "id": "q076",
-   "split": "check",
+   "split": "check-v1",
    "platform": "linux",
    "target": "linux",
    "query": "check disk for errors",
@@ -900,7 +900,7 @@
   },
   {
    "id": "q077",
-   "split": "check",
+   "split": "check-v1",
    "platform": "windows",
    "target": "windows",
    "query": "ping a host",
@@ -911,7 +911,7 @@
   },
   {
    "id": "q078",
-   "split": "check",
+   "split": "check-v1",
    "platform": "windows",
    "target": "windows",
    "query": "check disk for errors",
@@ -921,7 +921,7 @@
   },
   {
    "id": "q079",
-   "split": "check",
+   "split": "check-v1",
    "platform": "windows",
    "target": "windows",
    "query": "list files in a folder",
@@ -932,7 +932,7 @@
   },
   {
    "id": "q080",
-   "split": "check",
+   "split": "check-v1",
    "platform": "common",
    "target": "osx",
    "query": "compress a file with gzip",
@@ -942,7 +942,7 @@
   },
   {
    "id": "q081",
-   "split": "check",
+   "split": "check-v1",
    "platform": "common",
    "target": "osx",
    "query": "show the first lines of a file",
@@ -952,7 +952,7 @@
   },
   {
    "id": "q082",
-   "split": "check",
+   "split": "check-v1",
    "platform": "common",
    "target": "osx",
    "query": "sort lines alphabetically",
@@ -962,7 +962,7 @@
   },
   {
    "id": "q083",
-   "split": "check",
+   "split": "check-v1",
    "platform": "common",
    "target": "osx",
    "query": "remove duplicate lines",
@@ -973,7 +973,7 @@
   },
   {
    "id": "q084",
-   "split": "check",
+   "split": "check-v1",
    "platform": "common",
    "target": "osx",
    "query": "measure how long a command takes",
@@ -984,16 +984,187 @@
   },
   {
    "id": "q085",
-   "split": "check",
+   "split": "check-v1",
    "platform": "common",
    "target": "osx",
    "query": "clone a git repository",
    "accept": [
     "git-clone"
    ]
+  },
+  {
+   "id": "q086",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "make a new directory",
+   "accept": [
+    "mkdir"
+   ]
+  },
+  {
+   "id": "q087",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "print environment variables",
+   "accept": [
+    "printenv",
+    "env"
+   ]
+  },
+  {
+   "id": "q088",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "base64 encode a string",
+   "accept": [
+    "base64"
+   ]
+  },
+  {
+   "id": "q089",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "get the sha256 hash of a file",
+   "accept": [
+    "sha256sum",
+    "shasum",
+    "openssl-dgst"
+   ]
+  },
+  {
+   "id": "q090",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "push git commits",
+   "accept": [
+    "git-push",
+    "git"
+   ]
+  },
+  {
+   "id": "q091",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "show command history",
+   "accept": [
+    "history",
+    "fc",
+    "atuin",
+    "mcfly"
+   ]
+  },
+  {
+   "id": "q092",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "list disks and partitions",
+   "accept": [
+    "lsblk",
+    "fdisk",
+    "parted",
+    "blkid",
+    "gdisk"
+   ]
+  },
+  {
+   "id": "q093",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "change my default shell",
+   "accept": [
+    "chsh",
+    "usermod"
+   ]
+  },
+  {
+   "id": "q094",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "open a port in the firewall",
+   "accept": [
+    "ufw",
+    "firewall-cmd",
+    "iptables",
+    "nft"
+   ]
+  },
+  {
+   "id": "q095",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "show battery level",
+   "accept": [
+    "pmset",
+    "istats"
+   ]
+  },
+  {
+   "id": "q096",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "eject an external drive",
+   "accept": [
+    "diskutil"
+   ]
+  },
+  {
+   "id": "q097",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "turn wifi off",
+   "accept": [
+    "networksetup"
+   ]
+  },
+  {
+   "id": "q098",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "set an environment variable permanently",
+   "accept": [
+    "setx"
+   ]
+  },
+  {
+   "id": "q099",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "map a network drive",
+   "accept": [
+    "net",
+    "mount"
+   ]
+  },
+  {
+   "id": "q100",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "list installed programs",
+   "accept": [
+    "winget",
+    "choco",
+    "choco-list",
+    "scoop"
+   ]
   }
  ],
  "changelog": [
-  "v1: accept lists for rename, ip-address and ipinfo widened after the first dev run. check was first scored for 0.3.6 (#60)."
+  "v1: accept lists for rename, ip-address and ipinfo widened after the first dev run. check was first scored for 0.3.6 (#60).",
+  "2026-11-25 (v2): the 15 old check queries (q071-q085) were relabelled split=check-v1 (spent: scored for 0.3.6, E1, E2). 15 fresh check queries were added (q086-q100: 6 common, 3 linux, 3 osx, 3 windows). The queries were written before askman or rank was run on them. Accept lists were built from db-v1 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, and leaving out the GNU alias pages (gmkdir etc.) as v1 did. No new foreign entries. 0.3.7 was scored once on the new check split (baseline-0.3.7/check-v2.txt); the lists are frozen from that point."
  ]
 }

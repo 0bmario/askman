@@ -2,17 +2,18 @@
 
 Usage:
   cargo build --release --example rank
-  python3 eval/score.py [--split dev|check|all] [--rank target/release/examples/rank]
+  python3 eval/score.py [--split dev|check|check-v1|all] [--rank target/release/examples/rank]
 
-askman-eval-v1.json holds 85 real-style queries scored against the shipped
-commands.db (db-v1): 70 `dev` and 15 held-back `check`.
+askman-eval-v2.json holds 100 real-style queries scored against the shipped
+commands.db (db-v1): 70 `dev`, 15 held-back `check` (fresh in v2), and the
+15 v1 check queries as `check-v1` (spent: scored for 0.3.6, E1 and E2).
 - accept: commands counted as correct (lowercase); empty means the right answer
   is "No good matches found."
 - foreign: commands that are wrong-platform answers for the listed targets.
 - Tune on dev only. Score check once per ship decision and record it in the PR.
 - Log accept-list edits in the JSON `changelog`; bump to v2 for larger changes.
 
-v0.3.5 baseline, dev: top-1 32/70, top-3 53/70, wrong-platform top-1 9.
+v0.3.7 baseline, dev: top-1 37/70, top-3 54/70, wrong-platform top-1 3.
 """
 import argparse
 import json
@@ -21,9 +22,9 @@ from collections import Counter
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--eval", default=Path(__file__).with_name("askman-eval-v1.json"))
+parser.add_argument("--eval", default=Path(__file__).with_name("askman-eval-v2.json"))
 parser.add_argument("--rank", default="target/release/examples/rank")
-parser.add_argument("--split", default="dev", choices=["dev", "check", "all"])
+parser.add_argument("--split", default="dev", choices=["dev", "check", "check-v1", "all"])
 args = parser.parse_args()
 
 doc = json.load(open(args.eval))
