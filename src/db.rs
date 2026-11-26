@@ -135,8 +135,8 @@ const MMAP_SIZE: i64 = 256 * 1024 * 1024;
 
 pub fn get_connection(db_path: &Path) -> Result<Connection> {
     let conn = Connection::open(db_path)?;
-    // The KNN scan reads every stored vector (about 46 MB) on each query; read through the
-    // map it takes about a quarter of the time. The data and every distance stay the same.
+    // The KNN scan reads every stored vector (about 46 MB) on each query; through the map it
+    // skips copying them, about 4 of its 14 ms. The data and every distance stay the same.
     conn.pragma_update(None, "mmap_size", MMAP_SIZE)?;
     Ok(conn)
 }
