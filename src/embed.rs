@@ -31,7 +31,10 @@ pub fn init_model(app_dir: &Path) -> Result<QueryModel> {
         None => {
             download_model(&cache_dir)?;
             cached_snapshot(&cache_dir).with_context(|| {
-                format!("query model files missing in {} after download", cache_dir.display())
+                format!(
+                    "query model files missing in {} after download",
+                    cache_dir.display()
+                )
             })?
         }
     };
