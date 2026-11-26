@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.12] - 2026-11-26
+
+### Fixed
+- Two `askman` commands started at the same moment before the commands database was downloaded (for example the first run after installing, or after `askman --clean`) could fail with `Error: No such file or directory (os error 2)`. Each one now downloads its own copy, checks it, and moves it into place, so both answer. A partial file left by a download that was cut off is removed by a later first-run download that starts more than 10 minutes afterwards, or at once by `askman --clean`.
+- The "Downloading initial commands database" and legacy-database notices now go to stderr, so `askman <question> | ...` passes on only the answer.
+
 ## [0.3.11] - 2026-11-26
 
 ### Changed
