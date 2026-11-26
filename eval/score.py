@@ -2,19 +2,19 @@
 
 Usage:
   cargo build --release --example rank
-  python3 eval/score.py [--split dev|check|check-v1|all] [--rank target/release/examples/rank]
+  python3 eval/score.py [--split dev|check|check-v3|check-v1|all] [--rank target/release/examples/rank]
 
-askman-eval-v3.json holds 220 real-style queries scored against db-v2
-(commands-v2.db): 150 `dev`, 55 held-back `check` and the 15 v1 check queries
-as `check-v1` (spent: scored for 0.3.6, E1 and E2). v3 kept all 100 v2 queries
-and added 80 dev and 40 check queries (q101-q220), split by a seeded shuffle.
+askman-eval-v4.json holds 270 real-style queries scored against db-v2
+(commands-v2.db): 150 `dev`, 50 held-back `check` (q221-q270, added in v4), the
+55 v3 check queries as `check-v3` (spent: scored for three experiments) and the
+15 v1 check queries as `check-v1` (spent: scored for 0.3.6, E1 and E2).
 - accept: commands counted as correct (lowercase); empty means the right answer
   is "No good matches found."
 - foreign: commands that are wrong-platform answers for the listed targets.
 - Tune on dev only. Score check once per ship decision and record it in the PR.
 - Log accept-list edits in the JSON `changelog`; bump the version for larger changes.
 
-0.3.7 query path + db-v2 baseline, dev: top-1 81/150, top-3 117/150, wrong-platform top-1 1.
+0.3.10 + db-v2 baseline, dev: top-1 90/150, top-3 116/150, wrong-platform top-1 1.
 """
 import argparse
 import json
@@ -23,9 +23,9 @@ from collections import Counter
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--eval", default=Path(__file__).with_name("askman-eval-v3.json"))
+parser.add_argument("--eval", default=Path(__file__).with_name("askman-eval-v4.json"))
 parser.add_argument("--rank", default="target/release/examples/rank")
-parser.add_argument("--split", default="dev", choices=["dev", "check", "check-v1", "all"])
+parser.add_argument("--split", default="dev", choices=["dev", "check", "check-v3", "check-v1", "all"])
 args = parser.parse_args()
 
 doc = json.load(open(args.eval))
