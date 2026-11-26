@@ -4,16 +4,17 @@ Usage:
   cargo build --release --example rank
   python3 eval/score.py [--split dev|check|check-v1|all] [--rank target/release/examples/rank]
 
-askman-eval-v2.json holds 100 real-style queries scored against the shipped
-database (db-v2): 70 `dev`, 15 held-back `check` (fresh in v2), and the
-15 v1 check queries as `check-v1` (spent: scored for 0.3.6, E1 and E2).
+askman-eval-v3.json holds 220 real-style queries scored against db-v2
+(commands-v2.db): 150 `dev`, 55 held-back `check` and the 15 v1 check queries
+as `check-v1` (spent: scored for 0.3.6, E1 and E2). v3 kept all 100 v2 queries
+and added 80 dev and 40 check queries (q101-q220), split by a seeded shuffle.
 - accept: commands counted as correct (lowercase); empty means the right answer
   is "No good matches found."
 - foreign: commands that are wrong-platform answers for the listed targets.
 - Tune on dev only. Score check once per ship decision and record it in the PR.
-- Log accept-list edits in the JSON `changelog`; bump to v2 for larger changes.
+- Log accept-list edits in the JSON `changelog`; bump the version for larger changes.
 
-v0.3.7 baseline, dev: top-1 37/70, top-3 54/70, wrong-platform top-1 3.
+0.3.7 query path + db-v2 baseline, dev: top-1 81/150, top-3 117/150, wrong-platform top-1 1.
 """
 import argparse
 import json
@@ -22,7 +23,7 @@ from collections import Counter
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--eval", default=Path(__file__).with_name("askman-eval-v2.json"))
+parser.add_argument("--eval", default=Path(__file__).with_name("askman-eval-v3.json"))
 parser.add_argument("--rank", default="target/release/examples/rank")
 parser.add_argument("--split", default="dev", choices=["dev", "check", "check-v1", "all"])
 args = parser.parse_args()
