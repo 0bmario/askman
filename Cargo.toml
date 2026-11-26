@@ -16,6 +16,9 @@ anyhow = "1.0.98"
 clap = { version = "4.5.37", features = ["derive"] }
 colored = "3.0.0"
 fastembed = "4.8.0"
+# The query path uses these directly, at the versions fastembed 4.8 pins.
+ort = { version = "=2.0.0-rc.9", default-features = false }
+tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
 dirs = "5.0.1"
 reqwest = { version = "0.12", features = ["blocking"] }
 rusqlite = { version = "0.35.0", features = ["bundled"] }
