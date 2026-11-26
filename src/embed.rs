@@ -227,8 +227,20 @@ mod tests {
             .collect()
     }
 
+    fn max_difference(a: &[f32], b: &[f32]) -> f32 {
+        assert_eq!(a.len(), b.len());
+        a.iter()
+            .zip(b)
+            .map(|(x, y)| (x - y).abs())
+            .fold(0f32, f32::max)
+    }
+
     // Reads the model from the askman data dir under HOME and never downloads it. CI runs
     // it without network access after the smoke test has fetched the model.
+    //
+    // The fixture was made on macOS aarch64. ORT's CPU kernels round differently on other
+    // CPUs, so there the fixture only bounds the difference, and exactness is checked against
+    // fastembed 4.8 run live on the same machine.
     #[test]
     #[ignore = "needs the query model in the askman data dir"]
     fn query_vectors_match_fastembed() -> Result<()> {
@@ -246,22 +258,41 @@ mod tests {
             ("loaded", load_optimized(&optimized)?),
             ("original", load_original(&original)?),
         ];
+        let fastembed = TextEmbedding::try_new(
+            InitOptions::new(EmbeddingModel::AllMiniLML6V2Q)
+                .with_cache_dir(model_cache_dir(&app_dir)),
+        )?;
+        let fixture_is_exact = cfg!(all(target_os = "macos", target_arch = "aarch64"));
+        let fixture_bound = if fixture_is_exact { 0.0 } else { 1e-6 };
         let references = reference_vectors();
         assert!(references.len() >= 6);
+        for (query, fixture) in &references {
+            let live = fastembed.embed(vec![query], None)?.remove(0);
+            let fixture_difference = max_difference(&live, fixture);
+            println!("fastembed vs fixture {fixture_difference:e}: {query:?}");
+            assert!(
+                fixture_difference <= fixture_bound,
+                "fastembed, query {query:?}"
+            );
+        }
         for (name, session) in sessions {
             let model = QueryModel {
                 tokenizer: tokenizer.clone(),
                 session,
             };
-            for (query, expected) in &references {
+            for (query, fixture) in &references {
                 let actual = embed_query(&model, query)?;
-                assert_eq!(actual.len(), expected.len());
-                let max_difference = actual
-                    .iter()
-                    .zip(expected)
-                    .map(|(a, b)| (a - b).abs())
-                    .fold(0f32, f32::max);
-                assert_eq!(max_difference, 0.0, "{name} session, query {query:?}");
+                let live = fastembed.embed(vec![query], None)?.remove(0);
+                let live_difference = max_difference(&actual, &live);
+                let fixture_difference = max_difference(&actual, fixture);
+                println!(
+                    "{name}: vs fastembed {live_difference:e}, vs fixture {fixture_difference:e}: {query:?}"
+                );
+                assert_eq!(live_difference, 0.0, "{name} session, query {query:?}");
+                assert!(
+                    fixture_difference <= fixture_bound,
+                    "{name} session, query {query:?}"
+                );
             }
         }
         std::fs::remove_dir_all(&scratch)?;
