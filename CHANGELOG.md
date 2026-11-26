@@ -1,10 +1,12 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.10] - 2026-11-26
 
 ### Changed
 - askman no longer ranks pages by how a command's name is spelled. Short names like `df` or `bfs` used to get a boost and hyphenated pages like `ssh-keygen` a penalty, so `--windows show disk partitions` answered `df`; it now answers `diskpart`.
-- On the askman evaluation set, dev top-1 rises from 81/150 to 90/150. Query time and download size are unchanged.
+- Some requests now get a different first answer that is less direct: on macOS `ssh into a server` shows `mosh` first, `install a python package` shows `pypy`, and `extract audio from a video` shows `yt-dlp` instead of `ffmpeg`.
+- On the askman evaluation set, top-1 rises from 81 to 90 of 150 dev queries and from 36 to 39 of 55 held-back queries. Query time and download size are unchanged.
+- Upgrading from 0.3.9 downloads nothing: the database is the same.
 
 ## [0.3.9] - 2026-11-26
 
