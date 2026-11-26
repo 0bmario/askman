@@ -127,7 +127,6 @@ dependencies = [
  "ort",
  "reqwest",
  "rusqlite",
- "serde_json",
  "sha2",
  "sqlite-vec",
  "tokenizers",
