@@ -8,10 +8,9 @@ use std::io::Write;
 // change which data a binary downloads. Bump all three values together: a new
 // file name per pinned database is what makes existing installs download it,
 // because a database is only downloaded when its file is missing.
-// db-v1 keeps the original name so current installs don't download it again.
-pub const DB_FILE: &str = "commands.db";
-const DB_URL: &str = "https://github.com/0bmario/askman/releases/download/db-v1/commands.db";
-const DB_SHA256: &str = "0218c1fd18dc6eb1c6b405356c92e47379286cec68f9fea1a70be896d5f71495";
+pub const DB_FILE: &str = "commands-v2.db";
+const DB_URL: &str = "https://github.com/0bmario/askman/releases/download/db-v2/commands-v2.db";
+const DB_SHA256: &str = "ae7a09479bdb25b06b1054a6c92b3505899945b51f6efc2c9e5e28854df2d93e";
 use std::path::{Path, PathBuf};
 
 /// Returns the app data directory path WITHOUT creating it.

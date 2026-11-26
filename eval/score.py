@@ -14,7 +14,7 @@ and added 80 dev and 40 check queries (q101-q220), split by a seeded shuffle.
 - Tune on dev only. Score check once per ship decision and record it in the PR.
 - Log accept-list edits in the JSON `changelog`; bump the version for larger changes.
 
-v0.3.7 baseline, dev: top-1 37/70, top-3 54/70, wrong-platform top-1 3.
+0.3.7 query path + db-v2 baseline, dev: top-1 81/150, top-3 117/150, wrong-platform top-1 1.
 """
 import argparse
 import json

@@ -781,7 +781,8 @@
    "target": "windows",
    "query": "show ip address",
    "accept": [
-    "ipconfig"
+    "ipconfig",
+    "get-netipaddress"
    ]
   },
   {
@@ -803,7 +804,8 @@
    "target": "windows",
    "query": "show system information",
    "accept": [
-    "systeminfo"
+    "systeminfo",
+    "get-computerinfo"
    ]
   },
   {
@@ -1919,7 +1921,9 @@
     "pacman",
     "pacman-remove",
     "zypper",
-    "yum"
+    "yum",
+    "aptitude",
+    "xbps-remove"
    ]
   },
   {
@@ -2341,7 +2345,8 @@
    "query": "list services",
    "accept": [
     "sc",
-    "net"
+    "net",
+    "get-service"
    ]
   },
   {
@@ -2351,7 +2356,8 @@
    "target": "windows",
    "query": "show open network connections",
    "accept": [
-    "netstat"
+    "netstat",
+    "get-nettcpconnection"
    ]
   },
   {
@@ -2550,6 +2556,9 @@
  "changelog": [
   "v1: accept lists for rename, ip-address and ipinfo widened after the first dev run. check was first scored for 0.3.6 (#60).",
   "2026-11-25 (v2): the 15 old check queries (q071-q085) were relabelled split=check-v1 (spent: scored for 0.3.6, E1, E2). 15 fresh check queries were added (q086-q100: 6 common, 3 linux, 3 osx, 3 windows). The queries were written before askman or rank was run on them. Accept lists were built from db-v1 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, and leaving out the GNU alias pages (gmkdir etc.) as v1 did. No new foreign entries. 0.3.7 was scored once on the new check split (baseline-0.3.7/check-v2.txt); the lists are frozen from that point.",
-  "2026-11-25 (v3): database is now db-v2. The 100 v2 queries are unchanged. 120 new queries were added (q101-q220: 60 common/osx, 20 linux, 20 osx, 20 windows, 5 of them unanswerable), written to a timestamped file before the database, askman or rank was run on them. Accept lists were built from db-v2 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, leaving out the GNU alias pages (gtac etc.); q206 (create a scheduled task) keeps its expected command `schtasks`, which has no db-v2 page. No new foreign entries. Splits: random.Random(20261125) shuffled each platform (sorted order), the shuffled groups were concatenated and every third query went to check: 80 dev, 40 check. The baseline (0.3.7 query path + db-v2) was scored once per new split (baseline-0.3.8/dev-v3.txt, check-v3.txt); the lists are frozen from that point."
+  "2026-11-25 (0.3.8): database pin moved to db-v2 (#59). Accept and foreign lists unchanged.",
+  "2026-11-25 (v3): database is now db-v2. The 100 v2 queries are unchanged. 120 new queries were added (q101-q220: 60 common/osx, 20 linux, 20 osx, 20 windows, 5 of them unanswerable), written to a timestamped file before the database, askman or rank was run on them. Accept lists were built from db-v2 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, leaving out the GNU alias pages (gtac etc.); q206 (create a scheduled task) keeps its expected command `schtasks`, which has no db-v2 page. No new foreign entries. Splits: random.Random(20261125) shuffled each platform (sorted order), the shuffled groups were concatenated and every third query went to check: 80 dev, 40 check. The baseline (0.3.7 query path + db-v2) was scored once per new split (baseline-0.3.8/dev-v3.txt, check-v3.txt); the lists are frozen from that point.",
+  "2026-11-26 (v3, owner-approved): q163 'remove a package' (check) adds aptitude and xbps-remove: plain omissions, both db-v2 linux package-manager pages; decided before any experiment was scored on v3.",
+  "2026-11-26 (v3, owner-approved): dev credit for askman pages added by PR #74 (not in db-v2, so they cannot score on db-v2): q065 adds get-netipaddress, q067 adds get-computerinfo, q201 adds get-service, q202 adds get-nettcpconnection. No other accept list changed; the remaining plausible-but-unlisted answers stay frozen."
  ]
 }
