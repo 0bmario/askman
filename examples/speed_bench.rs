@@ -74,7 +74,8 @@ fn time_query(main_epoch_ns: u128, variant: &str, os: &str, query: &str) -> Resu
     let start = Instant::now();
     db::register_sqlite_vec();
     let app_dir = db::get_app_dir()?;
-    let conn = db::get_connection(&db::get_db_path(&app_dir)?)?;
+    // Opened directly (0.3.10's get_connection), so a changed get_connection does not leak into `base`.
+    let conn = rusqlite::Connection::open(db::get_db_path(&app_dir)?)?;
     if mmap {
         conn.pragma_update(None, "mmap_size", 256 * 1024 * 1024)?;
     }

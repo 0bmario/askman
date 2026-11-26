@@ -44,9 +44,16 @@ pub fn init_model(app_dir: &Path) -> Result<QueryModel> {
         }
     };
     let optimized = app_dir.join("models").join(optimized_file_name(&snapshot));
+    // Parsing tokenizer.json takes about a third as long as loading the session and needs
+    // nothing from it, so it runs on its own thread meanwhile.
+    let (tokenizer, session) = std::thread::scope(|scope| {
+        let tokenizer = scope.spawn(|| load_tokenizer(&snapshot.join(TOKENIZER_FILE)));
+        let session = load_session(&snapshot.join(MODEL_FILE), &optimized);
+        (tokenizer.join(), session)
+    });
     Ok(QueryModel {
-        tokenizer: load_tokenizer(&snapshot.join(TOKENIZER_FILE))?,
-        session: load_session(&snapshot.join(MODEL_FILE), &optimized)?,
+        tokenizer: tokenizer.expect("tokenizer thread panicked")?,
+        session: session?,
     })
 }
 
