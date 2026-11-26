@@ -53,13 +53,9 @@ pub fn get_target_os(linux: bool, osx: bool, windows: bool) -> TargetOs {
     }
 }
 
-/// Pure scoring function: adjusts raw distance based on command name heuristics.
+/// Pure scoring function: adjusts raw distance for the target OS.
 /// Returns `None` if the result should be filtered out (score above threshold).
-pub fn adjust_score(
-    cmd: &str,
-    is_target_os: bool,
-    raw_distance: f64,
-) -> Option<(f64, Vec<String>)> {
+pub fn adjust_score(is_target_os: bool, raw_distance: f64) -> Option<(f64, Vec<String>)> {
     if raw_distance > MAX_DISTANCE {
         return None;
     }
@@ -70,20 +66,6 @@ pub fn adjust_score(
     if is_target_os {
         applied_heuristics.push(format!("target_os ({TARGET_OS_FACTOR}x)"));
         score *= TARGET_OS_FACTOR;
-    }
-
-    // Heuristic to prefer basic unix commands over niche variants
-    if cmd == "grep" || (cmd.len() <= 3 && !cmd.starts_with('q') && !cmd.starts_with('z')) {
-        applied_heuristics.push("core_command (0.67x)".to_string());
-        score *= 0.67; // Boost core commands like 'mv', 'cp', 'rm', 'grep'
-    } else if cmd.contains('-')
-        || cmd.starts_with('q')
-        || cmd.starts_with('z')
-        || (cmd.ends_with("grep") && cmd != "grep")
-        || cmd.ends_with("all")
-    {
-        applied_heuristics.push("niche_variant (1.33x)".to_string());
-        score *= 1.33; // Penalize niche variants
     }
 
     Some((score, applied_heuristics))
@@ -120,7 +102,7 @@ pub fn perform_search(
     for result in results {
         let (cmd, is_target_os, desc, ex_desc, ex_cmd, raw_distance) = result?;
 
-        let (adjusted_score, heuristics) = match adjust_score(&cmd, is_target_os, raw_distance) {
+        let (adjusted_score, heuristics) = match adjust_score(is_target_os, raw_distance) {
             Some(s) => s,
             None => {
                 continue;
@@ -183,51 +165,26 @@ mod tests {
 
     #[test]
     fn test_filters_out_high_distance() {
-        assert!(adjust_score("ls", false, 1.50).is_none());
-        assert!(adjust_score("ls", false, 1.11).is_none());
+        assert!(adjust_score(false, 1.50).is_none());
+        assert!(adjust_score(false, 1.11).is_none());
     }
 
     #[test]
     fn test_accepts_low_distance() {
-        assert!(adjust_score("ls", false, 0.5).is_some());
-    }
-
-    #[test]
-    fn test_core_command_boosted() {
-        let (ls_score, _) = adjust_score("ls", false, 0.5).unwrap();
-        // 'ls' is <= 3 chars, not q/z prefix -> boosted by 0.67x (lower distance)
-        assert!((ls_score - 0.335).abs() < 0.001);
-    }
-
-    #[test]
-    fn test_grep_boosted() {
-        let (grep_score, _) = adjust_score("grep", false, 0.5).unwrap();
-        assert!((grep_score - 0.335).abs() < 0.001);
-    }
-
-    #[test]
-    fn test_niche_variant_penalized() {
-        let (zgrep_score, _) = adjust_score("zgrep", false, 0.5).unwrap();
-        // starts with 'z' AND ends with "grep" -> penalized by 1.33x
-        assert!((zgrep_score - 0.665).abs() < 0.001);
-    }
-
-    #[test]
-    fn test_hyphenated_command_penalized() {
-        let (score, _) = adjust_score("docker-cp", false, 0.5).unwrap();
-        assert!((score - 0.665).abs() < 0.001);
+        assert!(adjust_score(false, 0.5).is_some());
     }
 
     #[test]
     fn test_target_os_page_boosted() {
-        let (score, _) = adjust_score("curl", true, 0.5).unwrap();
+        let (score, _) = adjust_score(true, 0.5).unwrap();
         assert!((score - 0.5 * TARGET_OS_FACTOR).abs() < 0.001);
     }
 
     #[test]
-    fn test_normal_command_no_modifier() {
-        // 'curl' is 4 chars, no special prefix/suffix -> no boost or penalty
-        let (score, _) = adjust_score("curl", false, 0.5).unwrap();
+    fn test_other_page_keeps_raw_distance() {
+        // Only the target OS changes the score; the command name plays no part.
+        let (score, heuristics) = adjust_score(false, 0.5).unwrap();
         assert!((score - 0.5).abs() < 0.001);
+        assert!(heuristics.is_empty());
     }
 }

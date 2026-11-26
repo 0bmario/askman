@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- askman no longer ranks pages by how a command's name is spelled. Short names like `df` or `bfs` used to get a boost and hyphenated pages like `ssh-keygen` a penalty, so `--windows show disk partitions` answered `df`; it now answers `diskpart`.
+- On the askman evaluation set, dev top-1 rises from 81/150 to 90/150. Query time and download size are unchanged.
+
 ## [0.3.9] - 2026-11-26
 
 ### Changed
