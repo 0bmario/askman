@@ -266,14 +266,13 @@ mod tests {
         let fixture_bound = if fixture_is_exact { 0.0 } else { 1e-6 };
         let references = reference_vectors();
         assert!(references.len() >= 6);
+        // Counted rather than asserted per query, so a failing run still prints every difference.
+        let mut failures = 0;
         for (query, fixture) in &references {
             let live = fastembed.embed(vec![query], None)?.remove(0);
             let fixture_difference = max_difference(&live, fixture);
             println!("fastembed vs fixture {fixture_difference:e}: {query:?}");
-            assert!(
-                fixture_difference <= fixture_bound,
-                "fastembed, query {query:?}"
-            );
+            failures += usize::from(fixture_difference > fixture_bound);
         }
         for (name, session) in sessions {
             let model = QueryModel {
@@ -288,13 +287,14 @@ mod tests {
                 println!(
                     "{name}: vs fastembed {live_difference:e}, vs fixture {fixture_difference:e}: {query:?}"
                 );
-                assert_eq!(live_difference, 0.0, "{name} session, query {query:?}");
-                assert!(
-                    fixture_difference <= fixture_bound,
-                    "{name} session, query {query:?}"
-                );
+                failures += usize::from(live_difference != 0.0);
+                failures += usize::from(fixture_difference > fixture_bound);
             }
         }
+        assert_eq!(
+            failures, 0,
+            "differences above the bounds, see the lines above"
+        );
         std::fs::remove_dir_all(&scratch)?;
         Ok(())
     }
