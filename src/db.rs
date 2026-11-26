@@ -114,11 +114,21 @@ fn install_download(
         let _ = std::fs::remove_file(&tmp_db_path);
         return Err(error);
     }
-    if let Err(error) = std::fs::rename(&tmp_db_path, db_path) {
-        let _ = std::fs::remove_file(&tmp_db_path);
-        return Err(error.into());
+    move_into_place(&tmp_db_path, db_path)
+}
+
+/// Renames the verified temp file to the database path. If that fails but the database now
+/// exists, another run installed its own verified copy (and may have swept our temp file as
+/// stale after a sleep or clock jump), so the database is ready.
+fn move_into_place(tmp_db_path: &Path, db_path: &Path) -> Result<()> {
+    let Err(error) = std::fs::rename(tmp_db_path, db_path) else {
+        return Ok(());
+    };
+    let _ = std::fs::remove_file(tmp_db_path);
+    if db_path.exists() {
+        return Ok(());
     }
-    Ok(())
+    Err(error.into())
 }
 
 /// Removes temp files left by killed downloads (about 60 MB each). A live download writes
@@ -244,6 +254,19 @@ mod tests {
         .unwrap_err();
         assert!(error.to_string().contains("expected"), "{error}");
         assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 0);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn a_failed_rename_is_fine_once_another_run_installed_the_database() {
+        let dir = scratch_dir("rename");
+        let tmp_db_path = dir.join(format!("{DB_FILE}.tmp-111"));
+        let db_path = dir.join(DB_FILE);
+
+        assert!(move_into_place(&tmp_db_path, &db_path).is_err());
+
+        std::fs::File::create(&db_path).unwrap();
+        assert!(move_into_place(&tmp_db_path, &db_path).is_ok());
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
