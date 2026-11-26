@@ -232,7 +232,8 @@
    "accept": [
     "find",
     "fd",
-    "locate"
+    "locate",
+    "mdfind"
    ]
   },
   {
@@ -496,7 +497,8 @@
    "query": "list docker containers",
    "accept": [
     "docker-ps",
-    "docker"
+    "docker",
+    "docker-container-ls"
    ]
   },
   {
@@ -3201,6 +3203,7 @@
   "2026-11-25 (v3): database is now db-v2. The 100 v2 queries are unchanged. 120 new queries were added (q101-q220: 60 common/osx, 20 linux, 20 osx, 20 windows, 5 of them unanswerable), written to a timestamped file before the database, askman or rank was run on them. Accept lists were built from db-v2 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, leaving out the GNU alias pages (gtac etc.); q206 (create a scheduled task) keeps its expected command `schtasks`, which has no db-v2 page. No new foreign entries. Splits: random.Random(20261125) shuffled each platform (sorted order), the shuffled groups were concatenated and every third query went to check: 80 dev, 40 check. The baseline (0.3.7 query path + db-v2) was scored once per new split (baseline-0.3.8/dev-v3.txt, check-v3.txt); the lists are frozen from that point.",
   "2026-11-26 (v3, owner-approved): q163 'remove a package' (check) adds aptitude and xbps-remove: plain omissions, both db-v2 linux package-manager pages; decided before any experiment was scored on v3.",
   "2026-11-26 (v3, owner-approved): dev credit for askman pages added by PR #74 (not in db-v2, so they cannot score on db-v2): q065 adds get-netipaddress, q067 adds get-computerinfo, q201 adds get-service, q202 adds get-nettcpconnection. No other accept list changed; the remaining plausible-but-unlisted answers stay frozen.",
-  "2026-11-26 (v4): the 55 v3 check queries were relabelled split=check-v3 (spent: scored for three experiments since v3); every other v3 query is unchanged. 50 fresh check queries were added (q221-q270: 25 common/osx, 8 linux, 9 osx, 8 windows; q245, q270 unanswerable), written to a timestamped file before the database, askman or rank was run on them. Accept lists were built from db-v2 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, with the v3 GNU-alias rule; subcommand pages and platform-native tools are listed when they do the task per their own documentation. q259 (free up inactive memory) keeps its expected command `purge`, which has no db-v2 page. No new foreign entries. The new check split has not been scored by anyone; the lists are frozen from this commit."
+  "2026-11-26 (v4): the 55 v3 check queries were relabelled split=check-v3 (spent: scored for three experiments since v3); every other v3 query is unchanged. 50 fresh check queries were added (q221-q270: 25 common/osx, 8 linux, 9 osx, 8 windows; q245, q270 unanswerable), written to a timestamped file before the database, askman or rank was run on them. Accept lists were built from db-v2 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, with the v3 GNU-alias rule; subcommand pages and platform-native tools are listed when they do the task per their own documentation. q259 (free up inactive memory) keeps its expected command `purge`, which has no db-v2 page. No new foreign entries. The new check split has not been scored by anyone; the lists are frozen from this commit.",
+  "2026-11-26 (v4, owner-approved after an independent source review): q015 'find files by name' (dev, osx) adds mdfind (mdfind man page: \"-name fileName: Searches for matching file names only.\"); q039 'list docker containers' (dev, osx) adds docker-container-ls (docs.docker.com/reference/cli/docker/container/ls/: \"Aliases: docker container list, docker container ps, docker ps\"; docker-ps was already accepted). Also reviewed and not added: sftp (q035) and impala (q172), interactive-only. No other list changed; the 50 check queries (q221-q270) are unchanged and unscored."
  ]
 }

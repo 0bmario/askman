@@ -14,7 +14,7 @@ askman-eval-v4.json holds 270 real-style queries scored against db-v2
 - Tune on dev only. Score check once per ship decision and record it in the PR.
 - Log accept-list edits in the JSON `changelog`; bump the version for larger changes.
 
-0.3.10 + db-v2 baseline, dev: top-1 90/150, top-3 116/150, wrong-platform top-1 1.
+0.3.10 + db-v2 baseline, dev: top-1 92/150, top-3 116/150, wrong-platform top-1 1.
 """
 import argparse
 import json
