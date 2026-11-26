@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.11] - 2026-11-26
+
+### Changed
+- Queries are faster: askman reads its database through a memory map and loads the tokenizer while the model loads. A query takes about 46-49 ms instead of 59-63 ms (median, four runs against 0.3.10 on an M2 Pro Mac). Answers are unchanged.
+- Upgrading from 0.3.10 downloads nothing and uses no more disk.
+
 ## [0.3.10] - 2026-11-26
 
 ### Changed
