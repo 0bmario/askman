@@ -134,6 +134,8 @@ fn load_tokenizer(path: &Path) -> Result<Tokenizer> {
             ..Default::default()
         }))
         .map_err(anyhow::Error::msg)?;
+    // fastembed also re-adds special_tokens_map.json's tokens; tokenizer.json already holds
+    // them as special tokens, so that changes nothing (the reference test has a "[cls]" query).
     Ok(tokenizer)
 }
 
