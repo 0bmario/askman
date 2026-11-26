@@ -1,9 +1,10 @@
 use anyhow::{Context, Result};
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 use ort::session::Session;
-use ort::session::builder::GraphOptimizationLevel;
+use ort::session::builder::{GraphOptimizationLevel, SessionBuilder};
 use ort::value::Tensor;
 use std::path::{Path, PathBuf};
+use std::time::{Duration, SystemTime};
 use tokenizers::{Tokenizer, TruncationParams};
 
 // The int8 query encoder matches the fp32 vectors in the commands database (built by
@@ -15,6 +16,10 @@ const MODEL_FILE: &str = "onnx/model_quantized.onnx";
 const TOKENIZER_FILE: &str = "tokenizer.json";
 /// fastembed's default; the model's tokenizer_config.json allows 512 as well.
 const MAX_TOKENS: usize = 512;
+/// Optimized model files start with this; temp files add `.tmp-<pid>` to the full name.
+const OPTIMIZED_PREFIX: &str = "model_quantized-optimized-";
+/// A temp file this old belongs to a run that was killed while writing it.
+const STALE_TMP_AGE: Duration = Duration::from_secs(10 * 60);
 
 pub struct QueryModel {
     tokenizer: Tokenizer,
@@ -38,7 +43,7 @@ pub fn init_model(app_dir: &Path) -> Result<QueryModel> {
             })?
         }
     };
-    let optimized = app_dir.join("models").join(optimized_file_name());
+    let optimized = app_dir.join("models").join(optimized_file_name(&snapshot));
     Ok(QueryModel {
         tokenizer: load_tokenizer(&snapshot.join(TOKENIZER_FILE))?,
         session: load_session(&snapshot.join(MODEL_FILE), &optimized)?,
@@ -81,9 +86,9 @@ pub fn embed_query(model: &QueryModel, query: &str) -> Result<Vec<f32>> {
 
 /// Where fastembed keeps its hf-hub cache: `HF_HOME` if set, else the data dir's `models/`.
 fn model_cache_dir(app_dir: &Path) -> PathBuf {
-    std::env::var_os("HF_HOME")
+    std::env::var("HF_HOME")
         .map(PathBuf::from)
-        .unwrap_or_else(|| app_dir.join("models"))
+        .unwrap_or_else(|_| app_dir.join("models"))
 }
 
 /// The hf-hub snapshot directory, if it holds both files the query model needs.
@@ -109,9 +114,11 @@ fn download_model(cache_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Keyed by ONNX Runtime version: an optimized graph is only valid for the runtime that wrote it.
-fn optimized_file_name() -> String {
-    format!("model_quantized-optimized-ort-{}.onnx", ort_version())
+/// Keyed by model snapshot and ONNX Runtime version, so a changed model or runtime never
+/// reuses a graph optimized for another one.
+fn optimized_file_name(snapshot: &Path) -> String {
+    let commit = snapshot.file_name().unwrap_or_default().to_string_lossy();
+    format!("{OPTIMIZED_PREFIX}{commit}-ort-{}.onnx", ort_version())
 }
 
 fn ort_version() -> String {
@@ -153,11 +160,14 @@ fn load_session(original: &Path, optimized: &Path) -> Result<Session> {
     } else {
         None
     };
+    let load_note = load_error
+        .map(|error| format!("; loading it failed: {error:#}"))
+        .unwrap_or_default();
     match create_optimized(original, optimized) {
         Ok(session) => {
-            if let Some(error) = load_error {
+            if !load_note.is_empty() {
                 eprintln!(
-                    "askman: rebuilt the optimized query model at {} ({error:#})",
+                    "askman: rebuilt the optimized query model at {}{load_note}",
                     optimized.display()
                 );
             }
@@ -165,7 +175,7 @@ fn load_session(original: &Path, optimized: &Path) -> Result<Session> {
         }
         Err(error) => {
             eprintln!(
-                "askman: cannot use the optimized query model at {} ({error:#}); loading the original model",
+                "askman: cannot use the optimized query model at {} (building it failed: {error:#}{load_note}); loading the original model",
                 optimized.display()
             );
             load_original(original)
@@ -173,8 +183,15 @@ fn load_session(original: &Path, optimized: &Path) -> Result<Session> {
     }
 }
 
+/// fastembed 4.8's session settings (intra-op threads = available parallelism), so the
+/// numerics match it; the graph optimization level is set by each caller.
+fn session_builder() -> Result<SessionBuilder> {
+    let threads = std::thread::available_parallelism()?.get();
+    Ok(Session::builder()?.with_intra_threads(threads)?)
+}
+
 fn load_optimized(optimized: &Path) -> Result<Session> {
-    Ok(Session::builder()?
+    Ok(session_builder()?
         .with_optimization_level(GraphOptimizationLevel::Disable)?
         .commit_from_file(optimized)?)
 }
@@ -183,14 +200,16 @@ fn load_optimized(optimized: &Path) -> Result<Session> {
 /// ORT writes to a per-process temp name that is then renamed, so concurrent first runs
 /// and killed runs never leave a partial file under the final name.
 fn create_optimized(original: &Path, optimized: &Path) -> Result<Session> {
-    if let Some(dir) = optimized.parent() {
-        std::fs::create_dir_all(dir)?;
-    }
+    let dir = optimized
+        .parent()
+        .context("optimized model path has no parent")?;
+    std::fs::create_dir_all(dir)?;
+    remove_stale_tmp_files(dir);
     let mut tmp_name = optimized.as_os_str().to_owned();
     tmp_name.push(format!(".tmp-{}", std::process::id()));
     let tmp_path = PathBuf::from(tmp_name);
     let result = (|| -> Result<Session> {
-        let session = Session::builder()?
+        let session = session_builder()?
             .with_optimization_level(GraphOptimizationLevel::Level2)?
             .with_optimized_model_path(&tmp_path)?
             .commit_from_file(original)?;
@@ -203,8 +222,30 @@ fn create_optimized(original: &Path, optimized: &Path) -> Result<Session> {
     result
 }
 
+/// Removes temp files left by killed runs. Best effort: a file another run is still
+/// writing is younger than the limit, and a failure here must not stop the query.
+fn remove_stale_tmp_files(dir: &Path) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let name = entry.file_name();
+        let name = name.to_string_lossy();
+        let is_our_tmp = name.starts_with(OPTIMIZED_PREFIX) && name.contains(".onnx.tmp-");
+        let age = entry
+            .metadata()
+            .and_then(|metadata| metadata.modified())
+            .ok()
+            .and_then(|modified| SystemTime::now().duration_since(modified).ok());
+        if is_our_tmp && age.is_some_and(|age| age > STALE_TMP_AGE) {
+            let _ = std::fs::remove_file(entry.path());
+        }
+    }
+}
+
 fn load_original(original: &Path) -> Result<Session> {
-    Session::builder()?
+    session_builder()?
+        .with_optimization_level(GraphOptimizationLevel::Level3)?
         .commit_from_file(original)
         .with_context(|| format!("failed to load the query model {}", original.display()))
 }
@@ -238,9 +279,9 @@ mod tests {
     // Reads the model from the askman data dir under HOME and never downloads it. CI runs
     // it without network access after the smoke test has fetched the model.
     //
-    // The fixture was made on macOS aarch64. ORT's CPU kernels round differently on other
-    // CPUs, so there the fixture only bounds the difference, and exactness is checked against
-    // fastembed 4.8 run live on the same machine.
+    // The fixture was made with fastembed 4.8 on macOS aarch64 and must match exactly there.
+    // On other CPUs fastembed itself differs from it (up to 1.1e-2 on Linux x86_64), so there
+    // the fixture difference is only printed; the live fastembed comparison is exact everywhere.
     #[test]
     #[ignore = "needs the query model in the askman data dir"]
     fn query_vectors_match_fastembed() -> Result<()> {
@@ -263,7 +304,6 @@ mod tests {
                 .with_cache_dir(model_cache_dir(&app_dir)),
         )?;
         let fixture_is_exact = cfg!(all(target_os = "macos", target_arch = "aarch64"));
-        let fixture_bound = if fixture_is_exact { 0.0 } else { 1e-6 };
         let references = reference_vectors();
         assert!(references.len() >= 6);
         // Counted rather than asserted per query, so a failing run still prints every difference.
@@ -272,7 +312,7 @@ mod tests {
             let live = fastembed.embed(vec![query], None)?.remove(0);
             let fixture_difference = max_difference(&live, fixture);
             println!("fastembed vs fixture {fixture_difference:e}: {query:?}");
-            failures += usize::from(fixture_difference > fixture_bound);
+            failures += usize::from(fixture_is_exact && fixture_difference != 0.0);
         }
         for (name, session) in sessions {
             let model = QueryModel {
@@ -288,7 +328,7 @@ mod tests {
                     "{name}: vs fastembed {live_difference:e}, vs fixture {fixture_difference:e}: {query:?}"
                 );
                 failures += usize::from(live_difference != 0.0);
-                failures += usize::from(fixture_difference > fixture_bound);
+                failures += usize::from(fixture_is_exact && fixture_difference != 0.0);
             }
         }
         assert_eq!(
