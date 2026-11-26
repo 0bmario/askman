@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "database": "db-v2 sha256 ae7a09479bdb25b06b1054a6c92b3505899945b51f6efc2c9e5e28854df2d93e",
  "rules": "A hit is a ranked page whose command is in accept (case-insensitive). Tune on dev only; score check once per ship decision.",
  "foreign": {
@@ -232,7 +232,8 @@
    "accept": [
     "find",
     "fd",
-    "locate"
+    "locate",
+    "mdfind"
    ]
   },
   {
@@ -496,7 +497,8 @@
    "query": "list docker containers",
    "accept": [
     "docker-ps",
-    "docker"
+    "docker",
+    "docker-container-ls"
    ]
   },
   {
@@ -996,7 +998,7 @@
   },
   {
    "id": "q086",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "make a new directory",
@@ -1006,7 +1008,7 @@
   },
   {
    "id": "q087",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "print environment variables",
@@ -1017,7 +1019,7 @@
   },
   {
    "id": "q088",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "base64 encode a string",
@@ -1027,7 +1029,7 @@
   },
   {
    "id": "q089",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "get the sha256 hash of a file",
@@ -1039,7 +1041,7 @@
   },
   {
    "id": "q090",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "push git commits",
@@ -1050,7 +1052,7 @@
   },
   {
    "id": "q091",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "show command history",
@@ -1063,7 +1065,7 @@
   },
   {
    "id": "q092",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "list disks and partitions",
@@ -1077,7 +1079,7 @@
   },
   {
    "id": "q093",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "change my default shell",
@@ -1088,7 +1090,7 @@
   },
   {
    "id": "q094",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "open a port in the firewall",
@@ -1101,7 +1103,7 @@
   },
   {
    "id": "q095",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "show battery level",
@@ -1112,7 +1114,7 @@
   },
   {
    "id": "q096",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "eject an external drive",
@@ -1122,7 +1124,7 @@
   },
   {
    "id": "q097",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "turn wifi off",
@@ -1132,7 +1134,7 @@
   },
   {
    "id": "q098",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "set an environment variable permanently",
@@ -1142,7 +1144,7 @@
   },
   {
    "id": "q099",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "map a network drive",
@@ -1153,7 +1155,7 @@
   },
   {
    "id": "q100",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "list installed programs",
@@ -1220,7 +1222,7 @@
   },
   {
    "id": "q105",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "show what type a file is",
@@ -1263,7 +1265,7 @@
   },
   {
    "id": "q109",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "extract a column from a csv",
@@ -1289,7 +1291,7 @@
   },
   {
    "id": "q111",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "number the lines of a file",
@@ -1312,7 +1314,7 @@
   },
   {
    "id": "q113",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "convert markdown to pdf",
@@ -1345,7 +1347,7 @@
   },
   {
    "id": "q116",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "keep a command running after logout",
@@ -1360,7 +1362,7 @@
   },
   {
    "id": "q117",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "change a process priority",
@@ -1371,7 +1373,7 @@
   },
   {
    "id": "q118",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "show the process tree",
@@ -1409,7 +1411,7 @@
   },
   {
    "id": "q121",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "trace the route to a host",
@@ -1475,7 +1477,7 @@
   },
   {
    "id": "q126",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "write an iso to a usb stick",
@@ -1540,7 +1542,7 @@
   },
   {
    "id": "q131",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "discard local changes in git",
@@ -1585,7 +1587,7 @@
   },
   {
    "id": "q135",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "run a docker container",
@@ -1644,7 +1646,7 @@
   },
   {
    "id": "q140",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "extract a 7z file",
@@ -1700,7 +1702,7 @@
   },
   {
    "id": "q145",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "show the kernel version",
@@ -1759,7 +1761,7 @@
   },
   {
    "id": "q150",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "copy my ssh key to a server",
@@ -1769,7 +1771,7 @@
   },
   {
    "id": "q151",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "forward a port over ssh",
@@ -1780,7 +1782,7 @@
   },
   {
    "id": "q152",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "run a command once at a specific time",
@@ -1790,7 +1792,7 @@
   },
   {
    "id": "q153",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "pause a script for a few seconds",
@@ -1814,7 +1816,7 @@
   },
   {
    "id": "q155",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "encrypt a file with a password",
@@ -1853,7 +1855,7 @@
   },
   {
    "id": "q158",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "show which files a process has open",
@@ -1872,7 +1874,7 @@
   },
   {
    "id": "q160",
-   "split": "check",
+   "split": "check-v3",
    "platform": "common",
    "target": "osx",
    "query": "water the plants",
@@ -1910,7 +1912,7 @@
   },
   {
    "id": "q163",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "remove a package",
@@ -1988,7 +1990,7 @@
   },
   {
    "id": "q169",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "show graphics card info",
@@ -2002,7 +2004,7 @@
   },
   {
    "id": "q170",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "show laptop battery status",
@@ -2063,7 +2065,7 @@
   },
   {
    "id": "q175",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "lock the screen",
@@ -2098,7 +2100,7 @@
   },
   {
    "id": "q178",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "show who is logged in",
@@ -2111,7 +2113,7 @@
   },
   {
    "id": "q179",
-   "split": "check",
+   "split": "check-v3",
    "platform": "linux",
    "target": "linux",
    "query": "rebuild the initramfs",
@@ -2134,7 +2136,7 @@
   },
   {
    "id": "q181",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "update all homebrew packages",
@@ -2165,7 +2167,7 @@
   },
   {
    "id": "q184",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "rebuild the spotlight index",
@@ -2197,7 +2199,7 @@
   },
   {
    "id": "q187",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "remove the quarantine flag from an app",
@@ -2247,7 +2249,7 @@
   },
   {
    "id": "q192",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "verify a disk",
@@ -2309,7 +2311,7 @@
   },
   {
    "id": "q198",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "toggle dark mode",
@@ -2320,7 +2322,7 @@
   },
   {
    "id": "q199",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "check if gatekeeper is enabled",
@@ -2330,7 +2332,7 @@
   },
   {
    "id": "q200",
-   "split": "check",
+   "split": "check-v3",
    "platform": "osx",
    "target": "osx",
    "query": "blorft wizzle snoob",
@@ -2362,7 +2364,7 @@
   },
   {
    "id": "q203",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "clear the arp cache",
@@ -2406,7 +2408,7 @@
   },
   {
    "id": "q207",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "show saved wifi passwords",
@@ -2501,7 +2503,7 @@
   },
   {
    "id": "q216",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "query a registry key",
@@ -2512,7 +2514,7 @@
   },
   {
    "id": "q217",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "show the mac address",
@@ -2523,7 +2525,7 @@
   },
   {
    "id": "q218",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "clear the screen",
@@ -2535,7 +2537,7 @@
   },
   {
    "id": "q219",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "grant a user access to a folder",
@@ -2545,10 +2547,651 @@
   },
   {
    "id": "q220",
-   "split": "check",
+   "split": "check-v3",
    "platform": "windows",
    "target": "windows",
    "query": "feed my cat",
+   "accept": [],
+   "note": "unanswerable; correct behavior is no answer"
+  },
+  {
+   "id": "q221",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "delete an empty folder",
+   "accept": [
+    "rmdir",
+    "rm"
+   ]
+  },
+  {
+   "id": "q222",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "move a file to another folder",
+   "accept": [
+    "mv"
+   ]
+  },
+  {
+   "id": "q223",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "find files modified today",
+   "accept": [
+    "find",
+    "bfs",
+    "fd"
+   ]
+  },
+  {
+   "id": "q224",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "remove blank lines from a file",
+   "accept": [
+    "sed",
+    "awk",
+    "grep"
+   ]
+  },
+  {
+   "id": "q225",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "convert tabs to spaces",
+   "accept": [
+    "expand"
+   ]
+  },
+  {
+   "id": "q226",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "show the current directory",
+   "accept": [
+    "pwd"
+   ]
+  },
+  {
+   "id": "q227",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "list background jobs",
+   "accept": [
+    "jobs"
+   ]
+  },
+  {
+   "id": "q228",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "show network interfaces",
+   "accept": [
+    "ifconfig",
+    "ipconfig",
+    "networksetup",
+    "netstat"
+   ]
+  },
+  {
+   "id": "q229",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "download a whole website",
+   "accept": [
+    "wget",
+    "wget2"
+   ]
+  },
+  {
+   "id": "q230",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "show disk io statistics",
+   "accept": [
+    "iostat",
+    "iotop"
+   ]
+  },
+  {
+   "id": "q231",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "list files in a zip archive",
+   "accept": [
+    "unzip",
+    "zipinfo",
+    "7z",
+    "7za",
+    "atool",
+    "lsar"
+   ]
+  },
+  {
+   "id": "q232",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "decompress a bz2 file",
+   "accept": [
+    "bzip2",
+    "bunzip2",
+    "bzcat",
+    "pbzip2",
+    "7z",
+    "7za",
+    "unar",
+    "atool",
+    "ouch"
+   ]
+  },
+  {
+   "id": "q233",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "rename a git branch",
+   "accept": [
+    "git-branch",
+    "git-rename-branch",
+    "git"
+   ]
+  },
+  {
+   "id": "q234",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "cherry pick a commit",
+   "accept": [
+    "git-cherry-pick",
+    "git"
+   ]
+  },
+  {
+   "id": "q235",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "remove unused docker images",
+   "accept": [
+    "docker-image",
+    "docker-system",
+    "docker"
+   ]
+  },
+  {
+   "id": "q236",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "show my user id and groups",
+   "accept": [
+    "id",
+    "groups"
+   ]
+  },
+  {
+   "id": "q237",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "show number of cpu cores",
+   "accept": [
+    "nproc",
+    "sysctl"
+   ]
+  },
+  {
+   "id": "q238",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "convert a wav file to mp3",
+   "accept": [
+    "ffmpeg",
+    "lame",
+    "sox"
+   ]
+  },
+  {
+   "id": "q239",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "rotate an image",
+   "accept": [
+    "magick",
+    "convert",
+    "mogrify",
+    "magick-mogrify",
+    "magick-convert",
+    "sips",
+    "pamflip",
+    "pnmrotate"
+   ]
+  },
+  {
+   "id": "q240",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "mount a remote folder over ssh",
+   "accept": [
+    "sshfs"
+   ]
+  },
+  {
+   "id": "q241",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "edit my crontab",
+   "accept": [
+    "crontab"
+   ]
+  },
+  {
+   "id": "q242",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "convert a file to utf-8",
+   "accept": [
+    "iconv",
+    "nkf",
+    "enca"
+   ]
+  },
+  {
+   "id": "q243",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "show http response headers",
+   "accept": [
+    "curl",
+    "http",
+    "xh",
+    "wget"
+   ]
+  },
+  {
+   "id": "q244",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "find duplicate files",
+   "accept": [
+    "fdupes",
+    "jdupes",
+    "rdfind",
+    "fclones",
+    "czkawka_cli",
+    "rmlint"
+   ]
+  },
+  {
+   "id": "q245",
+   "split": "check",
+   "platform": "common",
+   "target": "osx",
+   "query": "bake a chocolate cake",
+   "accept": [],
+   "note": "unanswerable; correct behavior is no answer"
+  },
+  {
+   "id": "q246",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "list loaded kernel modules",
+   "accept": [
+    "lsmod",
+    "kmod"
+   ]
+  },
+  {
+   "id": "q247",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "view kernel messages",
+   "accept": [
+    "dmesg",
+    "journalctl"
+   ]
+  },
+  {
+   "id": "q248",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "block an ip address",
+   "accept": [
+    "iptables",
+    "ufw",
+    "firewall-cmd",
+    "nft",
+    "fail2ban-client"
+   ]
+  },
+  {
+   "id": "q249",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "show pci devices",
+   "accept": [
+    "lspci",
+    "lshw",
+    "hwinfo",
+    "systool"
+   ]
+  },
+  {
+   "id": "q250",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "upgrade all packages",
+   "accept": [
+    "apt",
+    "apt-get",
+    "aptitude",
+    "nala",
+    "dnf",
+    "dnf4",
+    "yum",
+    "zypper",
+    "pacman",
+    "pacman-sync",
+    "yay",
+    "paru",
+    "pamac",
+    "apk",
+    "emerge",
+    "xbps-install",
+    "eopkg",
+    "pkcon",
+    "deb-get",
+    "oma",
+    "topgrade",
+    "aura",
+    "aurman",
+    "pacaur",
+    "trizen",
+    "yaourt",
+    "pacstall",
+    "pactrans",
+    "paxs",
+    "lure",
+    "appman",
+    "spi",
+    "slapt-get",
+    "urpmi",
+    "prt-get",
+    "wajig",
+    "synopkg",
+    "snap.pkg",
+    "flatpak",
+    "flatpak-update"
+   ]
+  },
+  {
+   "id": "q251",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "set the screen brightness",
+   "accept": [
+    "brightnessctl",
+    "xbacklight",
+    "light",
+    "xrandr",
+    "blight",
+    "backlight_control",
+    "ddcutil",
+    "gummy"
+   ]
+  },
+  {
+   "id": "q252",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "show the default gateway",
+   "accept": [
+    "ip",
+    "ip-route",
+    "ip-route-show",
+    "route",
+    "netstat",
+    "routel"
+   ]
+  },
+  {
+   "id": "q253",
+   "split": "check",
+   "platform": "linux",
+   "target": "linux",
+   "query": "find which package owns a file",
+   "accept": [
+    "dpkg",
+    "dpkg-query",
+    "apt-file",
+    "rpm",
+    "dnf",
+    "yum",
+    "pacman",
+    "pacman-query",
+    "pacman-files",
+    "pkgfile",
+    "opkg",
+    "equery"
+   ]
+  },
+  {
+   "id": "q254",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "empty the trash",
+   "accept": [
+    "osascript",
+    "rm",
+    "m"
+   ]
+  },
+  {
+   "id": "q255",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "set the computer name",
+   "accept": [
+    "scutil",
+    "systemsetup"
+   ]
+  },
+  {
+   "id": "q256",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "list bluetooth devices",
+   "accept": [
+    "system_profiler"
+   ]
+  },
+  {
+   "id": "q257",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "turn on the firewall",
+   "accept": [
+    "m"
+   ]
+  },
+  {
+   "id": "q258",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "convert an image to png",
+   "accept": [
+    "sips",
+    "magick",
+    "convert",
+    "magick-convert",
+    "mogrify",
+    "magick-mogrify"
+   ]
+  },
+  {
+   "id": "q259",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "free up inactive memory",
+   "accept": [
+    "purge"
+   ],
+   "note": "purge has no page in db-v2; kept as the expected command (counts as a miss)"
+  },
+  {
+   "id": "q260",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "open the current folder in finder",
+   "accept": [
+    "open"
+   ]
+  },
+  {
+   "id": "q261",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "mute the sound",
+   "accept": [
+    "osascript",
+    "m"
+   ]
+  },
+  {
+   "id": "q262",
+   "split": "check",
+   "platform": "osx",
+   "target": "osx",
+   "query": "list installed applications",
+   "accept": [
+    "system_profiler",
+    "mas",
+    "brew",
+    "brew-list"
+   ]
+  },
+  {
+   "id": "q263",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "log off the current user",
+   "accept": [
+    "logoff",
+    "shutdown"
+   ]
+  },
+  {
+   "id": "q264",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "show the dns servers",
+   "accept": [
+    "ipconfig",
+    "nslookup",
+    "netsh"
+   ]
+  },
+  {
+   "id": "q265",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "delete a file",
+   "accept": [
+    "del",
+    "remove-item",
+    "rm"
+   ]
+  },
+  {
+   "id": "q266",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "list local user accounts",
+   "accept": [
+    "net",
+    "wmic"
+   ]
+  },
+  {
+   "id": "q267",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "turn off the firewall",
+   "accept": [
+    "netsh"
+   ]
+  },
+  {
+   "id": "q268",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "start a service",
+   "accept": [
+    "sc",
+    "net",
+    "start-service",
+    "set-service"
+   ]
+  },
+  {
+   "id": "q269",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "show installed drivers",
+   "accept": [
+    "driverquery",
+    "pnputil"
+   ]
+  },
+  {
+   "id": "q270",
+   "split": "check",
+   "platform": "windows",
+   "target": "windows",
+   "query": "glorp vintag meshu",
    "accept": [],
    "note": "unanswerable; correct behavior is no answer"
   }
@@ -2559,6 +3202,9 @@
   "2026-11-25 (0.3.8): database pin moved to db-v2 (#59). Accept and foreign lists unchanged.",
   "2026-11-25 (v3): database is now db-v2. The 100 v2 queries are unchanged. 120 new queries were added (q101-q220: 60 common/osx, 20 linux, 20 osx, 20 windows, 5 of them unanswerable), written to a timestamped file before the database, askman or rank was run on them. Accept lists were built from db-v2 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, leaving out the GNU alias pages (gtac etc.); q206 (create a scheduled task) keeps its expected command `schtasks`, which has no db-v2 page. No new foreign entries. Splits: random.Random(20261125) shuffled each platform (sorted order), the shuffled groups were concatenated and every third query went to check: 80 dev, 40 check. The baseline (0.3.7 query path + db-v2) was scored once per new split (baseline-0.3.8/dev-v3.txt, check-v3.txt); the lists are frozen from that point.",
   "2026-11-26 (v3, owner-approved): q163 'remove a package' (check) adds aptitude and xbps-remove: plain omissions, both db-v2 linux package-manager pages; decided before any experiment was scored on v3.",
-  "2026-11-26 (v3, owner-approved): dev credit for askman pages added by PR #74 (not in db-v2, so they cannot score on db-v2): q065 adds get-netipaddress, q067 adds get-computerinfo, q201 adds get-service, q202 adds get-nettcpconnection. No other accept list changed; the remaining plausible-but-unlisted answers stay frozen."
+  "2026-11-26 (v3, owner-approved): dev credit for askman pages added by PR #74 (not in db-v2, so they cannot score on db-v2): q065 adds get-netipaddress, q067 adds get-computerinfo, q201 adds get-service, q202 adds get-nettcpconnection. No other accept list changed; the remaining plausible-but-unlisted answers stay frozen.",
+  "2026-11-26 (v4): the 55 v3 check queries were relabelled split=check-v3 (spent: scored for three experiments since v3); every other v3 query is unchanged. 50 fresh check queries were added (q221-q270: 25 common/osx, 8 linux, 9 osx, 8 windows; q245, q270 unanswerable), written to a timestamped file before the database, askman or rank was run on them. Accept lists were built from db-v2 itself (sqlite3 + sqlite-vec over command/os/description/examples), using only pages for common or the target OS, with the v3 GNU-alias rule; subcommand pages and platform-native tools are listed when they do the task per their own documentation. q259 (free up inactive memory) keeps its expected command `purge`, which has no db-v2 page. No new foreign entries. The new check split has not been scored by anyone; the lists are frozen from this commit.",
+  "2026-11-26 (v4, owner-approved after an independent source review): q015 'find files by name' (dev, osx) adds mdfind (mdfind man page: \"-name fileName: Searches for matching file names only.\"); q039 'list docker containers' (dev, osx) adds docker-container-ls (docs.docker.com/reference/cli/docker/container/ls/: \"Aliases: docker container list, docker container ps, docker ps\"; docker-ps was already accepted). Also reviewed and not added: sftp (q035) and impala (q172), interactive-only. No other list changed; the 50 check queries (q221-q270) are unchanged.",
+  "2026-11-26 (v4): the chief scored the 50 check queries (q221-q270) once per version at 19:04 on 2026-11-26, on commit 4af84e1, as the baseline: 0.3.9 top-1 35, top-3 41, wrong-platform top-1 0; 0.3.10 top-1 38, top-3 42, wrong-platform top-1 0."
  ]
 }
