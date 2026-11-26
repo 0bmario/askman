@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.9] - 2026-11-26
+
+### Changed
+- Queries are faster: askman loads its model about 15 ms quicker. A query takes about 56-58 ms instead of 71-74 ms (median, measured on an M2 Pro Mac). Answers are unchanged.
+- Upgrading from 0.3.8 downloads nothing. The first query after upgrading takes slightly longer once (about 92 ms), because askman writes an optimized copy of the model to the data directory. That copy uses about 23 MB of disk. `askman --clean` still removes everything.
+
 ## [0.3.8] - 2026-11-25
 
 ### Changed
