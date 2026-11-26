@@ -56,6 +56,13 @@ jobs:
           else
             offline() { sudo unshare --net --setuid "$(id -u)" --setgid "$(id -g)" "$@"; }
           fi
+          # The first query must create the optimized query model, even when the HOME came from the cache.
+          if [ "$RUNNER_OS" = macOS ]; then
+            models_dir="$RUNNER_TEMP/askman-home/Library/Application Support/askman/models"
+          else
+            models_dir="$RUNNER_TEMP/askman-home/.local/share/askman/models"
+          fi
+          rm -f "$models_dir"/model_quantized-optimized-ort-*.onnx
           for query in "extract a tar archive" "list files in a directory" "find files by name"; do
             answer=$(offline env HOME="$RUNNER_TEMP/askman-home" ./target/debug/askman $query)
             echo "$answer"
@@ -64,6 +71,10 @@ jobs:
               exit 1
             fi
           done
+          ls "$models_dir"/model_quantized-optimized-ort-*.onnx
+          # Query vectors against the fastembed reference fixture, offline, from the model in this HOME.
+          offline env HOME="$RUNNER_TEMP/askman-home" CARGO_HOME="$HOME/.cargo" RUSTUP_HOME="$HOME/.rustup" PATH="$PATH" \
+            cargo test --offline --lib -- --ignored query_vectors_match_fastembed
 
       # Report only: the score is uploaded, never compared against a threshold.
       - name: Eval (dev)
