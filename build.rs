@@ -35,38 +35,41 @@ fn pkg_config_onnxruntime_version() -> Option<String> {
     if env::var_os("HOST") != env::var_os("TARGET") {
         return None;
     }
-    let libs = run_pkg_config(&["--libs", "--cflags", "libonnxruntime"])?;
-    if !libs.status.success() {
-        return None;
-    }
-    let version = run_pkg_config(&["--modversion", "libonnxruntime"])?;
-    if !version.status.success() {
-        return None;
-    }
-    Some(String::from_utf8(version.stdout).ok()?.trim().to_string())
-}
-
-fn run_pkg_config(args: &[&str]) -> Option<std::process::Output> {
     // The pkg-config crate's `--static` switches; ort-sys sets none of its own.
     let is_static = env_var("LIBONNXRUNTIME_STATIC").is_some()
-        || (env_var("LIBONNXRUNTIME_DYNAMIC").is_none() && env_var("PKG_CONFIG_ALL_STATIC").is_some());
-    let command = |program: OsString| {
-        let mut command = Command::new(program);
-        if is_static {
-            command.arg("--static");
-        }
-        command.args(args);
-        for name in ["PKG_CONFIG_PATH", "PKG_CONFIG_LIBDIR", "PKG_CONFIG_SYSROOT_DIR"] {
-            if let Some(value) = host_env_var(name) {
-                command.env(name, value);
-            }
-        }
-        command.output().ok()
+        || (env_var("LIBONNXRUNTIME_DYNAMIC").is_none()
+            && env_var("PKG_CONFIG_ALL_STATIC").is_some());
+    let passed_env: Vec<(&str, OsString)> = [
+        "PKG_CONFIG_PATH",
+        "PKG_CONFIG_LIBDIR",
+        "PKG_CONFIG_SYSROOT_DIR",
+    ]
+    .into_iter()
+    .filter_map(|name| Some((name, host_env_var(name)?)))
+    .collect();
+    let programs: Vec<OsString> = match host_env_var("PKG_CONFIG") {
+        Some(program) => vec![program],
+        None => vec!["pkg-config".into(), "pkgconf".into()],
     };
-    match host_env_var("PKG_CONFIG") {
-        Some(program) => command(program),
-        None => command("pkg-config".into()).or_else(|| command("pkgconf".into())),
-    }
+    let succeeds = |args: &[&str]| {
+        programs
+            .iter()
+            .find_map(|program| {
+                let mut command = Command::new(program);
+                if is_static {
+                    command.arg("--static");
+                }
+                command
+                    .args(args)
+                    .arg("libonnxruntime")
+                    .envs(passed_env.iter().cloned());
+                command.output().ok()
+            })
+            .filter(|output| output.status.success())
+    };
+    succeeds(&["--libs", "--cflags"])?;
+    let version = succeeds(&["--modversion"])?;
+    Some(String::from_utf8(version.stdout).ok()?.trim().to_string())
 }
 
 /// `<NAME>_<target>`, `<NAME>_<target with _>`, `HOST_<NAME>`, then `<NAME>`, as the pkg-config crate
