@@ -28,6 +28,7 @@ LIBONNXRUNTIME_NO_PKG_CONFIG=1 cargo install askman
 The variable keeps askman on its bundled ONNX Runtime even when a system one
 (for example Homebrew's `onnxruntime`) is installed; without it, such a build stops
 with this instruction. `install.sh` binaries are not affected.
+Linking a system ONNX Runtime is not supported: askman is built and verified only with its bundled ONNX Runtime 1.20.
 
 On first run, `askman` downloads a small embedding model and the commands database (`commands-v2.db`). After that, lookups run offline.
 

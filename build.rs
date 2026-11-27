@@ -8,7 +8,8 @@ use std::process::Command;
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    if env_var("LIBONNXRUNTIME_NO_PKG_CONFIG").is_some() {
+    // ort-sys links nothing on docs.rs either.
+    if env_var("DOCS_RS").is_some() || env_var("LIBONNXRUNTIME_NO_PKG_CONFIG").is_some() {
         return;
     }
     let Some(version) = pkg_config_onnxruntime_version() else {
@@ -20,18 +21,21 @@ fn main() {
         .and_then(|minor| minor.parse::<u32>().ok())
         .is_some_and(|minor| minor >= 20);
     if ort_sys_would_link_it {
-        panic!(
-            "pkg-config found a system ONNX Runtime ({version}), which would replace askman's bundled one. \
-             Set LIBONNXRUNTIME_NO_PKG_CONFIG=1 and rerun, or install with install.sh \
+        eprintln!(
+            "error: pkg-config found a system ONNX Runtime ({version}), which would replace askman's bundled one. \
+             Run `LIBONNXRUNTIME_NO_PKG_CONFIG=1 cargo install askman` instead, or install with install.sh \
              (https://github.com/0bmario/askman#installation)."
         );
+        std::process::exit(1);
     }
 }
 
 /// The version pkg-config reports, found the way the `pkg-config` crate (used by ort-sys) runs it.
 /// None whenever ort-sys's probe would fail, or when unsure.
 fn pkg_config_onnxruntime_version() -> Option<String> {
-    // Like the pkg-config crate, probe only for native builds; cross builds continue.
+    // Cross builds are not checked and always continue. The pkg-config crate probes them only with
+    // PKG_CONFIG_ALLOW_CROSS or a set PKG_CONFIG / PKG_CONFIG_SYSROOT_DIR (plain or target-prefixed);
+    // missing that rare case is accepted.
     if env::var_os("HOST") != env::var_os("TARGET") {
         return None;
     }
@@ -69,7 +73,9 @@ fn pkg_config_onnxruntime_version() -> Option<String> {
     };
     succeeds(&["--libs", "--cflags"])?;
     let version = succeeds(&["--modversion"])?;
-    Some(String::from_utf8(version.stdout).ok()?.trim().to_string())
+    // Only the first line, as the pkg-config crate reads it.
+    let version = String::from_utf8(version.stdout).ok()?;
+    Some(version.lines().next()?.trim().to_string())
 }
 
 /// `<NAME>_<target>`, `<NAME>_<target with _>`, `HOST_<NAME>`, then `<NAME>`, as the pkg-config crate
