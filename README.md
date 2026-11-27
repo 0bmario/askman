@@ -22,16 +22,12 @@ curl -fsSL https://raw.githubusercontent.com/0bmario/askman/v0.3.5/install.sh | 
 ### Cargo
 
 ```bash
-cargo install askman
+LIBONNXRUNTIME_NO_PKG_CONFIG=1 cargo install askman
 ```
 
-If a system ONNX Runtime is installed (for example through Homebrew) and the
-installed binary fails to start with a `Library not loaded` error, reinstall
-with the bundled runtime instead:
-
-```bash
-LIBONNXRUNTIME_NO_PKG_CONFIG=1 cargo install askman --force
-```
+The variable keeps askman on its bundled ONNX Runtime even when a system one
+(for example Homebrew's `onnxruntime`) is installed; without it, such a build stops
+with this instruction. `install.sh` binaries are not affected.
 
 On first run, `askman` downloads a small embedding model and the commands database (`commands-v2.db`). After that, lookups run offline.
 
