@@ -1,10 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.13] - 2026-11-28
 
 ### Fixed
 - `cargo install askman` on a machine with a system ONNX Runtime visible to pkg-config (for example Homebrew's `onnxruntime`) built a binary linked to that library instead of askman's bundled one, which could fail at start with `Library not loaded`. The build now stops and says to set `LIBONNXRUNTIME_NO_PKG_CONFIG=1` and rerun, or to use `install.sh`. Binaries from `install.sh` and the GitHub releases are not affected.
 - Linking a system ONNX Runtime is not supported: askman is built and verified only with its bundled ONNX Runtime 1.20, and a build that would link a system one stops.
+- The stated minimum Rust version was too low: askman needs Rust 1.88, not 1.85, to build.
 
 ## [0.3.12] - 2026-11-26
 
